@@ -675,9 +675,6 @@ function MortgageStructure() {
 
 function InterestRates() {
   const [activeTab, setActiveTab] = useState(0);
-  const [liveRates, setLiveRates] = useState(null);
-  const [loadingRates, setLoadingRates] = useState(false);
-  const [rateError, setRateError] = useState(null);
 
   const tabs = ["What Drives Rates", "Rate Options & Points", "Live Rates"];
 
@@ -693,35 +690,6 @@ function InterestRates() {
     { rate: "6.750%", points: -0.750, cost: -2250, payment: 1948, savings: "Lender credit of $2,250 — higher rate, lower cash to close" },
   ];
 
-  const fetchLiveRates = async () => {
-    setLoadingRates(true);
-    setRateError(null);
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          tools: [{ type: "web_search_20250305", name: "web_search" }],
-          messages: [{
-            role: "user",
-            content: "Search for today's current average mortgage rates. I need: 30-year conventional fixed, 15-year conventional fixed, 30-year FHA, 30-year VA, and 5/1 ARM. Respond ONLY with a JSON object, no markdown backticks, in this exact format: {\"date\":\"April 4, 2026\",\"rates\":[{\"type\":\"30-Yr Fixed Conv.\",\"rate\":\"6.46\"},{\"type\":\"15-Yr Fixed Conv.\",\"rate\":\"5.77\"},{\"type\":\"30-Yr FHA\",\"rate\":\"6.07\"},{\"type\":\"30-Yr VA\",\"rate\":\"5.88\"},{\"type\":\"5/1 ARM\",\"rate\":\"6.25\"}],\"source\":\"source name\"}"
-          }],
-        }),
-      });
-      const data = await res.json();
-      const text = data.content?.map(i => i.type === "text" ? i.text : "").filter(Boolean).join("") || "";
-      const clean = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
-      setLiveRates(parsed);
-    } catch (err) {
-      console.error(err);
-      setRateError("Couldn't fetch live rates. Check back shortly.");
-    }
-    setLoadingRates(false);
-  };
-
   return (
     <section id="rates" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
@@ -731,7 +699,7 @@ function InterestRates() {
       />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {tabs.map((t, i) => (
-          <button key={t} onClick={() => { setActiveTab(i); if (i === 2 && !liveRates && !loadingRates) fetchLiveRates(); }} className={`tab-btn ${activeTab === i ? "tab-btn-active" : ""}`}>{t}</button>
+          <button key={t} onClick={() => setActiveTab(i)} className={`tab-btn ${activeTab === i ? "tab-btn-active" : ""}`}>{t}</button>
         ))}
       </div>
 
@@ -822,51 +790,21 @@ function InterestRates() {
       {activeTab === 2 && (
         <div style={{ maxWidth: 720 }}>
           <div className="content-card" style={{ padding: "28px", marginBottom: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
-              <div>
-                <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 4 }}>Current Market Rates</h4>
-                <p style={{ fontSize: 12, color: P.warmGrayLight }}>
-                  {liveRates ? `Updated: ${liveRates.date}` : "Fetched live via web search"}
-                </p>
-              </div>
-              <button onClick={fetchLiveRates} disabled={loadingRates} style={{
-                padding: "8px 18px", borderRadius: 8, border: `1px solid ${P.navy}`, background: loadingRates ? P.cream : "transparent",
-                fontFamily: F.body, fontSize: 12, fontWeight: 600, color: P.navy, cursor: loadingRates ? "wait" : "pointer",
-              }}>
-                {loadingRates ? "Fetching..." : "↻ Refresh Rates"}
-              </button>
+            <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 4 }}>Current Market Rates</h4>
+            <p style={{ fontSize: 12, color: P.warmGrayLight, marginBottom: 20 }}>
+              Live national averages from Mortgage News Daily — updated every business day
+            </p>
+            <div style={{ borderRadius: 10, overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
+              <iframe
+                src="https://www.mortgagenewsdaily.com/widgets/rates/expanded"
+                title="Current Mortgage Rates"
+                style={{ width: "100%", height: 520, border: "none", background: "#fff" }}
+                loading="lazy"
+              />
             </div>
-
-            {loadingRates && !liveRates && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: P.warmGrayLight }}>
-                <div style={{ fontSize: 28, marginBottom: 8, animation: "spin 1s linear infinite" }}>⟳</div>
-                <p style={{ fontSize: 13 }}>Searching the web for today's rates...</p>
-                <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
-              </div>
-            )}
-
-            {rateError && (
-              <div style={{ textAlign: "center", padding: "24px", color: P.warmGray, fontSize: 13 }}>{rateError}</div>
-            )}
-
-            {liveRates && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {liveRates.rates?.map((r, i) => (
-                  <div key={i} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "14px 18px", borderRadius: 10, background: i === 0 ? P.navy : P.cream,
-                  }}>
-                    <span style={{ fontSize: 14, fontWeight: 500, color: i === 0 ? "rgba(255,255,255,0.75)" : P.warmGray }}>{r.type}</span>
-                    <span style={{ fontFamily: F.display, fontSize: 26, color: i === 0 ? "#fff" : P.navy }}>{r.rate}%</span>
-                  </div>
-                ))}
-                {liveRates.source && (
-                  <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "right", marginTop: 4 }}>
-                    Source: {liveRates.source}
-                  </p>
-                )}
-              </div>
-            )}
+            <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 10, textAlign: "right" }}>
+              Source: <a href="https://www.mortgagenewsdaily.com/mortgage-rates" target="_blank" rel="noopener noreferrer" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>MortgageNewsDaily.com</a>
+            </p>
           </div>
           <div style={{ display: "flex", gap: 12, padding: "16px 18px", background: P.white, borderRadius: 8, border: "1px solid rgba(0,0,0,0.04)" }}>
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
