@@ -1088,7 +1088,7 @@ const globalCSS = `
   .calc-grid > *:last-child { flex: 1 1 360px; }
 
   @media (max-width: 900px) {
-    .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; }
     .sidebar-open { transform: translateX(0) !important; }
     .sidebar-overlay { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
     .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); }
