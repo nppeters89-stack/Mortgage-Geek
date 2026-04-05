@@ -1097,7 +1097,8 @@ function CalculatorPage() {
   const [term, setTerm] = useState(30);
   const [downPct, setDownPct] = useState(10);
   const [taxes, setTaxes] = useState(250);
-  const [insurance, setInsurance] = useState(150);
+
+  const insurance = Math.round((homePrice * 0.0035) / 12 * 100) / 100;
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
 
@@ -1130,7 +1131,7 @@ function CalculatorPage() {
 
   // Conventional
   const convLoan = baseLoan;
-  const convMiRate = downPct < 10 ? 0.54 : downPct < 20 ? 0.41 : 0;
+  const convMiRate = downPct < 5 ? 0.70 : downPct < 10 ? 0.54 : downPct < 20 ? 0.41 : 0;
   const convMI = (baseLoan * (convMiRate / 100)) / 12;
   const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
   const convTotal = convPI + convMI + taxes + insurance;
@@ -1209,7 +1210,14 @@ function CalculatorPage() {
               </div>
             </div>
             <CalcInput label="Monthly Taxes" value={taxes} onChange={setTaxes} prefix="$" step={25} />
-            <CalcInput label="Monthly Insurance" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
+              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
+                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
+              </div>
+            </div>
           </div>
           <div style={{ display: "flex", gap: 16, marginTop: 16, flexWrap: "wrap" }}>
             <span style={{ fontSize: 12, color: P.warmGrayLight }}>Down Payment: <strong style={{ color: P.text }}>{fmt(downAmt)}</strong></span>
@@ -1228,21 +1236,21 @@ function CalculatorPage() {
               </span>
             )}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
               { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
             ].map((p) => (
-              <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
+              <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
                 <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: p.color, minWidth: 80 }}>{p.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: p.color, flex: 1 }}>{p.label}</span>
                 <input
                   type="number"
                   value={p.rate}
                   onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 0 && v <= 15) p.setRate(v); }}
                   step={0.125}
-                  style={{ flex: 1, border: "none", background: "transparent", fontSize: 15, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", textAlign: "right", width: 60, minWidth: 50 }}
+                  style={{ border: "none", background: "transparent", fontSize: 16, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", textAlign: "right", width: 64 }}
                 />
                 <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray }}>%</span>
               </div>
