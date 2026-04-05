@@ -1021,12 +1021,29 @@ function InterestRates({ navTarget }) {
 }
 
 function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999 }) {
+  const [localVal, setLocalVal] = useState(String(value));
+  useEffect(() => { setLocalVal(String(value)); }, [value]);
+
+  const handleChange = (e) => {
+    const raw = e.target.value;
+    setLocalVal(raw);
+    const v = parseFloat(raw);
+    if (!isNaN(v) && v >= min && v <= max) onChange(v);
+  };
+
+  const handleBlur = () => {
+    const v = parseFloat(localVal);
+    if (isNaN(v) || v < min) { onChange(min); setLocalVal(String(min)); }
+    else if (v > max) { onChange(max); setLocalVal(String(max)); }
+    else { onChange(v); setLocalVal(String(v)); }
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
       <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, overflow: "hidden", background: P.cream }}>
         {prefix && <span style={{ padding: "9px 0 9px 12px", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{prefix}</span>}
-        <input type="number" value={value} onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= min && v <= max) onChange(v); }} step={step}
+        <input type="number" value={localVal} onChange={handleChange} onBlur={handleBlur} step={step}
           style={{ flex: 1, border: "none", background: "transparent", padding: "9px 12px", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", width: "100%" }} />
         {suffix && <span style={{ padding: "9px 12px 9px 0", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{suffix}</span>}
       </div>
@@ -1231,15 +1248,38 @@ export default function MortgageLandingPage() {
 
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", `#${id}`);
+    }
   };
 
   const handleSubNavigate = (sectionId, step) => {
     setNavTarget({ section: sectionId, step });
     handleNavigate(sectionId);
-    // Clear after a short delay so it doesn't re-trigger
     setTimeout(() => setNavTarget(null), 500);
   };
+
+  // Deep link: scroll to section on initial load from hash or path
+  useEffect(() => {
+    const scrollToTarget = () => {
+      let target = window.location.hash?.replace("#", "");
+      // Also support /calculator style paths
+      if (!target) {
+        const path = window.location.pathname?.replace("/", "");
+        if (path) target = path;
+      }
+      if (target) {
+        const el = document.getElementById(target);
+        if (el) {
+          setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+        }
+      }
+    };
+    scrollToTarget();
+    window.addEventListener("hashchange", scrollToTarget);
+    return () => window.removeEventListener("hashchange", scrollToTarget);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
