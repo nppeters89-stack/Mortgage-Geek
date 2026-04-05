@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/getting-started", "destination": "/" },
+    { "source": "/process", "destination": "/" },
+    { "source": "/types", "destination": "/" },
+    { "source": "/costs", "destination": "/" },
+    { "source": "/profile", "destination": "/" },
+    { "source": "/structure", "destination": "/" },
+    { "source": "/rates", "destination": "/" },
+    { "source": "/calculator", "destination": "/" }
+  ]
+}
