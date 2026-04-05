@@ -1096,7 +1096,30 @@ function CalculatorPage() {
   const [vaRate, setVaRate] = useState(6.25);
   const [term, setTerm] = useState(30);
   const [downPct, setDownPct] = useState(10);
-  const [taxes, setTaxes] = useState(250);
+  const [taxState, setTaxState] = useState("TN");
+
+  const STATE_TAX_RATES = {
+    AL: { name: "Alabama", rate: 0.41 }, AK: { name: "Alaska", rate: 1.19 }, AZ: { name: "Arizona", rate: 0.62 },
+    AR: { name: "Arkansas", rate: 0.62 }, CA: { name: "California", rate: 0.71 }, CO: { name: "Colorado", rate: 0.51 },
+    CT: { name: "Connecticut", rate: 2.15 }, DE: { name: "Delaware", rate: 0.57 }, FL: { name: "Florida", rate: 0.86 },
+    GA: { name: "Georgia", rate: 0.92 }, HI: { name: "Hawaii", rate: 0.28 }, ID: { name: "Idaho", rate: 0.63 },
+    IL: { name: "Illinois", rate: 2.07 }, IN: { name: "Indiana", rate: 0.85 }, IA: { name: "Iowa", rate: 1.57 },
+    KS: { name: "Kansas", rate: 1.41 }, KY: { name: "Kentucky", rate: 0.86 }, LA: { name: "Louisiana", rate: 0.55 },
+    ME: { name: "Maine", rate: 1.30 }, MD: { name: "Maryland", rate: 1.07 }, MA: { name: "Massachusetts", rate: 1.23 },
+    MI: { name: "Michigan", rate: 1.54 }, MN: { name: "Minnesota", rate: 1.12 }, MS: { name: "Mississippi", rate: 0.65 },
+    MO: { name: "Missouri", rate: 0.97 }, MT: { name: "Montana", rate: 0.74 }, NE: { name: "Nebraska", rate: 1.73 },
+    NV: { name: "Nevada", rate: 0.55 }, NH: { name: "New Hampshire", rate: 2.18 }, NJ: { name: "New Jersey", rate: 2.23 },
+    NM: { name: "New Mexico", rate: 0.67 }, NY: { name: "New York", rate: 1.72 }, NC: { name: "North Carolina", rate: 0.84 },
+    ND: { name: "North Dakota", rate: 0.98 }, OH: { name: "Ohio", rate: 1.56 }, OK: { name: "Oklahoma", rate: 0.87 },
+    OR: { name: "Oregon", rate: 0.97 }, PA: { name: "Pennsylvania", rate: 1.58 }, RI: { name: "Rhode Island", rate: 1.63 },
+    SC: { name: "South Carolina", rate: 0.57 }, SD: { name: "South Dakota", rate: 1.31 }, TN: { name: "Tennessee", rate: 0.56 },
+    TX: { name: "Texas", rate: 1.80 }, UT: { name: "Utah", rate: 0.58 }, VT: { name: "Vermont", rate: 1.90 },
+    VA: { name: "Virginia", rate: 0.82 }, WA: { name: "Washington", rate: 0.98 }, WV: { name: "West Virginia", rate: 0.58 },
+    WI: { name: "Wisconsin", rate: 1.85 }, WY: { name: "Wyoming", rate: 0.61 }, DC: { name: "Washington DC", rate: 0.56 },
+  };
+
+  const taxRate = STATE_TAX_RATES[taxState]?.rate || 0.56;
+  const taxes = Math.round((homePrice * (taxRate / 100)) / 12 * 100) / 100;
 
   const insurance = Math.round((homePrice * 0.0035) / 12 * 100) / 100;
   const [ratesLoaded, setRatesLoaded] = useState(false);
@@ -1209,7 +1232,26 @@ function CalculatorPage() {
                 ))}
               </div>
             </div>
-            <CalcInput label="Monthly Taxes" value={taxes} onChange={setTaxes} prefix="$" step={25} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax State</label>
+              <select
+                value={taxState}
+                onChange={(e) => setTaxState(e.target.value)}
+                style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+              >
+                {Object.entries(STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
+                  <option key={code} value={code}>{s.name} ({s.rate}%)</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Taxes (est.)</label>
+              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{taxes.toFixed(0)}</span>
+                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>{taxRate}% / yr</span>
+              </div>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
               <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
