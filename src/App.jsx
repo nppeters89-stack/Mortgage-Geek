@@ -363,15 +363,6 @@ function Hero({ onNavigate }) {
           </button>
         </div>
 
-        {/* Subtle trust line */}
-        <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-          {["12+ Years Experience", "NMLS# 1119524", "Equal Housing Lender"].map((t, i) => (
-            <span key={i} style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", letterSpacing: 0.5 }}>
-              {i > 0 && <span style={{ marginRight: 20 }}>·</span>}
-              {t}
-            </span>
-          ))}
-        </div>
       </div>
     </section>
   );
@@ -1044,6 +1035,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 }
 
 function Calculator() {
+  const [program, setProgram] = useState("conv");
   const [homePrice, setHomePrice] = useState(300000);
   const [rate, setRate] = useState(6.75);
   const [term, setTerm] = useState(30);
@@ -1052,14 +1044,74 @@ function Calculator() {
   const [insurance, setInsurance] = useState(150);
   const [showAmort, setShowAmort] = useState(false);
 
-  const principal = homePrice * (1 - downPct / 100);
-  const { data: amortData, monthly } = useMemo(() => generateAmortData(principal, rate, term), [principal, rate, term]);
-  const totalPayment = monthly + taxes + insurance;
-  const totalInterest = monthly * term * 12 - principal;
+  const baseLoan = homePrice * (1 - downPct / 100);
+
+  // Program-specific calculations
+  let totalLoan = baseLoan;
+  let upfrontFee = 0;
+  let upfrontFeeLabel = "";
+  let monthlyMI = 0;
+  let miLabel = "";
+  let miRate = 0;
+
+  if (program === "fha") {
+    upfrontFee = baseLoan * 0.0175;
+    upfrontFeeLabel = "Upfront MIP (1.75%)";
+    totalLoan = baseLoan + upfrontFee;
+    miRate = downPct < 5 ? 0.55 : 0.50;
+    monthlyMI = (baseLoan * (miRate / 100)) / 12;
+    miLabel = `Monthly MIP (${miRate}%)`;
+  } else if (program === "va") {
+    upfrontFee = baseLoan * 0.033;
+    upfrontFeeLabel = "VA Funding Fee (3.3%)";
+    totalLoan = baseLoan + upfrontFee;
+    monthlyMI = 0;
+    miLabel = "";
+  } else {
+    // Conventional
+    totalLoan = baseLoan;
+    if (downPct < 10) {
+      miRate = 0.54;
+      monthlyMI = (baseLoan * (miRate / 100)) / 12;
+      miLabel = `Monthly PMI (${miRate}%)`;
+    } else if (downPct < 20) {
+      miRate = 0.41;
+      monthlyMI = (baseLoan * (miRate / 100)) / 12;
+      miLabel = `Monthly PMI (${miRate}%)`;
+    } else {
+      monthlyMI = 0;
+      miLabel = "";
+    }
+  }
+
+  const { data: amortData, monthly } = useMemo(() => generateAmortData(totalLoan, rate, term), [totalLoan, rate, term]);
+  const totalPayment = monthly + taxes + insurance + monthlyMI;
+  const totalInterest = monthly * term * 12 - totalLoan;
+
+  const programInfo = {
+    conv: { label: "Conventional", color: P.navy, desc: "Standard loan — PMI required below 20% down" },
+    fha: { label: "FHA", color: "#8B6914", desc: "1.75% upfront MIP financed into loan + monthly MIP" },
+    va: { label: "VA", color: P.sage, desc: "3.3% funding fee financed into loan — no monthly MI" },
+  };
 
   return (
     <section id="calculator" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="Run the Numbers" title="Payment Calculator" subtitle="See exactly what your monthly payment looks like — and how the money breaks down." />
+      <SectionHeader eyebrow="Run the Numbers" title="Payment Calculator" subtitle="See how your payment changes by loan program. Each has different mortgage insurance rules and financed fees." />
+
+      {/* Program selector */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
+        {Object.entries(programInfo).map(([key, info]) => (
+          <button key={key} onClick={() => setProgram(key)} style={{
+            flex: "1 1 120px", padding: "14px 16px", borderRadius: 10, border: program === key ? "none" : `1px solid ${P.creamDark}`,
+            background: program === key ? info.color : P.white, cursor: "pointer", textAlign: "left",
+            fontFamily: F.body, transition: "all 0.15s",
+          }}>
+            <span style={{ display: "block", fontSize: 15, fontWeight: 700, color: program === key ? "#fff" : P.navy, marginBottom: 2 }}>{info.label}</span>
+            <span style={{ display: "block", fontSize: 11, color: program === key ? "rgba(255,255,255,0.6)" : P.warmGrayLight, lineHeight: 1.3 }}>{info.desc}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="calc-grid">
         <div className="content-card" style={{ padding: "28px 24px", display: "flex", flexDirection: "column", gap: 16 }}>
           <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} />
@@ -1075,28 +1127,64 @@ function Calculator() {
           </div>
           <CalcInput label="Monthly Taxes" value={taxes} onChange={setTaxes} prefix="$" step={25} />
           <CalcInput label="Monthly Insurance" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+
+          {/* Financed fee callout */}
+          {upfrontFee > 0 && (
+            <div style={{ background: `${programInfo[program].color}10`, border: `1px solid ${programInfo[program].color}25`, borderRadius: 8, padding: "12px 14px" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: programInfo[program].color, display: "block", marginBottom: 4 }}>Financed Into Loan</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 13, color: P.warmGray }}>{upfrontFeeLabel}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: P.text }}>{fmt(upfrontFee)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6, paddingTop: 6, borderTop: `1px solid ${programInfo[program].color}20` }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: P.warmGray }}>Total Loan Amount</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: programInfo[program].color }}>{fmt(totalLoan)}</span>
+              </div>
+            </div>
+          )}
         </div>
+
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ background: P.navy, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
+          {/* Main result */}
+          <div style={{ background: programInfo[program].color, borderRadius: 12, padding: "28px 24px", textAlign: "center", transition: "background 0.3s" }}>
             <span style={{ display: "block", fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", color: "rgba(255,255,255,0.45)", marginBottom: 6 }}>Total Monthly Payment</span>
             <span style={{ fontFamily: F.display, fontSize: 44, color: "#fff" }}>{fmt(totalPayment)}</span>
+            <span style={{ display: "block", fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{programInfo[program].label} · {term}-Year Fixed</span>
           </div>
+
+          {/* Breakdown */}
           <div className="content-card" style={{ padding: "20px 24px" }}>
-            {[{ label: "Principal & Interest", val: monthly, color: P.navy }, { label: "Property Taxes", val: taxes, color: P.gold }, { label: "Insurance", val: insurance, color: P.sage }].map((r) => (
+            {[
+              { label: "Principal & Interest", val: monthly, color: programInfo[program].color },
+              ...(monthlyMI > 0 ? [{ label: miLabel, val: monthlyMI, color: "#C0392B" }] : []),
+              { label: "Property Taxes", val: taxes, color: P.gold },
+              { label: "Homeowners Insurance", val: insurance, color: P.sage },
+            ].map((r) => (
               <div key={r.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 0", fontSize: 13, color: P.warmGray }}>
                 <span><span style={{ display: "inline-block", width: 9, height: 9, borderRadius: "50%", marginRight: 8, verticalAlign: "middle", background: r.color }} />{r.label}</span>
                 <span style={{ fontWeight: 600, color: P.text }}>{fmt(r.val)}</span>
               </div>
             ))}
           </div>
+
+          {/* Summary grid */}
           <div className="content-card" style={{ padding: "20px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            {[{ l: "Loan Amount", v: fmt(principal) }, { l: "Down Payment", v: fmt(homePrice * (downPct / 100)) }, { l: "Total Interest", v: fmt(totalInterest) }, { l: "Total Cost", v: fmt(principal + totalInterest) }].map((s) => (
+            {[
+              { l: "Base Loan", v: fmt(baseLoan) },
+              { l: "Down Payment", v: fmt(homePrice * (downPct / 100)) },
+              ...(upfrontFee > 0 ? [{ l: upfrontFeeLabel, v: fmt(upfrontFee) }] : []),
+              { l: "Total Loan Amount", v: fmt(totalLoan) },
+              { l: "Total Interest", v: fmt(totalInterest) },
+              { l: "Total Cost of Loan", v: fmt(totalLoan + totalInterest) },
+            ].map((s) => (
               <div key={s.l} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.4, textTransform: "uppercase", color: P.warmGrayLight }}>{s.l}</span>
                 <span style={{ fontFamily: F.display, fontSize: 18, color: P.navy }}>{s.v}</span>
               </div>
             ))}
           </div>
+
+          {/* Amortization toggle */}
           <button onClick={() => setShowAmort(!showAmort)} style={{ width: "100%", padding: "12px 0", borderRadius: 8, border: `1px solid ${P.navy}`, background: "transparent", fontFamily: F.body, fontSize: 13, fontWeight: 600, color: P.navy, cursor: "pointer" }}>
             {showAmort ? "Hide" : "Show"} Amortization Schedule
           </button>
@@ -1118,6 +1206,16 @@ function Calculator() {
               </div>
             </div>
           )}
+
+          {/* Program-specific note */}
+          <div style={{ display: "flex", gap: 12, padding: "16px 18px", background: P.white, borderRadius: 8, border: "1px solid rgba(0,0,0,0.04)" }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+            <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray }}>
+              {program === "fha" && <><strong>FHA note:</strong> The 1.75% upfront MIP ({fmt(upfrontFee)}) is financed into your loan, so your P&I payment is calculated on {fmt(totalLoan)} — not {fmt(baseLoan)}. Monthly MIP at {miRate}% is based on the base loan amount and {downPct < 10 ? "stays for the life of the loan" : "can be removed after 11 years"}.</>}
+              {program === "conv" && <><strong>Conventional note:</strong> {downPct >= 20 ? "With 20%+ down, no PMI is required — this is one of the biggest advantages of a larger down payment." : `PMI at ${miRate}% is required until you reach 80% LTV (20% equity). You can request removal once you hit that threshold — it doesn't stay forever like FHA MIP.`}</>}
+              {program === "va" && <><strong>VA note:</strong> The 3.3% funding fee ({fmt(upfrontFee)}) is financed into the loan. This is the worst-case fee for subsequent use with $0 down — first-time use and/or larger down payments reduce it. Veterans with service-connected disabilities are exempt entirely. No monthly MI on VA loans.</>}
+            </p>
+          </div>
         </div>
       </div>
     </section>
