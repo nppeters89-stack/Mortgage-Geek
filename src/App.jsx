@@ -245,23 +245,51 @@ function Sidebar({ activeSection, onNavigate, mobileOpen, setMobileOpen }) {
 
 function Hero({ onNavigate }) {
   return (
-    <section id="hero" style={{ position: "relative", background: `linear-gradient(145deg, ${P.navy} 0%, ${P.navyLight} 100%)`, padding: "72px 40px 56px", overflow: "hidden" }}>
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 30% 100%, rgba(184,134,11,0.1) 0%, transparent 50%), radial-gradient(ellipse at 90% 10%, rgba(90,122,110,0.12) 0%, transparent 50%)" }} />
-      <div style={{ position: "relative", maxWidth: 800 }}>
-        <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: P.goldLight, marginBottom: 16 }}>MortgageGeek.ai</p>
-        <h2 style={{ fontFamily: F.display, fontSize: "clamp(28px, 4vw, 46px)", fontWeight: 400, color: "#fff", lineHeight: 1.2, marginBottom: 16 }}>
+    <section id="hero" style={{ position: "relative", background: `linear-gradient(145deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`, padding: "80px 40px 64px", overflow: "hidden" }}>
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(184,134,11,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 15%, rgba(90,122,110,0.1) 0%, transparent 50%)" }} />
+      <div style={{ position: "relative", maxWidth: 680 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
+        <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.15, marginBottom: 20 }}>
           A mortgage doesn't have to be <span style={{ color: P.goldLight }}>complicated.</span>
         </h2>
-        <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.6)", maxWidth: 520, marginBottom: 32 }}>
-          No jargon. No sales pitch. Just the knowledge you need to make the biggest financial decision of your life with confidence.
+        <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: 36 }}>
+          Everything you need to understand the mortgage process — from first conversation to closing day — explained in plain language by someone who's done it thousands of times.
         </p>
-        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-          {[{ num: "3+3", label: "Steps to Closing", id: "getting-started" }, { num: "5", label: "Loan Types Explained", id: "types" }, { num: "26", label: "Closing Costs Defined", id: "costs" }].map((c) => (
-            <button key={c.id} onClick={() => onNavigate(c.id)} className="hero-card">
-              <span style={{ fontFamily: F.display, fontSize: 32, color: "#fff", lineHeight: 1 }}>{c.num}</span>
-              <span style={{ fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.5)", letterSpacing: 0.3 }}>{c.label}</span>
-              <span style={{ position: "absolute", top: 16, right: 16, fontSize: 14, color: P.goldLight, opacity: 0.6 }}>→</span>
-            </button>
+
+        {/* CTA row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <a href="tel:+16156560737" style={{
+            display: "inline-flex", alignItems: "center", gap: 10,
+            padding: "14px 28px", borderRadius: 10,
+            background: P.gold, color: "#fff",
+            fontFamily: F.body, fontSize: 15, fontWeight: 600,
+            textDecoration: "none", letterSpacing: 0.3,
+            boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            (615) 656-0737
+          </a>
+          <button onClick={() => onNavigate("getting-started")} style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "14px 24px", borderRadius: 10,
+            background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            fontFamily: F.body, fontSize: 14, fontWeight: 500,
+            cursor: "pointer", letterSpacing: 0.2,
+          }}>
+            Start Learning ↓
+          </button>
+        </div>
+
+        {/* Subtle trust line */}
+        <div style={{ marginTop: 32, display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+          {["12+ Years Experience", "NMLS# 1119524", "Equal Housing Lender"].map((t, i) => (
+            <span key={i} style={{ fontSize: 11, fontWeight: 500, color: "rgba(255,255,255,0.25)", letterSpacing: 0.5 }}>
+              {i > 0 && <span style={{ marginRight: 20 }}>·</span>}
+              {t}
+            </span>
           ))}
         </div>
       </div>
@@ -1083,9 +1111,6 @@ const globalCSS = `
   .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
   .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
   .nav-btn-active { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
-
-  .hero-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 18px 24px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; text-align: left; min-width: 150px; position: relative; }
-  .hero-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
 
   .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
 
