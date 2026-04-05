@@ -178,19 +178,55 @@ const MORTGAGE_STRUCTURE = [
 ];
 
 const NAV_ITEMS = [
-  { id: "getting-started", label: "Getting Started", icon: "🏁" },
-  { id: "process", label: "The 30-Day Process", icon: "📋" },
-  { id: "types", label: "Mortgage Types", icon: "🏦" },
-  { id: "costs", label: "Closing Costs", icon: "💰" },
-  { id: "profile", label: "Borrower Profile", icon: "👤" },
-  { id: "structure", label: "Mortgage Structure", icon: "🏗" },
-  { id: "rates", label: "Interest Rates", icon: "📈" },
+  { id: "getting-started", label: "Getting Started", icon: "🏁", subs: [
+    { label: "Pre-Qualification", id: "getting-started", step: 0 },
+    { label: "Pre-Approval", id: "getting-started", step: 1 },
+    { label: "House Hunting & Contract", id: "getting-started", step: 2 },
+  ]},
+  { id: "process", label: "The 30-Day Process", icon: "📋", subs: [
+    { label: "Loan Processing", id: "process", step: 0 },
+    { label: "Underwriting", id: "process", step: 1 },
+    { label: "Closing", id: "process", step: 2 },
+  ]},
+  { id: "types", label: "Mortgage Types", icon: "🏦", subs: [
+    { label: "Conventional", id: "types", step: 0 },
+    { label: "FHA", id: "types", step: 1 },
+    { label: "VA", id: "types", step: 2 },
+    { label: "USDA", id: "types", step: 3 },
+    { label: "Jumbo", id: "types", step: 4 },
+  ]},
+  { id: "costs", label: "Closing Costs", icon: "💰", subs: [
+    { label: "Lender Fees", id: "costs", step: 0 },
+    { label: "Title & Settlement", id: "costs", step: 1 },
+    { label: "Third-Party Services", id: "costs", step: 2 },
+    { label: "Government Fees", id: "costs", step: 3 },
+    { label: "Prepaids & Escrow", id: "costs", step: 4 },
+    { label: "TRID Fee Tolerances", id: "costs", step: "trid" },
+  ]},
+  { id: "profile", label: "Borrower Profile", icon: "👤", subs: [
+    { label: "Credit", id: "profile", step: 0 },
+    { label: "Income & Employment", id: "profile", step: 1 },
+    { label: "Assets & Reserves", id: "profile", step: 2 },
+    { label: "Property & Real Estate", id: "profile", step: 3 },
+  ]},
+  { id: "structure", label: "Mortgage Structure", icon: "🏗", subs: [
+    { label: "Loan Term", id: "structure", step: 0 },
+    { label: "Fixed vs. ARM", id: "structure", step: 1 },
+    { label: "Amortization", id: "structure", step: 2 },
+  ]},
+  { id: "rates", label: "Interest Rates", icon: "📈", subs: [
+    { label: "What Drives Rates", id: "rates", step: 0 },
+    { label: "Rate Options & Points", id: "rates", step: 1 },
+    { label: "Live Rates", id: "rates", step: 2 },
+  ]},
   { id: "calculator", label: "Calculator", icon: "🧮" },
 ];
 
 // ─── Components ──────────────────────────────────────────────────────────────
 
-function Sidebar({ activeSection, onNavigate, mobileOpen, setMobileOpen }) {
+function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobileOpen }) {
+  const [expandedNav, setExpandedNav] = useState(null);
+
   return (
     <>
       <div className="mobile-bar">
@@ -219,10 +255,54 @@ function Sidebar({ activeSection, onNavigate, mobileOpen, setMobileOpen }) {
           <nav style={{ padding: "20px 12px", flex: 1 }}>
             <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>TOPICS</span>
             {NAV_ITEMS.map((item) => (
-              <button key={item.id} onClick={() => { onNavigate(item.id); setMobileOpen(false); }} className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}>
-                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
-                <span>{item.label}</span>
-              </button>
+              <div key={item.id}>
+                <button
+                  onClick={() => {
+                    onNavigate(item.id);
+                    if (item.subs) {
+                      setExpandedNav(expandedNav === item.id ? null : item.id);
+                    } else {
+                      setMobileOpen(false);
+                    }
+                  }}
+                  className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                    <span>{item.label}</span>
+                  </span>
+                  {item.subs && (
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", transition: "transform 0.2s", transform: expandedNav === item.id ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+                  )}
+                </button>
+                {item.subs && expandedNav === item.id && (
+                  <div style={{ paddingLeft: 50, paddingBottom: 4 }}>
+                    {item.subs.map((sub, si) => (
+                      <button
+                        key={si}
+                        onClick={() => {
+                          onSubNavigate(sub.id, sub.step);
+                          setMobileOpen(false);
+                        }}
+                        style={{
+                          display: "block", width: "100%", textAlign: "left",
+                          padding: "7px 12px", border: "none", borderRadius: 6,
+                          background: "transparent", fontFamily: F.body,
+                          fontSize: 12, color: "rgba(255,255,255,0.4)",
+                          cursor: "pointer", transition: "all 0.15s",
+                          borderLeft: "1px solid rgba(255,255,255,0.08)",
+                          marginBottom: 1,
+                        }}
+                        onMouseEnter={(e) => { e.target.style.color = "rgba(255,255,255,0.7)"; e.target.style.background = "rgba(255,255,255,0.04)"; }}
+                        onMouseLeave={(e) => { e.target.style.color = "rgba(255,255,255,0.4)"; e.target.style.background = "transparent"; }}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
@@ -307,8 +387,9 @@ function SectionHeader({ eyebrow, title, subtitle }) {
   );
 }
 
-function PreContract() {
+function PreContract({ navTarget }) {
   const [active, setActive] = useState(0);
+  useEffect(() => { if (navTarget?.section === "getting-started" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = PRE_CONTRACT_STEPS[active];
   return (
     <section id="getting-started" style={{ padding: "64px 40px" }}>
@@ -399,8 +480,9 @@ function ThirtyDayGraphic({ activeStep }) {
   );
 }
 
-function ActiveLoanProcess() {
+function ActiveLoanProcess({ navTarget }) {
   const [active, setActive] = useState(0);
+  useEffect(() => { if (navTarget?.section === "process" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = ACTIVE_LOAN_STEPS[active];
   return (
     <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
@@ -442,8 +524,9 @@ function ActiveLoanProcess() {
   );
 }
 
-function MortgageTypes() {
+function MortgageTypes({ navTarget }) {
   const [active, setActive] = useState(0);
+  useEffect(() => { if (navTarget?.section === "types" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const t = MORTGAGE_TYPES[active];
   return (
     <section id="types" style={{ padding: "64px 40px", background: P.creamDark }}>
@@ -479,10 +562,16 @@ function MortgageTypes() {
   );
 }
 
-function ClosingCosts() {
+function ClosingCosts({ navTarget }) {
   const [openCat, setOpenCat] = useState(0);
   const [openItem, setOpenItem] = useState(null);
   const [openTrid, setOpenTrid] = useState(null);
+  useEffect(() => {
+    if (navTarget?.section === "costs") {
+      if (navTarget.step === "trid") { setOpenTrid(0); }
+      else if (typeof navTarget.step === "number") { setOpenCat(navTarget.step); setOpenItem(null); }
+    }
+  }, [navTarget]);
   return (
     <section id="costs" style={{ padding: "64px 40px" }}>
       <SectionHeader eyebrow="Follow the Money" title="All About Closing Costs" subtitle="Closing costs typically run 2–5% of the purchase price. Here's every fee you may encounter on your Closing Disclosure — what it is, what it costs, and who it goes to." />
@@ -585,8 +674,9 @@ function ClosingCosts() {
   );
 }
 
-function BorrowerProfile() {
+function BorrowerProfile({ navTarget }) {
   const [active, setActive] = useState(0);
+  useEffect(() => { if (navTarget?.section === "profile" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   return (
     <section id="profile" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." />
@@ -677,8 +767,9 @@ function AmortizationChart({ principal = 300000, rate = 7, years = 30 }) {
   );
 }
 
-function MortgageStructure() {
+function MortgageStructure({ navTarget }) {
   const [active, setActive] = useState(0);
+  useEffect(() => { if (navTarget?.section === "structure" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const isAmort = MORTGAGE_STRUCTURE[active].title === "Amortization";
   return (
     <section id="structure" style={{ padding: "64px 40px" }}>
@@ -701,11 +792,18 @@ function MortgageStructure() {
   );
 }
 
-function InterestRates() {
+function InterestRates({ navTarget }) {
   const [activeTab, setActiveTab] = useState(0);
   const [liveRates, setLiveRates] = useState(null);
   const [rateLoading, setRateLoading] = useState(false);
   const [rateError, setRateError] = useState(null);
+
+  useEffect(() => {
+    if (navTarget?.section === "rates" && typeof navTarget.step === "number") {
+      setActiveTab(navTarget.step);
+      if (navTarget.step === 2 && !liveRates && !rateLoading) fetchRates();
+    }
+  }, [navTarget]);
 
   const tabs = ["What Drives Rates", "Rate Options & Points", "Live Rates"];
 
@@ -1031,10 +1129,18 @@ function Calculator() {
 export default function MortgageLandingPage() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navTarget, setNavTarget] = useState(null);
 
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleSubNavigate = (sectionId, step) => {
+    setNavTarget({ section: sectionId, step });
+    handleNavigate(sectionId);
+    // Clear after a short delay so it doesn't re-trigger
+    setTimeout(() => setNavTarget(null), 500);
   };
 
   useEffect(() => {
@@ -1049,16 +1155,16 @@ export default function MortgageLandingPage() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, display: "flex", minHeight: "100vh" }}>
       <style>{globalCSS}</style>
-      <Sidebar activeSection={activeSection} onNavigate={handleNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar activeSection={activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className="main-content">
         <Hero onNavigate={handleNavigate} />
-        <PreContract />
-        <ActiveLoanProcess />
-        <MortgageTypes />
-        <ClosingCosts />
-        <BorrowerProfile />
-        <MortgageStructure />
-        <InterestRates />
+        <PreContract navTarget={navTarget} />
+        <ActiveLoanProcess navTarget={navTarget} />
+        <MortgageTypes navTarget={navTarget} />
+        <ClosingCosts navTarget={navTarget} />
+        <BorrowerProfile navTarget={navTarget} />
+        <MortgageStructure navTarget={navTarget} />
+        <InterestRates navTarget={navTarget} />
         <Calculator />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
