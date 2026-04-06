@@ -1128,12 +1128,12 @@ function RateInput({ label, rate, setRate, color }) {
 }
 
 function CalculatorPage() {
-  const [homePrice, setHomePrice] = useState(300000);
+  const [homePrice, setHomePrice] = useState(350000);
   const [convRate, setConvRate] = useState(6.75);
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
   const [term, setTerm] = useState(30);
-  const [downPct, setDownPct] = useState(10);
+  const [downPct, setDownPct] = useState(3.5);
   const [taxState, setTaxState] = useState("TN");
   const [vaUsage, setVaUsage] = useState("first");
 
@@ -1300,7 +1300,19 @@ function CalculatorPage() {
         <div className="content-card" style={{ padding: "24px 28px", marginBottom: 12 }}>
           <div className="calc-inputs-grid">
             <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
-            <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
+            <div>
+              <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
+              <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                  <span style={{ color: P.warmGrayLight }}>Down Payment</span>
+                  <span style={{ fontWeight: 600, color: P.text }}>{fmt(downAmt)}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                  <span style={{ color: P.warmGrayLight }}>Base Loan</span>
+                  <span style={{ fontWeight: 600, color: P.navy }}>{fmt(baseLoan)}</span>
+                </div>
+              </div>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
               <div style={{ display: "flex", gap: 4 }}>
@@ -1337,10 +1349,6 @@ function CalculatorPage() {
                 <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>{taxRate}% / yr</span>
               </div>
             </div>
-          </div>
-          <div style={{ display: "flex", gap: 16, marginTop: 16, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, color: P.warmGrayLight }}>Down Payment: <strong style={{ color: P.text }}>{fmt(downAmt)}</strong></span>
-            <span style={{ fontSize: 12, color: P.warmGrayLight }}>Base Loan: <strong style={{ color: P.text }}>{fmt(baseLoan)}</strong></span>
           </div>
         </div>
 
