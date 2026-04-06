@@ -1158,7 +1158,8 @@ function CalculatorPage() {
   };
 
   const taxRate = STATE_TAX_RATES[taxState]?.rate || 0.56;
-  const taxes = Math.round((homePrice * (taxRate / 100)) / 12 * 100) / 100;
+  const [taxes, setTaxes] = useState(Math.round((350000 * (0.56 / 100)) / 12));
+  useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, homePrice]);
 
   const insurance = Math.round((homePrice * 0.0035) / 12 * 100) / 100;
   const [ratesLoaded, setRatesLoaded] = useState(false);
@@ -1343,10 +1344,8 @@ function CalculatorPage() {
                   <option key={code} value={code}>{code} ({s.rate}%)</option>
                 ))}
               </select>
-              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "7px 12px", marginTop: 4 }}>
-                <span style={{ fontSize: 12, color: P.warmGrayLight, marginRight: 6 }}>Monthly Tax:</span>
-                <span style={{ fontSize: 14, fontWeight: 600, color: P.text }}>${taxes.toFixed(0)}</span>
-                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>{taxRate}% / yr</span>
+              <div style={{ marginTop: 4 }}>
+                <CalcInput label="Monthly Tax" value={taxes} onChange={setTaxes} prefix="$" step={25} />
               </div>
             </div>
           </div>
