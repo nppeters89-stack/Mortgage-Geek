@@ -4,12 +4,12 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const P = {
-  navy: "#7132f5", navyDark: "#101114", navyLight: "#5741d8",
+  navy: "#0052ff", navyDark: "#0a0b0d", navyLight: "#578bfa",
   gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#ffffff", creamDark: "#f5f5f7",
-  warmGray: "#686b82", warmGrayLight: "#9497a9",
+  cream: "#ffffff", creamDark: "#f3f4f6",
+  warmGray: "#5b616e", warmGrayLight: "#8a919e",
   white: "#FFFFFF", sage: "#149e61",
-  text: "#101114", textLight: "#484b5e",
+  text: "#0a0b0d", textLight: "#5b616e",
 };
 
 const F = {
@@ -312,7 +312,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <svg width="24" height="26" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 6, opacity: 0.5 }}>
               <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill="white"/>
-              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#101114" stroke="white" strokeWidth="0.5"/>
+              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#0a0b0d" stroke="white" strokeWidth="0.5"/>
               <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="white" strokeWidth="1.5" fill="none"/>
               <rect x="12" y="22" width="16" height="3" fill="white"/>
               <rect x="12" y="28" width="16" height="3" fill="white"/>
@@ -344,11 +344,10 @@ function Hero({ onNavigate }) {
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <a href="tel:+16156560737" style={{
             display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "14px 28px", borderRadius: 10,
-            background: P.gold, color: "#fff",
+            padding: "14px 28px", borderRadius: 56,
+            background: "#fff", color: P.navyDark,
             fontFamily: F.body, fontSize: 15, fontWeight: 600,
-            textDecoration: "none", letterSpacing: 0.3,
-            boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+            textDecoration: "none", letterSpacing: 0.16,
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -357,7 +356,7 @@ function Hero({ onNavigate }) {
           </a>
           <button onClick={() => onNavigate("getting-started")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "14px 24px", borderRadius: 10,
+            padding: "14px 24px", borderRadius: 56,
             background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
             border: "1px solid rgba(255,255,255,0.15)",
             fontFamily: F.body, fontSize: 14, fontWeight: 500,
@@ -1074,11 +1073,10 @@ function CalculatorCTA() {
             </p>
             <a href="/calculator" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 28px", borderRadius: 10,
-              background: P.gold, color: "#fff",
+              padding: "14px 32px", borderRadius: 56,
+              background: P.navy, color: "#fff",
               fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.3,
-              boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+              textDecoration: "none", letterSpacing: 0.16,
             }}>
               Open Calculator →
             </a>
@@ -1181,7 +1179,7 @@ function CalculatorPage() {
       note: downPct >= 20 ? "No PMI required" : `PMI removable at 80% LTV`,
     },
     {
-      name: "FHA", color: "#5b1ecf", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: "#282b31", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
@@ -1281,7 +1279,7 @@ function CalculatorPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#5b1ecf" },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#282b31" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
             ].map((p) => (
               <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
@@ -1510,34 +1508,34 @@ const globalCSS = `
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #101114; z-index: 150; overflow-y: auto; }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0a0b0d; z-index: 150; overflow-y: auto; }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
   .hamburger { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
 
-  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 12px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
-  .nav-btn:hover { background: rgba(113,50,245,0.08); color: rgba(255,255,255,0.7); }
-  .nav-btn-active { background: rgba(113,50,245,0.16) !important; color: #fff !important; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 12px; background: transparent; color: rgba(255,255,255,0.45); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
+  .nav-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+  .nav-btn-active { background: rgba(0,82,255,0.12) !important; color: #fff !important; }
 
-  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; }
+  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(91,97,110,0.12); box-shadow: none; }
 
-  .tab-btn { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 12px; border: 1px solid #dedee5; background: #fff; color: #9497a9; cursor: pointer; transition: all 0.15s; }
-  .tab-btn:hover { border-color: #7132f5; color: #7132f5; }
-  .tab-btn-active { background: #7132f5 !important; color: #fff !important; border-color: #7132f5 !important; }
+  .tab-btn { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 56px; border: 1px solid rgba(91,97,110,0.2); background: #fff; color: #5b616e; cursor: pointer; transition: all 0.15s; }
+  .tab-btn:hover { border-color: #0052ff; color: #0052ff; }
+  .tab-btn-active { background: #0052ff !important; color: #fff !important; border-color: #0052ff !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 12px; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #686b82; cursor: pointer; text-align: left; transition: all 0.15s; }
-  .process-step:hover { background: rgba(113,50,245,0.04); }
-  .process-step-active { background: #fff !important; color: #101114 !important; box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; }
-  .process-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #9497a9; min-width: 28px; line-height: 1.3; }
-  .process-num-active { color: #7132f5 !important; }
-  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; border: 1px solid rgba(0,0,0,0.06); min-width: 300px; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 12px; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #5b616e; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step:hover { background: rgba(0,82,255,0.03); }
+  .process-step-active { background: #fff !important; color: #0a0b0d !important; box-shadow: 0 1px 4px rgba(16,24,40,0.04); border: 1px solid rgba(91,97,110,0.12); }
+  .process-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #8a919e; min-width: 28px; line-height: 1.3; }
+  .process-num-active { color: #0052ff !important; }
+  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: none; border: 1px solid rgba(91,97,110,0.12); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #101114; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #f5f5f7; }
-  .costs-cat-head-active { background: #7132f5 !important; color: #fff !important; border-radius: 12px 12px 0 0; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0a0b0d; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head:hover { background: #f3f4f6; }
+  .costs-cat-head-active { background: #0052ff !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
   .calc-grid > *:first-child { flex: 1 1 300px; }
@@ -1547,7 +1545,7 @@ const globalCSS = `
     .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; }
     .sidebar-open { transform: translateX(0) !important; }
     .sidebar-overlay { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #101114; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0a0b0d; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .main-content { margin-left: 0 !important; padding-top: 56px; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
