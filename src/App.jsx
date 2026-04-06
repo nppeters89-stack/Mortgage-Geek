@@ -343,33 +343,36 @@ function Hero({ onNavigate }) {
         {/* CTA row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <a href="tel:+16156560737" style={{
-            display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "14px 28px", borderRadius: 10,
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "14px 24px", borderRadius: 10,
             background: P.gold, color: "#fff",
             fontFamily: F.body, fontSize: 15, fontWeight: 600,
             textDecoration: "none", letterSpacing: 0.3,
             boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
           }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>
-            (615) 656-0737
+            Call
           </a>
-          <a href="/calculator" style={{
+          <a href="sms:+16156560737&body=Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages." style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "14px 24px", borderRadius: 10,
             background: "rgba(255,255,255,0.12)", color: "#fff",
             border: "1px solid rgba(255,255,255,0.2)",
-            fontFamily: F.body, fontSize: 14, fontWeight: 600,
-            textDecoration: "none", letterSpacing: 0.2,
+            fontFamily: F.body, fontSize: 15, fontWeight: 600,
+            textDecoration: "none", letterSpacing: 0.3,
           }}>
-            🧮 Payment Calculator
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Text
           </a>
           <button onClick={() => onNavigate("getting-started")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "14px 24px", borderRadius: 10,
-            background: "transparent", color: "rgba(255,255,255,0.6)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "transparent", color: "rgba(255,255,255,0.5)",
+            border: "1px solid rgba(255,255,255,0.08)",
             fontFamily: F.body, fontSize: 14, fontWeight: 500,
             cursor: "pointer", letterSpacing: 0.2,
           }}>
