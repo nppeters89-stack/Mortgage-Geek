@@ -4,18 +4,17 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const P = {
-  navy: "#0052ff", navyDark: "#0a0b0d", navyLight: "#578bfa",
+  navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
   gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#ffffff", creamDark: "#eef0f3",
-  warmGray: "#5b616e", warmGrayLight: "#8a919e",
-  white: "#FFFFFF", sage: "#149e61",
-  text: "#0a0b0d", textLight: "#5b616e",
-  darkCard: "#282b31",
+  cream: "#FAF7F2", creamDark: "#F0EBE3",
+  warmGray: "#6B6358", warmGrayLight: "#9B9488",
+  white: "#FFFFFF", sage: "#5A7A6E",
+  text: "#2C2825", textLight: "#5C5650",
 };
 
 const F = {
-  display: "'IBM Plex Sans', -apple-system, sans-serif",
-  body: "'IBM Plex Sans', -apple-system, sans-serif",
+  display: "'Instrument Serif', Georgia, serif",
+  body: "'DM Sans', -apple-system, sans-serif",
 };
 
 const fmt = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -244,7 +243,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
       <aside className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}>
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", padding: "0 0 24px" }}>
           <div style={{ padding: "32px 24px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
-            <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.navy}`, background: "rgba(255,255,255,0.05)" }}>
+            <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.gold}`, background: "rgba(255,255,255,0.05)" }}>
               <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span style={{ fontSize: 28 }}>🤓</span>
@@ -313,7 +312,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <svg width="24" height="26" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 6, opacity: 0.5 }}>
               <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill="white"/>
-              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#0a0b0d" stroke="white" strokeWidth="0.5"/>
+              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#0F2530" stroke="white" strokeWidth="0.5"/>
               <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="white" strokeWidth="1.5" fill="none"/>
               <rect x="12" y="22" width="16" height="3" fill="white"/>
               <rect x="12" y="28" width="16" height="3" fill="white"/>
@@ -334,7 +333,7 @@ function Hero({ onNavigate }) {
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(184,134,11,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 15%, rgba(90,122,110,0.1) 0%, transparent 50%)" }} />
       <div style={{ position: "relative", maxWidth: 680 }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
-        <h2 style={{ fontFamily: F.display, fontSize: "clamp(36px, 5.5vw, 64px)", fontWeight: 700, letterSpacing: -1.5, color: "#fff", lineHeight: 1.00, marginBottom: 20 }}>
+        <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.2, marginBottom: 20 }}>
           A mortgage doesn't have to be <span style={{ color: P.goldLight }}>complicated.</span>
         </h2>
         <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: 36 }}>
@@ -345,10 +344,11 @@ function Hero({ onNavigate }) {
         <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
           <a href="tel:+16156560737" style={{
             display: "inline-flex", alignItems: "center", gap: 10,
-            padding: "14px 28px", borderRadius: 56,
-            background: "#fff", color: P.navyDark,
+            padding: "14px 28px", borderRadius: 10,
+            background: P.gold, color: "#fff",
             fontFamily: F.body, fontSize: 15, fontWeight: 600,
-            textDecoration: "none", letterSpacing: 0.16,
+            textDecoration: "none", letterSpacing: 0.3,
+            boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
           }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -357,7 +357,7 @@ function Hero({ onNavigate }) {
           </a>
           <button onClick={() => onNavigate("getting-started")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "14px 24px", borderRadius: 56,
+            padding: "14px 24px", borderRadius: 10,
             background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
             border: "1px solid rgba(255,255,255,0.15)",
             fontFamily: F.body, fontSize: 14, fontWeight: 500,
@@ -372,12 +372,12 @@ function Hero({ onNavigate }) {
   );
 }
 
-function SectionHeader({ eyebrow, title, subtitle, dark }) {
+function SectionHeader({ eyebrow, title, subtitle }) {
   return (
     <div style={{ maxWidth: 640, marginBottom: 40 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: dark ? P.navyLight : P.navy, display: "block", marginBottom: 10 }}>{eyebrow}</span>
-      <h2 style={{ fontFamily: F.display, fontSize: "clamp(26px, 3.5vw, 36px)", color: dark ? "#fff" : P.text, marginBottom: 10, lineHeight: 1.00, fontWeight: 700, letterSpacing: -0.5 }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: 14, lineHeight: 1.56, color: dark ? "rgba(255,255,255,0.5)" : P.warmGray }}>{subtitle}</p>}
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>{eyebrow}</span>
+      <h2 style={{ fontFamily: F.display, fontSize: "clamp(26px, 3.5vw, 36px)", color: P.navy, marginBottom: 10, lineHeight: 1.15 }}>{title}</h2>
+      {subtitle && <p style={{ fontSize: 14, lineHeight: 1.7, color: P.warmGray }}>{subtitle}</p>}
     </div>
   );
 }
@@ -480,12 +480,11 @@ function ActiveLoanProcess({ navTarget }) {
   useEffect(() => { if (navTarget?.section === "process" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = ACTIVE_LOAN_STEPS[active];
   return (
-    <section id="process" style={{ padding: "64px 40px", background: P.navyDark }}>
+    <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
         eyebrow="The Clock Is Ticking"
         title="The 30-Day Loan Process"
         subtitle="Once you're under contract, the countdown begins. Here's what happens during the roughly 30 days between a ratified contract and your closing date."
-        dark
       />
       <ThirtyDayGraphic activeStep={active} />
       <div className="process-grid">
@@ -525,8 +524,8 @@ function MortgageTypes({ navTarget }) {
   useEffect(() => { if (navTarget?.section === "types" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const t = MORTGAGE_TYPES[active];
   return (
-    <section id="types" style={{ padding: "64px 40px", background: P.navyDark }}>
-      <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." dark />
+    <section id="types" style={{ padding: "64px 40px", background: P.creamDark }}>
+      <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {MORTGAGE_TYPES.map((m, i) => (
           <button key={m.name} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{m.name}</button>
@@ -674,8 +673,8 @@ function BorrowerProfile({ navTarget }) {
   const [active, setActive] = useState(0);
   useEffect(() => { if (navTarget?.section === "profile" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   return (
-    <section id="profile" style={{ padding: "64px 40px", background: P.navyDark }}>
-      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." dark />
+    <section id="profile" style={{ padding: "64px 40px", background: P.creamDark }}>
+      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {BORROWER_PROFILE.map((b, i) => (
           <button key={b.title} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{b.title}</button>
@@ -838,12 +837,11 @@ function InterestRates({ navTarget }) {
   ];
 
   return (
-    <section id="rates" style={{ padding: "64px 40px", background: P.navyDark }}>
+    <section id="rates" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
         eyebrow="The Number Everyone Asks About"
         title="Interest Rates"
         subtitle="Your interest rate isn't one number — it's a spectrum of options. Understanding what drives it and how to read a rate sheet puts you in control."
-        dark
       />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {tabs.map((t, i) => (
@@ -1059,7 +1057,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 
 function CalculatorCTA() {
   return (
-    <section id="calculator" style={{ padding: "64px 40px", background: P.navyDark }}>
+    <section id="calculator" style={{ padding: "64px 40px", background: P.creamDark }}>
       <div style={{ maxWidth: 720 }}>
         <div style={{
           background: `linear-gradient(135deg, ${P.navy} 0%, ${P.navyLight} 100%)`,
@@ -1076,10 +1074,11 @@ function CalculatorCTA() {
             </p>
             <a href="/calculator" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 32px", borderRadius: 56,
-              background: P.navy, color: "#fff",
+              padding: "14px 28px", borderRadius: 10,
+              background: P.gold, color: "#fff",
               fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.16,
+              textDecoration: "none", letterSpacing: 0.3,
+              boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
             }}>
               Open Calculator →
             </a>
@@ -1182,7 +1181,7 @@ function CalculatorPage() {
       note: downPct >= 20 ? "No PMI required" : `PMI removable at 80% LTV`,
     },
     {
-      name: "FHA", color: "#282b31", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: "#8B6914", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
@@ -1199,17 +1198,43 @@ function CalculatorPage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
-      <style>{globalCSS}</style>
+      <style>{globalCSS}{`
+        .calc-inputs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .calc-tax-ins-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        @media (max-width: 900px) {
+          .calc-inputs-grid { grid-template-columns: 1fr 1fr; }
+          .calc-cards-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 500px) {
+          .calc-inputs-grid { grid-template-columns: 1fr; }
+          .calc-tax-ins-row { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
       {/* Calculator header */}
-      <div style={{ background: P.navyDark, padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 22 }}>🤓</span>
-          <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <a href="tel:+16156560737" style={{ fontSize: 13, color: P.goldLight, textDecoration: "none", fontWeight: 500 }}>(615) 656-0737</a>
-          <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", textDecoration: "none", fontWeight: 500 }}>← Back to Guide</a>
+      <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: `2px solid ${P.gold}` }} />
+            <div>
+              <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff", display: "block", lineHeight: 1.2 }}>The Mortgage Geek</span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>NMLS# 1119524</span>
+            </div>
+          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <a href="tel:+16156560737" style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 16px", borderRadius: 8,
+              background: P.gold, color: "#fff",
+              fontFamily: F.body, fontSize: 13, fontWeight: 600,
+              textDecoration: "none",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </a>
+            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", textDecoration: "none", fontWeight: 500 }}>← Back to Guide</a>
+          </div>
         </div>
       </div>
 
@@ -1222,7 +1247,7 @@ function CalculatorPage() {
 
         {/* Input bar */}
         <div className="content-card" style={{ padding: "24px 28px", marginBottom: 12 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 16 }}>
+          <div className="calc-inputs-grid">
             <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} />
             <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
@@ -1233,6 +1258,17 @@ function CalculatorPage() {
                 ))}
               </div>
             </div>
+          </div>
+          {/* Tax & Insurance row - HOI left, State + tax amount right */}
+          <div className="calc-tax-ins-row">
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
+              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
+                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
+              </div>
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax State</label>
               <select
@@ -1241,24 +1277,13 @@ function CalculatorPage() {
                 style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
               >
                 {Object.entries(STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
-                  <option key={code} value={code}>{s.name} ({s.rate}%)</option>
+                  <option key={code} value={code}>{code} ({s.rate}%)</option>
                 ))}
               </select>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Taxes (est.)</label>
-              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
-                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{taxes.toFixed(0)}</span>
+              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "7px 12px", marginTop: 4 }}>
+                <span style={{ fontSize: 12, color: P.warmGrayLight, marginRight: 6 }}>Monthly Tax:</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: P.text }}>${taxes.toFixed(0)}</span>
                 <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>{taxRate}% / yr</span>
-              </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
-              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
-                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
-                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
               </div>
             </div>
           </div>
@@ -1282,7 +1307,7 @@ function CalculatorPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#282b31" },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
             ].map((p) => (
               <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
@@ -1305,7 +1330,7 @@ function CalculatorPage() {
         </div>
 
         {/* Side-by-side cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 32 }}>
+        <div className="calc-cards-grid">
           {programs.map((prog, i) => {
             const isBest = prog.total === lowestTotal;
             return (
@@ -1500,7 +1525,7 @@ function MainSite() {
 // ─── Global CSS ──────────────────────────────────────────────────────────────
 
 const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   input[type=number]::-webkit-inner-spin-button,
@@ -1508,37 +1533,37 @@ const globalCSS = `
   input[type=number] { -moz-appearance: textfield; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0a0b0d; z-index: 150; overflow-y: auto; }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
   .hamburger { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
 
-  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 12px; background: transparent; color: rgba(255,255,255,0.45); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
-  .nav-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
-  .nav-btn-active { background: rgba(0,82,255,0.12) !important; color: #fff !important; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
+  .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
+  .nav-btn-active { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
 
-  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(91,97,110,0.2); box-shadow: none; }
+  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-  .tab-btn { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 56px; border: 1px solid rgba(91,97,110,0.2); background: #fff; color: #5b616e; cursor: pointer; transition: all 0.15s; }
-  .tab-btn:hover { border-color: #0052ff; color: #0052ff; }
-  .tab-btn-active { background: #0052ff !important; color: #fff !important; border-color: #0052ff !important; }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #9B9488; cursor: pointer; transition: all 0.15s; }
+  .tab-btn:hover { border-color: #1B3A4B; color: #1B3A4B; }
+  .tab-btn-active { background: #1B3A4B !important; color: #fff !important; border-color: #1B3A4B !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 12px; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #5b616e; cursor: pointer; text-align: left; transition: all 0.15s; }
-  .process-step:hover { background: rgba(0,82,255,0.03); }
-  .process-step-active { background: #fff !important; color: #0a0b0d !important; box-shadow: 0 1px 4px rgba(16,24,40,0.04); border: 1px solid rgba(91,97,110,0.2); }
-  .process-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #8a919e; min-width: 28px; line-height: 1.3; }
-  .process-num-active { color: #0052ff !important; }
-  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: none; border: 1px solid rgba(91,97,110,0.2); min-width: 300px; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B6358; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step:hover { background: rgba(255,255,255,0.6); }
+  .process-step-active { background: #fff !important; color: #2C2825 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #9B9488; min-width: 28px; line-height: 1.3; }
+  .process-num-active { color: #B8860B !important; }
+  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0a0b0d; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #eef0f3; }
-  .costs-cat-head-active { background: #0052ff !important; color: #fff !important; border-radius: 12px 12px 0 0; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1B3A4B; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head:hover { background: #FAF7F2; }
+  .costs-cat-head-active { background: #1B3A4B !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
   .calc-grid > *:first-child { flex: 1 1 300px; }
@@ -1548,9 +1573,14 @@ const globalCSS = `
     .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; }
     .sidebar-open { transform: translateX(0) !important; }
     .sidebar-overlay { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0a0b0d; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .main-content { margin-left: 0 !important; padding-top: 56px; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
+    .calc-grid { flex-direction: column; }
+    .calc-grid > *:first-child, .calc-grid > *:last-child { flex: 1 1 auto; }
+  }
+  @media (max-width: 600px) {
+    section { padding-left: 20px !important; padding-right: 20px !important; }
   }
 `;
