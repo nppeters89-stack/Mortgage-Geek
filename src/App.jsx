@@ -4,17 +4,17 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const P = {
-  navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
+  navy: "#7132f5", navyDark: "#101114", navyLight: "#5741d8",
   gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#FAF7F2", creamDark: "#F0EBE3",
-  warmGray: "#6B6358", warmGrayLight: "#9B9488",
-  white: "#FFFFFF", sage: "#5A7A6E",
-  text: "#2C2825", textLight: "#5C5650",
+  cream: "#ffffff", creamDark: "#f5f5f7",
+  warmGray: "#686b82", warmGrayLight: "#9497a9",
+  white: "#FFFFFF", sage: "#149e61",
+  text: "#101114", textLight: "#484b5e",
 };
 
 const F = {
-  display: "'Instrument Serif', Georgia, serif",
-  body: "'DM Sans', -apple-system, sans-serif",
+  display: "'IBM Plex Sans', -apple-system, sans-serif",
+  body: "'IBM Plex Sans', -apple-system, sans-serif",
 };
 
 const fmt = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
@@ -243,11 +243,11 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
       <aside className={`sidebar ${mobileOpen ? "sidebar-open" : ""}`}>
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", padding: "0 0 24px" }}>
           <div style={{ padding: "32px 24px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
-            <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.gold}`, background: "rgba(255,255,255,0.05)" }}>
+            <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.navy}`, background: "rgba(255,255,255,0.05)" }}>
               <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <span style={{ fontSize: 28 }}>🤓</span>
-            <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 400, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
+            <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}><a href="tel:+16156560737" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>(615) 656-0737</a></p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>NMLS# 1119524</p>
@@ -312,7 +312,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <svg width="24" height="26" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 6, opacity: 0.5 }}>
               <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill="white"/>
-              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#0F2530" stroke="white" strokeWidth="0.5"/>
+              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#101114" stroke="white" strokeWidth="0.5"/>
               <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="white" strokeWidth="1.5" fill="none"/>
               <rect x="12" y="22" width="16" height="3" fill="white"/>
               <rect x="12" y="28" width="16" height="3" fill="white"/>
@@ -333,7 +333,7 @@ function Hero({ onNavigate }) {
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(184,134,11,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 15%, rgba(90,122,110,0.1) 0%, transparent 50%)" }} />
       <div style={{ position: "relative", maxWidth: 680 }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
-        <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.15, marginBottom: 20 }}>
+        <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 700, letterSpacing: -1, color: "#fff", lineHeight: 1.15, marginBottom: 20 }}>
           A mortgage doesn't have to be <span style={{ color: P.goldLight }}>complicated.</span>
         </h2>
         <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: 36 }}>
@@ -1181,7 +1181,7 @@ function CalculatorPage() {
       note: downPct >= 20 ? "No PMI required" : `PMI removable at 80% LTV`,
     },
     {
-      name: "FHA", color: "#8B6914", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: "#5b1ecf", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
@@ -1281,7 +1281,7 @@ function CalculatorPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#5b1ecf" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
             ].map((p) => (
               <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
@@ -1499,7 +1499,7 @@ function MainSite() {
 // ─── Global CSS ──────────────────────────────────────────────────────────────
 
 const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   input[type=number]::-webkit-inner-spin-button,
@@ -1507,37 +1507,37 @@ const globalCSS = `
   input[type=number] { -moz-appearance: textfield; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.10); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #101114; z-index: 150; overflow-y: auto; }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
   .hamburger { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
 
-  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
-  .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
-  .nav-btn-active { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 12px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
+  .nav-btn:hover { background: rgba(113,50,245,0.08); color: rgba(255,255,255,0.7); }
+  .nav-btn-active { background: rgba(113,50,245,0.16) !important; color: #fff !important; }
 
-  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; }
 
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #9B9488; cursor: pointer; transition: all 0.15s; }
-  .tab-btn:hover { border-color: #1B3A4B; color: #1B3A4B; }
-  .tab-btn-active { background: #1B3A4B !important; color: #fff !important; border-color: #1B3A4B !important; }
+  .tab-btn { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 12px; border: 1px solid #dedee5; background: #fff; color: #9497a9; cursor: pointer; transition: all 0.15s; }
+  .tab-btn:hover { border-color: #7132f5; color: #7132f5; }
+  .tab-btn-active { background: #7132f5 !important; color: #fff !important; border-color: #7132f5 !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B6358; cursor: pointer; text-align: left; transition: all 0.15s; }
-  .process-step:hover { background: rgba(255,255,255,0.6); }
-  .process-step-active { background: #fff !important; color: #2C2825 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #9B9488; min-width: 28px; line-height: 1.3; }
-  .process-num-active { color: #B8860B !important; }
-  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 12px; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #686b82; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step:hover { background: rgba(113,50,245,0.04); }
+  .process-step-active { background: #fff !important; color: #101114 !important; box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; }
+  .process-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #9497a9; min-width: 28px; line-height: 1.3; }
+  .process-num-active { color: #7132f5 !important; }
+  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: rgba(0,0,0,0.03) 0px 4px 24px; border: 1px solid rgba(0,0,0,0.06); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1B3A4B; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #FAF7F2; }
-  .costs-cat-head-active { background: #1B3A4B !important; color: #fff !important; border-radius: 12px 12px 0 0; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #101114; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head:hover { background: #f5f5f7; }
+  .costs-cat-head-active { background: #7132f5 !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
   .calc-grid > *:first-child { flex: 1 1 300px; }
@@ -1547,7 +1547,7 @@ const globalCSS = `
     .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; }
     .sidebar-open { transform: translateX(0) !important; }
     .sidebar-overlay { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #101114; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .main-content { margin-left: 0 !important; padding-top: 56px; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
