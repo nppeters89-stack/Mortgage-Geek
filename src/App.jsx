@@ -1227,12 +1227,14 @@ function CalculatorPage() {
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate,
       note: downPct >= 20 ? "No PMI required" : `PMI removable at 80% LTV`,
+      eligible: downPct >= 3, minDown: 3,
     },
     {
       name: "FHA", color: "#8B6914", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
+      eligible: downPct >= 3.5, minDown: 3.5,
     },
     {
       name: "VA", color: P.sage, loan: vaLoan, pi: vaPI, mi: 0,
@@ -1241,11 +1243,12 @@ function CalculatorPage() {
       note: vaUsage === "exempt"
         ? "Funding fee waived — service-connected disability"
         : `No monthly MI — ${vaUsageLabels[vaUsage].toLowerCase()}, ${downPct >= 10 ? "10%+ down" : downPct >= 5 ? "5–9.99% down" : "<5% down"}`,
-      isVA: true,
+      isVA: true, eligible: true, minDown: 0,
     },
   ];
 
-  const lowestTotal = Math.min(convTotal, fhaTotal, vaTotal);
+  const eligibleTotals = programs.filter(p => p.eligible).map(p => p.total);
+  const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
@@ -1377,7 +1380,29 @@ function CalculatorPage() {
         {/* Side-by-side cards */}
         <div className="calc-cards-grid">
           {programs.map((prog, i) => {
-            const isBest = prog.total === lowestTotal;
+            const isBest = prog.eligible && prog.total === lowestTotal;
+
+            if (!prog.eligible) {
+              return (
+                <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative", opacity: 0.6 }}>
+                  <div style={{ background: P.warmGrayLight, padding: "24px 20px", textAlign: "center" }}>
+                    <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
+                    <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>Ineligible</span>
+                  </div>
+                  <div style={{ padding: "28px 20px", textAlign: "center" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: P.creamDark, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                      <span style={{ fontSize: 24 }}>⚠️</span>
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>Minimum {prog.minDown}% Down Required</p>
+                    <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray }}>
+                      {prog.name} loans require a minimum down payment of {prog.minDown}% ({fmt(homePrice * (prog.minDown / 100))}). 
+                      Increase your down payment to see {prog.name} payment details.
+                    </p>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
                 {isBest && (
@@ -1457,20 +1482,31 @@ function CalculatorPage() {
           <div style={{ display: "flex", gap: 12 }}>
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
-              <p style={{ marginBottom: 8 }}>
-                <strong>Monthly difference:</strong> The spread between the lowest and highest payment here is{" "}
-                <strong style={{ color: P.navy }}>{fmt(Math.max(convTotal, fhaTotal, vaTotal) - lowestTotal)}/month</strong>{" "}
-                ({fmt((Math.max(convTotal, fhaTotal, vaTotal) - lowestTotal) * 12)}/year).
-                {convRate !== fhaRate || convRate !== vaRate ? (
-                  <span> Rate spread: Conv {convRate}% vs FHA {fhaRate}% vs VA {vaRate}% — this difference alone accounts for a meaningful portion of the payment gap.</span>
-                ) : null}
-              </p>
+              {eligibleTotals.length >= 2 && (
+                <p style={{ marginBottom: 8 }}>
+                  <strong>Monthly difference:</strong> The spread between the lowest and highest eligible payment is{" "}
+                  <strong style={{ color: P.navy }}>{fmt(Math.max(...eligibleTotals) - lowestTotal)}/month</strong>{" "}
+                  ({fmt((Math.max(...eligibleTotals) - lowestTotal) * 12)}/year).
+                  {convRate !== fhaRate || convRate !== vaRate ? (
+                    <span> Rate spread: Conv {convRate}% vs FHA {fhaRate}% vs VA {vaRate}% — this difference alone accounts for a meaningful portion of the payment gap.</span>
+                  ) : null}
+                </p>
+              )}
+              {programs.some(p => !p.eligible) && (
+                <p style={{ marginBottom: 8 }}>
+                  <strong>Note:</strong> {programs.filter(p => !p.eligible).map(p => p.name).join(" and ")} {programs.filter(p => !p.eligible).length === 1 ? "is" : "are"} ineligible at {downPct}% down. 
+                  {downPct < 3 ? " Minimum down payments: Conventional (3%), FHA (3.5%). Only VA allows 0% down." :
+                   downPct < 3.5 ? " FHA requires a minimum 3.5% down payment. Increase to 3.5% to compare all three programs." : ""}
+                </p>
+              )}
               <p>
                 {downPct >= 20
                   ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA and VA finance upfront fees, meaning you borrow more even with the same down payment."
                   : downPct >= 5
                     ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, and VA has no monthly MI at all (but the funding fee adds to your balance)."
-                    : "At less than 5% down, FHA's monthly MIP is slightly higher (0.55% vs 0.50%), and Conventional PMI can be steep. VA is often the best deal here if you're eligible — no MI and no down payment required."}
+                    : downPct >= 3.5
+                      ? "At less than 5% down, FHA's monthly MIP is slightly higher (0.55% vs 0.50%), and Conventional PMI can be steep. VA is often the best deal here if you're eligible — no MI and no down payment required."
+                      : "At this down payment level, VA is likely your only option if you're eligible. Consider increasing your down payment to unlock Conventional and FHA programs."}
               </p>
               {vaUsage !== "exempt" && (
                 <p style={{ marginTop: 8 }}>
