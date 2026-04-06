@@ -1148,31 +1148,146 @@ function CalculatorPage() {
   const [term, setTerm] = useState(30);
   const [downPct, setDownPct] = useState(3.5);
   const [taxState, setTaxState] = useState("TN");
+  const [taxMetro, setTaxMetro] = useState("Nashville");
   const [vaUsage, setVaUsage] = useState("first");
 
   const STATE_TAX_RATES = {
-    AL: { name: "Alabama", rate: 0.41 }, AK: { name: "Alaska", rate: 1.19 }, AZ: { name: "Arizona", rate: 0.62 },
-    AR: { name: "Arkansas", rate: 0.62 }, CA: { name: "California", rate: 0.71 }, CO: { name: "Colorado", rate: 0.51 },
-    CT: { name: "Connecticut", rate: 2.15 }, DE: { name: "Delaware", rate: 0.57 }, FL: { name: "Florida", rate: 0.86 },
-    GA: { name: "Georgia", rate: 0.92 }, HI: { name: "Hawaii", rate: 0.28 }, ID: { name: "Idaho", rate: 0.63 },
-    IL: { name: "Illinois", rate: 2.07 }, IN: { name: "Indiana", rate: 0.85 }, IA: { name: "Iowa", rate: 1.57 },
-    KS: { name: "Kansas", rate: 1.41 }, KY: { name: "Kentucky", rate: 0.86 }, LA: { name: "Louisiana", rate: 0.55 },
-    ME: { name: "Maine", rate: 1.30 }, MD: { name: "Maryland", rate: 1.07 }, MA: { name: "Massachusetts", rate: 1.23 },
-    MI: { name: "Michigan", rate: 1.54 }, MN: { name: "Minnesota", rate: 1.12 }, MS: { name: "Mississippi", rate: 0.65 },
-    MO: { name: "Missouri", rate: 0.97 }, MT: { name: "Montana", rate: 0.74 }, NE: { name: "Nebraska", rate: 1.73 },
-    NV: { name: "Nevada", rate: 0.55 }, NH: { name: "New Hampshire", rate: 2.18 }, NJ: { name: "New Jersey", rate: 2.23 },
-    NM: { name: "New Mexico", rate: 0.67 }, NY: { name: "New York", rate: 1.72 }, NC: { name: "North Carolina", rate: 0.84 },
-    ND: { name: "North Dakota", rate: 0.98 }, OH: { name: "Ohio", rate: 1.56 }, OK: { name: "Oklahoma", rate: 0.87 },
-    OR: { name: "Oregon", rate: 0.97 }, PA: { name: "Pennsylvania", rate: 1.58 }, RI: { name: "Rhode Island", rate: 1.63 },
-    SC: { name: "South Carolina", rate: 0.57 }, SD: { name: "South Dakota", rate: 1.31 }, TN: { name: "Tennessee", rate: 0.56 },
-    TX: { name: "Texas", rate: 1.80 }, UT: { name: "Utah", rate: 0.58 }, VT: { name: "Vermont", rate: 1.90 },
-    VA: { name: "Virginia", rate: 0.82 }, WA: { name: "Washington", rate: 0.98 }, WV: { name: "West Virginia", rate: 0.58 },
-    WI: { name: "Wisconsin", rate: 1.85 }, WY: { name: "Wyoming", rate: 0.61 }, DC: { name: "Washington DC", rate: 0.56 },
+    AL: { name: "Alabama", rate: 0.41, metros: [
+      { name: "Birmingham", rate: 0.52 }, { name: "Huntsville", rate: 0.46 }, { name: "Mobile", rate: 0.48 },
+    ]},
+    AK: { name: "Alaska", rate: 1.19 },
+    AZ: { name: "Arizona", rate: 0.62, metros: [
+      { name: "Phoenix/Maricopa", rate: 0.64 }, { name: "Tucson/Pima", rate: 0.93 },
+    ]},
+    AR: { name: "Arkansas", rate: 0.62 },
+    CA: { name: "California", rate: 0.71, metros: [
+      { name: "Los Angeles", rate: 0.76 }, { name: "San Francisco", rate: 0.68 }, { name: "San Diego", rate: 0.73 },
+      { name: "Orange County", rate: 0.69 }, { name: "Sacramento", rate: 0.87 }, { name: "Riverside", rate: 0.95 },
+    ]},
+    CO: { name: "Colorado", rate: 0.51, metros: [
+      { name: "Denver", rate: 0.54 }, { name: "Colorado Springs", rate: 0.54 }, { name: "Aurora/Arapahoe", rate: 0.55 },
+    ]},
+    CT: { name: "Connecticut", rate: 2.15 },
+    DE: { name: "Delaware", rate: 0.57 },
+    FL: { name: "Florida", rate: 0.86, metros: [
+      { name: "Miami-Dade", rate: 0.97 }, { name: "Jacksonville/Duval", rate: 0.89 }, { name: "Tampa/Hillsborough", rate: 0.95 },
+      { name: "Orlando/Orange", rate: 0.89 }, { name: "Palm Beach", rate: 1.05 }, { name: "Broward/Ft Lauderdale", rate: 1.02 },
+    ]},
+    GA: { name: "Georgia", rate: 0.92, metros: [
+      { name: "Atlanta/Fulton", rate: 1.11 }, { name: "Cobb County", rate: 0.95 }, { name: "DeKalb County", rate: 1.20 },
+      { name: "Gwinnett County", rate: 1.02 },
+    ]},
+    HI: { name: "Hawaii", rate: 0.28 },
+    ID: { name: "Idaho", rate: 0.63 },
+    IL: { name: "Illinois", rate: 2.07, metros: [
+      { name: "Chicago/Cook", rate: 2.10 }, { name: "DuPage County", rate: 1.96 }, { name: "Lake County", rate: 2.68 },
+      { name: "Will County", rate: 2.42 },
+    ]},
+    IN: { name: "Indiana", rate: 0.85, metros: [
+      { name: "Indianapolis/Marion", rate: 1.02 }, { name: "Fort Wayne/Allen", rate: 0.88 },
+    ]},
+    IA: { name: "Iowa", rate: 1.57 },
+    KS: { name: "Kansas", rate: 1.41, metros: [
+      { name: "Kansas City/Johnson", rate: 1.37 }, { name: "Wichita/Sedgwick", rate: 1.48 },
+    ]},
+    KY: { name: "Kentucky", rate: 0.86, metros: [
+      { name: "Louisville/Jefferson", rate: 1.06 }, { name: "Lexington/Fayette", rate: 0.92 },
+    ]},
+    LA: { name: "Louisiana", rate: 0.55 },
+    ME: { name: "Maine", rate: 1.30 },
+    MD: { name: "Maryland", rate: 1.07, metros: [
+      { name: "Baltimore City", rate: 2.25 }, { name: "Montgomery County", rate: 0.93 },
+      { name: "Prince George's", rate: 1.15 }, { name: "Anne Arundel", rate: 0.94 },
+    ]},
+    MA: { name: "Massachusetts", rate: 1.23, metros: [
+      { name: "Boston/Suffolk", rate: 0.89 }, { name: "Middlesex County", rate: 1.20 }, { name: "Worcester County", rate: 1.35 },
+    ]},
+    MI: { name: "Michigan", rate: 1.54, metros: [
+      { name: "Detroit/Wayne", rate: 2.58 }, { name: "Oakland County", rate: 1.49 }, { name: "Grand Rapids/Kent", rate: 1.31 },
+    ]},
+    MN: { name: "Minnesota", rate: 1.12, metros: [
+      { name: "Minneapolis/Hennepin", rate: 1.18 }, { name: "St Paul/Ramsey", rate: 1.24 },
+    ]},
+    MS: { name: "Mississippi", rate: 0.65 },
+    MO: { name: "Missouri", rate: 0.97, metros: [
+      { name: "St Louis City", rate: 1.38 }, { name: "Kansas City/Jackson", rate: 1.22 },
+    ]},
+    MT: { name: "Montana", rate: 0.74 },
+    NE: { name: "Nebraska", rate: 1.73 },
+    NV: { name: "Nevada", rate: 0.55, metros: [
+      { name: "Las Vegas/Clark", rate: 0.60 }, { name: "Reno/Washoe", rate: 0.61 },
+    ]},
+    NH: { name: "New Hampshire", rate: 2.18 },
+    NJ: { name: "New Jersey", rate: 2.23, metros: [
+      { name: "Bergen County", rate: 2.41 }, { name: "Essex County", rate: 2.36 },
+      { name: "Middlesex County", rate: 2.57 }, { name: "Morris County", rate: 2.15 },
+    ]},
+    NM: { name: "New Mexico", rate: 0.67 },
+    NY: { name: "New York", rate: 1.72, metros: [
+      { name: "New York City", rate: 0.88 }, { name: "Long Island/Nassau", rate: 2.22 },
+      { name: "Westchester", rate: 1.62 }, { name: "Buffalo/Erie", rate: 2.42 },
+    ]},
+    NC: { name: "North Carolina", rate: 0.84, metros: [
+      { name: "Charlotte/Mecklenburg", rate: 0.94 }, { name: "Raleigh/Wake", rate: 0.82 }, { name: "Durham", rate: 1.13 },
+    ]},
+    ND: { name: "North Dakota", rate: 0.98 },
+    OH: { name: "Ohio", rate: 1.56, metros: [
+      { name: "Columbus/Franklin", rate: 1.57 }, { name: "Cleveland/Cuyahoga", rate: 2.06 }, { name: "Cincinnati/Hamilton", rate: 1.89 },
+    ]},
+    OK: { name: "Oklahoma", rate: 0.87 },
+    OR: { name: "Oregon", rate: 0.97, metros: [
+      { name: "Portland/Multnomah", rate: 1.12 }, { name: "Washington County", rate: 0.95 },
+    ]},
+    PA: { name: "Pennsylvania", rate: 1.58, metros: [
+      { name: "Philadelphia", rate: 1.36 }, { name: "Pittsburgh/Allegheny", rate: 2.14 }, { name: "Montgomery County", rate: 1.56 },
+    ]},
+    RI: { name: "Rhode Island", rate: 1.63 },
+    SC: { name: "South Carolina", rate: 0.57, metros: [
+      { name: "Charleston", rate: 0.52 }, { name: "Greenville", rate: 0.64 }, { name: "Columbia/Richland", rate: 0.68 },
+    ]},
+    SD: { name: "South Dakota", rate: 1.31 },
+    TN: { name: "Tennessee", rate: 0.56, metros: [
+      { name: "Nashville/Davidson", rate: 0.95 }, { name: "Memphis/Shelby", rate: 1.55 },
+      { name: "Knoxville/Knox", rate: 0.82 }, { name: "Chattanooga/Hamilton", rate: 0.85 },
+      { name: "Williamson County", rate: 0.53 }, { name: "Rutherford County", rate: 0.80 },
+      { name: "Sumner County", rate: 0.70 }, { name: "Wilson County", rate: 0.65 },
+    ]},
+    TX: { name: "Texas", rate: 1.80, metros: [
+      { name: "Houston/Harris", rate: 2.09 }, { name: "Dallas/Dallas Co", rate: 1.93 },
+      { name: "Austin/Travis", rate: 1.68 }, { name: "San Antonio/Bexar", rate: 1.89 },
+      { name: "Fort Worth/Tarrant", rate: 2.10 }, { name: "Collin County", rate: 1.82 },
+    ]},
+    UT: { name: "Utah", rate: 0.58, metros: [
+      { name: "Salt Lake County", rate: 0.67 }, { name: "Utah County", rate: 0.52 },
+    ]},
+    VT: { name: "Vermont", rate: 1.90 },
+    VA: { name: "Virginia", rate: 0.82, metros: [
+      { name: "Fairfax County", rate: 1.03 }, { name: "Virginia Beach", rate: 0.87 },
+      { name: "Arlington County", rate: 0.98 }, { name: "Richmond City", rate: 1.12 },
+    ]},
+    WA: { name: "Washington", rate: 0.98, metros: [
+      { name: "Seattle/King", rate: 0.93 }, { name: "Tacoma/Pierce", rate: 1.14 }, { name: "Snohomish County", rate: 0.92 },
+    ]},
+    WV: { name: "West Virginia", rate: 0.58 },
+    WI: { name: "Wisconsin", rate: 1.85, metros: [
+      { name: "Milwaukee", rate: 2.53 }, { name: "Madison/Dane", rate: 1.90 },
+    ]},
+    WY: { name: "Wyoming", rate: 0.61 },
+    DC: { name: "Washington DC", rate: 0.56 },
   };
 
-  const taxRate = STATE_TAX_RATES[taxState]?.rate || 0.56;
-  const [taxes, setTaxes] = useState(Math.round((350000 * (0.56 / 100)) / 12));
-  useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, homePrice]);
+  const stateData = STATE_TAX_RATES[taxState];
+  const metroList = stateData?.metros || [];
+  const selectedMetro = metroList.find(m => m.name === taxMetro);
+  const taxRate = selectedMetro ? selectedMetro.rate : stateData?.rate || 0.56;
+  const [taxes, setTaxes] = useState(Math.round((350000 * (0.95 / 100)) / 12));
+  useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, taxMetro, homePrice]);
+  // Reset metro when state changes
+  useEffect(() => {
+    const newMetros = STATE_TAX_RATES[taxState]?.metros;
+    if (newMetros && newMetros.length > 0) setTaxMetro(newMetros[0].name);
+    else setTaxMetro("");
+  }, [taxState]);
 
   const insurance = Math.round((homePrice * 0.0035) / 12 * 100) / 100;
   const [ratesLoaded, setRatesLoaded] = useState(false);
@@ -1347,7 +1462,7 @@ function CalculatorPage() {
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax State</label>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax Location</label>
               <select
                 value={taxState}
                 onChange={(e) => setTaxState(e.target.value)}
@@ -1357,6 +1472,18 @@ function CalculatorPage() {
                   <option key={code} value={code}>{code} ({s.rate}%)</option>
                 ))}
               </select>
+              {metroList.length > 0 && (
+                <select
+                  value={taxMetro}
+                  onChange={(e) => setTaxMetro(e.target.value)}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                >
+                  <option value="">State Avg ({stateData.rate}%)</option>
+                  {metroList.map((m) => (
+                    <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                  ))}
+                </select>
+              )}
               <div style={{ marginTop: 4 }}>
                 <CalcInput label="Monthly Tax" value={taxes} onChange={setTaxes} prefix="$" step={25} />
               </div>
