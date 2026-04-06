@@ -1301,16 +1301,13 @@ function CalculatorPage() {
           <div className="calc-inputs-grid">
             <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
             <div>
-              <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
-              <div style={{ marginTop: 6, display: "flex", flexDirection: "column", gap: 2 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                  <span style={{ color: P.warmGrayLight }}>Down Payment</span>
-                  <span style={{ fontWeight: 600, color: P.text }}>{fmt(downAmt)}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                  <span style={{ color: P.warmGrayLight }}>Base Loan</span>
-                  <span style={{ fontWeight: 600, color: P.navy }}>{fmt(baseLoan)}</span>
-                </div>
+              <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
+              <div style={{ marginTop: 6 }}>
+                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={(v) => { if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100); }} prefix="$" step={1000} min={0} max={homePrice} comma />
+              </div>
+              <div style={{ marginTop: 8, padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
+                <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(baseLoan)}</span>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
