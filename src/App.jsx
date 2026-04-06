@@ -1382,16 +1382,11 @@ function CalculatorPage() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
       <style>{globalCSS}{`
-        .calc-inputs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .calc-tax-ins-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+        .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-        @media (max-width: 900px) {
-          .calc-inputs-grid { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 700px) {
+          .calc-input-cols { grid-template-columns: 1fr; }
           .calc-cards-grid { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 500px) {
-          .calc-inputs-grid { grid-template-columns: 1fr; }
-          .calc-tax-ins-row { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -1428,71 +1423,68 @@ function CalculatorPage() {
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 540, margin: "0 auto" }}>One set of inputs, three loan programs. See how Conventional, FHA, and VA stack up for the same home.</p>
         </div>
 
-        {/* Input bar */}
-        <div className="content-card" style={{ padding: "24px 28px", marginBottom: 12 }}>
-          <div className="calc-inputs-grid">
-            <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
-            <div>
+        {/* Input card - 2 column layout */}
+        <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
+          <div className="calc-input-cols">
+            {/* Left column - Price & Down Payment */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
               <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
-              <div style={{ marginTop: 6 }}>
-                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={(v) => { if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100); }} prefix="$" step={1000} min={0} max={homePrice} comma />
-              </div>
-              <div style={{ marginTop: 8, padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+              <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={(v) => { if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100); }} prefix="$" step={1000} min={0} max={homePrice} comma />
+              <div style={{ padding: "12px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
                 <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(baseLoan)}</span>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[15, 30].map((t) => (
-                  <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "9px 0" }}>{t} yr</button>
-                ))}
+            {/* Right column - Term, Insurance, Taxes */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[15, 30].map((t) => (
+                    <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "9px 0" }}>{t} yr</button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>
-          {/* Tax & Insurance row - HOI left, State + tax amount right */}
-          <div className="calc-tax-ins-row">
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
-              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
-                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
-                <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
-                <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
+                <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                  <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
+                  <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
+                </div>
               </div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax Location</label>
-              <select
-                value={taxState}
-                onChange={(e) => setTaxState(e.target.value)}
-                style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
-              >
-                {Object.entries(STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
-                  <option key={code} value={code}>{code} ({s.rate}%)</option>
-                ))}
-              </select>
-              {metroList.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax Location</label>
                 <select
-                  value={taxMetro}
-                  onChange={(e) => setTaxMetro(e.target.value)}
-                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                  value={taxState}
+                  onChange={(e) => setTaxState(e.target.value)}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                 >
-                  <option value="">State Avg ({stateData.rate}%)</option>
-                  {metroList.map((m) => (
-                    <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                  {Object.entries(STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
+                    <option key={code} value={code}>{code} ({s.rate}%)</option>
                   ))}
                 </select>
-              )}
-              <div style={{ marginTop: 4 }}>
-                <CalcInput label="Monthly Tax" value={taxes} onChange={setTaxes} prefix="$" step={25} />
+                {metroList.length > 0 && (
+                  <select
+                    value={taxMetro}
+                    onChange={(e) => setTaxMetro(e.target.value)}
+                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                  >
+                    <option value="">State Avg ({stateData.rate}%)</option>
+                    {metroList.map((m) => (
+                      <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                    ))}
+                  </select>
+                )}
               </div>
+              <CalcInput label="Monthly Tax" value={taxes} onChange={setTaxes} prefix="$" step={25} />
             </div>
           </div>
         </div>
 
         {/* Per-program rate inputs */}
-        <div className="content-card" style={{ padding: "16px 28px", marginBottom: 32 }}>
+        <div className="content-card" style={{ padding: "16px 28px", marginBottom: 32, maxWidth: 800, margin: "0 auto 32px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Interest Rates by Program</span>
             {ratesLoaded && (
