@@ -219,6 +219,8 @@ const NAV_ITEMS = [
     { label: "Rate Options & Points", id: "rates", step: 1 },
     { label: "Live Rates", id: "rates", step: 2 },
   ]},
+  { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
+  { id: "next-steps", label: "Get Started", icon: "🚀" },
   { id: "calculator", label: "Calculator", icon: "🧮", href: "/calculator" },
 ];
 
@@ -575,53 +577,111 @@ function MortgageTypes({ navTarget }) {
 }
 
 function ClosingCosts({ navTarget }) {
+  const [showDetail, setShowDetail] = useState(false);
   const [openCat, setOpenCat] = useState(0);
   const [openItem, setOpenItem] = useState(null);
   const [openTrid, setOpenTrid] = useState(null);
+  const [costPrice, setCostPrice] = useState(350000);
   useEffect(() => {
     if (navTarget?.section === "costs") {
-      if (navTarget.step === "trid") { setOpenTrid(0); }
-      else if (typeof navTarget.step === "number") { setOpenCat(navTarget.step); setOpenItem(null); }
+      if (navTarget.step === "trid") { setShowDetail(true); setOpenTrid(0); }
+      else if (typeof navTarget.step === "number") { setShowDetail(true); setOpenCat(navTarget.step); setOpenItem(null); }
     }
   }, [navTarget]);
+
+  const lowEst = Math.round(costPrice * 0.02);
+  const highEst = Math.round(costPrice * 0.05);
+
   return (
     <section id="costs" style={{ padding: "64px 40px" }}>
-      <SectionHeader eyebrow="Follow the Money" title="All About Closing Costs" subtitle="Closing costs typically run 2–5% of the purchase price. Here's every fee you may encounter on your Closing Disclosure — what it is, what it costs, and who it goes to." />
+      <SectionHeader eyebrow="Follow the Money" title="All About Closing Costs" subtitle="Every home purchase comes with costs beyond the down payment. Here's the quick version — and a deep dive if you want it." />
       <div style={{ maxWidth: 720 }}>
-        {CLOSING_COSTS.map((cat, ci) => (
-          <div key={ci} className="content-card" style={{ marginBottom: 10 }}>
-            <button onClick={() => { setOpenCat(openCat === ci ? -1 : ci); setOpenItem(null); }} className={`costs-cat-head ${openCat === ci ? "costs-cat-head-active" : ""}`}>
-              <span>{cat.category}</span>
-              <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 11, opacity: 0.4, fontWeight: 500 }}>{cat.items.length}</span>
-                <span style={{ fontSize: 18, fontWeight: 300 }}>{openCat === ci ? "−" : "+"}</span>
-              </span>
-            </button>
-            {openCat === ci && cat.items.map((item, ii) => (
-              <div key={ii} style={{ borderTop: `1px solid ${P.cream}` }}>
-                <button onClick={() => setOpenItem(openItem === `${ci}-${ii}` ? null : `${ci}-${ii}`)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 20px", border: "none", background: "transparent", fontFamily: F.body, fontSize: 13, fontWeight: 500, color: P.text, cursor: "pointer", textAlign: "left" }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.gold, flexShrink: 0 }} />
-                  <span style={{ flex: 1 }}>{item.name}</span>
-                  <span style={{ fontSize: 16, color: P.warmGrayLight }}>{openItem === `${ci}-${ii}` ? "−" : "+"}</span>
-                </button>
-                {openItem === `${ci}-${ii}` && <p style={{ padding: "0 20px 14px 36px", fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>{item.desc}</p>}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
 
-      {/* TRID Fee Tolerance Matrix */}
-      <div style={{ maxWidth: 720, marginTop: 48 }}>
-        <div style={{ marginBottom: 28 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>Your Protection</span>
-          <h3 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3vw, 30px)", color: P.navy, marginBottom: 10, lineHeight: 1.15 }}>TRID Fee Tolerance Matrix</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.7, color: P.warmGray }}>
-            The TILA-RESPA Integrated Disclosure (TRID) rule — also known as "Know Before You Owe" — is your consumer protection against surprise fee increases at closing. It categorizes every closing cost into one of three tolerance "buckets" that determine how much (if at all) a fee can increase between your Loan Estimate and your Closing Disclosure. If a lender exceeds the allowed tolerance, they must reimburse you — this is called a "fee cure."
+        {/* Quick Summary */}
+        <div className="content-card" style={{ padding: "28px", marginBottom: 24 }}>
+          <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 16 }}>Quick Estimate</h4>
+          <p style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray, marginBottom: 20 }}>
+            Closing costs typically run <strong>2–5% of the purchase price</strong>. This covers lender fees, title insurance, government recording, prepaid taxes & insurance, and more. The exact amount depends on your loan type, location, and what you negotiate with the seller.
           </p>
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 20 }}>
+            <div style={{ flex: "1 1 200px" }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Purchase Price</label>
+              <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
+                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                <input type="text" inputMode="decimal" value={costPrice.toLocaleString("en-US")}
+                  onChange={(e) => { const v = parseFloat(e.target.value.replace(/,/g, "")); if (!isNaN(v)) setCostPrice(v); }}
+                  style={{ flex: 1, border: "none", background: "transparent", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", width: "100%" }}
+                />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <div style={{ background: P.creamDark, borderRadius: 10, padding: "16px", textAlign: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>Low End (2%)</span>
+              <span style={{ fontFamily: F.display, fontSize: 26, color: P.navy }}>{fmt(lowEst)}</span>
+            </div>
+            <div style={{ background: P.creamDark, borderRadius: 10, padding: "16px", textAlign: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>High End (5%)</span>
+              <span style={{ fontFamily: F.display, fontSize: 26, color: P.navy }}>{fmt(highEst)}</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 12, marginTop: 16, padding: "14px 16px", background: P.cream, borderRadius: 8 }}>
+            <span style={{ fontSize: 18, flexShrink: 0 }}>🤓</span>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray }}>
+              <strong>Geek Tip:</strong> You can often negotiate seller concessions (seller pays part of your closing costs) — especially in a buyer's market. FHA allows up to 6%, VA up to 4%, and Conventional up to 3–9% depending on down payment.
+            </p>
+          </div>
         </div>
 
-        {TRID_BUCKETS.map((bucket, i) => (
+        {/* Toggle for full detail */}
+        <button onClick={() => setShowDetail(!showDetail)} style={{
+          width: "100%", padding: "14px", borderRadius: 10, border: `1px solid ${P.navy}`,
+          background: showDetail ? P.navy : "transparent", color: showDetail ? "#fff" : P.navy,
+          fontFamily: F.body, fontSize: 14, fontWeight: 600, cursor: "pointer",
+          marginBottom: 24, transition: "all 0.2s",
+        }}>
+          {showDetail ? "Hide Detailed Breakdown ↑" : `View All 26 Closing Costs in Detail ↓`}
+        </button>
+
+        {/* Full detailed breakdown */}
+        {showDetail && (
+          <>
+            {CLOSING_COSTS.map((cat, ci) => (
+              <div key={ci} className="content-card" style={{ marginBottom: 10 }}>
+                <button onClick={() => { setOpenCat(openCat === ci ? -1 : ci); setOpenItem(null); }} className={`costs-cat-head ${openCat === ci ? "costs-cat-head-active" : ""}`}>
+                  <span>{cat.category}</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 11, opacity: 0.4, fontWeight: 500 }}>{cat.items.length}</span>
+                    <span style={{ fontSize: 18, fontWeight: 300 }}>{openCat === ci ? "−" : "+"}</span>
+                  </span>
+                </button>
+                {openCat === ci && cat.items.map((item, ii) => (
+                  <div key={ii} style={{ borderTop: `1px solid ${P.cream}` }}>
+                    <button onClick={() => setOpenItem(openItem === `${ci}-${ii}` ? null : `${ci}-${ii}`)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "12px 20px", border: "none", background: "transparent", fontFamily: F.body, fontSize: 13, fontWeight: 500, color: P.text, cursor: "pointer", textAlign: "left" }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.gold, flexShrink: 0 }} />
+                      <span style={{ flex: 1 }}>{item.name}</span>
+                      <span style={{ fontSize: 16, color: P.warmGrayLight }}>{openItem === `${ci}-${ii}` ? "−" : "+"}</span>
+                    </button>
+                    {openItem === `${ci}-${ii}` && <p style={{ padding: "0 20px 14px 36px", fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>{item.desc}</p>}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </>
+        )}
+
+        {/* TRID section also inside detail view */}
+        {showDetail && (
+          <div style={{ marginTop: 48 }}>
+            <div style={{ marginBottom: 28 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>Your Protection</span>
+              <h3 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3vw, 30px)", color: P.navy, marginBottom: 10, lineHeight: 1.15 }}>TRID Fee Tolerance Matrix</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: P.warmGray }}>
+                The TILA-RESPA Integrated Disclosure (TRID) rule — also known as "Know Before You Owe" — is your consumer protection against surprise fee increases at closing. It categorizes every closing cost into one of three tolerance "buckets" that determine how much (if at all) a fee can increase between your Loan Estimate and your Closing Disclosure. If a lender exceeds the allowed tolerance, they must reimburse you — this is called a "fee cure."
+              </p>
+            </div>
+
+            {TRID_BUCKETS.map((bucket, i) => (
           <div key={i} className="content-card" style={{ marginBottom: 12 }}>
             <button
               onClick={() => setOpenTrid(openTrid === i ? null : i)}
@@ -675,12 +735,14 @@ function ClosingCosts({ navTarget }) {
           </div>
         ))}
 
-        <div style={{ display: "flex", gap: 12, marginTop: 16, padding: "16px 18px", background: P.white, borderRadius: 8, border: `1px solid rgba(0,0,0,0.04)`, boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
-          <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray }}>
-            <strong>Why this matters to you:</strong> Compare your final Closing Disclosure line-by-line against your original Loan Estimate. If fees in the zero-tolerance bucket increased at all, or if 10%-bucket fees collectively jumped more than 10%, your lender owes you money. You have 3 business days to review your Closing Disclosure before closing — use them.
-          </p>
-        </div>
+            <div style={{ display: "flex", gap: 12, marginTop: 16, padding: "16px 18px", background: P.white, borderRadius: 8, border: `1px solid rgba(0,0,0,0.04)`, boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+              <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray }}>
+                <strong>Why this matters to you:</strong> Compare your final Closing Disclosure line-by-line against your original Loan Estimate. If fees in the zero-tolerance bucket increased at all, or if 10%-bucket fees collectively jumped more than 10%, your lender owes you money. You have 3 business days to review your Closing Disclosure before closing — use them.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1079,6 +1141,153 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
         {suffix && <span style={{ padding: "9px 12px 9px 0", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{suffix}</span>}
       </div>
     </div>
+  );
+}
+
+function PreApprovalChecklist() {
+  const [checkedItems, setCheckedItems] = useState({});
+  const toggle = (id) => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const categories = [
+    { title: "Income & Employment", items: [
+      { id: "paystubs", label: "Most recent 30 days of pay stubs" },
+      { id: "w2", label: "W-2s from the past 2 years" },
+      { id: "tax_returns", label: "Federal tax returns (past 2 years) — all pages" },
+      { id: "self_employed", label: "If self-employed: business tax returns + year-to-date profit & loss" },
+      { id: "other_income", label: "Other income docs: Social Security, pension, rental income, alimony, etc." },
+    ]},
+    { title: "Assets & Bank Statements", items: [
+      { id: "bank_statements", label: "Most recent 2 months of bank statements — all pages, all accounts" },
+      { id: "retirement", label: "Retirement / investment account statements (most recent quarter)" },
+      { id: "gift_letter", label: "If using gift funds: gift letter + proof of donor's ability + transfer documentation" },
+      { id: "large_deposits", label: "Explanation for any large deposits (outside of regular payroll)" },
+    ]},
+    { title: "Identity & Residency", items: [
+      { id: "drivers_license", label: "Valid government-issued photo ID (driver's license or passport)" },
+      { id: "ssn", label: "Social Security number (for credit pull authorization)" },
+      { id: "address_history", label: "Addresses for the past 2 years" },
+      { id: "rent_history", label: "Landlord contact info or 12 months of rent payment proof (if renting)" },
+    ]},
+    { title: "Property & Debts", items: [
+      { id: "purchase_contract", label: "Signed purchase contract (once you're under contract)" },
+      { id: "real_estate_owned", label: "Details on any real estate you currently own" },
+      { id: "debt_info", label: "Monthly debt obligations: car payments, student loans, credit cards, child support" },
+      { id: "bankruptcy", label: "If applicable: bankruptcy discharge papers, divorce decree" },
+    ]},
+    { title: "VA Borrowers (if applicable)", items: [
+      { id: "dd214", label: "DD-214 (Certificate of Release or Discharge)" },
+      { id: "coe", label: "Certificate of Eligibility (COE) — or I can pull this for you" },
+      { id: "disability_letter", label: "If exempt from funding fee: VA disability rating letter" },
+    ]},
+  ];
+
+  const totalItems = categories.reduce((sum, cat) => sum + cat.items.length, 0);
+  const checkedCount = Object.values(checkedItems).filter(Boolean).length;
+
+  return (
+    <section id="checklist" style={{ padding: "64px 40px", background: P.creamDark }}>
+      <SectionHeader eyebrow="Get Organized" title="Pre-Approval Checklist" subtitle="Gathering these documents before you apply will speed up your approval and reduce back-and-forth. Check them off as you go." />
+      <div style={{ maxWidth: 720 }}>
+        {/* Progress bar */}
+        <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: P.navy }}>{checkedCount} of {totalItems} items ready</span>
+            <span style={{ fontSize: 12, color: P.warmGrayLight }}>{totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0}%</span>
+          </div>
+          <div style={{ height: 8, background: P.creamDark, borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${(checkedCount / totalItems) * 100}%`, background: checkedCount === totalItems ? P.sage : P.gold, borderRadius: 4, transition: "width 0.3s" }} />
+          </div>
+          {checkedCount === totalItems && (
+            <p style={{ fontSize: 12, color: P.sage, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
+          )}
+        </div>
+
+        {categories.map((cat, ci) => (
+          <div key={ci} className="content-card" style={{ padding: "20px 24px", marginBottom: 10 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: P.navy, marginBottom: 12 }}>{cat.title}</h4>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {cat.items.map((item) => (
+                <label key={item.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 13, lineHeight: 1.5, color: checkedItems[item.id] ? P.warmGrayLight : P.text }}>
+                  <input type="checkbox" checked={!!checkedItems[item.id]} onChange={() => toggle(item.id)}
+                    style={{ marginTop: 3, accentColor: P.gold, flexShrink: 0 }} />
+                  <span style={{ textDecoration: checkedItems[item.id] ? "line-through" : "none" }}>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div style={{ display: "flex", gap: 12, marginTop: 16, padding: "16px 18px", background: P.white, borderRadius: 8, border: "1px solid rgba(0,0,0,0.04)" }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+          <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray }}>
+            <strong>Don't have everything?</strong> That's okay — you don't need every single item to get started. A pre-qualification conversation only needs the basics. We can work through the rest as your application progresses.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NextSteps() {
+  return (
+    <section id="next-steps" style={{ padding: "64px 40px" }}>
+      <div style={{ maxWidth: 720 }}>
+        <div style={{
+          background: `linear-gradient(145deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+          borderRadius: 16, padding: "48px 36px", position: "relative", overflow: "hidden",
+        }}>
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(184,134,11,0.1) 0%, transparent 50%)" }} />
+          <div style={{ position: "relative" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldLight, display: "block", marginBottom: 12 }}>Ready?</span>
+            <h2 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3.5vw, 34px)", color: "#fff", marginBottom: 12, lineHeight: 1.2 }}>
+              Let's figure out your next move.
+            </h2>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", marginBottom: 32, maxWidth: 480 }}>
+              Whether you're ready to get pre-approved or just have a quick question — I'm here. No pressure, no obligation. Just a conversation.
+            </p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <a href="tel:+16156560737" style={{
+                display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 10,
+                background: P.gold, textDecoration: "none", color: "#fff",
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <div>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600 }}>Call me</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.7 }}>(615) 656-0737 — let's talk through your scenario</span>
+                </div>
+              </a>
+
+              <a href="sms:+16156560737&body=Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages." style={{
+                display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 10,
+                background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)",
+                textDecoration: "none", color: "#fff",
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <div>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600 }}>Text me</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.5 }}>Quick question? Shoot me a text — I respond fast</span>
+                </div>
+              </a>
+
+              <a href="/calculator" style={{
+                display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 10,
+                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                textDecoration: "none", color: "rgba(255,255,255,0.7)",
+              }}>
+                <span style={{ fontSize: 20 }}>🧮</span>
+                <div>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 600 }}>Run the numbers first</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.5 }}>Compare Conventional, FHA, and VA side by side</span>
+                </div>
+              </a>
+            </div>
+
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 24, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1771,6 +1980,8 @@ function MainSite() {
         <BorrowerProfile navTarget={navTarget} />
         <MortgageStructure navTarget={navTarget} />
         <InterestRates navTarget={navTarget} />
+        <PreApprovalChecklist />
+        <NextSteps />
         <CalculatorCTA />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
