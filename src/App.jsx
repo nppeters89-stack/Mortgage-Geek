@@ -401,6 +401,80 @@ function SectionHeader({ eyebrow, title, subtitle }) {
   );
 }
 
+function JourneyOverview({ onNavigate }) {
+  const steps = [
+    { num: "1", label: "Pre-Qualify", section: "getting-started", step: 0, phase: "pre" },
+    { num: "2", label: "Pre-Approve", section: "getting-started", step: 1, phase: "pre" },
+    { num: "3", label: "Find a Home", section: "getting-started", step: 2, phase: "pre" },
+    { num: "4", label: "Processing", section: "process", step: 0, phase: "post" },
+    { num: "5", label: "Underwriting", section: "process", step: 1, phase: "post" },
+    { num: "6", label: "Closing", section: "process", step: 2, phase: "post" },
+  ];
+
+  return (
+    <section style={{ padding: "48px 40px 24px" }}>
+      <div style={{ maxWidth: 720 }}>
+        <div className="content-card" style={{ padding: "28px 24px", overflow: "visible" }}>
+          <div style={{ textAlign: "center", marginBottom: 20 }}>
+            <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 4 }}>Your Mortgage Journey</h3>
+            <p style={{ fontSize: 12, color: P.warmGrayLight }}>6 steps from first conversation to getting your keys</p>
+          </div>
+
+          {/* Phase labels */}
+          <div style={{ display: "flex", marginBottom: 8 }}>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.navy, background: `${P.navy}10`, padding: "3px 10px", borderRadius: 10 }}>Your Pace</span>
+            </div>
+            <div style={{ flex: 1, textAlign: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, background: `${P.gold}15`, padding: "3px 10px", borderRadius: 10 }}>~30 Days</span>
+            </div>
+          </div>
+
+          {/* Timeline */}
+          <div style={{ position: "relative", padding: "0 8px" }}>
+            {/* Connecting line */}
+            <div style={{ position: "absolute", top: 18, left: 30, right: 30, height: 3, background: P.creamDark, borderRadius: 2, zIndex: 0 }} />
+            {/* Contract divider */}
+            <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", height: 38, width: 2, background: P.gold, zIndex: 1, borderRadius: 1 }} />
+
+            <div style={{ position: "relative", display: "flex", justifyContent: "space-between", zIndex: 2 }}>
+              {steps.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => onNavigate(s.section, s.step)}
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                    background: "none", border: "none", cursor: "pointer", padding: 0, width: "16.66%",
+                  }}
+                >
+                  <div style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    background: s.phase === "pre" ? P.navy : P.gold,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                    transition: "transform 0.15s",
+                  }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.15)"}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                  >
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{s.num}</span>
+                  </div>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: P.warmGray, textAlign: "center", lineHeight: 1.2 }}>{s.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Contract marker label */}
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: P.gold }}>▲ CONTRACT SIGNED</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function PreContract({ navTarget }) {
   const [active, setActive] = useState(0);
   useEffect(() => { if (navTarget?.section === "getting-started" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
@@ -408,7 +482,7 @@ function PreContract({ navTarget }) {
   return (
     <section id="getting-started" style={{ padding: "64px 40px" }}>
       <SectionHeader
-        eyebrow="Before the Clock Starts"
+        eyebrow="Steps 1–3 · Before the Clock Starts"
         title="Getting Started"
         subtitle="These steps happen at your own pace — before you're under contract. No deadlines, no pressure. Take the time to get it right."
       />
@@ -424,9 +498,11 @@ function PreContract({ navTarget }) {
             </button>
           ))}
           {/* Visual transition arrow */}
-          <div style={{ textAlign: "center", padding: "16px 0 8px", color: P.warmGrayLight, fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>
-            <span style={{ display: "block", fontSize: 18, marginBottom: 4 }}>↓</span>
-            UNDER CONTRACT
+          <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
+            <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, background: `${P.gold}15`, padding: "10px 20px", borderRadius: 10 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold }}>Contract Signed</span>
+              <span style={{ fontSize: 10, color: P.warmGrayLight }}>The 30-day clock starts ↓</span>
+            </div>
           </div>
         </div>
         <div className="process-detail">
@@ -501,7 +577,7 @@ function ActiveLoanProcess({ navTarget }) {
   return (
     <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
-        eyebrow="The Clock Is Ticking"
+        eyebrow="Steps 4–6 · The Clock Is Ticking"
         title="The 30-Day Loan Process"
         subtitle="Once you're under contract, the countdown begins. Here's what happens during the roughly 30 days between a ratified contract and your closing date."
       />
@@ -1973,6 +2049,7 @@ function MainSite() {
       <Sidebar activeSection={activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className="main-content">
         <Hero onNavigate={handleNavigate} />
+        <JourneyOverview onNavigate={handleSubNavigate} />
         <PreContract navTarget={navTarget} />
         <ActiveLoanProcess navTarget={navTarget} />
         <MortgageTypes navTarget={navTarget} />
