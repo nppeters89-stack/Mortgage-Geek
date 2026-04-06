@@ -1147,6 +1147,14 @@ function CalculatorPage() {
   const [vaRate, setVaRate] = useState(6.25);
   const [term, setTerm] = useState(30);
   const [downPct, setDownPct] = useState(3.5);
+  const [downDollarOverride, setDownDollarOverride] = useState(null);
+  useEffect(() => { setDownDollarOverride(null); }, [homePrice]); // reset override when price changes
+
+  const handleDownPctChange = (v) => { setDownPct(v); setDownDollarOverride(null); };
+  const handleDownDollarChange = (v) => {
+    setDownDollarOverride(v);
+    if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100);
+  };
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("Nashville");
   const [vaUsage, setVaUsage] = useState("first");
@@ -1318,8 +1326,8 @@ function CalculatorPage() {
     })();
   }, []);
 
-  const baseLoan = homePrice * (1 - downPct / 100);
-  const downAmt = homePrice * (downPct / 100);
+  const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
+  const baseLoan = homePrice - downAmt;
 
   // Conventional
   const convLoan = baseLoan;
@@ -1401,7 +1409,7 @@ function CalculatorPage() {
               <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>NMLS# 1119524</span>
             </div>
           </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <a href="tel:+16156560737" style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 8,
@@ -1412,7 +1420,18 @@ function CalculatorPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               Call
             </a>
-            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", textDecoration: "none", fontWeight: 500 }}>← Back to Guide</a>
+            <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20mortgage%20calculator%20and%20had%20a%20question." style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "8px 16px", borderRadius: 8,
+              background: "rgba(255,255,255,0.1)", color: "#fff",
+              border: "1px solid rgba(255,255,255,0.2)",
+              fontFamily: F.body, fontSize: 13, fontWeight: 600,
+              textDecoration: "none",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Text
+            </a>
+            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
           </div>
         </div>
       </div>
@@ -1430,8 +1449,8 @@ function CalculatorPage() {
             {/* Left column - Price & Down Payment */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
-              <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
-              <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={(v) => { if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100); }} prefix="$" step={1000} min={0} max={homePrice} comma />
+              <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
+              <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
               <div style={{ padding: "12px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
                 <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(baseLoan)}</span>
@@ -1530,13 +1549,17 @@ function CalculatorPage() {
 
             return (
               <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
-                {isBest && (
-                  <div style={{ background: prog.color, padding: "4px 12px", textAlign: "center" }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#fff" }}>Lowest Payment</span>
-                  </div>
-                )}
                 {/* Header */}
-                <div style={{ background: prog.color, padding: "24px 20px", textAlign: "center" }}>
+                <div style={{ background: prog.color, padding: "24px 20px", textAlign: "center", position: "relative" }}>
+                  {isBest && (
+                    <span style={{
+                      position: "absolute", top: 10, right: 10,
+                      background: "#fff", color: prog.color,
+                      fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase",
+                      padding: "4px 10px", borderRadius: 50,
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    }}>★ Lowest</span>
+                  )}
                   <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
                   <span style={{ fontFamily: F.display, fontSize: 40, color: "#fff" }}>{fmt(prog.total)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {prog.rate}% rate</span>
