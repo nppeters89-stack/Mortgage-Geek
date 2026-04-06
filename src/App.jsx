@@ -1135,6 +1135,7 @@ function CalculatorPage() {
   const [term, setTerm] = useState(30);
   const [downPct, setDownPct] = useState(10);
   const [taxState, setTaxState] = useState("TN");
+  const [vaUsage, setVaUsage] = useState("first");
 
   const STATE_TAX_RATES = {
     AL: { name: "Alabama", rate: 0.41 }, AK: { name: "Alaska", rate: 1.19 }, AZ: { name: "Arizona", rate: 0.62 },
@@ -1205,11 +1206,20 @@ function CalculatorPage() {
   const { monthly: fhaPI } = useMemo(() => generateAmortData(fhaLoan, fhaRate, term), [fhaLoan, fhaRate, term]);
   const fhaTotal = fhaPI + fhaMI + taxes + insurance;
 
-  // VA
-  const vaFee = baseLoan * 0.033;
+  // VA - Funding fee varies by usage type and down payment
+  const vaFeeRate = useMemo(() => {
+    if (vaUsage === "exempt") return 0;
+    if (downPct >= 10) return 1.25;
+    if (downPct >= 5) return 1.50;
+    // Less than 5% down
+    return vaUsage === "first" ? 2.15 : 3.30;
+  }, [vaUsage, downPct]);
+  const vaFee = baseLoan * (vaFeeRate / 100);
   const vaLoan = baseLoan + vaFee;
   const { monthly: vaPI } = useMemo(() => generateAmortData(vaLoan, vaRate, term), [vaLoan, vaRate, term]);
   const vaTotal = vaPI + taxes + insurance;
+
+  const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
   const programs = [
     {
@@ -1227,8 +1237,11 @@ function CalculatorPage() {
     {
       name: "VA", color: P.sage, loan: vaLoan, pi: vaPI, mi: 0,
       miLabel: null,
-      upfront: vaFee, upfrontLabel: "Funding Fee (3.3%)", total: vaTotal, rate: vaRate,
-      note: "No monthly MI — funding fee financed",
+      upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate,
+      note: vaUsage === "exempt"
+        ? "Funding fee waived — service-connected disability"
+        : `No monthly MI — ${vaUsageLabels[vaUsage].toLowerCase()}, ${downPct >= 10 ? "10%+ down" : downPct >= 5 ? "5–9.99% down" : "<5% down"}`,
+      isVA: true,
     },
   ];
 
@@ -1390,12 +1403,34 @@ function CalculatorPage() {
                     ))}
                   </div>
 
+                  {/* VA Usage selector */}
+                  {prog.isVA && (
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
+                      <select
+                        value={vaUsage}
+                        onChange={(e) => setVaUsage(e.target.value)}
+                        style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "8px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center" }}
+                      >
+                        <option value="first">First-Time Use</option>
+                        <option value="subsequent">Subsequent Use</option>
+                        <option value="exempt">Exempt (Disability)</option>
+                      </select>
+                    </div>
+                  )}
+
                   {/* Loan details */}
                   <div style={{ background: P.cream, borderRadius: 8, padding: "12px 14px", marginBottom: 12 }}>
                     {prog.upfront > 0 && (
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
                         <span style={{ color: P.warmGray }}>{prog.upfrontLabel}</span>
                         <span style={{ fontWeight: 600, color: P.text }}>{fmt(prog.upfront)}</span>
+                      </div>
+                    )}
+                    {prog.isVA && prog.upfront === 0 && (
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
+                        <span style={{ color: P.sage, fontWeight: 600 }}>Funding Fee Waived</span>
+                        <span style={{ fontWeight: 600, color: P.sage }}>$0</span>
                       </div>
                     )}
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
@@ -1432,6 +1467,19 @@ function CalculatorPage() {
                     ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, and VA has no monthly MI at all (but the funding fee adds to your balance)."
                     : "At less than 5% down, FHA's monthly MIP is slightly higher (0.55% vs 0.50%), and Conventional PMI can be steep. VA is often the best deal here if you're eligible — no MI and no down payment required."}
               </p>
+              {vaUsage !== "exempt" && (
+                <p style={{ marginTop: 8 }}>
+                  <strong>VA funding fee:</strong> Currently set to {vaUsageLabels[vaUsage].toLowerCase()} at {vaFeeRate}%
+                  {downPct < 5 && vaUsage === "subsequent" ? " — this is the highest tier. First-time users with the same down payment pay 2.15% instead." : ""}
+                  {downPct >= 5 ? ` — at ${downPct >= 10 ? "10%+" : "5–9.99%"} down, the fee is the same for first-time and subsequent use.` : ""}
+                  {" "}Use the dropdown on the VA card to compare scenarios. Veterans with service-connected disabilities are exempt entirely.
+                </p>
+              )}
+              {vaUsage === "exempt" && (
+                <p style={{ marginTop: 8 }}>
+                  <strong>VA funding fee waived.</strong> Veterans with service-connected disabilities are exempt from the funding fee, making VA even more competitive — no upfront fee and no monthly MI.
+                </p>
+              )}
             </div>
           </div>
         </div>
