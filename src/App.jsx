@@ -232,7 +232,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
       <div className="mobile-bar">
         <div className="mobile-bar-inner">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 20 }}>🤓</span>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <span style={{ fontSize: 16, lineHeight: 1 }}>🤓</span>
+            </div>
             <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
           </div>
           <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -246,7 +248,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
             <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.gold}`, background: "rgba(255,255,255,0.05)" }}>
               <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
-            <span style={{ fontSize: 28 }}>🤓</span>
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
+              <span style={{ fontSize: 26, lineHeight: 1 }}>🤓</span>
+            </div>
             <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}><a href="tel:+16156560737" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>(615) 656-0737</a></p>
