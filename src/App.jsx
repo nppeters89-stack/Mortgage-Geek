@@ -1498,7 +1498,7 @@ function CalculatorPage() {
 
         {/* Per-program rate inputs */}
         <div className="content-card" style={{ padding: "16px 28px", marginBottom: 32, maxWidth: 800, margin: "0 auto 32px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Interest Rates by Program</span>
             {ratesLoaded && (
               <span style={{ fontSize: 11, color: P.sage, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
@@ -1507,6 +1507,9 @@ function CalculatorPage() {
               </span>
             )}
           </div>
+          <p style={{ fontSize: 11, color: P.warmGrayLight, marginBottom: 12, lineHeight: 1.5 }}>
+            National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
+          </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
