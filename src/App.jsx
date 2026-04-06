@@ -1024,22 +1024,32 @@ function InterestRates({ navTarget }) {
   );
 }
 
-function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999 }) {
-  const [localVal, setLocalVal] = useState(String(value));
-  useEffect(() => { setLocalVal(String(value)); }, [value]);
+function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999, comma }) {
+  const fmtComma = (v) => comma ? Number(v).toLocaleString("en-US") : String(v);
+  const [localVal, setLocalVal] = useState(fmtComma(value));
+  const [focused, setFocused] = useState(false);
+  useEffect(() => { if (!focused) setLocalVal(fmtComma(value)); }, [value, focused]);
 
   const handleChange = (e) => {
     const raw = e.target.value;
     setLocalVal(raw);
-    const v = parseFloat(raw);
+    const cleaned = comma ? raw.replace(/,/g, "") : raw;
+    const v = parseFloat(cleaned);
     if (!isNaN(v) && v >= min && v <= max) onChange(v);
   };
 
+  const handleFocus = () => {
+    setFocused(true);
+    setLocalVal(String(value));
+  };
+
   const handleBlur = () => {
-    const v = parseFloat(localVal);
-    if (isNaN(v) || v < min) { onChange(min); setLocalVal(String(min)); }
-    else if (v > max) { onChange(max); setLocalVal(String(max)); }
-    else { onChange(v); setLocalVal(String(v)); }
+    setFocused(false);
+    const cleaned = comma ? localVal.replace(/,/g, "") : localVal;
+    const v = parseFloat(cleaned);
+    if (isNaN(v) || v < min) { onChange(min); setLocalVal(fmtComma(min)); }
+    else if (v > max) { onChange(max); setLocalVal(fmtComma(max)); }
+    else { onChange(v); setLocalVal(fmtComma(v)); }
   };
 
   return (
@@ -1047,7 +1057,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
       <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>{label}</label>
       <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, overflow: "hidden", background: P.cream }}>
         {prefix && <span style={{ padding: "9px 0 9px 12px", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{prefix}</span>}
-        <input type="number" value={localVal} onChange={handleChange} onBlur={handleBlur} step={step}
+        <input type={comma ? "text" : "number"} inputMode="decimal" value={localVal} onChange={handleChange} onFocus={handleFocus} onBlur={handleBlur} step={step}
           style={{ flex: 1, border: "none", background: "transparent", padding: "9px 12px", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", width: "100%" }} />
         {suffix && <span style={{ padding: "9px 12px 9px 0", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{suffix}</span>}
       </div>
@@ -1086,6 +1096,34 @@ function CalculatorCTA() {
         </div>
       </div>
     </section>
+  );
+}
+
+function RateInput({ label, rate, setRate, color }) {
+  const [localVal, setLocalVal] = useState(String(rate));
+  useEffect(() => { setLocalVal(String(rate)); }, [rate]);
+  const handleChange = (e) => {
+    setLocalVal(e.target.value);
+    const v = parseFloat(e.target.value);
+    if (!isNaN(v) && v >= 0 && v <= 15) setRate(v);
+  };
+  const handleBlur = () => {
+    const v = parseFloat(localVal);
+    if (isNaN(v) || v < 0) { setRate(0); setLocalVal("0"); }
+    else if (v > 15) { setRate(15); setLocalVal("15"); }
+    else { setRate(v); setLocalVal(String(v)); }
+  };
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
+      <span style={{ width: 8, height: 8, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      <span style={{ fontSize: 13, fontWeight: 600, color: color, flex: 1 }}>{label}</span>
+      <input
+        type="number" inputMode="decimal" value={localVal} onChange={handleChange} onBlur={handleBlur}
+        step={0.125}
+        style={{ border: "none", background: "transparent", fontSize: 16, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", textAlign: "right", width: 64 }}
+      />
+      <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray }}>%</span>
+    </div>
   );
 }
 
@@ -1248,7 +1286,7 @@ function CalculatorPage() {
         {/* Input bar */}
         <div className="content-card" style={{ padding: "24px 28px", marginBottom: 12 }}>
           <div className="calc-inputs-grid">
-            <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} />
+            <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
             <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
@@ -1310,18 +1348,7 @@ function CalculatorPage() {
               { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
             ].map((p) => (
-              <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
-                <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, flexShrink: 0 }} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: p.color, flex: 1 }}>{p.label}</span>
-                <input
-                  type="number"
-                  value={p.rate}
-                  onChange={(e) => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 0 && v <= 15) p.setRate(v); }}
-                  step={0.125}
-                  style={{ border: "none", background: "transparent", fontSize: 16, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", textAlign: "right", width: 64 }}
-                />
-                <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray }}>%</span>
-              </div>
+              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
             ))}
           </div>
           {!ratesLoaded && (
@@ -1334,7 +1361,7 @@ function CalculatorPage() {
           {programs.map((prog, i) => {
             const isBest = prog.total === lowestTotal;
             return (
-              <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative", border: isBest ? `2px solid ${prog.color}` : undefined }}>
+              <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
                 {isBest && (
                   <div style={{ background: prog.color, padding: "4px 12px", textAlign: "center" }}>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "#fff" }}>Lowest Payment</span>
