@@ -341,7 +341,7 @@ function Hero({ onNavigate }) {
         </p>
 
         {/* CTA row */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
           <a href="tel:+16156560737" style={{
             display: "inline-flex", alignItems: "center", gap: 10,
             padding: "14px 28px", borderRadius: 10,
@@ -355,11 +355,21 @@ function Hero({ onNavigate }) {
             </svg>
             (615) 656-0737
           </a>
+          <a href="/calculator" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "14px 24px", borderRadius: 10,
+            background: "rgba(255,255,255,0.12)", color: "#fff",
+            border: "1px solid rgba(255,255,255,0.2)",
+            fontFamily: F.body, fontSize: 14, fontWeight: 600,
+            textDecoration: "none", letterSpacing: 0.2,
+          }}>
+            🧮 Payment Calculator
+          </a>
           <button onClick={() => onNavigate("getting-started")} style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "14px 24px", borderRadius: 10,
-            background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.8)",
-            border: "1px solid rgba(255,255,255,0.15)",
+            background: "transparent", color: "rgba(255,255,255,0.6)",
+            border: "1px solid rgba(255,255,255,0.1)",
             fontFamily: F.body, fontSize: 14, fontWeight: 500,
             cursor: "pointer", letterSpacing: 0.2,
           }}>
@@ -1550,6 +1560,13 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
+  const [showFloatingCalc, setShowFloatingCalc] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => { setShowFloatingCalc(window.scrollY > 400); };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
@@ -1633,6 +1650,27 @@ function MainSite() {
           </div>
         </footer>
       </main>
+
+      {/* Floating calculator button */}
+      <a
+        href="/calculator"
+        style={{
+          position: "fixed", bottom: 24, right: 24, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "12px 20px", borderRadius: 50,
+          background: P.gold, color: "#fff",
+          fontFamily: F.body, fontSize: 14, fontWeight: 600,
+          textDecoration: "none", letterSpacing: 0.3,
+          boxShadow: "0 4px 20px rgba(184,134,11,0.35), 0 2px 8px rgba(0,0,0,0.1)",
+          transform: showFloatingCalc ? "translateY(0)" : "translateY(100px)",
+          opacity: showFloatingCalc ? 1 : 0,
+          transition: "all 0.3s ease",
+          pointerEvents: showFloatingCalc ? "auto" : "none",
+        }}
+      >
+        <span style={{ fontSize: 18 }}>🧮</span>
+        Calculator
+      </a>
     </div>
   );
 }
