@@ -1289,7 +1289,8 @@ function CalculatorPage() {
     else setTaxMetro("");
   }, [taxState]);
 
-  const insurance = Math.round((homePrice * 0.0035) / 12 * 100) / 100;
+  const [insurance, setInsurance] = useState(Math.round((350000 * 0.0035) / 12));
+  useEffect(() => { setInsurance(Math.round((homePrice * 0.0035) / 12)); }, [homePrice]);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
 
@@ -1322,7 +1323,7 @@ function CalculatorPage() {
 
   // Conventional
   const convLoan = baseLoan;
-  const convMiRate = downPct < 5 ? 0.70 : downPct < 10 ? 0.54 : downPct < 20 ? 0.41 : 0;
+  const convMiRate = downPct < 5 ? 0.52 : downPct < 10 ? 0.37 : downPct < 20 ? 0.27 : 0;
   const convMI = (baseLoan * (convMiRate / 100)) / 12;
   const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
   const convTotal = convPI + convMI + taxes + insurance;
@@ -1355,7 +1356,7 @@ function CalculatorPage() {
       name: "Conventional", color: P.navy, loan: convLoan, pi: convPI, mi: convMI,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate,
-      note: downPct >= 20 ? "No PMI required" : `PMI removable at 80% LTV`,
+      note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
       eligible: downPct >= 3, minDown: 3,
     },
     {
@@ -1446,14 +1447,7 @@ function CalculatorPage() {
                   ))}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Homeowners Ins. (est.)</label>
-                <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
-                  <span style={{ fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text }}>{insurance.toFixed(0)}</span>
-                  <span style={{ fontSize: 10, color: P.warmGrayLight, marginLeft: "auto" }}>0.35% / yr</span>
-                </div>
-              </div>
+              <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} />
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Property Tax Location</label>
                 <select
@@ -1634,9 +1628,9 @@ function CalculatorPage() {
                 {downPct >= 20
                   ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA and VA finance upfront fees, meaning you borrow more even with the same down payment."
                   : downPct >= 5
-                    ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, and VA has no monthly MI at all (but the funding fee adds to your balance)."
+                    ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, and VA has no monthly MI at all (but the funding fee adds to your balance). Conv PMI estimates here assume 740+ FICO and DTI under 43% — lower scores or higher DTI will increase PMI."
                     : downPct >= 3.5
-                      ? "At less than 5% down, FHA's monthly MIP is slightly higher (0.55% vs 0.50%), and Conventional PMI can be steep. VA is often the best deal here if you're eligible — no MI and no down payment required."
+                      ? "At less than 5% down, all three programs carry some form of mortgage insurance or upfront fee. Conv PMI estimates assume 740+ FICO and DTI under 43% — lower scores will increase PMI significantly. VA is often the best deal if you're eligible — no monthly MI at all."
                       : "At this down payment level, VA is likely your only option if you're eligible. Consider increasing your down payment to unlock Conventional and FHA programs."}
               </p>
               {vaUsage !== "exempt" && (
