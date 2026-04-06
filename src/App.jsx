@@ -6,10 +6,11 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 const P = {
   navy: "#0052ff", navyDark: "#0a0b0d", navyLight: "#578bfa",
   gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#ffffff", creamDark: "#f3f4f6",
+  cream: "#ffffff", creamDark: "#eef0f3",
   warmGray: "#5b616e", warmGrayLight: "#8a919e",
   white: "#FFFFFF", sage: "#149e61",
   text: "#0a0b0d", textLight: "#5b616e",
+  darkCard: "#282b31",
 };
 
 const F = {
@@ -333,7 +334,7 @@ function Hero({ onNavigate }) {
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(184,134,11,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 15%, rgba(90,122,110,0.1) 0%, transparent 50%)" }} />
       <div style={{ position: "relative", maxWidth: 680 }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
-        <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 700, letterSpacing: -1, color: "#fff", lineHeight: 1.15, marginBottom: 20 }}>
+        <h2 style={{ fontFamily: F.display, fontSize: "clamp(36px, 5.5vw, 64px)", fontWeight: 700, letterSpacing: -1.5, color: "#fff", lineHeight: 1.00, marginBottom: 20 }}>
           A mortgage doesn't have to be <span style={{ color: P.goldLight }}>complicated.</span>
         </h2>
         <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: 36 }}>
@@ -371,12 +372,12 @@ function Hero({ onNavigate }) {
   );
 }
 
-function SectionHeader({ eyebrow, title, subtitle }) {
+function SectionHeader({ eyebrow, title, subtitle, dark }) {
   return (
     <div style={{ maxWidth: 640, marginBottom: 40 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>{eyebrow}</span>
-      <h2 style={{ fontFamily: F.display, fontSize: "clamp(26px, 3.5vw, 36px)", color: P.navy, marginBottom: 10, lineHeight: 1.15 }}>{title}</h2>
-      {subtitle && <p style={{ fontSize: 14, lineHeight: 1.7, color: P.warmGray }}>{subtitle}</p>}
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: dark ? P.navyLight : P.navy, display: "block", marginBottom: 10 }}>{eyebrow}</span>
+      <h2 style={{ fontFamily: F.display, fontSize: "clamp(26px, 3.5vw, 36px)", color: dark ? "#fff" : P.text, marginBottom: 10, lineHeight: 1.00, fontWeight: 700, letterSpacing: -0.5 }}>{title}</h2>
+      {subtitle && <p style={{ fontSize: 14, lineHeight: 1.56, color: dark ? "rgba(255,255,255,0.5)" : P.warmGray }}>{subtitle}</p>}
     </div>
   );
 }
@@ -479,11 +480,12 @@ function ActiveLoanProcess({ navTarget }) {
   useEffect(() => { if (navTarget?.section === "process" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = ACTIVE_LOAN_STEPS[active];
   return (
-    <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="process" style={{ padding: "64px 40px", background: P.navyDark }}>
       <SectionHeader
         eyebrow="The Clock Is Ticking"
         title="The 30-Day Loan Process"
         subtitle="Once you're under contract, the countdown begins. Here's what happens during the roughly 30 days between a ratified contract and your closing date."
+        dark
       />
       <ThirtyDayGraphic activeStep={active} />
       <div className="process-grid">
@@ -523,8 +525,8 @@ function MortgageTypes({ navTarget }) {
   useEffect(() => { if (navTarget?.section === "types" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const t = MORTGAGE_TYPES[active];
   return (
-    <section id="types" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." />
+    <section id="types" style={{ padding: "64px 40px", background: P.navyDark }}>
+      <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." dark />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {MORTGAGE_TYPES.map((m, i) => (
           <button key={m.name} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{m.name}</button>
@@ -672,8 +674,8 @@ function BorrowerProfile({ navTarget }) {
   const [active, setActive] = useState(0);
   useEffect(() => { if (navTarget?.section === "profile" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   return (
-    <section id="profile" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." />
+    <section id="profile" style={{ padding: "64px 40px", background: P.navyDark }}>
+      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." dark />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {BORROWER_PROFILE.map((b, i) => (
           <button key={b.title} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{b.title}</button>
@@ -836,11 +838,12 @@ function InterestRates({ navTarget }) {
   ];
 
   return (
-    <section id="rates" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="rates" style={{ padding: "64px 40px", background: P.navyDark }}>
       <SectionHeader
         eyebrow="The Number Everyone Asks About"
         title="Interest Rates"
         subtitle="Your interest rate isn't one number — it's a spectrum of options. Understanding what drives it and how to read a rate sheet puts you in control."
+        dark
       />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {tabs.map((t, i) => (
@@ -1056,7 +1059,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 
 function CalculatorCTA() {
   return (
-    <section id="calculator" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="calculator" style={{ padding: "64px 40px", background: P.navyDark }}>
       <div style={{ maxWidth: 720 }}>
         <div style={{
           background: `linear-gradient(135deg, ${P.navy} 0%, ${P.navyLight} 100%)`,
@@ -1518,7 +1521,7 @@ const globalCSS = `
   .nav-btn:hover { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
   .nav-btn-active { background: rgba(0,82,255,0.12) !important; color: #fff !important; }
 
-  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(91,97,110,0.12); box-shadow: none; }
+  .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(91,97,110,0.2); box-shadow: none; }
 
   .tab-btn { font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 56px; border: 1px solid rgba(91,97,110,0.2); background: #fff; color: #5b616e; cursor: pointer; transition: all 0.15s; }
   .tab-btn:hover { border-color: #0052ff; color: #0052ff; }
@@ -1528,13 +1531,13 @@ const globalCSS = `
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
   .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 12px; background: transparent; font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; color: #5b616e; cursor: pointer; text-align: left; transition: all 0.15s; }
   .process-step:hover { background: rgba(0,82,255,0.03); }
-  .process-step-active { background: #fff !important; color: #0a0b0d !important; box-shadow: 0 1px 4px rgba(16,24,40,0.04); border: 1px solid rgba(91,97,110,0.12); }
+  .process-step-active { background: #fff !important; color: #0a0b0d !important; box-shadow: 0 1px 4px rgba(16,24,40,0.04); border: 1px solid rgba(91,97,110,0.2); }
   .process-num { font-family: 'IBM Plex Sans', sans-serif; font-size: 20px; font-weight: 700; color: #8a919e; min-width: 28px; line-height: 1.3; }
   .process-num-active { color: #0052ff !important; }
-  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: none; border: 1px solid rgba(91,97,110,0.12); min-width: 300px; }
+  .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: none; border: 1px solid rgba(91,97,110,0.2); min-width: 300px; }
 
   .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0a0b0d; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #f3f4f6; }
+  .costs-cat-head:hover { background: #eef0f3; }
   .costs-cat-head-active { background: #0052ff !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
