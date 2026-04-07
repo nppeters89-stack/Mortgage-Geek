@@ -1478,21 +1478,21 @@ function PreQualPage() {
       frontMax: null, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
       minDown: 3, eligible: downPct >= 3,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
-      notes: "PMI est. based on 740+ FICO, <43% DTI. Back-end 49.99%. No hard front-end ratio.",
+      notes: "PMI est. based on 740+ FICO, <43% DTI. Back-end 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI.",
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
       frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
       minDown: 3.5, eligible: downPct >= 3.5,
       miLabel: `MIP (${fhaMiRate}%)`,
-      notes: "Front-end 46.99%, back-end 56.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
+      notes: "Front-end 46.99%, back-end 56.99%. DTI thresholds assume 680+ FICO. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
     {
       name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
       frontMax: null, backMax: 0.50, miRate: 0, upfrontFee: vaFeeRate,
       minDown: 0, eligible: true,
       miLabel: "No monthly MI",
-      notes: `Back-end 50%. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 50% with strong residual income.`,
+      notes: `Back-end 50%. DTI thresholds assume 680+ FICO. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 50% with strong residual income.`,
     },
   ];
 
