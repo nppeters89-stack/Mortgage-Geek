@@ -177,7 +177,7 @@ const MORTGAGE_STRUCTURE = [
   ]},
 ];
 
-const NAV_ITEMS = [
+const NAV_TOPICS = [
   { id: "getting-started", label: "Getting Started", icon: "🏁", subs: [
     { label: "Pre-Qualification", id: "getting-started", step: 0 },
     { label: "Pre-Approval", id: "getting-started", step: 1 },
@@ -221,7 +221,12 @@ const NAV_ITEMS = [
   ]},
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "next-steps", label: "Get Started", icon: "🚀" },
-  { id: "calculator", label: "Calculator", icon: "🧮", href: "/calculator" },
+];
+
+const NAV_TOOLS = [
+  { id: "calculator", label: "Payment Calculator", icon: "🧮", href: "/calculator" },
+  { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
+  { id: "glossary", label: "Jargon Decoder", icon: "📖" },
 ];
 
 // ─── Components ──────────────────────────────────────────────────────────────
@@ -260,14 +265,10 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           </div>
           <nav style={{ padding: "20px 12px", flex: 1 }}>
             <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>TOPICS</span>
-            {NAV_ITEMS.map((item) => (
+            {NAV_TOPICS.map((item) => (
               <div key={item.id}>
                 <button
                   onClick={() => {
-                    if (item.href) {
-                      window.location.href = item.href;
-                      return;
-                    }
                     onNavigate(item.id);
                     if (item.subs) {
                       setExpandedNav(expandedNav === item.id ? null : item.id);
@@ -313,6 +314,23 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                   </div>
                 )}
               </div>
+            ))}
+
+            <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 12px" }} />
+            <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>TOOLS</span>
+            {NAV_TOOLS.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  if (item.href) { window.location.href = item.href; return; }
+                  onNavigate(item.id);
+                  setMobileOpen(false);
+                }}
+                className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+              >
+                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
             ))}
           </nav>
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
@@ -1356,6 +1374,454 @@ function NextSteps() {
   );
 }
 
+function PreQualCTA() {
+  return (
+    <section id="prequal" style={{ padding: "64px 40px" }}>
+      <div style={{ maxWidth: 720 }}>
+        <div style={{
+          background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navyLight} 100%)`,
+          borderRadius: 16, padding: "48px 40px", position: "relative", overflow: "hidden",
+        }}>
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 80% 20%, rgba(184,134,11,0.12) 0%, transparent 60%)" }} />
+          <div style={{ position: "relative" }}>
+            <span style={{ fontSize: 36, display: "block", marginBottom: 12 }}>🎯</span>
+            <h3 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3vw, 32px)", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>
+              Pre-Qual Simulator
+            </h3>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", maxWidth: 460, marginBottom: 28 }}>
+              Enter your income and debts — see what you can afford under Conventional, FHA, and VA, each with their own DTI limits and mortgage insurance rules.
+            </p>
+            <a href="/prequal" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "14px 28px", borderRadius: 10,
+              background: P.gold, color: "#fff",
+              fontFamily: F.body, fontSize: 15, fontWeight: 600,
+              textDecoration: "none", letterSpacing: 0.3,
+              boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+            }}>
+              Open Simulator →
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PreQualPage() {
+  const [grossIncome, setGrossIncome] = useState(6500);
+  const [monthlyDebts, setMonthlyDebts] = useState(450);
+  const [downPct, setDownPct] = useState(5);
+  const [convRate, setConvRate] = useState(6.75);
+  const [fhaRate, setFhaRate] = useState(6.25);
+  const [vaRate, setVaRate] = useState(6.25);
+  const [vaUsage, setVaUsage] = useState("first");
+  const [ratesLoaded, setRatesLoaded] = useState(false);
+  const [rateSource, setRateSource] = useState(null);
+  const taxRate = 0.95;
+  const insRate = 0.35;
+
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125;
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/rates");
+        const data = await res.json();
+        if (data.success && data.rates) {
+          const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
+          const conv = find("30-year fixed"); const fha = find("fha"); const va = find("va");
+          if (conv) setConvRate(roundRate(parseFloat(conv.rate)));
+          if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (va) setVaRate(roundRate(parseFloat(va.rate)));
+          setRateSource(data.date || "today"); setRatesLoaded(true);
+        }
+      } catch (e) { /* silent */ }
+    })();
+  }, []);
+
+  // VA funding fee
+  const vaFeeRate = useMemo(() => {
+    if (vaUsage === "exempt") return 0;
+    if (downPct >= 10) return 1.25;
+    if (downPct >= 5) return 1.50;
+    return vaUsage === "first" ? 2.15 : 3.30;
+  }, [vaUsage, downPct]);
+
+  // Solve max price from max housing payment
+  const solvePrice = (maxPayment, rate, miRateAnnual, upfrontFeePct) => {
+    if (maxPayment <= 0) return 0;
+    const mr = (rate / 100) / 12;
+    const n = 360;
+    let price = maxPayment * 170;
+    for (let i = 0; i < 25; i++) {
+      const baseLoan = price * (1 - downPct / 100);
+      const totalLoan = baseLoan * (1 + upfrontFeePct / 100);
+      const pi = totalLoan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1);
+      const mi = (baseLoan * (miRateAnnual / 100)) / 12;
+      const tax = (price * (taxRate / 100)) / 12;
+      const ins = (price * (insRate / 100)) / 12;
+      const total = pi + mi + tax + ins;
+      if (total < 1) break;
+      price = Math.round(price * (maxPayment / total));
+      if (Math.abs(total - maxPayment) < 5) break;
+    }
+    return Math.max(0, price);
+  };
+
+  // Program definitions
+  const convMiRate = downPct < 5 ? 0.52 : downPct < 10 ? 0.37 : downPct < 20 ? 0.27 : 0;
+  const fhaMiRate = downPct < 5 ? 0.55 : 0.50;
+
+  const programs = [
+    {
+      name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
+      frontMax: null, backMax: 0.50, miRate: convMiRate, upfrontFee: 0,
+      minDown: 3, eligible: downPct >= 3,
+      miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
+      notes: "PMI est. based on 740+ FICO, <43% DTI. No hard front-end ratio — AUS evaluates holistically.",
+    },
+    {
+      name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
+      frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
+      minDown: 3.5, eligible: downPct >= 3.5,
+      miLabel: `MIP (${fhaMiRate}%)`,
+      notes: "Front-end 46.99%, back-end 56.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
+    },
+    {
+      name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
+      frontMax: null, backMax: 0.41, miRate: 0, upfrontFee: vaFeeRate,
+      minDown: 0, eligible: true,
+      miLabel: "No monthly MI",
+      notes: `Back-end 41% guideline (can exceed with residual income). Funding fee ${vaFeeRate}% financed. No monthly MI.`,
+    },
+  ];
+
+  // Calculate for each program
+  const results = programs.map(prog => {
+    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0 };
+
+    const frontLimit = prog.frontMax ? Math.floor(grossIncome * prog.frontMax) : Infinity;
+    const backLimit = Math.floor(grossIncome * prog.backMax - monthlyDebts);
+    const maxPayment = Math.min(frontLimit, backLimit);
+
+    const comfBackLimit = Math.floor(grossIncome * (prog.backMax * 0.75) - monthlyDebts);
+    const comfFrontLimit = prog.frontMax ? Math.floor(grossIncome * prog.frontMax * 0.75) : Infinity;
+    const comfPayment = Math.min(comfFrontLimit, comfBackLimit);
+
+    const maxPrice = solvePrice(maxPayment, prog.rate, prog.miRate, prog.upfrontFee);
+    const comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
+
+    const maxLoan = maxPrice * (1 - downPct / 100);
+    const maxTotalLoan = maxLoan * (1 + prog.upfrontFee / 100);
+    const comfLoan = comfPrice * (1 - downPct / 100);
+
+    const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
+    const bindingConstraint = frontLimit < backLimit ? "front-end" : "back-end";
+
+    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint };
+  });
+
+  return (
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+      <style>{globalCSS}{`
+        .pq-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .pq-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        @media (max-width: 700px) {
+          .pq-input-cols { grid-template-columns: 1fr; }
+          .pq-cards-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: `2px solid ${P.gold}` }} />
+            <div>
+              <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff", display: "block", lineHeight: 1.2 }}>The Mortgage Geek</span>
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>NMLS# 1119524</span>
+            </div>
+          </a>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <a href="tel:+16156560737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call
+            </a>
+            <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20pre-qual%20simulator%20and%20had%20a%20question." style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Text
+            </a>
+            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Pre-Qual Simulator</h1>
+          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Enter your income and debts. See what you qualify for under each loan program — with their real DTI limits and mortgage insurance rules.</p>
+        </div>
+
+        {/* Inputs */}
+        <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
+          <div className="pq-input-cols">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma />
+              <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma />
+              <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
+                <select value={vaUsage} onChange={(e) => setVaUsage(e.target.value)}
+                  style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
+                  <option value="first">First-Time Use</option>
+                  <option value="subsequent">Subsequent Use</option>
+                  <option value="exempt">Exempt (Disability)</option>
+                </select>
+              </div>
+              <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Current Debt-Only DTI</span>
+                <span style={{ fontFamily: F.display, fontSize: 22, color: grossIncome > 0 && (monthlyDebts / grossIncome) > 0.30 ? P.gold : P.sage }}>{grossIncome > 0 ? ((monthlyDebts / grossIncome) * 100).toFixed(1) : 0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Rate inputs */}
+        <div className="content-card" style={{ padding: "16px 28px", marginBottom: 32, maxWidth: 800, margin: "0 auto 32px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Interest Rates by Program</span>
+            {ratesLoaded && (
+              <span style={{ fontSize: 11, color: P.sage, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.sage, display: "inline-block" }} />
+                Live · {rateSource}
+              </span>
+            )}
+          </div>
+          <p style={{ fontSize: 11, color: P.warmGrayLight, marginBottom: 12 }}>National averages via MND. Adjust to match your quote.</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
+              { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
+            ].map((p) => (
+              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+            ))}
+          </div>
+        </div>
+
+        {/* Program result cards */}
+        <div className="pq-cards-grid">
+          {results.map((prog, i) => {
+            if (!prog.eligible) {
+              return (
+                <div key={i} className="content-card" style={{ overflow: "hidden", opacity: 0.6 }}>
+                  <div style={{ background: P.warmGrayLight, padding: "20px", textAlign: "center" }}>
+                    <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
+                    <span style={{ fontFamily: F.display, fontSize: 24, color: "#fff" }}>Ineligible</span>
+                  </div>
+                  <div style={{ padding: "24px 20px", textAlign: "center" }}>
+                    <span style={{ fontSize: 24, display: "block", marginBottom: 8 }}>⚠️</span>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: P.text, marginBottom: 4 }}>Min {prog.minDown}% Down Required</p>
+                    <p style={{ fontSize: 11, color: P.warmGray }}>Increase down payment to {prog.minDown}% to see {prog.name} results.</p>
+                  </div>
+                </div>
+              );
+            }
+
+            const bestPrice = Math.max(...results.filter(r => r.eligible && r.maxPrice > 0).map(r => r.maxPrice));
+            const isBest = prog.maxPrice === bestPrice && prog.maxPrice > 0;
+
+            return (
+              <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
+                {/* Header */}
+                <div style={{ background: prog.color, padding: "20px", textAlign: "center", position: "relative" }}>
+                  {isBest && (
+                    <span style={{ position: "absolute", top: 8, right: 8, background: "#fff", color: prog.color, fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "3px 8px", borderRadius: 50, boxShadow: "0 2px 6px rgba(0,0,0,0.15)" }}>★ Most Power</span>
+                  )}
+                  <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{prog.name} · Max Purchase</span>
+                  <span style={{ fontFamily: F.display, fontSize: 34, color: "#fff" }}>{fmt(prog.maxPrice)}</span>
+                  <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{prog.rate}% · {prog.bindingConstraint} DTI binding</span>
+                </div>
+
+                <div style={{ padding: "16px 20px" }}>
+                  {/* DTI gauge */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
+                      <span>Back-End DTI</span>
+                      <span style={{ fontWeight: 700, color: prog.currentBackDTI > (prog.backMax * 100) ? "#C0392B" : P.text }}>{prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(0)}%</span>
+                    </div>
+                    <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min((prog.currentBackDTI / (prog.backMax * 100)) * 100, 100)}%`, background: prog.color, borderRadius: 3 }} />
+                    </div>
+                    {prog.frontMax && (
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>
+                        <span>Front-End DTI</span>
+                        <span>{(prog.frontMax * 100).toFixed(2)}% limit</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Max breakdown */}
+                  <div style={{ marginBottom: 12 }}>
+                    {[
+                      { label: "Max Housing Payment", val: fmt(prog.maxPayment), bold: true },
+                      { label: "Loan Amount", val: fmt(prog.maxLoan) },
+                      ...(prog.upfrontFee > 0 ? [{ label: `Financed Fee (${prog.upfrontFee}%)`, val: fmt(prog.maxLoan * (prog.upfrontFee / 100)) }] : []),
+                      { label: "Down Payment", val: fmt(prog.maxPrice * (downPct / 100)) },
+                      { label: prog.miLabel, val: prog.miRate > 0 ? fmt((prog.maxLoan * prog.miRate / 100) / 12) + "/mo" : "—" },
+                    ].map((r, ri) => (
+                      <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
+                        <span>{r.label}</span>
+                        <span style={{ fontWeight: r.bold ? 700 : 600, color: r.bold ? prog.color : P.text }}>{r.val}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Comfortable range */}
+                  <div style={{ background: P.creamDark, borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>Comfortable Range</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                      <span style={{ color: P.warmGray }}>Purchase Price</span>
+                      <span style={{ fontWeight: 700, color: P.sage }}>{fmt(prog.comfPrice)}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                      <span style={{ color: P.warmGray }}>Housing Payment</span>
+                      <span style={{ fontWeight: 600, color: P.text }}>{fmt(prog.comfPayment)}/mo</span>
+                    </div>
+                  </div>
+
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, lineHeight: 1.5, fontStyle: "italic" }}>{prog.notes}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Geek tip */}
+        <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24, maxWidth: 800, margin: "0 auto 24px" }}>
+          <div style={{ display: "flex", gap: 12 }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+            <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
+              <p style={{ marginBottom: 8 }}>
+                <strong>Why the numbers differ:</strong> FHA allows the highest DTI (56.99% back-end), giving you the most buying power on paper — but it comes with lifetime MIP. Conventional caps at 50% but PMI is removable. VA uses 41% as a guideline but can flex with strong residual income and has no monthly MI at all.
+              </p>
+              <p>
+                <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cross-link to calculator */}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            🧮 Run a payment scenario in the Calculator →
+          </a>
+        </div>
+
+        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+          This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function JargonDecoder() {
+  const [search, setSearch] = useState("");
+  const [openTerm, setOpenTerm] = useState(null);
+
+  const terms = [
+    { term: "APR", def: "Annual Percentage Rate — your interest rate plus lender fees, expressed as a yearly rate. APR is always higher than your note rate because it includes costs like origination fees and discount points. Use APR to compare the true cost of loans from different lenders." },
+    { term: "Amortization", def: "The process of paying off your loan over time through scheduled payments. Early payments are mostly interest; later payments are mostly principal. A 30-year amortization schedule shows exactly how this shifts month by month." },
+    { term: "Appraisal", def: "An independent assessment of a property's market value, ordered by the lender through an Appraisal Management Company (AMC). The lender needs to confirm the home is worth what you're borrowing. Typically $400–$700." },
+    { term: "ARM", def: "Adjustable Rate Mortgage — a loan with an interest rate that changes after an initial fixed period. A 7/6 ARM is fixed for 7 years, then adjusts every 6 months based on a market index (usually SOFR). Lower initial rate, but risk of increases later." },
+    { term: "Clear to Close", def: "The best phrase in the mortgage process. It means the underwriter has approved your loan with all conditions satisfied, and you're authorized to proceed to the closing table." },
+    { term: "Closing Disclosure (CD)", def: "A 5-page document you receive at least 3 business days before closing. It details every cost, your loan terms, and your monthly payment. Compare it line-by-line against your Loan Estimate — discrepancies may require a fee cure." },
+    { term: "Conforming Loan", def: "A mortgage that meets Fannie Mae or Freddie Mac guidelines, including being under the conforming loan limit ($766,550 in most areas for 2024). Loans above this limit are called jumbo loans." },
+    { term: "Conventional Loan", def: "A mortgage not insured by a government agency (FHA, VA, USDA). Follows Fannie Mae or Freddie Mac guidelines. Requires PMI if less than 20% down, but PMI is removable once you reach 80% LTV." },
+    { term: "DTI", def: "Debt-to-Income Ratio — your total monthly debt payments divided by your gross monthly income. Lenders typically want this below 43–45% for conventional loans, though FHA can go higher. Lower DTI = stronger borrower profile." },
+    { term: "Earnest Money", def: "A deposit (typically 1–3% of purchase price) submitted with your offer to show the seller you're serious. It's held in escrow and applied toward your down payment or closing costs at closing." },
+    { term: "Escrow", def: "Has two meanings: (1) An account where your lender holds money for property taxes and homeowners insurance, paying them on your behalf. (2) The period between contract signing and closing when a neutral third party holds funds and documents." },
+    { term: "FHA Loan", def: "A mortgage insured by the Federal Housing Administration. Lower barriers to entry (3.5% minimum down, 580+ credit score), but requires both upfront MIP (1.75%) and monthly MIP, which stays for the life of the loan if you put less than 10% down." },
+    { term: "LTV", def: "Loan-to-Value Ratio — your loan amount divided by the property value. A $270,000 loan on a $300,000 home = 90% LTV. LTV affects your rate, PMI requirements, and loan eligibility. Lower LTV = less risk for the lender." },
+    { term: "Loan Estimate (LE)", def: "A standardized 3-page document the lender must provide within 3 business days of receiving your application. It outlines your estimated rate, monthly payment, closing costs, and loan terms. Use it to compare offers from multiple lenders." },
+    { term: "Loan Originator (LO)", def: "The licensed professional who guides you through the mortgage process — from application to closing. Your LO structures your loan, advises on programs, and coordinates with processing, underwriting, and title." },
+    { term: "MIP", def: "Mortgage Insurance Premium — the FHA equivalent of PMI. Comes in two parts: an upfront premium (1.75% of the loan, usually financed) and a monthly premium (0.50–0.55% annually). Unlike conventional PMI, FHA MIP typically stays for the life of the loan." },
+    { term: "MBS", def: "Mortgage-Backed Securities — bonds created by bundling thousands of mortgages together and selling them to investors. MBS prices directly influence mortgage rates: when MBS prices rise, rates tend to fall, and vice versa." },
+    { term: "PITI", def: "Principal, Interest, Taxes, and Insurance — the four components of your total monthly housing payment. When someone asks 'what's your mortgage payment,' this is the complete answer, not just principal and interest." },
+    { term: "PMI", def: "Private Mortgage Insurance — required on conventional loans with less than 20% down. Protects the lender (not you) if you default. The key advantage over FHA MIP: PMI is removable once you reach 80% LTV through payments or appreciation." },
+    { term: "Pre-Approval", def: "A conditional commitment from a lender stating how much you're approved to borrow, based on verified income, assets, and credit. Stronger than pre-qualification and often required by sellers before accepting an offer." },
+    { term: "Pre-Qualification", def: "An initial estimate of what you can afford, based on self-reported financial information. Faster and less rigorous than pre-approval. Good starting point, but not a guarantee of approval." },
+    { term: "Rate Lock", def: "An agreement with your lender to hold a specific interest rate for a set period (typically 30–60 days). Protects you from rate increases while your loan is being processed. Once locked, your rate won't change even if market rates rise." },
+    { term: "SOFR", def: "Secured Overnight Financing Rate — the benchmark index used for most adjustable-rate mortgages (ARMs). Replaced LIBOR in 2023. When your ARM adjusts, the new rate = SOFR + a fixed margin set at origination." },
+    { term: "Title Insurance", def: "A one-time premium that protects against title defects — things like undisclosed heirs, forged documents, or recording errors. Lender's title insurance is required; owner's title insurance is optional but strongly recommended." },
+    { term: "TRID", def: "TILA-RESPA Integrated Disclosure — the \"Know Before You Owe\" rule that standardized mortgage disclosures. It governs your Loan Estimate and Closing Disclosure and sets fee tolerance limits protecting you from surprise cost increases." },
+    { term: "Underwriting", def: "The process where your complete loan file is analyzed against lending guidelines. The underwriter reviews your credit, income, assets, and the property to make the approval decision. This is the gatekeeper step." },
+    { term: "UFMIP", def: "Upfront Mortgage Insurance Premium — the one-time FHA insurance charge of 1.75% of the loan amount, due at closing. Almost always financed into the loan so you don't pay it out of pocket, but you do pay interest on it." },
+    { term: "VA Funding Fee", def: "A one-time fee on VA loans (1.25–3.3% of loan amount) that replaces monthly mortgage insurance. The fee varies based on down payment, usage type (first-time vs. subsequent), and loan purpose. Veterans with service-connected disabilities are exempt." },
+    { term: "VA Loan", def: "A mortgage guaranteed by the Department of Veterans Affairs for eligible veterans, active-duty service members, and surviving spouses. No down payment required, no monthly mortgage insurance, and competitive rates." },
+  ];
+
+  const filtered = search.trim() === "" ? terms : terms.filter(t =>
+    t.term.toLowerCase().includes(search.toLowerCase()) || t.def.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <section id="glossary" style={{ padding: "64px 40px", background: P.creamDark }}>
+      <SectionHeader eyebrow="Speak the Language" title="Jargon Decoder" subtitle="Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." />
+      <div style={{ maxWidth: 720 }}>
+        {/* Search */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 10, background: P.white, padding: "10px 16px", boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>
+            <span style={{ fontSize: 16, marginRight: 10, opacity: 0.4 }}>🔍</span>
+            <input
+              type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search terms..."
+              style={{ flex: 1, border: "none", background: "transparent", fontSize: 14, fontFamily: F.body, color: P.text, outline: "none" }}
+            />
+            {search && <button onClick={() => setSearch("")} style={{ background: "none", border: "none", fontSize: 16, color: P.warmGrayLight, cursor: "pointer" }}>✕</button>}
+          </div>
+          <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 6 }}>{filtered.length} term{filtered.length !== 1 ? "s" : ""}{search ? ` matching "${search}"` : ""}</p>
+        </div>
+
+        {/* Terms */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {filtered.map((t, i) => (
+            <div key={i} className="content-card" style={{ overflow: "hidden" }}>
+              <button onClick={() => setOpenTerm(openTerm === i ? null : i)} style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "14px 20px", border: "none", background: openTerm === i ? P.navy : P.white,
+                fontFamily: F.body, cursor: "pointer", transition: "all 0.15s",
+              }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: openTerm === i ? "#fff" : P.navy, letterSpacing: 0.2 }}>{t.term}</span>
+                <span style={{ fontSize: 16, fontWeight: 300, color: openTerm === i ? "rgba(255,255,255,0.5)" : P.warmGrayLight }}>{openTerm === i ? "−" : "+"}</span>
+              </button>
+              {openTerm === i && (
+                <div style={{ padding: "14px 20px", borderTop: `1px solid ${P.cream}` }}>
+                  <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{t.def}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: "40px 0" }}>
+            <span style={{ fontSize: 32, display: "block", marginBottom: 12 }}>🤓</span>
+            <p style={{ fontSize: 14, color: P.warmGray }}>No terms found for "{search}"</p>
+            <p style={{ fontSize: 12, color: P.warmGrayLight, marginTop: 4 }}>Try a different search or <button onClick={() => setSearch("")} style={{ background: "none", border: "none", color: P.gold, fontWeight: 600, cursor: "pointer", fontFamily: F.body, fontSize: 12 }}>view all terms</button></p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function CalculatorCTA() {
   return (
     <section id="calculator" style={{ padding: "64px 40px", background: P.creamDark }}>
@@ -1969,10 +2435,13 @@ function CalculatorPage() {
 export default function MortgageLandingPage() {
   const [currentPage, setCurrentPage] = useState(() => {
     const path = window.location.pathname?.replace(/^\//, "");
-    return path === "calculator" ? "calculator" : "main";
+    if (path === "calculator") return "calculator";
+    if (path === "prequal") return "prequal";
+    return "main";
   });
 
   if (currentPage === "calculator") return <CalculatorPage />;
+  if (currentPage === "prequal") return <PreQualPage />;
   return <MainSite />;
 }
 
@@ -2049,6 +2518,8 @@ function MainSite() {
         <PreApprovalChecklist />
         <NextSteps />
         <CalculatorCTA />
+        <PreQualCTA />
+        <JargonDecoder />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
             {/* Equal Housing Logo */}
