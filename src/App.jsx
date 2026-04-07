@@ -1475,24 +1475,24 @@ function PreQualPage() {
   const programs = [
     {
       name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
-      frontMax: null, backMax: 0.50, miRate: convMiRate, upfrontFee: 0,
+      frontMax: null, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
       minDown: 3, eligible: downPct >= 3,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
-      notes: "PMI est. based on 740+ FICO, <43% DTI. No hard front-end ratio — AUS evaluates holistically.",
+      notes: "PMI est. based on 740+ FICO, <43% DTI. Back-end 49.99%. No hard front-end ratio.",
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
-      frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
+      frontMax: 0.4699, backMax: 0.4699, miRate: fhaMiRate, upfrontFee: 1.75,
       minDown: 3.5, eligible: downPct >= 3.5,
       miLabel: `MIP (${fhaMiRate}%)`,
-      notes: "Front-end 46.99%, back-end 56.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
+      notes: "Front-end 46.99%, back-end 46.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
     {
       name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
-      frontMax: null, backMax: 0.41, miRate: 0, upfrontFee: vaFeeRate,
+      frontMax: null, backMax: 0.50, miRate: 0, upfrontFee: vaFeeRate,
       minDown: 0, eligible: true,
       miLabel: "No monthly MI",
-      notes: `Back-end 41% guideline (can exceed with residual income). Funding fee ${vaFeeRate}% financed. No monthly MI.`,
+      notes: `Back-end 50%. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 50% with strong residual income.`,
     },
   ];
 
@@ -1707,7 +1707,7 @@ function PreQualPage() {
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
               <p style={{ marginBottom: 8 }}>
-                <strong>Why the numbers differ:</strong> FHA allows the highest DTI (56.99% back-end), giving you the most buying power on paper — but it comes with lifetime MIP. Conventional caps at 50% but PMI is removable. VA uses 41% as a guideline but can flex with strong residual income and has no monthly MI at all.
+                <strong>Why the numbers differ:</strong> FHA uses a 46.99% DTI cap for both front-end and back-end, with lifetime MIP but lower rates. Conventional allows up to 49.99% back-end with no hard front-end cap, and PMI is removable at 80% LTV. VA goes up to 50% back-end with no monthly MI at all — often the strongest option for eligible borrowers.
               </p>
               <p>
                 <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
