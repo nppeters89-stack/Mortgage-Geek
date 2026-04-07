@@ -1418,10 +1418,162 @@ function PreQualPage() {
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
   const [vaUsage, setVaUsage] = useState("first");
+  const [taxState, setTaxState] = useState("TN");
+  const [taxMetro, setTaxMetro] = useState("Nashville/Davidson");
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
-  const taxRate = 0.95;
   const insRate = 0.35;
+
+  // Default 2026 loan limits (1-unit)
+  const DEFAULT_LIMITS = { fha: 541287, conv: 832750, va: 832750 };
+  const NASH_MSA_LIMITS = { fha: 1029250, conv: 1029250, va: 1029250 };
+  const ATL_MSA_LIMITS = { fha: 718750, conv: 832750, va: 832750 };
+
+  const PQ_TAX_RATES = {
+    AL: { name: "Alabama", rate: 0.41, metros: [
+      { name: "Birmingham", rate: 0.52 }, { name: "Huntsville", rate: 0.46 }, { name: "Mobile", rate: 0.48 },
+    ]},
+    AK: { name: "Alaska", rate: 1.19 },
+    AZ: { name: "Arizona", rate: 0.62, metros: [
+      { name: "Phoenix/Maricopa", rate: 0.64 }, { name: "Tucson/Pima", rate: 0.93 },
+    ]},
+    AR: { name: "Arkansas", rate: 0.62 },
+    CA: { name: "California", rate: 0.71, metros: [
+      { name: "Los Angeles", rate: 0.76, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "San Francisco", rate: 0.68, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "San Diego", rate: 0.73, limits: { fha: 1006250, conv: 1006250, va: 1006250 } },
+      { name: "Orange County", rate: 0.69, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Sacramento", rate: 0.87 }, { name: "Riverside", rate: 0.95 },
+    ]},
+    CO: { name: "Colorado", rate: 0.51, metros: [
+      { name: "Denver", rate: 0.54, limits: { fha: 862500, conv: 862500, va: 862500 } },
+      { name: "Colorado Springs", rate: 0.54 }, { name: "Aurora/Arapahoe", rate: 0.55, limits: { fha: 862500, conv: 862500, va: 862500 } },
+    ]},
+    CT: { name: "Connecticut", rate: 2.15 },
+    DE: { name: "Delaware", rate: 0.57 },
+    FL: { name: "Florida", rate: 0.86, metros: [
+      { name: "Miami-Dade", rate: 0.97 }, { name: "Jacksonville/Duval", rate: 0.89 }, { name: "Tampa/Hillsborough", rate: 0.95 },
+      { name: "Orlando/Orange", rate: 0.89 }, { name: "Palm Beach", rate: 1.05 }, { name: "Broward/Ft Lauderdale", rate: 1.02 },
+    ]},
+    GA: { name: "Georgia", rate: 0.92, metros: [
+      { name: "Atlanta/Fulton", rate: 1.11, limits: ATL_MSA_LIMITS }, { name: "Cobb County", rate: 0.95, limits: ATL_MSA_LIMITS },
+      { name: "DeKalb County", rate: 1.20, limits: ATL_MSA_LIMITS }, { name: "Gwinnett County", rate: 1.02, limits: ATL_MSA_LIMITS },
+    ]},
+    HI: { name: "Hawaii", rate: 0.28 }, ID: { name: "Idaho", rate: 0.63 },
+    IL: { name: "Illinois", rate: 2.07, metros: [
+      { name: "Chicago/Cook", rate: 2.10 }, { name: "DuPage County", rate: 1.96 }, { name: "Lake County", rate: 2.68 }, { name: "Will County", rate: 2.42 },
+    ]},
+    IN: { name: "Indiana", rate: 0.85, metros: [
+      { name: "Indianapolis/Marion", rate: 1.02 }, { name: "Fort Wayne/Allen", rate: 0.88 },
+    ]},
+    IA: { name: "Iowa", rate: 1.57 },
+    KS: { name: "Kansas", rate: 1.41, metros: [
+      { name: "Kansas City/Johnson", rate: 1.37 }, { name: "Wichita/Sedgwick", rate: 1.48 },
+    ]},
+    KY: { name: "Kentucky", rate: 0.86, metros: [
+      { name: "Louisville/Jefferson", rate: 1.06 }, { name: "Lexington/Fayette", rate: 0.92 },
+    ]},
+    LA: { name: "Louisiana", rate: 0.55 }, ME: { name: "Maine", rate: 1.30 },
+    MD: { name: "Maryland", rate: 1.07, metros: [
+      { name: "Baltimore City", rate: 2.25 }, { name: "Montgomery County", rate: 0.93, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Prince George's", rate: 1.15, limits: { fha: 1149825, conv: 1149825, va: 1149825 } }, { name: "Anne Arundel", rate: 0.94 },
+    ]},
+    MA: { name: "Massachusetts", rate: 1.23, metros: [
+      { name: "Boston/Suffolk", rate: 0.89, limits: { fha: 914250, conv: 914250, va: 914250 } },
+      { name: "Middlesex County", rate: 1.20, limits: { fha: 914250, conv: 914250, va: 914250 } }, { name: "Worcester County", rate: 1.35 },
+    ]},
+    MI: { name: "Michigan", rate: 1.54, metros: [
+      { name: "Detroit/Wayne", rate: 2.58 }, { name: "Oakland County", rate: 1.49 }, { name: "Grand Rapids/Kent", rate: 1.31 },
+    ]},
+    MN: { name: "Minnesota", rate: 1.12, metros: [
+      { name: "Minneapolis/Hennepin", rate: 1.18 }, { name: "St Paul/Ramsey", rate: 1.24 },
+    ]},
+    MS: { name: "Mississippi", rate: 0.65 },
+    MO: { name: "Missouri", rate: 0.97, metros: [
+      { name: "St Louis City", rate: 1.38 }, { name: "Kansas City/Jackson", rate: 1.22 },
+    ]},
+    MT: { name: "Montana", rate: 0.74 }, NE: { name: "Nebraska", rate: 1.73 },
+    NV: { name: "Nevada", rate: 0.55, metros: [
+      { name: "Las Vegas/Clark", rate: 0.60 }, { name: "Reno/Washoe", rate: 0.61 },
+    ]},
+    NH: { name: "New Hampshire", rate: 2.18 },
+    NJ: { name: "New Jersey", rate: 2.23, metros: [
+      { name: "Bergen County", rate: 2.41 }, { name: "Essex County", rate: 2.36 },
+      { name: "Middlesex County", rate: 2.57 }, { name: "Morris County", rate: 2.15 },
+    ]},
+    NM: { name: "New Mexico", rate: 0.67 },
+    NY: { name: "New York", rate: 1.72, metros: [
+      { name: "New York City", rate: 0.88, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Long Island/Nassau", rate: 2.22, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Westchester", rate: 1.62, limits: { fha: 1149825, conv: 1149825, va: 1149825 } }, { name: "Buffalo/Erie", rate: 2.42 },
+    ]},
+    NC: { name: "North Carolina", rate: 0.84, metros: [
+      { name: "Charlotte/Mecklenburg", rate: 0.94 }, { name: "Raleigh/Wake", rate: 0.82 }, { name: "Durham", rate: 1.13 },
+    ]},
+    ND: { name: "North Dakota", rate: 0.98 },
+    OH: { name: "Ohio", rate: 1.56, metros: [
+      { name: "Columbus/Franklin", rate: 1.57 }, { name: "Cleveland/Cuyahoga", rate: 2.06 }, { name: "Cincinnati/Hamilton", rate: 1.89 },
+    ]},
+    OK: { name: "Oklahoma", rate: 0.87 },
+    OR: { name: "Oregon", rate: 0.97, metros: [
+      { name: "Portland/Multnomah", rate: 1.12 }, { name: "Washington County", rate: 0.95 },
+    ]},
+    PA: { name: "Pennsylvania", rate: 1.58, metros: [
+      { name: "Philadelphia", rate: 1.36 }, { name: "Pittsburgh/Allegheny", rate: 2.14 }, { name: "Montgomery County", rate: 1.56 },
+    ]},
+    RI: { name: "Rhode Island", rate: 1.63 },
+    SC: { name: "South Carolina", rate: 0.57, metros: [
+      { name: "Charleston", rate: 0.52 }, { name: "Greenville", rate: 0.64 }, { name: "Columbia/Richland", rate: 0.68 },
+    ]},
+    SD: { name: "South Dakota", rate: 1.31 },
+    TN: { name: "Tennessee", rate: 0.56, metros: [
+      { name: "Nashville/Davidson", rate: 0.95, limits: NASH_MSA_LIMITS },
+      { name: "Memphis/Shelby", rate: 1.55 },
+      { name: "Knoxville/Knox", rate: 0.82 },
+      { name: "Chattanooga/Hamilton", rate: 0.85 },
+      { name: "Williamson County", rate: 0.53, limits: NASH_MSA_LIMITS },
+      { name: "Rutherford County", rate: 0.80, limits: NASH_MSA_LIMITS },
+      { name: "Sumner County", rate: 0.70, limits: NASH_MSA_LIMITS },
+      { name: "Wilson County", rate: 0.65, limits: NASH_MSA_LIMITS },
+    ]},
+    TX: { name: "Texas", rate: 1.80, metros: [
+      { name: "Houston/Harris", rate: 2.09 }, { name: "Dallas/Dallas Co", rate: 1.93 },
+      { name: "Austin/Travis", rate: 1.68, limits: { fha: 571550, conv: 832750, va: 832750 } },
+      { name: "San Antonio/Bexar", rate: 1.89 }, { name: "Fort Worth/Tarrant", rate: 2.10 }, { name: "Collin County", rate: 1.82 },
+    ]},
+    UT: { name: "Utah", rate: 0.58, metros: [
+      { name: "Salt Lake County", rate: 0.67, limits: { fha: 732750, conv: 832750, va: 832750 } }, { name: "Utah County", rate: 0.52 },
+    ]},
+    VT: { name: "Vermont", rate: 1.90 },
+    VA: { name: "Virginia", rate: 0.82, metros: [
+      { name: "Fairfax County", rate: 1.03, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Virginia Beach", rate: 0.87 },
+      { name: "Arlington County", rate: 0.98, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+      { name: "Richmond City", rate: 1.12 },
+    ]},
+    WA: { name: "Washington", rate: 0.98, metros: [
+      { name: "Seattle/King", rate: 0.93, limits: { fha: 1029250, conv: 1029250, va: 1029250 } },
+      { name: "Tacoma/Pierce", rate: 1.14, limits: { fha: 1029250, conv: 1029250, va: 1029250 } }, { name: "Snohomish County", rate: 0.92, limits: { fha: 1029250, conv: 1029250, va: 1029250 } },
+    ]},
+    WV: { name: "West Virginia", rate: 0.58 },
+    WI: { name: "Wisconsin", rate: 1.85, metros: [
+      { name: "Milwaukee", rate: 2.53 }, { name: "Madison/Dane", rate: 1.90 },
+    ]},
+    WY: { name: "Wyoming", rate: 0.61 },
+    DC: { name: "Washington DC", rate: 0.56, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
+  };
+
+  const stateData = PQ_TAX_RATES[taxState];
+  const metroList = stateData?.metros || [];
+  const selectedMetro = metroList.find(m => m.name === taxMetro);
+  const taxRate = selectedMetro ? selectedMetro.rate : stateData?.rate || 0.56;
+  const loanLimits = selectedMetro?.limits || stateData?.limits || DEFAULT_LIMITS;
+
+  useEffect(() => {
+    const newMetros = PQ_TAX_RATES[taxState]?.metros;
+    if (newMetros && newMetros.length > 0) setTaxMetro(newMetros[0].name);
+    else setTaxMetro("");
+  }, [taxState]);
 
   const roundRate = (r) => Math.round(r / 0.125) * 0.125;
   useEffect(() => {
@@ -1478,21 +1630,21 @@ function PreQualPage() {
     {
       name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
       frontMax: 0.4999, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
-      minDown: 3, eligible: downPct >= 3,
+      minDown: 3, eligible: downPct >= 3, loanLimit: loanLimits.conv,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
       notes: "Front-end and back-end both 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI. PMI removable at 80% LTV.",
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
       frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
-      minDown: 3.5, eligible: downPct >= 3.5,
+      minDown: 3.5, eligible: downPct >= 3.5, loanLimit: loanLimits.fha,
       miLabel: `MIP (${fhaMiRate}%)`,
       notes: "Front-end 46.99%, back-end 56.99%. DTI thresholds assume 680+ FICO. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
     {
       name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
       frontMax: null, backMax: 0.50, miRate: 0, upfrontFee: vaFeeRate,
-      minDown: 0, eligible: true,
+      minDown: 0, eligible: true, loanLimit: loanLimits.va,
       miLabel: "No monthly MI",
       notes: `Back-end 50%. DTI thresholds assume 680+ FICO. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 50% with strong residual income.`,
     },
@@ -1500,7 +1652,7 @@ function PreQualPage() {
 
   // Calculate for each program
   const results = programs.map(prog => {
-    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0 };
+    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0, overLimit: false };
 
     // Front-end: max HOUSING payment (independent of debts)
     const frontMaxHousing = prog.frontMax ? Math.floor(grossIncome * prog.frontMax) : Infinity;
@@ -1519,16 +1671,24 @@ function PreQualPage() {
     const comfBack = Math.floor(grossIncome * prog.backMax * 0.75) - monthlyDebts;
     const comfPayment = Math.max(0, Math.min(comfFront, comfBack));
 
-    const maxPrice = solvePrice(maxPayment, prog.rate, prog.miRate, prog.upfrontFee);
+    let maxPrice = solvePrice(maxPayment, prog.rate, prog.miRate, prog.upfrontFee);
     const comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
 
-    const maxLoan = maxPrice * (1 - downPct / 100);
+    // Loan limit check — cap price if base loan would exceed the limit
+    let maxLoan = maxPrice * (1 - downPct / 100);
+    let overLimit = false;
+    if (maxLoan > prog.loanLimit && downPct < 100) {
+      maxPrice = Math.floor(prog.loanLimit / (1 - downPct / 100));
+      maxLoan = prog.loanLimit;
+      overLimit = true;
+    }
+
     const maxTotalLoan = maxLoan * (1 + prog.upfrontFee / 100);
     const comfLoan = comfPrice * (1 - downPct / 100);
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
-    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing };
+    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit };
   });
 
   return (
@@ -1632,6 +1792,31 @@ function PreQualPage() {
               </div>
             </div>
           </div>
+          {/* Property location row */}
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
+            <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location (tax rate & loan limits)</label>
+            <div style={{ display: "grid", gridTemplateColumns: metroList.length > 0 ? "1fr 1fr" : "1fr", gap: 8 }}>
+              <select value={taxState} onChange={(e) => setTaxState(e.target.value)}
+                style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
+                {Object.entries(PQ_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
+                  <option key={code} value={code}>{code} ({s.rate}%)</option>
+                ))}
+              </select>
+              {metroList.length > 0 && (
+                <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
+                  <option value="">State Avg ({stateData.rate}%)</option>
+                  {metroList.map((m) => (
+                    <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                  ))}
+                </select>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 10, color: P.warmGrayLight }}>
+              <span>Tax: {taxRate}%</span>
+              <span>Loan Limits — FHA: {fmt(loanLimits.fha)} · Conv: {fmt(loanLimits.conv)} · VA: {fmt(loanLimits.va)}</span>
+            </div>
+          </div>
         </div>
 
         {/* Rate inputs */}
@@ -1688,7 +1873,14 @@ function PreQualPage() {
                   )}
                   <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{prog.name} · Max Purchase</span>
                   <span style={{ fontFamily: F.display, fontSize: 34, color: "#fff" }}>{fmt(prog.maxPrice)}</span>
-                  <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{prog.rate}% · {prog.bindingConstraint} DTI binding</span>
+                  <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
+                    {prog.rate}% · {prog.overLimit ? "capped at loan limit" : `${prog.bindingConstraint} DTI binding`}
+                  </span>
+                  {prog.overLimit && (
+                    <span style={{ display: "inline-block", marginTop: 6, fontSize: 10, fontWeight: 600, background: "rgba(255,255,255,0.15)", color: "#fff", padding: "3px 10px", borderRadius: 10 }}>
+                      ⚠️ Loan limit: {fmt(prog.loanLimit)}
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ padding: "16px 20px" }}>
@@ -1718,15 +1910,16 @@ function PreQualPage() {
                     {[
                       { label: "Max Housing Payment", val: fmt(prog.maxPayment), bold: true },
                       ...(monthlyDebts > 0 ? [{ label: "Housing + Debts", val: fmt(prog.maxPayment + monthlyDebts), sub: `of ${fmt(prog.backTotalMax)} back-end max` }] : []),
-                      { label: "Loan Amount", val: fmt(prog.maxLoan) },
+                      { label: "Loan Amount", val: fmt(prog.maxLoan), warn: prog.overLimit },
+                      { label: "Loan Limit", val: fmt(prog.loanLimit), dim: !prog.overLimit },
                       ...(prog.upfrontFee > 0 ? [{ label: `Financed Fee (${prog.upfrontFee}%)`, val: fmt(prog.maxLoan * (prog.upfrontFee / 100)) }] : []),
                       { label: "Down Payment", val: fmt(prog.maxPrice * (downPct / 100)) },
                       { label: prog.miLabel, val: prog.miRate > 0 ? fmt((prog.maxLoan * prog.miRate / 100) / 12) + "/mo" : "—" },
                     ].map((r, ri) => (
-                      <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
+                      <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: r.dim ? P.creamDark : P.warmGray, borderBottom: `1px solid ${P.cream}`, opacity: r.dim ? 0.6 : 1 }}>
                         <span>{r.label}</span>
                         <div style={{ textAlign: "right" }}>
-                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.bold ? prog.color : P.text }}>{r.val}</span>
+                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.warn ? "#C0392B" : r.bold ? prog.color : r.dim ? P.warmGrayLight : P.text }}>{r.val}</span>
                           {r.sub && <span style={{ display: "block", fontSize: 9, color: P.warmGrayLight }}>{r.sub}</span>}
                         </div>
                       </div>
