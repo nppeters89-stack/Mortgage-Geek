@@ -1482,10 +1482,10 @@ function PreQualPage() {
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
-      frontMax: 0.4699, backMax: 0.4699, miRate: fhaMiRate, upfrontFee: 1.75,
+      frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
       minDown: 3.5, eligible: downPct >= 3.5,
       miLabel: `MIP (${fhaMiRate}%)`,
-      notes: "Front-end 46.99%, back-end 46.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
+      notes: "Front-end 46.99%, back-end 56.99%. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
     {
       name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
@@ -1498,15 +1498,24 @@ function PreQualPage() {
 
   // Calculate for each program
   const results = programs.map(prog => {
-    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0 };
+    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0 };
 
-    const frontLimit = prog.frontMax ? Math.floor(grossIncome * prog.frontMax) : Infinity;
-    const backLimit = Math.floor(grossIncome * prog.backMax - monthlyDebts);
-    const maxPayment = Math.min(frontLimit, backLimit);
+    // Front-end: max HOUSING payment (independent of debts)
+    const frontMaxHousing = prog.frontMax ? Math.floor(grossIncome * prog.frontMax) : Infinity;
 
-    const comfBackLimit = Math.floor(grossIncome * (prog.backMax * 0.75) - monthlyDebts);
-    const comfFrontLimit = prog.frontMax ? Math.floor(grossIncome * prog.frontMax * 0.75) : Infinity;
-    const comfPayment = Math.min(comfFrontLimit, comfBackLimit);
+    // Back-end: max TOTAL of (housing + all debts)
+    const backTotalMax = Math.floor(grossIncome * prog.backMax);
+    // Therefore max housing from back-end = total max - existing debts
+    const backMaxHousing = backTotalMax - monthlyDebts;
+
+    // Actual max housing = whichever is lower
+    const maxPayment = Math.max(0, Math.min(frontMaxHousing, backMaxHousing));
+    const bindingConstraint = frontMaxHousing <= backMaxHousing ? "front-end" : "back-end";
+
+    // Comfortable range (75% of limits)
+    const comfFront = prog.frontMax ? Math.floor(grossIncome * prog.frontMax * 0.75) : Infinity;
+    const comfBack = Math.floor(grossIncome * prog.backMax * 0.75) - monthlyDebts;
+    const comfPayment = Math.max(0, Math.min(comfFront, comfBack));
 
     const maxPrice = solvePrice(maxPayment, prog.rate, prog.miRate, prog.upfrontFee);
     const comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
@@ -1516,9 +1525,8 @@ function PreQualPage() {
     const comfLoan = comfPrice * (1 - downPct / 100);
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
-    const bindingConstraint = frontLimit < backLimit ? "front-end" : "back-end";
 
-    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint };
+    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing };
   });
 
   return (
@@ -1648,27 +1656,32 @@ function PreQualPage() {
                 </div>
 
                 <div style={{ padding: "16px 20px" }}>
-                  {/* DTI gauge */}
+                  {/* DTI breakdown */}
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
-                      <span>Back-End DTI</span>
-                      <span style={{ fontWeight: 700, color: prog.currentBackDTI > (prog.backMax * 100) ? "#C0392B" : P.text }}>{prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(0)}%</span>
-                    </div>
-                    <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${Math.min((prog.currentBackDTI / (prog.backMax * 100)) * 100, 100)}%`, background: prog.color, borderRadius: 3 }} />
-                    </div>
                     {prog.frontMax && (
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>
-                        <span>Front-End DTI</span>
-                        <span>{(prog.frontMax * 100).toFixed(2)}% limit</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 6 }}>
+                        <span>Front-End Max Housing</span>
+                        <span style={{ fontWeight: 700, color: prog.bindingConstraint === "front-end" ? prog.color : P.warmGrayLight }}>{fmt(prog.frontMaxHousing)} {prog.bindingConstraint === "front-end" ? "← binding" : ""}</span>
                       </div>
                     )}
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
+                      <span>Back-End Max (Housing + Debts)</span>
+                      <span style={{ fontWeight: 700, color: prog.bindingConstraint === "back-end" ? prog.color : P.warmGrayLight }}>{fmt(prog.backTotalMax)}</span>
+                    </div>
+                    <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
+                      <div style={{ height: "100%", width: `${Math.min((prog.currentBackDTI / (prog.backMax * 100)) * 100, 100)}%`, background: prog.color, borderRadius: 3 }} />
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight }}>
+                      <span>Back-End DTI</span>
+                      <span>{prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(1)}%</span>
+                    </div>
                   </div>
 
                   {/* Max breakdown */}
                   <div style={{ marginBottom: 12 }}>
                     {[
                       { label: "Max Housing Payment", val: fmt(prog.maxPayment), bold: true },
+                      ...(monthlyDebts > 0 ? [{ label: "Housing + Debts", val: fmt(prog.maxPayment + monthlyDebts), sub: `of ${fmt(prog.backTotalMax)} back-end max` }] : []),
                       { label: "Loan Amount", val: fmt(prog.maxLoan) },
                       ...(prog.upfrontFee > 0 ? [{ label: `Financed Fee (${prog.upfrontFee}%)`, val: fmt(prog.maxLoan * (prog.upfrontFee / 100)) }] : []),
                       { label: "Down Payment", val: fmt(prog.maxPrice * (downPct / 100)) },
@@ -1676,7 +1689,10 @@ function PreQualPage() {
                     ].map((r, ri) => (
                       <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
                         <span>{r.label}</span>
-                        <span style={{ fontWeight: r.bold ? 700 : 600, color: r.bold ? prog.color : P.text }}>{r.val}</span>
+                        <div style={{ textAlign: "right" }}>
+                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.bold ? prog.color : P.text }}>{r.val}</span>
+                          {r.sub && <span style={{ display: "block", fontSize: 9, color: P.warmGrayLight }}>{r.sub}</span>}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1707,7 +1723,7 @@ function PreQualPage() {
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
               <p style={{ marginBottom: 8 }}>
-                <strong>Why the numbers differ:</strong> FHA uses a 46.99% DTI cap for both front-end and back-end, with lifetime MIP but lower rates. Conventional allows up to 49.99% back-end with no hard front-end cap, and PMI is removable at 80% LTV. VA goes up to 50% back-end with no monthly MI at all — often the strongest option for eligible borrowers.
+                <strong>Why the numbers differ:</strong> Each program has different rules. FHA caps your housing payment at 46.99% of income (front-end) and total debts at 56.99% (back-end). Conventional has no hard front-end cap but limits total debts to 49.99%. VA also has no front-end cap and allows up to 50% total debts with no monthly MI — often the strongest option for eligible borrowers.
               </p>
               <p>
                 <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
