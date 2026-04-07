@@ -1794,7 +1794,7 @@ function PreQualPage() {
           </div>
           {/* Property location row */}
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
-            <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location (tax rate & loan limits)</label>
+            <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location</label>
             <div style={{ display: "grid", gridTemplateColumns: metroList.length > 0 ? "1fr 1fr" : "1fr", gap: 8 }}>
               <select value={taxState} onChange={(e) => setTaxState(e.target.value)}
                 style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
@@ -1812,10 +1812,7 @@ function PreQualPage() {
                 </select>
               )}
             </div>
-            <div style={{ display: "flex", gap: 16, marginTop: 8, fontSize: 10, color: P.warmGrayLight }}>
-              <span>Tax: {taxRate}%</span>
-              <span>Loan Limits — FHA: {fmt(loanLimits.fha)} · Conv: {fmt(loanLimits.conv)} · VA: {fmt(loanLimits.va)}</span>
-            </div>
+            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}</p>
           </div>
         </div>
 
