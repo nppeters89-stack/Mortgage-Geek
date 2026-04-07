@@ -1799,7 +1799,7 @@ function PreQualPage() {
               <select value={taxState} onChange={(e) => setTaxState(e.target.value)}
                 style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
                 {Object.entries(PQ_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
-                  <option key={code} value={code}>{code} ({s.rate}%)</option>
+                  <option key={code} value={code}>{s.name}</option>
                 ))}
               </select>
               {metroList.length > 0 && (
@@ -2461,7 +2461,7 @@ function CalculatorPage() {
                   style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                 >
                   {Object.entries(STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
-                    <option key={code} value={code}>{code} ({s.rate}%)</option>
+                    <option key={code} value={code}>{s.name}</option>
                   ))}
                 </select>
                 {metroList.length > 0 && (
