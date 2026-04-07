@@ -1477,10 +1477,10 @@ function PreQualPage() {
   const programs = [
     {
       name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
-      frontMax: null, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
+      frontMax: 0.4999, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
       minDown: 3, eligible: downPct >= 3,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
-      notes: "PMI est. based on 740+ FICO, <43% DTI. Back-end 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI.",
+      notes: "Front-end and back-end both 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI. PMI removable at 80% LTV.",
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
@@ -1759,7 +1759,7 @@ function PreQualPage() {
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
               <p style={{ marginBottom: 8 }}>
-                <strong>Why the numbers differ:</strong> Each program has different rules. FHA caps your housing payment at 46.99% of income (front-end) and total debts at 56.99% (back-end). Conventional has no hard front-end cap but limits total debts to 49.99%. VA also has no front-end cap and allows up to 50% total debts with no monthly MI — often the strongest option for eligible borrowers.
+                <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers.
               </p>
               <p>
                 <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
