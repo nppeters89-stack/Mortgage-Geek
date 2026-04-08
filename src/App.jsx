@@ -3014,7 +3014,11 @@ function MainSite() {
   }, [mobileOpen]);
 
   useEffect(() => {
-    const handleScroll = () => { setShowFloatingCalc(window.scrollY > 400); };
+    const handleScroll = () => {
+      const toolsSection = document.getElementById("tools-cta");
+      const toolsVisible = toolsSection ? toolsSection.getBoundingClientRect().top < window.innerHeight : false;
+      setShowFloatingCalc(window.scrollY > 400 && !toolsVisible);
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
