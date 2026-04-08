@@ -1583,9 +1583,10 @@ function ToolsCTA() {
 }
 
 function PreQualPage() {
-  const [grossIncome, setGrossIncome] = useState(6500);
-  const [monthlyDebts, setMonthlyDebts] = useState(450);
-  const [downPct, setDownPct] = useState(5);
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const [grossIncome, setGrossIncome] = useState(() => { const v = parseFloat(params.get("income")); return v > 0 ? v : 6500; });
+  const [monthlyDebts, setMonthlyDebts] = useState(() => { const v = parseFloat(params.get("debts")); return v >= 0 ? v : 450; });
+  const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
   const [showStudentCalc, setShowStudentCalc] = useState(false);
   const [studentBalance, setStudentBalance] = useState(0);
   const [convRate, setConvRate] = useState(6.75);
@@ -2161,11 +2162,17 @@ function PreQualPage() {
         })()}
 
         {/* Cross-link to calculator */}
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-            🧮 Run a payment scenario in the Calculator →
-          </a>
-        </div>
+        {(() => {
+          const bestPrice = Math.max(...results.filter(r => r.eligible && r.maxPrice > 0).map(r => r.maxPrice), 0);
+          const calcUrl = `/calculator?price=${bestPrice > 0 ? bestPrice : 350000}&down=${downPct}`;
+          return (
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <a href={calcUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                🧮 Run {bestPrice > 0 ? fmt(bestPrice) : "a payment scenario"} in the Calculator →
+              </a>
+            </div>
+          );
+        })()}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
           This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
@@ -2295,12 +2302,13 @@ function RateInput({ label, rate, setRate, color }) {
 }
 
 function CalculatorPage() {
-  const [homePrice, setHomePrice] = useState(350000);
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
   const [convRate, setConvRate] = useState(6.75);
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
   const [term, setTerm] = useState(30);
-  const [downPct, setDownPct] = useState(3.5);
+  const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   useEffect(() => { setDownDollarOverride(null); }, [homePrice]); // reset override when price changes
 
@@ -2861,7 +2869,7 @@ function CalculatorPage() {
 
         {/* Cross-link to prequal */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <a href="/prequal" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+          <a href={`/prequal?down=${downPct}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             🎯 See what you qualify for in the Pre-Qual Simulator →
           </a>
         </div>
