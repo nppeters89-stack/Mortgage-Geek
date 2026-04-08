@@ -1981,6 +1981,34 @@ function PreQualPage() {
           </div>
         </div>
 
+        {/* Text results */}
+        {(() => {
+          const eligible = results.filter(r => r.eligible && r.maxPrice > 0);
+          const lines = eligible.map(r => `${r.name}: max ${fmt(r.maxPrice)} (${fmt(r.maxPayment)}/mo)`).join("\n");
+          const body = encodeURIComponent(
+            `Hi! Here's my pre-qual scenario from MortgageGeek.ai:\n\n` +
+            `Income: ${fmt(grossIncome)}/mo | Debts: ${fmt(monthlyDebts)}/mo | ${downPct}% down\n\n` +
+            `${lines}\n\n` +
+            `Can we discuss getting pre-approved?`
+          );
+          return (
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <a href={`sms:+16156560737&body=${body}`} style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "14px 28px", borderRadius: 10,
+                background: P.gold, color: "#fff",
+                fontFamily: F.body, fontSize: 14, fontWeight: 600,
+                textDecoration: "none",
+                boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Text Me These Results
+              </a>
+              <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 6 }}>Opens a text with your scenario pre-filled — ready to send</p>
+            </div>
+          );
+        })()}
+
         {/* Cross-link to calculator */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
@@ -2650,6 +2678,35 @@ function CalculatorPage() {
             </div>
           </div>
         </div>
+
+        {/* Text results */}
+        {(() => {
+          const eligible = programs.filter(p => p.eligible);
+          const winner = eligible.length > 0 ? eligible.reduce((a, b) => a.total < b.total ? a : b) : null;
+          const lines = eligible.map(p => `${p.name}: ${fmt(p.total)}/mo (${p.rate}%)${p.total === lowestTotal ? " ← Lowest" : ""}`).join("\n");
+          const body = encodeURIComponent(
+            `Hi! Here's my mortgage scenario from MortgageGeek.ai:\n\n` +
+            `${fmt(homePrice)} home | ${downPct}% down | ${term}yr\n\n` +
+            `${lines}\n\n` +
+            `Can we discuss my options?`
+          );
+          return (
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <a href={`sms:+16156560737&body=${body}`} style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "14px 28px", borderRadius: 10,
+                background: P.gold, color: "#fff",
+                fontFamily: F.body, fontSize: 14, fontWeight: 600,
+                textDecoration: "none",
+                boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Text Me These Results
+              </a>
+              <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 6 }}>Opens a text with your scenario pre-filled — ready to send</p>
+            </div>
+          );
+        })()}
 
         {/* Cross-link to prequal */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
