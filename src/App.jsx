@@ -2910,7 +2910,7 @@ function MainSite() {
   // Swipe-to-open/close sidebar — real-time finger tracking
   useEffect(() => {
     const SIDEBAR_W = 280;
-    const EDGE_ZONE = 50;
+    const EDGE_ZONE = window.innerWidth / 2;
     const SNAP_THRESHOLD = 80;
     let startX = 0, startY = 0, currentX = 0;
     let tracking = false, dirLocked = false, isHorizontal = false;
