@@ -1346,7 +1346,7 @@ function AboutPage() {
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
             <h1 style={{ fontFamily: F.display, fontSize: "clamp(28px, 4vw, 38px)", color: P.navy, marginBottom: 6 }}>Nick Peters</h1>
             <p style={{ fontSize: 14, color: P.warmGray }}>Mortgage Loan Originator · NMLS# 1119524</p>
-            <p style={{ fontSize: 13, color: P.warmGrayLight, marginTop: 2 }}>Nashville, TN · Licensed since 2013</p>
+            <p style={{ fontSize: 13, color: P.warmGrayLight, marginTop: 2 }}>Nashville, TN · Licensed since 2014</p>
           </div>
         </div>
 
@@ -1364,11 +1364,10 @@ function AboutPage() {
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginBottom: 48 }}>
           {[
             { num: "12+", label: "Years in the industry" },
             { num: "Hundreds", label: "Families helped" },
-            { num: "5", label: "Loan programs mastered" },
           ].map((s, i) => (
             <div key={i} className="content-card" style={{ padding: "24px 16px", textAlign: "center" }}>
               <span style={{ fontFamily: F.display, fontSize: 30, color: P.navy, display: "block", marginBottom: 4 }}>{s.num}</span>
@@ -1379,9 +1378,9 @@ function AboutPage() {
 
         {/* Programs */}
         <div style={{ marginBottom: 48 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 12 }}>Loan Programs</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 12 }}>Loan Programs Mastered</span>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {["Conventional", "FHA", "VA", "USDA", "Jumbo"].map((p, i) => (
+            {["Conventional", "FHA", "VA", "USDA", "Jumbo", "DSCR"].map((p, i) => (
               <span key={i} style={{ padding: "8px 18px", borderRadius: 50, background: P.white, fontSize: 13, fontWeight: 600, color: P.navy, border: `1px solid ${P.creamDark}`, boxShadow: "0 2px 8px rgba(0,0,0,0.03)" }}>{p}</span>
             ))}
           </div>
