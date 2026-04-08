@@ -2689,6 +2689,55 @@ function MainSite() {
   const [navTarget, setNavTarget] = useState(null);
   const [showFloatingCalc, setShowFloatingCalc] = useState(false);
 
+  // Swipe-to-open/close sidebar
+  useEffect(() => {
+    let startX = 0, startY = 0, tracking = false, direction = null;
+
+    const onTouchStart = (e) => {
+      const touch = e.touches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      direction = null;
+      // Start tracking if: swiping from left edge to open, or sidebar is open (to close)
+      if (!mobileOpen && startX < 30) tracking = true;
+      else if (mobileOpen) tracking = true;
+      else tracking = false;
+    };
+
+    const onTouchMove = (e) => {
+      if (!tracking) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      // Lock direction on first significant movement
+      if (!direction && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+        direction = Math.abs(dx) > Math.abs(dy) ? "horizontal" : "vertical";
+      }
+      // If scrolling vertically, stop tracking
+      if (direction === "vertical") tracking = false;
+    };
+
+    const onTouchEnd = (e) => {
+      if (!tracking || direction !== "horizontal") { tracking = false; return; }
+      const endX = e.changedTouches[0].clientX;
+      const dx = endX - startX;
+
+      if (!mobileOpen && dx > 60) setMobileOpen(true);   // swipe right to open
+      if (mobileOpen && dx < -60) setMobileOpen(false);   // swipe left to close
+
+      tracking = false;
+    };
+
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: true });
+    document.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [mobileOpen]);
+
   useEffect(() => {
     const handleScroll = () => { setShowFloatingCalc(window.scrollY > 400); };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -2782,38 +2831,26 @@ function MainSite() {
         </footer>
       </main>
 
-      {/* Floating tool buttons */}
-      <div style={{
-        position: "fixed", bottom: 24, right: 24, zIndex: 100,
-        display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end",
-        transform: showFloatingCalc ? "translateY(0)" : "translateY(120px)",
-        opacity: showFloatingCalc ? 1 : 0,
-        transition: "all 0.3s ease",
-        pointerEvents: showFloatingCalc ? "auto" : "none",
-      }}>
-        <a href="/prequal" style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "10px 16px", borderRadius: 50,
-          background: P.navy, color: "#fff",
-          fontFamily: F.body, fontSize: 13, fontWeight: 600,
-          textDecoration: "none",
-          boxShadow: "0 4px 16px rgba(27,58,75,0.35), 0 2px 6px rgba(0,0,0,0.1)",
-        }}>
-          <span style={{ fontSize: 15 }}>🎯</span>
-          Pre-Qual
-        </a>
-        <a href="/calculator" style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "10px 16px", borderRadius: 50,
+      {/* Floating tools button */}
+      <a
+        href="#tools-cta"
+        style={{
+          position: "fixed", bottom: 24, right: 24, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "12px 20px", borderRadius: 50,
           background: P.gold, color: "#fff",
-          fontFamily: F.body, fontSize: 13, fontWeight: 600,
+          fontFamily: F.body, fontSize: 14, fontWeight: 600,
           textDecoration: "none",
-          boxShadow: "0 4px 16px rgba(184,134,11,0.35), 0 2px 6px rgba(0,0,0,0.1)",
-        }}>
-          <span style={{ fontSize: 15 }}>🧮</span>
-          Calculator
-        </a>
-      </div>
+          boxShadow: "0 4px 20px rgba(184,134,11,0.35), 0 2px 8px rgba(0,0,0,0.1)",
+          transform: showFloatingCalc ? "translateY(0)" : "translateY(100px)",
+          opacity: showFloatingCalc ? 1 : 0,
+          transition: "all 0.3s ease",
+          pointerEvents: showFloatingCalc ? "auto" : "none",
+        }}
+      >
+        <span style={{ fontSize: 16 }}>🛠</span>
+        Tools
+      </a>
     </div>
   );
 }
