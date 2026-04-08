@@ -346,7 +346,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           </div>
         </div>
       </aside>
-      {mobileOpen && <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />}
+      <div className={`sidebar-overlay ${mobileOpen ? "sidebar-overlay-visible" : ""}`} id="sidebar-overlay-drag" onClick={() => { if (mobileOpen) setMobileOpen(false); }} />
     </>
   );
 }
@@ -2689,43 +2689,100 @@ function MainSite() {
   const [navTarget, setNavTarget] = useState(null);
   const [showFloatingCalc, setShowFloatingCalc] = useState(false);
 
-  // Swipe-to-open/close sidebar
+  // Swipe-to-open/close sidebar — real-time finger tracking
   useEffect(() => {
-    let startX = 0, startY = 0, tracking = false, direction = null;
+    const SIDEBAR_W = 280;
+    const EDGE_ZONE = 50;
+    const SNAP_THRESHOLD = 80;
+    let startX = 0, startY = 0, currentX = 0;
+    let tracking = false, dirLocked = false, isHorizontal = false;
+    let mode = null; // "opening" or "closing"
+
+    const getSidebar = () => document.querySelector(".sidebar");
+    const getOverlay = () => document.getElementById("sidebar-overlay-drag");
 
     const onTouchStart = (e) => {
       const touch = e.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
-      direction = null;
-      // Start tracking if: swiping from left edge to open, or sidebar is open (to close)
-      if (!mobileOpen && startX < 30) tracking = true;
-      else if (mobileOpen) tracking = true;
-      else tracking = false;
+      currentX = startX;
+      dirLocked = false;
+      isHorizontal = false;
+
+      if (!mobileOpen && startX < EDGE_ZONE) {
+        mode = "opening";
+        tracking = true;
+      } else if (mobileOpen) {
+        mode = "closing";
+        tracking = true;
+      } else {
+        tracking = false;
+      }
     };
 
     const onTouchMove = (e) => {
       if (!tracking) return;
       const touch = e.touches[0];
-      const dx = touch.clientX - startX;
+      currentX = touch.clientX;
+      const dx = currentX - startX;
       const dy = touch.clientY - startY;
-      // Lock direction on first significant movement
-      if (!direction && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
-        direction = Math.abs(dx) > Math.abs(dy) ? "horizontal" : "vertical";
+
+      // Lock direction after 8px of movement
+      if (!dirLocked && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        dirLocked = true;
+        isHorizontal = Math.abs(dx) > Math.abs(dy);
+        if (!isHorizontal) { tracking = false; return; }
+        // Disable transitions for real-time tracking
+        const sidebar = getSidebar();
+        const overlay = getOverlay();
+        if (sidebar) sidebar.classList.add("sidebar-dragging");
+        if (overlay) overlay.classList.add("sidebar-dragging");
       }
-      // If scrolling vertically, stop tracking
-      if (direction === "vertical") tracking = false;
+
+      if (!dirLocked || !isHorizontal) return;
+
+      const sidebar = getSidebar();
+      const overlay = getOverlay();
+      if (!sidebar) return;
+
+      if (mode === "opening") {
+        // dragPx: 0 (closed) to SIDEBAR_W (fully open)
+        const dragPx = Math.max(0, Math.min(dx, SIDEBAR_W));
+        const pct = dragPx / SIDEBAR_W;
+        sidebar.style.transform = `translateX(${-SIDEBAR_W + dragPx}px)`;
+        if (overlay) overlay.style.opacity = pct;
+      } else if (mode === "closing") {
+        // dx is negative when swiping left
+        const dragPx = Math.max(0, Math.min(-dx, SIDEBAR_W));
+        const pct = 1 - (dragPx / SIDEBAR_W);
+        sidebar.style.transform = `translateX(${-dragPx}px)`;
+        if (overlay) overlay.style.opacity = pct;
+      }
     };
 
-    const onTouchEnd = (e) => {
-      if (!tracking || direction !== "horizontal") { tracking = false; return; }
-      const endX = e.changedTouches[0].clientX;
-      const dx = endX - startX;
+    const onTouchEnd = () => {
+      if (!tracking || !isHorizontal) { tracking = false; return; }
+      const dx = currentX - startX;
+      const sidebar = getSidebar();
+      const overlay = getOverlay();
 
-      if (!mobileOpen && dx > 60) setMobileOpen(true);   // swipe right to open
-      if (mobileOpen && dx < -60) setMobileOpen(false);   // swipe left to close
+      // Re-enable CSS transitions for snap
+      if (sidebar) sidebar.classList.remove("sidebar-dragging");
+      if (overlay) overlay.classList.remove("sidebar-dragging");
+
+      // Clear inline styles — let CSS classes handle the snap
+      if (sidebar) sidebar.style.transform = "";
+      if (overlay) overlay.style.opacity = "";
+
+      if (mode === "opening" && dx > SNAP_THRESHOLD) {
+        setMobileOpen(true);
+      } else if (mode === "closing" && dx < -SNAP_THRESHOLD) {
+        setMobileOpen(false);
+      }
+      // If didn't pass threshold, CSS transitions snap back to current state
 
       tracking = false;
+      mode = null;
     };
 
     document.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -2903,9 +2960,11 @@ const globalCSS = `
   .calc-grid > *:last-child { flex: 1 1 360px; }
 
   @media (max-width: 900px) {
-    .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; }
-    .sidebar-open { transform: translateX(0) !important; }
-    .sidebar-overlay { display: block !important; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; will-change: transform; }
+    .sidebar-open { transform: translateX(0); }
+    .sidebar-dragging { transition: none !important; }
+    .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay-visible { opacity: 1; pointer-events: auto; }
     .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); }
     .main-content { margin-left: 0 !important; padding-top: 56px; }
     .process-grid { flex-direction: column; }
