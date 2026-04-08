@@ -1353,17 +1353,31 @@ function NextSteps() {
                 </div>
               </a>
 
-              <a href="/calculator" style={{
-                display: "flex", alignItems: "center", gap: 14, padding: "16px 20px", borderRadius: 10,
-                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                textDecoration: "none", color: "rgba(255,255,255,0.7)",
-              }}>
-                <span style={{ fontSize: 20 }}>🧮</span>
-                <div>
-                  <span style={{ display: "block", fontSize: 15, fontWeight: 600 }}>Run the numbers first</span>
-                  <span style={{ display: "block", fontSize: 12, opacity: 0.5 }}>Compare Conventional, FHA, and VA side by side</span>
-                </div>
-              </a>
+              <div className="nextsteps-tools" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <a href="/prequal" style={{
+                  display: "flex", alignItems: "center", gap: 12, padding: "16px 16px", borderRadius: 10,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  textDecoration: "none", color: "rgba(255,255,255,0.7)",
+                }}>
+                  <span style={{ fontSize: 20 }}>🎯</span>
+                  <div>
+                    <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>What can I afford?</span>
+                    <span style={{ display: "block", fontSize: 11, opacity: 0.5 }}>Pre-Qual Simulator</span>
+                  </div>
+                </a>
+
+                <a href="/calculator" style={{
+                  display: "flex", alignItems: "center", gap: 12, padding: "16px 16px", borderRadius: 10,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  textDecoration: "none", color: "rgba(255,255,255,0.7)",
+                }}>
+                  <span style={{ fontSize: 20 }}>🧮</span>
+                  <div>
+                    <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>Run the numbers</span>
+                    <span style={{ display: "block", fontSize: 11, opacity: 0.5 }}>Payment Calculator</span>
+                  </div>
+                </a>
+              </div>
             </div>
 
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 24, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
@@ -1374,35 +1388,44 @@ function NextSteps() {
   );
 }
 
-function PreQualCTA() {
+function ToolsCTA() {
+  const tools = [
+    {
+      icon: "🧮", title: "Payment Calculator", href: "/calculator",
+      desc: "Same house, three programs. Compare Conventional, FHA, and VA payment breakdowns with live rates.",
+    },
+    {
+      icon: "🎯", title: "Pre-Qual Simulator", href: "/prequal",
+      desc: "Enter your income and debts — see what you can afford under each loan program with real DTI limits.",
+    },
+  ];
   return (
-    <section id="prequal" style={{ padding: "64px 40px" }}>
+    <section id="tools-cta" style={{ padding: "64px 40px", background: P.creamDark }}>
       <div style={{ maxWidth: 720 }}>
-        <div style={{
-          background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navyLight} 100%)`,
-          borderRadius: 16, padding: "48px 40px", position: "relative", overflow: "hidden",
-        }}>
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 80% 20%, rgba(184,134,11,0.12) 0%, transparent 60%)" }} />
-          <div style={{ position: "relative" }}>
-            <span style={{ fontSize: 36, display: "block", marginBottom: 12 }}>🎯</span>
-            <h3 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3vw, 32px)", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>
-              Pre-Qual Simulator
-            </h3>
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", maxWidth: 460, marginBottom: 28 }}>
-              Enter your income and debts — see what you can afford under Conventional, FHA, and VA, each with their own DTI limits and mortgage insurance rules.
-            </p>
-            <a href="/prequal" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 28px", borderRadius: 10,
-              background: P.gold, color: "#fff",
-              fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.3,
-              boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
-            }}>
-              Open Simulator →
+        <SectionHeader eyebrow="Your Toolkit" title="Run the Numbers" subtitle="Two free tools built by a loan originator — not a marketing team. No login, no data collected, no strings attached." />
+        <div className="tools-grid-cta" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          {tools.map((t, i) => (
+            <a key={i} href={t.href} className="content-card" style={{
+              display: "flex", flexDirection: "column", padding: 0, textDecoration: "none",
+              overflow: "hidden", transition: "transform 0.15s, box-shadow 0.15s",
+            }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = ""; }}
+            >
+              <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
+                <span style={{ fontSize: 36, display: "block", marginBottom: 8 }}>{t.icon}</span>
+                <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff" }}>{t.title}</span>
+              </div>
+              <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray, flex: 1 }}>{t.desc}</p>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 14, fontSize: 13, fontWeight: 600, color: P.gold }}>
+                  Open {t.title.split(" ")[0]} →
+                </span>
+              </div>
             </a>
-          </div>
+          ))}
         </div>
+        <style>{`@media (max-width: 500px) { .tools-grid-cta, .nextsteps-tools { grid-template-columns: 1fr !important; } }`}</style>
       </div>
     </section>
   );
@@ -2059,40 +2082,6 @@ function JargonDecoder() {
             <p style={{ fontSize: 12, color: P.warmGrayLight, marginTop: 4 }}>Try a different search or <button onClick={() => setSearch("")} style={{ background: "none", border: "none", color: P.gold, fontWeight: 600, cursor: "pointer", fontFamily: F.body, fontSize: 12 }}>view all terms</button></p>
           </div>
         )}
-      </div>
-    </section>
-  );
-}
-
-function CalculatorCTA() {
-  return (
-    <section id="calculator" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <div style={{ maxWidth: 720 }}>
-        <div style={{
-          background: `linear-gradient(135deg, ${P.navy} 0%, ${P.navyLight} 100%)`,
-          borderRadius: 16, padding: "48px 40px", position: "relative", overflow: "hidden",
-        }}>
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 80% 20%, rgba(184,134,11,0.12) 0%, transparent 60%)" }} />
-          <div style={{ position: "relative" }}>
-            <span style={{ fontSize: 36, display: "block", marginBottom: 12 }}>🧮</span>
-            <h3 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3vw, 32px)", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>
-              Payment Calculator
-            </h3>
-            <p style={{ fontSize: 15, lineHeight: 1.7, color: "rgba(255,255,255,0.55)", maxWidth: 460, marginBottom: 28 }}>
-              Compare Conventional, FHA, and VA side by side — same house, same rate, three different payment breakdowns. See exactly how mortgage insurance, funding fees, and down payment affect your bottom line.
-            </p>
-            <a href="/calculator" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 28px", borderRadius: 10,
-              background: P.gold, color: "#fff",
-              fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.3,
-              boxShadow: "0 4px 16px rgba(184,134,11,0.3)",
-            }}>
-              Open Calculator →
-            </a>
-          </div>
-        </div>
       </div>
     </section>
   );
@@ -2766,8 +2755,7 @@ function MainSite() {
         <InterestRates navTarget={navTarget} />
         <PreApprovalChecklist />
         <NextSteps />
-        <CalculatorCTA />
-        <PreQualCTA />
+        <ToolsCTA />
         <JargonDecoder />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
@@ -2794,26 +2782,38 @@ function MainSite() {
         </footer>
       </main>
 
-      {/* Floating calculator button */}
-      <a
-        href="/calculator"
-        style={{
-          position: "fixed", bottom: 24, right: 24, zIndex: 100,
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "12px 20px", borderRadius: 50,
+      {/* Floating tool buttons */}
+      <div style={{
+        position: "fixed", bottom: 24, right: 24, zIndex: 100,
+        display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end",
+        transform: showFloatingCalc ? "translateY(0)" : "translateY(120px)",
+        opacity: showFloatingCalc ? 1 : 0,
+        transition: "all 0.3s ease",
+        pointerEvents: showFloatingCalc ? "auto" : "none",
+      }}>
+        <a href="/prequal" style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "10px 16px", borderRadius: 50,
+          background: P.navy, color: "#fff",
+          fontFamily: F.body, fontSize: 13, fontWeight: 600,
+          textDecoration: "none",
+          boxShadow: "0 4px 16px rgba(27,58,75,0.35), 0 2px 6px rgba(0,0,0,0.1)",
+        }}>
+          <span style={{ fontSize: 15 }}>🎯</span>
+          Pre-Qual
+        </a>
+        <a href="/calculator" style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "10px 16px", borderRadius: 50,
           background: P.gold, color: "#fff",
-          fontFamily: F.body, fontSize: 14, fontWeight: 600,
-          textDecoration: "none", letterSpacing: 0.3,
-          boxShadow: "0 4px 20px rgba(184,134,11,0.35), 0 2px 8px rgba(0,0,0,0.1)",
-          transform: showFloatingCalc ? "translateY(0)" : "translateY(100px)",
-          opacity: showFloatingCalc ? 1 : 0,
-          transition: "all 0.3s ease",
-          pointerEvents: showFloatingCalc ? "auto" : "none",
-        }}
-      >
-        <span style={{ fontSize: 18 }}>🧮</span>
-        Calculator
-      </a>
+          fontFamily: F.body, fontSize: 13, fontWeight: 600,
+          textDecoration: "none",
+          boxShadow: "0 4px 16px rgba(184,134,11,0.35), 0 2px 6px rgba(0,0,0,0.1)",
+        }}>
+          <span style={{ fontSize: 15 }}>🧮</span>
+          Calculator
+        </a>
+      </div>
     </div>
   );
 }
