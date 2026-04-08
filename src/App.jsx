@@ -1229,8 +1229,22 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 }
 
 function PreApprovalChecklist() {
-  const [checkedItems, setCheckedItems] = useState({});
-  const toggle = (id) => setCheckedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  const STORAGE_KEY = "mg_checklist";
+  const [checkedItems, setCheckedItems] = useState(() => {
+    try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : {}; }
+    catch { return {}; }
+  });
+  const toggle = (id) => {
+    setCheckedItems(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+  const resetAll = () => {
+    setCheckedItems({});
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  };
 
   const categories = [
     { title: "Income & Employment", items: [
@@ -1276,11 +1290,19 @@ function PreApprovalChecklist() {
         <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: P.navy }}>{checkedCount} of {totalItems} items ready</span>
-            <span style={{ fontSize: 12, color: P.warmGrayLight }}>{totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0}%</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 12, color: P.warmGrayLight }}>{totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0}%</span>
+              {checkedCount > 0 && (
+                <button onClick={resetAll} style={{ background: "none", border: "none", fontSize: 11, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body, opacity: 0.6, textDecoration: "underline" }}>Reset</button>
+              )}
+            </div>
           </div>
           <div style={{ height: 8, background: P.creamDark, borderRadius: 4, overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${(checkedCount / totalItems) * 100}%`, background: checkedCount === totalItems ? P.sage : P.gold, borderRadius: 4, transition: "width 0.3s" }} />
           </div>
+          {checkedCount > 0 && checkedCount < totalItems && (
+            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6, textAlign: "center" }}>Your progress is saved automatically</p>
+          )}
           {checkedCount === totalItems && (
             <p style={{ fontSize: 12, color: P.sage, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
           )}
@@ -1425,7 +1447,16 @@ function AboutPage() {
           </div>
         </div>
 
-        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+          <svg width="30" height="32" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill={P.navy}/>
+            <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill={P.white} stroke={P.navy} strokeWidth="0.5"/>
+            <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke={P.navy} strokeWidth="1.5" fill="none"/>
+            <rect x="12" y="22" width="16" height="3" fill={P.navy}/>
+            <rect x="12" y="28" width="16" height="3" fill={P.navy}/>
+          </svg>
+          <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
+        </div>
       </div>
     </div>
   );
