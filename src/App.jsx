@@ -2662,6 +2662,13 @@ function CalculatorPage() {
           </div>
         </div>
 
+        {/* Cross-link to prequal */}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <a href="/prequal" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            🎯 See what you qualify for in the Pre-Qual Simulator →
+          </a>
+        </div>
+
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
           {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily) and rounded to the nearest 0.125%. " : ""}
