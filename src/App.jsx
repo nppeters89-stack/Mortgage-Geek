@@ -1852,17 +1852,20 @@ function PreQualPage() {
 
   // Calculate for each program
   const results = programs.map(prog => {
-    if (!prog.eligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0, overLimit: false };
+    const useFixedDown = downDollarOverride > 0;
+
+    // When using fixed dollar down, eligibility is determined by whether the dollar
+    // amount can meet the minimum down requirement at ANY price (it always can, we just cap the price)
+    const isEligible = useFixedDown ? true : prog.eligible;
+    if (!isEligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0, overLimit: false, actualDownAmt: 0, actualDownPctDisplay: 0 };
 
     // Front-end: max HOUSING payment (independent of debts)
     const frontMaxHousing = prog.frontMax ? Math.floor(grossIncome * prog.frontMax) : Infinity;
 
     // Back-end: max TOTAL of (housing + all debts)
     const backTotalMax = Math.floor(grossIncome * prog.backMax);
-    // Therefore max housing from back-end = total max - existing debts
     const backMaxHousing = backTotalMax - monthlyDebts;
 
-    // Actual max housing = whichever is lower
     const maxPayment = Math.max(0, Math.min(frontMaxHousing, backMaxHousing));
     const bindingConstraint = frontMaxHousing <= backMaxHousing ? "front-end" : "back-end";
 
@@ -1872,10 +1875,23 @@ function PreQualPage() {
     const comfPayment = Math.max(0, Math.min(comfFront, comfBack));
 
     let maxPrice = solvePrice(maxPayment, prog.rate, prog.miRate, prog.upfrontFee);
-    const comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
+    let comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
 
-    // Loan limit check — cap price if base loan would exceed the limit
-    const useFixedDown = downDollarOverride > 0;
+    // When using fixed dollar down, cap price so down payment meets minimum %
+    // e.g., $10,000 at 3% min → max price = $333,333
+    let cappedByMinDown = false;
+    if (useFixedDown && prog.minDown > 0) {
+      const maxPriceFromMinDown = Math.floor(downDollarOverride / (prog.minDown / 100));
+      if (maxPrice > maxPriceFromMinDown) {
+        maxPrice = maxPriceFromMinDown;
+        cappedByMinDown = true;
+      }
+      if (comfPrice > maxPriceFromMinDown) {
+        comfPrice = maxPriceFromMinDown;
+      }
+    }
+
+    // Calculate loan amounts
     let maxLoan = useFixedDown ? Math.max(maxPrice - downDollarOverride, 0) : maxPrice * (1 - dpForCalc / 100);
     let overLimit = false;
     if (maxLoan > prog.loanLimit) {
@@ -1891,7 +1907,7 @@ function PreQualPage() {
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
-    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay };
+    return { ...prog, eligible: isEligible, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay, cappedByMinDown };
   });
 
   return (
@@ -2093,7 +2109,7 @@ function PreQualPage() {
                   <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{prog.name} · Max Purchase</span>
                   <span style={{ fontFamily: F.display, fontSize: 34, color: "#fff" }}>{fmt(prog.maxPrice)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
-                    {prog.rate}% · {prog.overLimit ? "capped at loan limit" : `${prog.bindingConstraint} DTI binding`}
+                    {prog.rate}% · {prog.overLimit ? "capped at loan limit" : prog.cappedByMinDown ? `capped at ${prog.minDown}% min down` : `${prog.bindingConstraint} DTI binding`}
                   </span>
                   {prog.overLimit && (
                     <span style={{ display: "inline-block", marginTop: 6, fontSize: 10, fontWeight: 600, background: "rgba(255,255,255,0.15)", color: "#fff", padding: "3px 10px", borderRadius: 10 }}>
