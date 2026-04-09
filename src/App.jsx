@@ -1587,9 +1587,13 @@ function PreQualPage() {
   const [grossIncome, setGrossIncome] = useState(() => { const v = parseFloat(params.get("income")); return v > 0 ? v : 6500; });
   const [monthlyDebts, setMonthlyDebts] = useState(() => { const v = parseFloat(params.get("debts")); return v >= 0 ? v : 450; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
+  const [downDollarOverride, setDownDollarOverride] = useState(null);
+  const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [showStudentCalc, setShowStudentCalc] = useState(false);
   const [studentBalance, setStudentBalance] = useState(0);
   const [convRate, setConvRate] = useState(6.75);
+  const [convRate30Api, setConvRate30Api] = useState(6.75);
+  const [convRate15Api, setConvRate15Api] = useState(6.0);
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
   const [vaUsage, setVaUsage] = useState("first");
@@ -1758,8 +1762,13 @@ function PreQualPage() {
         const data = await res.json();
         if (data.success && data.rates) {
           const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
-          const conv = find("30-year fixed"); const fha = find("fha"); const va = find("va");
-          if (conv) setConvRate(roundRate(parseFloat(conv.rate)));
+          const conv30 = find("30-year fixed"); const conv15 = find("15-year fixed");
+          const fha = find("fha"); const va = find("va");
+          const r30 = conv30 ? roundRate(parseFloat(conv30.rate)) : 6.75;
+          const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
+          setConvRate30Api(r30);
+          setConvRate15Api(r15);
+          setConvRate(term === 15 ? r15 : r30);
           if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
           if (va) setVaRate(roundRate(parseFloat(va.rate)));
           setRateSource(data.date || "today"); setRatesLoaded(true);
@@ -1767,6 +1776,11 @@ function PreQualPage() {
       } catch (e) { /* silent */ }
     })();
   }, []);
+
+  // Switch conv rate when term changes
+  useEffect(() => {
+    if (ratesLoaded) setConvRate(term === 15 ? convRate15Api : convRate30Api);
+  }, [term]);
 
   // VA funding fee
   const vaFeeRate = useMemo(() => {
@@ -1777,15 +1791,25 @@ function PreQualPage() {
   }, [vaUsage, downPct]);
 
   // Solve max price from max housing payment
+  // Effective down payment: use dollar override to derive percentage if set
+  const effectiveDownPct = useMemo(() => {
+    if (!downDollarOverride || downDollarOverride <= 0) return downPct;
+    // Estimate a rough price to derive %, will refine iteratively
+    const roughMaxPayment = Math.floor(grossIncome * 0.45 - monthlyDebts);
+    const roughPrice = Math.max(roughMaxPayment * 150, downDollarOverride * 2);
+    return Math.min(Math.max(Math.round((downDollarOverride / roughPrice) * 10000) / 100, 0), 99);
+  }, [downDollarOverride, downPct, grossIncome, monthlyDebts]);
+
   const solvePrice = (maxPayment, rate, miRateAnnual, upfrontFeePct) => {
     if (maxPayment <= 0) return 0;
     const mr = (rate / 100) / 12;
-    const n = 360;
+    const n = term * 12;
+    const useFixedDown = downDollarOverride > 0;
     let price = maxPayment * 170;
     for (let i = 0; i < 25; i++) {
-      const baseLoan = price * (1 - downPct / 100);
+      const baseLoan = useFixedDown ? Math.max(price - downDollarOverride, 0) : price * (1 - effectiveDownPct / 100);
       const totalLoan = baseLoan * (1 + upfrontFeePct / 100);
-      const pi = totalLoan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1);
+      const pi = totalLoan > 0 ? totalLoan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1) : 0;
       const mi = (baseLoan * (miRateAnnual / 100)) / 12;
       const tax = (price * (taxRate / 100)) / 12;
       const ins = (price * (insRate / 100)) / 12;
@@ -1797,22 +1821,23 @@ function PreQualPage() {
     return Math.max(0, price);
   };
 
-  // Program definitions
-  const convMiRate = downPct < 5 ? 0.52 : downPct < 10 ? 0.37 : downPct < 20 ? 0.27 : 0;
-  const fhaMiRate = downPct < 5 ? 0.55 : 0.50;
+  // Program definitions — use effectiveDownPct for MI tiers and eligibility
+  const dpForCalc = downDollarOverride > 0 ? effectiveDownPct : downPct;
+  const convMiRate = dpForCalc < 5 ? 0.52 : dpForCalc < 10 ? 0.37 : dpForCalc < 20 ? 0.27 : 0;
+  const fhaMiRate = dpForCalc < 5 ? 0.55 : 0.50;
 
   const programs = [
     {
       name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
       frontMax: 0.4999, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
-      minDown: 3, eligible: downPct >= 3, loanLimit: loanLimits.conv,
+      minDown: 3, eligible: dpForCalc >= 3, loanLimit: loanLimits.conv,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
       notes: "Front-end and back-end both 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI. PMI removable at 80% LTV.",
     },
     {
       name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
       frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
-      minDown: 3.5, eligible: downPct >= 3.5, loanLimit: loanLimits.fha,
+      minDown: 3.5, eligible: dpForCalc >= 3.5, loanLimit: loanLimits.fha,
       miLabel: `MIP (${fhaMiRate}%)`,
       notes: "Front-end 46.99%, back-end 56.99%. DTI thresholds assume 680+ FICO. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
@@ -1850,20 +1875,23 @@ function PreQualPage() {
     const comfPrice = solvePrice(comfPayment, prog.rate, prog.miRate, prog.upfrontFee);
 
     // Loan limit check — cap price if base loan would exceed the limit
-    let maxLoan = maxPrice * (1 - downPct / 100);
+    const useFixedDown = downDollarOverride > 0;
+    let maxLoan = useFixedDown ? Math.max(maxPrice - downDollarOverride, 0) : maxPrice * (1 - dpForCalc / 100);
     let overLimit = false;
-    if (maxLoan > prog.loanLimit && downPct < 100) {
-      maxPrice = Math.floor(prog.loanLimit / (1 - downPct / 100));
+    if (maxLoan > prog.loanLimit) {
       maxLoan = prog.loanLimit;
+      maxPrice = useFixedDown ? maxLoan + downDollarOverride : Math.floor(prog.loanLimit / (1 - dpForCalc / 100));
       overLimit = true;
     }
 
     const maxTotalLoan = maxLoan * (1 + prog.upfrontFee / 100);
-    const comfLoan = comfPrice * (1 - downPct / 100);
+    const comfLoan = useFixedDown ? Math.max(comfPrice - downDollarOverride, 0) : comfPrice * (1 - dpForCalc / 100);
+    const actualDownAmt = useFixedDown ? downDollarOverride : maxPrice * (dpForCalc / 100);
+    const actualDownPctDisplay = maxPrice > 0 ? ((actualDownAmt / maxPrice) * 100).toFixed(1) : 0;
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
-    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit };
+    return { ...prog, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay };
   });
 
   return (
@@ -1951,7 +1979,21 @@ function PreQualPage() {
               )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <CalcInput label="Down Payment" value={downPct} onChange={setDownPct} suffix="%" step={1} min={0} max={100} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[15, 30].map((t) => (
+                    <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "9px 0" }}>{t} yr</button>
+                  ))}
+                </div>
+              </div>
+              <CalcInput label="Down Payment %" value={downPct} onChange={(v) => { setDownPct(v); setDownDollarOverride(null); }} suffix="%" step={1} min={0} max={100} />
+              <div>
+                <CalcInput label="Down Payment $ (optional)" value={downDollarOverride !== null ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
+                {downDollarOverride > 0 && (
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 4 }}>Results will show the max price where {fmt(downDollarOverride)} equals your down payment.</p>
+                )}
+              </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
                 <select value={vaUsage} onChange={(e) => setVaUsage(e.target.value)}
@@ -2085,7 +2127,7 @@ function PreQualPage() {
                       { label: "Loan Amount", val: fmt(prog.maxLoan), warn: prog.overLimit },
                       { label: "Loan Limit", val: fmt(prog.loanLimit), dim: !prog.overLimit },
                       ...(prog.upfrontFee > 0 ? [{ label: `Financed Fee (${prog.upfrontFee}%)`, val: fmt(prog.maxLoan * (prog.upfrontFee / 100)) }] : []),
-                      { label: "Down Payment", val: fmt(prog.maxPrice * (downPct / 100)) },
+                      { label: "Down Payment", val: fmt(prog.actualDownAmt), sub: `${prog.actualDownPctDisplay}%` },
                       { label: prog.miLabel, val: prog.miRate > 0 ? fmt((prog.maxLoan * prog.miRate / 100) / 12) + "/mo" : "—" },
                     ].map((r, ri) => (
                       <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: r.dim ? P.creamDark : P.warmGray, borderBottom: `1px solid ${P.cream}`, opacity: r.dim ? 0.6 : 1 }}>
@@ -2139,7 +2181,7 @@ function PreQualPage() {
           const lines = eligible.map(r => `${r.name}: max ${fmt(r.maxPrice)} (${fmt(r.maxPayment)}/mo)`).join("\n");
           const body = encodeURIComponent(
             `Hi! Here's my pre-qual scenario from MortgageGeek.ai:\n\n` +
-            `Income: ${fmt(grossIncome)}/mo | Debts: ${fmt(monthlyDebts)}/mo | ${downPct}% down\n\n` +
+            `Income: ${fmt(grossIncome)}/mo | Debts: ${fmt(monthlyDebts)}/mo | ${downPct}% down | ${term}yr\n\n` +
             `${lines}\n\n` +
             `Can we discuss getting pre-approved?`
           );
@@ -2164,7 +2206,7 @@ function PreQualPage() {
         {/* Cross-link to calculator */}
         {(() => {
           const bestPrice = Math.max(...results.filter(r => r.eligible && r.maxPrice > 0).map(r => r.maxPrice), 0);
-          const calcUrl = `/calculator?price=${bestPrice > 0 ? bestPrice : 350000}&down=${downPct}`;
+          const calcUrl = `/calculator?price=${bestPrice > 0 ? bestPrice : 350000}&down=${downPct}&term=${term}`;
           return (
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <a href={calcUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
@@ -2305,9 +2347,11 @@ function CalculatorPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
   const [convRate, setConvRate] = useState(6.75);
+  const [convRate30Api, setConvRate30Api] = useState(6.75);
+  const [convRate15Api, setConvRate15Api] = useState(6.0);
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
-  const [term, setTerm] = useState(30);
+  const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   useEffect(() => { setDownDollarOverride(null); }, [homePrice]); // reset override when price changes
@@ -2475,10 +2519,15 @@ function CalculatorPage() {
         const data = await res.json();
         if (data.success && data.rates) {
           const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
-          const conv = find("30-year fixed");
+          const conv30 = find("30-year fixed");
+          const conv15 = find("15-year fixed");
           const fha = find("fha");
           const va = find("va");
-          if (conv) setConvRate(roundRate(parseFloat(conv.rate)));
+          const r30 = conv30 ? roundRate(parseFloat(conv30.rate)) : 6.75;
+          const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
+          setConvRate30Api(r30);
+          setConvRate15Api(r15);
+          setConvRate(term === 15 ? r15 : r30);
           if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
           if (va) setVaRate(roundRate(parseFloat(va.rate)));
           setRateSource(data.date || "today");
@@ -2487,6 +2536,13 @@ function CalculatorPage() {
       } catch (e) { /* fail silently, use defaults */ }
     })();
   }, []);
+
+  // Switch conv rate when term changes
+  useEffect(() => {
+    if (ratesLoaded) {
+      setConvRate(term === 15 ? convRate15Api : convRate30Api);
+    }
+  }, [term]);
 
   const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
   const baseLoan = homePrice - downAmt;
@@ -2869,7 +2925,7 @@ function CalculatorPage() {
 
         {/* Cross-link to prequal */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <a href={`/prequal?down=${downPct}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+          <a href={`/prequal?down=${downPct}&term=${term}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             🎯 See what you qualify for in the Pre-Qual Simulator →
           </a>
         </div>
