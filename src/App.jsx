@@ -1987,11 +1987,16 @@ function PreQualPage() {
                   ))}
                 </div>
               </div>
-              <CalcInput label="Down Payment %" value={downPct} onChange={(v) => { setDownPct(v); setDownDollarOverride(null); }} suffix="%" step={1} min={0} max={100} />
+              <div style={{ opacity: downDollarOverride > 0 ? 0.4 : 1, pointerEvents: downDollarOverride > 0 ? "none" : "auto", transition: "opacity 0.2s" }}>
+                <CalcInput label="Down Payment %" value={downPct} onChange={(v) => { setDownPct(v); setDownDollarOverride(null); }} suffix="%" step={1} min={0} max={100} />
+              </div>
               <div>
                 <CalcInput label="Down Payment $ (optional)" value={downDollarOverride !== null ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
                 {downDollarOverride > 0 && (
-                  <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 4 }}>Results will show the max price where {fmt(downDollarOverride)} equals your down payment.</p>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+                    <p style={{ fontSize: 10, color: P.warmGrayLight }}>Using fixed dollar amount for results.</p>
+                    <button onClick={() => setDownDollarOverride(null)} style={{ fontSize: 10, color: P.gold, background: "none", border: "none", cursor: "pointer", fontFamily: F.body, textDecoration: "underline" }}>Switch to %</button>
+                  </div>
                 )}
               </div>
               <div>
