@@ -1955,11 +1955,45 @@ function PreQualPage() {
         {/* Inputs */}
         <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
           <div className="pq-input-cols">
-            {/* Left column — Income & Debts */}
+            {/* Left column — Income, Debts & DTI */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma />
               <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma />
-              <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
+              <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5, marginTop: -4 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
+              <button onClick={() => setShowStudentCalc(!showStudentCalc)} style={{
+                display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
+                fontSize: 11, fontWeight: 600, color: P.gold, cursor: "pointer", fontFamily: F.body, padding: "0",
+              }}>
+                <span style={{ fontSize: 12 }}>🎓</span>
+                {showStudentCalc ? "Hide Student Loan Calculator" : "Student Loan Payment Calculator"}
+                <span style={{ fontSize: 10, transition: "transform 0.2s", transform: showStudentCalc ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+              </button>
+              {showStudentCalc && (
+                <div style={{ background: P.creamDark, borderRadius: 8, padding: "14px 16px" }}>
+                  <p style={{ fontSize: 11, color: P.warmGray, marginBottom: 10, lineHeight: 1.5 }}>
+                    For student loans currently at <strong>$0/mo</strong> due to deferment, forbearance, or income-driven repayment — lenders still count a payment.
+                  </p>
+                  <CalcInput label="Total Student Loan Balance" value={studentBalance} onChange={setStudentBalance} prefix="$" step={1000} comma />
+                  {studentBalance > 0 && (
+                    <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: P.white, borderRadius: 8, padding: "10px 14px" }}>
+                      <div>
+                        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Qualifying Payment (0.5%)</span>
+                        <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(Math.round(studentBalance * 0.005))}/mo</span>
+                      </div>
+                      <button onClick={() => setMonthlyDebts(prev => prev + Math.round(studentBalance * 0.005))} style={{
+                        padding: "8px 14px", borderRadius: 6, border: "none",
+                        background: P.navy, color: "#fff", fontSize: 11, fontWeight: 600,
+                        cursor: "pointer", fontFamily: F.body, whiteSpace: "nowrap",
+                      }}>
+                        + Add to Debts
+                      </button>
+                    </div>
+                  )}
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic", lineHeight: 1.5 }}>
+                    0.5% is the standard qualifying calc for deferred student loans. Use your actual payment if on an active repayment plan.
+                  </p>
+                </div>
+              )}
               <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Current Debt-Only DTI</span>
                 <span style={{ fontFamily: F.display, fontSize: 22, color: grossIncome > 0 && (monthlyDebts / grossIncome) > 0.30 ? P.gold : P.sage }}>{grossIncome > 0 ? ((monthlyDebts / grossIncome) * 100).toFixed(1) : 0}%</span>
@@ -1997,44 +2031,6 @@ function PreQualPage() {
                 </select>
               </div>
             </div>
-          </div>
-
-          {/* Student Loan Calculator — full width below columns */}
-          <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
-            <button onClick={() => setShowStudentCalc(!showStudentCalc)} style={{
-              display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
-              fontSize: 11, fontWeight: 600, color: P.gold, cursor: "pointer", fontFamily: F.body, padding: "4px 0",
-            }}>
-              <span style={{ fontSize: 12 }}>🎓</span>
-              {showStudentCalc ? "Hide Student Loan Calculator" : "Student Loan Payment Calculator"}
-              <span style={{ fontSize: 10, transition: "transform 0.2s", transform: showStudentCalc ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
-            </button>
-            {showStudentCalc && (
-              <div style={{ background: P.creamDark, borderRadius: 8, padding: "14px 16px", marginTop: 8 }}>
-                <p style={{ fontSize: 11, color: P.warmGray, marginBottom: 10, lineHeight: 1.5 }}>
-                  For student loans currently at <strong>$0/mo</strong> due to deferment, forbearance, or income-driven repayment — lenders still count a payment. Enter your total balance to calculate the qualifying payment.
-                </p>
-                <CalcInput label="Total Student Loan Balance" value={studentBalance} onChange={setStudentBalance} prefix="$" step={1000} comma />
-                {studentBalance > 0 && (
-                  <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: P.white, borderRadius: 8, padding: "10px 14px" }}>
-                    <div>
-                      <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Qualifying Payment (0.5%)</span>
-                      <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(Math.round(studentBalance * 0.005))}/mo</span>
-                    </div>
-                    <button onClick={() => setMonthlyDebts(prev => prev + Math.round(studentBalance * 0.005))} style={{
-                      padding: "8px 14px", borderRadius: 6, border: "none",
-                      background: P.navy, color: "#fff", fontSize: 11, fontWeight: 600,
-                      cursor: "pointer", fontFamily: F.body, whiteSpace: "nowrap",
-                    }}>
-                      + Add to Debts
-                    </button>
-                  </div>
-                )}
-                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic", lineHeight: 1.5 }}>
-                  0.5% of principal balance is the standard qualifying calculation for deferred student loans (Conventional, FHA, VA). If your loans are on an active repayment plan with a documented payment, use that actual payment instead.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Property location row */}
