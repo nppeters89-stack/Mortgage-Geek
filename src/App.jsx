@@ -1188,7 +1188,8 @@ function InterestRates({ navTarget }) {
 }
 
 function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999, comma }) {
-  const fmtComma = (v) => comma ? Number(v).toLocaleString("en-US") : String(v);
+  const isEmpty = value === "" || value === null || value === undefined;
+  const fmtComma = (v) => (v === "" || v === null || v === undefined) ? "" : comma ? Number(v).toLocaleString("en-US") : String(v);
   const [localVal, setLocalVal] = useState(fmtComma(value));
   const [focused, setFocused] = useState(false);
   useEffect(() => { if (!focused) setLocalVal(fmtComma(value)); }, [value, focused]);
@@ -1196,6 +1197,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
   const handleChange = (e) => {
     const raw = e.target.value;
     setLocalVal(raw);
+    if (raw === "") { onChange(0); return; }
     const cleaned = comma ? raw.replace(/,/g, "") : raw;
     const v = parseFloat(cleaned);
     if (!isNaN(v) && v >= min && v <= max) onChange(v);
@@ -1203,11 +1205,12 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 
   const handleFocus = () => {
     setFocused(true);
-    setLocalVal(String(value));
+    setLocalVal(isEmpty ? "" : String(value));
   };
 
   const handleBlur = () => {
     setFocused(false);
+    if (localVal === "" && isEmpty) { setLocalVal(""); return; }
     const cleaned = comma ? localVal.replace(/,/g, "") : localVal;
     const v = parseFloat(cleaned);
     if (isNaN(v) || v < min) { onChange(min); setLocalVal(fmtComma(min)); }
@@ -2010,22 +2013,25 @@ function PreQualPage() {
                   ))}
                 </div>
               </div>
-              <div style={{ opacity: downMode === "pct" ? 1 : 0.35, pointerEvents: downMode === "pct" ? "auto" : "none", transition: "opacity 0.2s" }}>
-                <CalcInput label="Down Payment %" value={downMode === "pct" ? downPct : ""} onChange={(v) => { setDownPct(v); }} suffix="%" step={1} min={0} max={100} />
-              </div>
-              <button onClick={() => {
-                if (downMode === "pct") { setDownMode("dollar"); setDownDollarOverride(null); }
-                else { setDownMode("pct"); setDownDollarOverride(null); }
-              }} style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                padding: "7px 0", borderRadius: 6, border: "none",
-                background: P.gold, color: "#fff",
-                fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F.body,
-              }}>
-                Switch to {downMode === "pct" ? "Dollar Amount" : "Percentage"}
-              </button>
-              <div style={{ opacity: downMode === "dollar" ? 1 : 0.35, pointerEvents: downMode === "dollar" ? "auto" : "none", transition: "opacity 0.2s" }}>
-                <CalcInput label="Down Payment $" value={downMode === "dollar" && downDollarOverride ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
+              <div style={{ border: `1px solid ${P.creamDark}`, borderRadius: 10, padding: "14px 14px 10px", background: P.white }}>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.navy, display: "block", marginBottom: 10 }}>Down Payment</label>
+                <div style={{ opacity: downMode === "pct" ? 1 : 0.3, pointerEvents: downMode === "pct" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                  <CalcInput label="Percentage" value={downMode === "pct" ? downPct : ""} onChange={(v) => { setDownPct(v); }} suffix="%" step={1} min={0} max={100} />
+                </div>
+                <button onClick={() => {
+                  if (downMode === "pct") { setDownMode("dollar"); setDownDollarOverride(null); }
+                  else { setDownMode("pct"); setDownDollarOverride(null); }
+                }} style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%",
+                  padding: "7px 0", margin: "8px 0", borderRadius: 6, border: "none",
+                  background: P.gold, color: "#fff",
+                  fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F.body,
+                }}>
+                  Switch to {downMode === "pct" ? "Dollar Amount" : "Percentage"}
+                </button>
+                <div style={{ opacity: downMode === "dollar" ? 1 : 0.3, pointerEvents: downMode === "dollar" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                  <CalcInput label="Dollar Amount" value={downMode === "dollar" && downDollarOverride ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
+                </div>
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
