@@ -1588,6 +1588,7 @@ function PreQualPage() {
   const [monthlyDebts, setMonthlyDebts] = useState(() => { const v = parseFloat(params.get("debts")); return v >= 0 ? v : 450; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
+  const [downMode, setDownMode] = useState("pct"); // "pct" or "dollar"
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [showStudentCalc, setShowStudentCalc] = useState(false);
   const [studentBalance, setStudentBalance] = useState(0);
@@ -1792,22 +1793,22 @@ function PreQualPage() {
 
   // Solve max price from max housing payment
   // Effective down payment: use dollar override to derive percentage if set
+  const isDollarMode = downMode === "dollar" && downDollarOverride > 0;
+
   const effectiveDownPct = useMemo(() => {
-    if (!downDollarOverride || downDollarOverride <= 0) return downPct;
-    // Estimate a rough price to derive %, will refine iteratively
+    if (!isDollarMode) return downPct;
     const roughMaxPayment = Math.floor(grossIncome * 0.45 - monthlyDebts);
     const roughPrice = Math.max(roughMaxPayment * 150, downDollarOverride * 2);
     return Math.min(Math.max(Math.round((downDollarOverride / roughPrice) * 10000) / 100, 0), 99);
-  }, [downDollarOverride, downPct, grossIncome, monthlyDebts]);
+  }, [isDollarMode, downDollarOverride, downPct, grossIncome, monthlyDebts]);
 
   const solvePrice = (maxPayment, rate, miRateAnnual, upfrontFeePct) => {
     if (maxPayment <= 0) return 0;
     const mr = (rate / 100) / 12;
     const n = term * 12;
-    const useFixedDown = downDollarOverride > 0;
     let price = maxPayment * 170;
     for (let i = 0; i < 25; i++) {
-      const baseLoan = useFixedDown ? Math.max(price - downDollarOverride, 0) : price * (1 - effectiveDownPct / 100);
+      const baseLoan = isDollarMode ? Math.max(price - downDollarOverride, 0) : price * (1 - effectiveDownPct / 100);
       const totalLoan = baseLoan * (1 + upfrontFeePct / 100);
       const pi = totalLoan > 0 ? totalLoan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1) : 0;
       const mi = (baseLoan * (miRateAnnual / 100)) / 12;
@@ -1822,7 +1823,7 @@ function PreQualPage() {
   };
 
   // Program definitions — use effectiveDownPct for MI tiers and eligibility
-  const dpForCalc = downDollarOverride > 0 ? effectiveDownPct : downPct;
+  const dpForCalc = isDollarMode ? effectiveDownPct : downPct;
   const convMiRate = dpForCalc < 5 ? 0.52 : dpForCalc < 10 ? 0.37 : dpForCalc < 20 ? 0.27 : 0;
   const fhaMiRate = dpForCalc < 5 ? 0.55 : 0.50;
 
@@ -1852,7 +1853,7 @@ function PreQualPage() {
 
   // Calculate for each program
   const results = programs.map(prog => {
-    const useFixedDown = downDollarOverride > 0;
+    const useFixedDown = isDollarMode;
 
     // When using fixed dollar down, eligibility is determined by whether the dollar
     // amount can meet the minimum down requirement at ANY price (it always can, we just cap the price)
@@ -2009,17 +2010,22 @@ function PreQualPage() {
                   ))}
                 </div>
               </div>
-              <div style={{ opacity: downDollarOverride > 0 ? 0.4 : 1, pointerEvents: downDollarOverride > 0 ? "none" : "auto", transition: "opacity 0.2s" }}>
-                <CalcInput label="Down Payment %" value={downPct} onChange={(v) => { setDownPct(v); setDownDollarOverride(null); }} suffix="%" step={1} min={0} max={100} />
+              <div style={{ opacity: downMode === "pct" ? 1 : 0.35, pointerEvents: downMode === "pct" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                <CalcInput label="Down Payment %" value={downMode === "pct" ? downPct : ""} onChange={(v) => { setDownPct(v); }} suffix="%" step={1} min={0} max={100} />
               </div>
-              <div>
-                <CalcInput label="Down Payment $ (optional)" value={downDollarOverride !== null ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
-                {downDollarOverride > 0 && (
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
-                    <p style={{ fontSize: 10, color: P.warmGrayLight }}>Using fixed dollar amount.</p>
-                    <button onClick={() => setDownDollarOverride(null)} style={{ fontSize: 10, color: P.gold, background: "none", border: "none", cursor: "pointer", fontFamily: F.body, textDecoration: "underline" }}>Switch to %</button>
-                  </div>
-                )}
+              <button onClick={() => {
+                if (downMode === "pct") { setDownMode("dollar"); setDownDollarOverride(null); }
+                else { setDownMode("pct"); setDownDollarOverride(null); }
+              }} style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                padding: "7px 0", borderRadius: 6, border: "none",
+                background: P.gold, color: "#fff",
+                fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F.body,
+              }}>
+                Switch to {downMode === "pct" ? "Dollar Amount" : "Percentage"}
+              </button>
+              <div style={{ opacity: downMode === "dollar" ? 1 : 0.35, pointerEvents: downMode === "dollar" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                <CalcInput label="Down Payment $" value={downMode === "dollar" && downDollarOverride ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
               </div>
               <div>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
