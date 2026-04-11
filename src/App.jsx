@@ -1500,10 +1500,35 @@ function ComparePage() {
         .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }
         .compare-card { width: 320px; flex-shrink: 0; }
         @media (max-width: 720px) { .compare-card { width: 100%; max-width: 360px; } }
+
+        .print-only { display: none; }
+
+        @media print {
+          @page { size: landscape; margin: 0.4in; }
+          body { background: #fff !important; }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          .compare-grid {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            padding-top: 20px !important;
+            page-break-inside: avoid;
+          }
+          .compare-card {
+            width: 32% !important;
+            max-width: none !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          .content-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
       `}</style>
 
       {/* Header */}
-      <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+      <div className="no-print" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
@@ -1514,7 +1539,18 @@ function ComparePage() {
       </div>
 
       <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
+        {/* Print-only branded header */}
+        <div className="print-only" style={{ marginBottom: 20, paddingBottom: 16, borderBottom: `2px solid ${P.navy}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 2 }}>🤓 The Mortgage Geek · Loan Comparison</div>
+              <div style={{ fontSize: 11, color: P.warmGray }}>Nick Peters · NMLS# 1119524 · (615) 656-0737 · mortgagegeek.ai</div>
+            </div>
+            <div style={{ fontSize: 10, color: P.warmGrayLight, textAlign: "right" }}>Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</div>
+          </div>
+        </div>
+
+        <div className="no-print" style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side by Side</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Loan Comparison Tool</h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Save up to 3 scenarios from the calculator and compare them side by side. Your scenarios are saved on this device.</p>
@@ -1531,9 +1567,12 @@ function ComparePage() {
           </div>
         ) : (
           <>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+            <div className="no-print" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
               <p style={{ fontSize: 13, color: P.warmGray }}>{scenarios.length} of 3 scenarios saved</p>
-              <button onClick={resetAll} style={{ padding: "6px 14px", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Clear All</button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => window.print()} style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "none", background: P.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F.body }}>📄 Save as PDF</button>
+                <button onClick={resetAll} style={{ padding: "8px 14px", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Clear All</button>
+              </div>
             </div>
 
             <div className="compare-grid">
@@ -1566,7 +1605,7 @@ function ComparePage() {
                           <span style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
                         </div>
                       ))}
-                      <button onClick={() => removeScenario(s.id)} style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
+                      <button onClick={() => removeScenario(s.id)} className="no-print" style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
                     </div>
                   </div>
                 );
@@ -1574,16 +1613,21 @@ function ComparePage() {
             </div>
 
             {scenarios.length < 3 && (
-              <div style={{ textAlign: "center", marginTop: 32 }}>
+              <div className="no-print" style={{ textAlign: "center", marginTop: 32 }}>
                 <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>+ Add another scenario from the Calculator</a>
               </div>
             )}
           </>
         )}
 
-        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 40, maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}>
+        <p className="no-print" style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 40, maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}>
           Scenarios are saved locally on this device only. Clearing your browser data will remove them. NMLS# 1119524.
         </p>
+
+        {/* Print-only footer */}
+        <div className="print-only" style={{ marginTop: 24, paddingTop: 12, borderTop: `1px solid ${P.creamDark}`, textAlign: "center", fontSize: 9, color: P.warmGrayLight, lineHeight: 1.6 }}>
+          Educational only · Not a loan estimate or commitment to lend · Rates and terms subject to change · NMLS# 1119524 · Equal Housing Lender · mortgagegeek.ai
+        </div>
       </div>
     </div>
   );
