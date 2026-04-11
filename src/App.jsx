@@ -1684,6 +1684,7 @@ function CashToClosePage() {
   const [stateCode, setStateCode] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("All other counties");
   const [totalCredits, setTotalCredits] = useState(0);
+  const [waiveEscrows, setWaiveEscrows] = useState(false);
   const [vaUsage, setVaUsage] = useState("first");
 
   // Active rate switches with selected program
@@ -1826,9 +1827,13 @@ function CashToClosePage() {
   // Tax reserves: based on state-specific schedule by closing month
   const closingMonth = closeDateObj.getMonth() + 1; // 1-12
   const taxReserveMonths = TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth] ?? 2;
-  const taxReserves = (taxAnnual / 12) * taxReserveMonths;
-  // Insurance reserves: standard 2 months
-  const insuranceReserves = (insuranceAnnual / 12) * 2;
+  const rawTaxReserves = (taxAnnual / 12) * taxReserveMonths;
+  const rawInsuranceReserves = (insuranceAnnual / 12) * 3;
+  // Escrow waiver eligibility: Conventional with 20%+ down
+  const canWaiveEscrows = program === "Conventional" && downPct >= 20;
+  const escrowsWaived = canWaiveEscrows && waiveEscrows;
+  const taxReserves = escrowsWaived ? 0 : rawTaxReserves;
+  const insuranceReserves = escrowsWaived ? 0 : rawInsuranceReserves;
   const reservesTotal = taxReserves + insuranceReserves;
 
   // Totals
@@ -2001,10 +2006,40 @@ function CashToClosePage() {
 
             <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
-              <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
-              <Row label="2 Months Insurance" val={fmt(insuranceReserves)} />
-              <Row label="Reserves Subtotal" val={fmt(reservesTotal)} subtotal />
-              <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
+
+              {/* Escrow Waiver dropdown — Conv only, 20%+ down */}
+              <div style={{ marginBottom: 12, padding: "10px 12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}`, opacity: canWaiveEscrows ? 1 : 0.5 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Waive Escrows?</label>
+                  <select
+                    value={waiveEscrows ? "yes" : "no"}
+                    onChange={(e) => setWaiveEscrows(e.target.value === "yes")}
+                    disabled={!canWaiveEscrows}
+                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "6px 28px 6px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", cursor: canWaiveEscrows ? "pointer" : "not-allowed", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}>
+                    <option value="no">No — Standard Escrow</option>
+                    <option value="yes">Yes — Waive Escrows</option>
+                  </select>
+                </div>
+                <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6, lineHeight: 1.5 }}>
+                  {canWaiveEscrows
+                    ? "Conv only · 20%+ down required · You'll pay taxes and insurance directly when due (not collected at closing or monthly)"
+                    : "Escrow waiver requires Conventional financing with 20% or more down payment"}
+                </p>
+              </div>
+
+              {escrowsWaived ? (
+                <>
+                  <p style={{ fontSize: 12, color: P.sage, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
+                  <Row label="Reserves Subtotal" val={fmt(0)} subtotal />
+                </>
+              ) : (
+                <>
+                  <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
+                  <Row label="3 Months Insurance" val={fmt(insuranceReserves)} />
+                  <Row label="Reserves Subtotal" val={fmt(reservesTotal)} subtotal />
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
+                </>
+              )}
             </div>
 
             <div style={{ marginTop: 20, padding: "16px", background: P.cream, borderRadius: 10 }}>
