@@ -1650,21 +1650,86 @@ function CashToClosePage() {
   // Tax reserves prepaid schedule by state — # of months collected based on closing month
   // From CL Guide National Taxes Matrix v32, defaulting to "all remaining" schedule
   // For 2/13 splits, use 13 (more conservative)
+  // VERIFIED states have been hand-checked. ESTIMATED states are auto-extracted and may need refinement.
+  const STATE_VERIFIED = new Set(["TN", "GA", "MS", "AR", "KY"]);
+
   const TAX_RESERVE_SCHEDULE = {
+    // ✓ Verified
     TN: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     GA: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
     MS: { 1:3, 2:4, 3:5, 4:6, 5:7, 6:8, 7:9, 8:10, 9:11, 10:12, 11:12, 12:2 },
     AR: { 1:12, 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9, 11:10, 12:11 },
     KY: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+    // ⚠ Auto-extracted, pending hand-verification
+    AL: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+    AZ: { 1:6, 2:2, 3:2, 4:5, 5:5, 6:5, 7:6, 8:2, 9:2, 10:3, 11:4, 12:5 },
+    CA: { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:2, 10:5, 11:5, 12:6 },
+    CO: { 1:4, 2:5, 3:6, 4:2, 5:2, 6:3, 7:4, 8:5, 9:6, 10:2, 11:2, 12:3 },
+    DE: { 1:7, 2:8, 3:9, 4:10, 5:11, 6:12, 7:13, 8:2, 9:3, 10:4, 11:5, 12:6 },
+    FL: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:13, 11:3, 12:4 },
+    HI: { 1:2, 2:3, 3:4, 4:5, 5:6, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:1 },
+    IA: { 1:7, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:3, 10:4, 11:5, 12:6 },
+    IL: { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:2, 10:3, 11:4, 12:5 },
+    IN: { 1:5, 2:6, 3:7, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:2, 11:3, 12:4 },
+    KS: { 1:5, 2:6, 3:2, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:2, 11:3, 12:4 },
+    LA: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:2, 11:2, 12:3 },
+    MD: { 1:9, 2:10, 3:11, 4:12, 5:13, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    MN: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:2, 10:3, 11:4, 12:5 },
+    MO: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    NC: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    NE: { 1:3, 2:4, 3:5, 4:6, 5:7, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    NJ: { 1:2, 2:3, 3:4, 4:2, 5:3, 6:4, 7:2, 8:3, 9:4, 10:2, 11:3, 12:4 },
+    NM: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:2, 10:2, 11:4, 12:5 },
+    NV: { 1:2, 2:1, 3:2, 4:3, 5:4, 6:3, 7:3, 8:2, 9:2, 10:2, 11:2, 12:2 },
+    OH: { 1:2, 2:3, 3:4, 4:5, 5:6, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    OK: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:13, 12:13 },
+    OR: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:2, 10:2, 11:3, 12:4 },
+    PA: { 1:9, 2:10, 3:11, 4:12, 5:13, 6:4, 7:5, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    SC: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    TX: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:13, 12:13 },
+    UT: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:2, 10:2, 11:3, 12:4 },
+    VA: { 1:3, 2:4, 3:5, 4:6, 5:2, 6:3, 7:4, 8:5, 9:6, 10:7, 11:8, 12:2 },
+    WA: { 1:6, 2:2, 3:2, 4:3, 5:4, 6:5, 7:6, 8:2, 9:2, 10:3, 11:4, 12:5 },
+    WI: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    WV: { 1:7, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:3, 10:4, 11:5, 12:6 },
   };
 
+  // Reasonable national fallback schedule for any state without verified data
+  const FALLBACK_SCHEDULE = { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 };
+
+  // Effective property tax rates by state (national averages, used as default when no metro selected)
+  // Sources: Tax Foundation, US Census ACS 5-year property tax data
+  const STATE_DEFAULT_TAX_RATES = {
+    AL:0.0040, AK:0.0117, AZ:0.0066, AR:0.0065, CA:0.0073, CO:0.0051, CT:0.0214, DE:0.0061, DC:0.0062,
+    FL:0.0091, GA:0.0090, HI:0.0028, ID:0.0069, IL:0.0223, IN:0.0085, IA:0.0157, KS:0.0141, KY:0.0085,
+    LA:0.0055, ME:0.0136, MD:0.0109, MA:0.0123, MI:0.0154, MN:0.0112, MS:0.0080, MO:0.0097, MT:0.0084,
+    NE:0.0173, NV:0.0060, NH:0.0218, NJ:0.0249, NM:0.0080, NY:0.0173, NC:0.0084, ND:0.0098, OH:0.0156,
+    OK:0.0090, OR:0.0093, PA:0.0158, RI:0.0163, SC:0.0057, SD:0.0132, TN:0.0075, TX:0.0180, UT:0.0066,
+    VT:0.0190, VA:0.0082, WA:0.0098, WV:0.0058, WI:0.0185, WY:0.0061,
+  };
+
+  // Full list of US states + DC for the dropdown
+  const ALL_STATES = [
+    ["AL","Alabama"],["AK","Alaska"],["AZ","Arizona"],["AR","Arkansas"],["CA","California"],
+    ["CO","Colorado"],["CT","Connecticut"],["DE","Delaware"],["DC","District of Columbia"],["FL","Florida"],
+    ["GA","Georgia"],["HI","Hawaii"],["ID","Idaho"],["IL","Illinois"],["IN","Indiana"],
+    ["IA","Iowa"],["KS","Kansas"],["KY","Kentucky"],["LA","Louisiana"],["ME","Maine"],
+    ["MD","Maryland"],["MA","Massachusetts"],["MI","Michigan"],["MN","Minnesota"],["MS","Mississippi"],
+    ["MO","Missouri"],["MT","Montana"],["NE","Nebraska"],["NV","Nevada"],["NH","New Hampshire"],
+    ["NJ","New Jersey"],["NM","New Mexico"],["NY","New York"],["NC","North Carolina"],["ND","North Dakota"],
+    ["OH","Ohio"],["OK","Oklahoma"],["OR","Oregon"],["PA","Pennsylvania"],["RI","Rhode Island"],
+    ["SC","South Carolina"],["SD","South Dakota"],["TN","Tennessee"],["TX","Texas"],["UT","Utah"],
+    ["VT","Vermont"],["VA","Virginia"],["WA","Washington"],["WV","West Virginia"],["WI","Wisconsin"],["WY","Wyoming"],
+  ];
+
   // Tax rate by state and metro (matches the calculator's metro system)
+  // Only verified states have detailed metro breakdowns; others fall back to STATE_DEFAULT_TAX_RATES
   const STATE_METROS = {
-    TN: { default: 0.0075, metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
-    GA: { default: 0.0090, metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
-    MS: { default: 0.0080, metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
-    AR: { default: 0.0065, metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
-    KY: { default: 0.0085, metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
+    TN: { metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
+    GA: { metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
+    MS: { metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
+    AR: { metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
+    KY: { metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
   };
 
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -1726,7 +1791,11 @@ function CashToClosePage() {
   const insuranceAnnual = Math.round(homePrice * 0.0035);
 
   // Auto-update tax rate when state/metro changes
-  const taxRate = STATE_METROS[stateCode]?.metros?.[taxMetro] ?? STATE_METROS[stateCode]?.default ?? 0.008;
+  const hasMetros = !!STATE_METROS[stateCode];
+  const taxRate = hasMetros
+    ? (STATE_METROS[stateCode]?.metros?.[taxMetro] ?? STATE_DEFAULT_TAX_RATES[stateCode] ?? 0.008)
+    : (STATE_DEFAULT_TAX_RATES[stateCode] ?? 0.008);
+  const isVerifiedState = STATE_VERIFIED.has(stateCode);
   const taxAnnual = Math.round(homePrice * taxRate);
 
   // Reset metro to default when state changes
@@ -1804,10 +1873,11 @@ function CashToClosePage() {
   // KY: $0.50/$500 ($1.00/$1000), paid by SELLER
   let transferTax = 0, transferTaxNote = "";
   if (stateCode === "TN") { transferTax = homePrice * 0.0037; transferTaxNote = "TN Realty Transfer Tax: $0.37 per $100 of value"; }
-  if (stateCode === "GA") { transferTax = homePrice * 0.001; transferTaxNote = "GA Real Estate Transfer Tax: $1.00 per $1,000 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
-  if (stateCode === "MS") { transferTax = 0; transferTaxNote = "Mississippi has no state transfer tax"; }
-  if (stateCode === "AR") { transferTax = homePrice * 0.0033; transferTaxNote = "AR Real Estate Transfer Tax: $3.30 per $1,000 of value"; }
-  if (stateCode === "KY") { transferTax = homePrice * 0.001; transferTaxNote = "KY Real Estate Transfer Tax: $0.50 per $500 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
+  else if (stateCode === "GA") { transferTax = homePrice * 0.001; transferTaxNote = "GA Real Estate Transfer Tax: $1.00 per $1,000 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
+  else if (stateCode === "MS") { transferTax = 0; transferTaxNote = "Mississippi has no state transfer tax"; }
+  else if (stateCode === "AR") { transferTax = homePrice * 0.0033; transferTaxNote = "AR Real Estate Transfer Tax: $3.30 per $1,000 of value"; }
+  else if (stateCode === "KY") { transferTax = homePrice * 0.001; transferTaxNote = "KY Real Estate Transfer Tax: $0.50 per $500 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
+  else { transferTax = 0; transferTaxNote = `⚠️ Transfer tax for ${stateCode} not yet verified — confirm with your closing attorney. This estimate currently excludes any state-level transfer tax.`; }
 
   // Mortgage recording tax (TN has one!)
   let mortgageTax = 0;
@@ -1826,7 +1896,7 @@ function CashToClosePage() {
   // Reserves (escrow setup)
   // Tax reserves: based on state-specific schedule by closing month
   const closingMonth = closeDateObj.getMonth() + 1; // 1-12
-  const taxReserveMonths = TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth] ?? 2;
+  const taxReserveMonths = TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth] ?? FALLBACK_SCHEDULE[closingMonth];
   const rawTaxReserves = (taxAnnual / 12) * taxReserveMonths;
   const rawInsuranceReserves = (insuranceAnnual / 12) * 3;
   // Escrow waiver eligibility: Conventional with 20%+ down
@@ -1912,22 +1982,43 @@ function CashToClosePage() {
             <div>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
               <select value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
-                <option value="TN">Tennessee</option>
-                <option value="GA">Georgia</option>
-                <option value="MS">Mississippi</option>
-                <option value="AR">Arkansas</option>
-                <option value="KY">Kentucky</option>
+                <optgroup label="✓ Verified">
+                  {ALL_STATES.filter(([code]) => STATE_VERIFIED.has(code)).map(([code, name]) => (
+                    <option key={code} value={code}>{name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="⚠ Estimated">
+                  {ALL_STATES.filter(([code]) => !STATE_VERIFIED.has(code)).map(([code, name]) => (
+                    <option key={code} value={code}>{name}</option>
+                  ))}
+                </optgroup>
               </select>
             </div>
-            <div>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
-              <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
-                {Object.entries(STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
-            </div>
+            {hasMetros ? (
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
+                <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                  {Object.entries(STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Property Tax Rate</label>
+                <div style={{ width: "100%", border: `1px dashed ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.warmGray }}>
+                  Statewide avg ({(taxRate * 100).toFixed(2)}%)
+                </div>
+              </div>
+            )}
           </div>
+          {!isVerifiedState && (
+            <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(212,168,67,0.1)", borderRadius: 8, border: `1px solid rgba(212,168,67,0.35)` }}>
+              <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
+                ⚠️ <strong>Estimated state.</strong> Property tax rate is a statewide average and transfer tax may not be included. For precise figures in {ALL_STATES.find(([c]) => c === stateCode)?.[1]}, contact me directly. We're rolling out hand-verified data state-by-state.
+              </p>
+            </div>
+          )}
           <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 4, fontStyle: "italic" }}>
             Auto-calculated: HOI {fmt(insuranceAnnual)}/yr (0.35% of price) · Property tax {fmt(taxAnnual)}/yr ({(taxRate * 100).toFixed(2)}%)
           </p>
