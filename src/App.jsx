@@ -15,7 +15,7 @@ const P = {
 // Single source of truth for program colors — used in calculator, prequal, and comparison
 const PROGRAM_COLORS = {
   Conventional: "#1B3A4B", // navy
-  FHA: "#B8860B",          // gold (brand)
+  FHA: "#8B6914",          // goldMuted (darker for better white text contrast)
   VA: "#5A7A6E",           // sage
 };
 
