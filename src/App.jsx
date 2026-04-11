@@ -2051,20 +2051,57 @@ function CashToClosePage() {
               )}
             </div>
 
-            <div style={{ marginTop: 20, padding: "16px", background: P.cream, borderRadius: 10 }}>
-              <Row label="Closing Costs (excl. financed fee)" val={fmt(closingCostsExFee)} bold />
+            <h3 style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 12, marginTop: 24, textAlign: "center" }}>Total Closing Costs</h3>
+            <div style={{ padding: "18px 20px", background: P.cream, borderRadius: 12, border: `2px solid ${PROG_COLOR}` }}>
+              {/* Stack of subtotals */}
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `1px solid ${P.creamDark}` }}>
+                <span style={{ color: P.warmGray, fontWeight: 600 }}>Lender Fees</span>
+                <span style={{ fontWeight: 700, color: P.text }}>{fmt(lenderTotal)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `1px solid ${P.creamDark}` }}>
+                <span style={{ color: P.warmGray, fontWeight: 600 }}>Title & Escrow</span>
+                <span style={{ fontWeight: 700, color: P.text }}>{fmt(titleTotal)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `1px solid ${P.creamDark}` }}>
+                <span style={{ color: P.warmGray, fontWeight: 600 }}>Government & Recording</span>
+                <span style={{ fontWeight: 700, color: P.text }}>{fmt(transferTax + mortgageTax)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `1px solid ${P.creamDark}` }}>
+                <span style={{ color: P.warmGray, fontWeight: 600 }}>Prepaid Items</span>
+                <span style={{ fontWeight: 700, color: P.text }}>{fmt(prepaidsTotal)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `2px solid ${P.warmGrayLight}` }}>
+                <span style={{ color: P.warmGray, fontWeight: 600 }}>Escrow Reserves</span>
+                <span style={{ fontWeight: 700, color: P.text }}>{fmt(reservesTotal)}</span>
+              </div>
+
+              {/* Grand total (excl. financed fee) */}
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 6px", fontSize: 15 }}>
+                <span style={{ color: P.navy, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, fontSize: 12 }}>Total Closing Costs</span>
+                <span style={{ fontWeight: 700, color: PROG_COLOR, fontSize: 18, fontFamily: F.display }}>{fmt(closingCostsExFee)}</span>
+              </div>
+
+              {/* Financed fee section — FHA/VA only */}
               {upfrontFee > 0 && (
                 <>
-                  <Row label={`+ ${upfrontLabel} (financed)`} val={fmt(upfrontFee)} sub italic />
-                  <Row label="Closing Costs (incl. financed fee)" val={fmt(closingCostsIncFee)} bold color={PROG_COLOR} />
-                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 4 }}>The {upfrontLabel} is rolled into your loan — not paid in cash at closing.</p>
+                  <div style={{ marginTop: 8, paddingTop: 12, borderTop: `1px dashed ${P.creamDark}` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 12 }}>
+                      <span style={{ color: P.warmGrayLight, fontStyle: "italic" }}>+ {upfrontLabel} (financed)</span>
+                      <span style={{ fontWeight: 600, color: P.warmGrayLight, fontStyle: "italic" }}>{fmt(upfrontFee)}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0 0", fontSize: 14 }}>
+                      <span style={{ color: P.navy, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5, fontSize: 11 }}>With Financed Fee</span>
+                      <span style={{ fontWeight: 700, color: PROG_COLOR, fontSize: 16, fontFamily: F.display }}>{fmt(closingCostsIncFee)}</span>
+                    </div>
+                    <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6, lineHeight: 1.5 }}>The {upfrontLabel} is rolled into your loan — not paid in cash at closing.</p>
+                  </div>
                 </>
               )}
             </div>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Cash to Close Calculation</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 24 }}>Cash to Close Calculation</h3>
             <Row label="Down Payment" val={fmt(downAmt)} />
-            <Row label="+ Closing Costs (excl. financed fee)" val={fmt(closingCostsExFee)} />
+            <Row label="+ Total Closing Costs" val={fmt(closingCostsExFee)} />
             <div style={{ marginTop: 12, marginBottom: 4 }}>
               <CalcInput label="− Total Credits" value={totalCredits} onChange={setTotalCredits} prefix="$" step={500} comma />
               <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 4, lineHeight: 1.5 }}>Combine earnest money already paid, seller concessions, lender credits, and any other credits into one total here.</p>
