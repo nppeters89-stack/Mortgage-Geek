@@ -226,6 +226,7 @@ const NAV_TOPICS = [
 const NAV_TOOLS = [
   { id: "calculator", label: "Payment Calculator", icon: "🧮", href: "/calculator" },
   { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
+  { id: "compare", label: "Loan Comparison", icon: "⚖️", href: "/compare" },
   { id: "glossary", label: "Jargon Decoder", icon: "📖" },
 ];
 
@@ -1465,6 +1466,119 @@ function AboutPage() {
   );
 }
 
+function ComparePage() {
+  const STORAGE_KEY = "mg_compare_scenarios";
+  const [scenarios, setScenarios] = useState(() => {
+    try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : []; }
+    catch { return []; }
+  });
+
+  const removeScenario = (id) => {
+    const next = scenarios.filter(s => s.id !== id);
+    setScenarios(next);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+  };
+
+  const resetAll = () => {
+    if (!window.confirm("Clear all saved scenarios? This cannot be undone.")) return;
+    setScenarios([]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
+  };
+
+  // Find the cheapest total payment for "best" badge
+  const lowestTotal = scenarios.length > 0 ? Math.min(...scenarios.map(s => s.total)) : 0;
+
+  return (
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+      <style>{globalCSS}{`
+        .compare-grid { display: grid; grid-template-columns: repeat(${Math.max(scenarios.length, 1)}, 1fr); gap: 16px; }
+        @media (max-width: 800px) { .compare-grid { grid-template-columns: 1fr; } }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
+            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+          </a>
+          <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>+ Add Scenario</a>
+        </div>
+      </div>
+
+      <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side by Side</span>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Loan Comparison Tool</h1>
+          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Save up to 3 scenarios from the calculator and compare them side by side. Your scenarios are saved on this device.</p>
+        </div>
+
+        {scenarios.length === 0 ? (
+          <div className="content-card" style={{ padding: "48px 32px", textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+            <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>⚖️</span>
+            <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 8 }}>No scenarios saved yet</h3>
+            <p style={{ fontSize: 14, color: P.warmGray, marginBottom: 24, lineHeight: 1.6 }}>
+              Head to the calculator, build a scenario, select a loan program, and tap "Save to Comparison." Come back here to see them stacked side by side.
+            </p>
+            <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 28px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>🧮 Open the Calculator →</a>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
+              <p style={{ fontSize: 13, color: P.warmGray }}>{scenarios.length} of 3 scenarios saved</p>
+              <button onClick={resetAll} style={{ padding: "6px 14px", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Clear All</button>
+            </div>
+
+            <div className="compare-grid">
+              {scenarios.map((s) => {
+                const isBest = s.total === lowestTotal && scenarios.length > 1;
+                return (
+                  <div key={s.id} className="content-card" style={{ overflow: "hidden", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent" }}>
+                    {isBest && <span style={{ position: "absolute", top: 8, right: 8, zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "3px 10px", borderRadius: 50 }}>★ Lowest Payment</span>}
+                    <div style={{ background: s.color || P.navy, padding: "20px", textAlign: "center" }}>
+                      <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
+                      <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
+                      <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {s.rate}%</span>
+                    </div>
+                    <div style={{ padding: "16px 20px" }}>
+                      {[
+                        { label: "Home Price", val: fmt(s.homePrice) },
+                        { label: "Down Payment", val: `${fmt(s.downAmt)} (${s.downPct}%)` },
+                        { label: "Loan Amount", val: fmt(s.loan) },
+                        { label: "Principal & Interest", val: `${fmt(s.pi)}/mo` },
+                        ...(s.mi > 0 ? [{ label: "Mortgage Insurance", val: `${fmt(s.mi)}/mo` }] : []),
+                        { label: "Property Tax", val: `${fmt(s.tax)}/mo` },
+                        { label: "Insurance", val: `${fmt(s.insurance)}/mo` },
+                        { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true },
+                      ].map((row, ri) => (
+                        <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 12, borderBottom: ri < 7 ? `1px solid ${P.cream}` : "none" }}>
+                          <span style={{ color: P.warmGrayLight }}>{row.label}</span>
+                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.bold ? s.color || P.navy : P.text }}>{row.val}</span>
+                        </div>
+                      ))}
+                      <button onClick={() => removeScenario(s.id)} style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {scenarios.length < 3 && (
+              <div style={{ textAlign: "center", marginTop: 32 }}>
+                <a href="/calculator" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>+ Add another scenario from the Calculator</a>
+              </div>
+            )}
+          </>
+        )}
+
+        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 40, maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}>
+          Scenarios are saved locally on this device only. Clearing your browser data will remove them. NMLS# 1119524.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function NextSteps() {
   return (
     <section id="next-steps" style={{ padding: "64px 40px" }}>
@@ -2431,6 +2545,8 @@ function CalculatorPage() {
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [saveToast, setSaveToast] = useState(null);
   useEffect(() => { setDownDollarOverride(null); }, [homePrice]); // reset override when price changes
 
   const handleDownPctChange = (v) => { setDownPct(v); setDownDollarOverride(null); };
@@ -2819,6 +2935,15 @@ function CalculatorPage() {
           )}
         </div>
 
+        {/* Section divider — Your Results */}
+        <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+          <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${P.creamDark}, transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
+          <div style={{ position: "relative", display: "inline-block", background: P.cream, padding: "0 20px" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold }}>↓ Your Results ↓</span>
+            <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to select it, then save to the Loan Comparison Tool</p>
+          </div>
+        </div>
+
         {/* Side-by-side cards */}
         <div className="calc-cards-grid">
           {programs.map((prog, i) => {
@@ -2845,8 +2970,18 @@ function CalculatorPage() {
               );
             }
 
+            const isSelected = selectedProgram === prog.name;
             return (
-              <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
+              <div key={i} className="content-card" onClick={() => setSelectedProgram(isSelected ? null : prog.name)} style={{
+                overflow: "hidden", position: "relative", cursor: "pointer",
+                border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
+                boxShadow: isSelected ? `0 0 0 4px rgba(184,134,11,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
+                transform: isSelected ? "translateY(-2px)" : "translateY(0)",
+                transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
+              }}>
+                {isSelected && (
+                  <span style={{ position: "absolute", top: 10, left: 10, zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "4px 10px", borderRadius: 50, boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>✓ Selected</span>
+                )}
                 {/* Header */}
                 <div style={{ background: prog.color, padding: "24px 20px", textAlign: "center", position: "relative" }}>
                   {isBest && (
@@ -2971,6 +3106,56 @@ function CalculatorPage() {
           </div>
         </div>
 
+        {/* Save to Comparison */}
+        {(() => {
+          const selectedProg = selectedProgram ? programs.find(p => p.name === selectedProgram && p.eligible) : null;
+          const saveScenario = () => {
+            if (!selectedProg) return;
+            const STORAGE_KEY = "mg_compare_scenarios";
+            let saved = [];
+            try { const raw = localStorage.getItem(STORAGE_KEY); saved = raw ? JSON.parse(raw) : []; } catch {}
+            if (saved.length >= 3) {
+              setSaveToast({ type: "error", msg: "Comparison is full (3 max). Remove one first." });
+              setTimeout(() => setSaveToast(null), 4000);
+              return;
+            }
+            const scenario = {
+              id: Date.now(),
+              program: selectedProg.name,
+              color: selectedProg.color,
+              homePrice, downPct, downAmt, term, rate: selectedProg.rate,
+              loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
+              tax: taxes, insurance, total: selectedProg.total,
+            };
+            saved.push(scenario);
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch {}
+            setSaveToast({ type: "success", msg: `${selectedProg.name} saved! ${saved.length} of 3 in comparison.` });
+            setTimeout(() => setSaveToast(null), 4000);
+          };
+          return (
+            <div style={{ textAlign: "center", marginBottom: 24 }}>
+              <button onClick={saveScenario} disabled={!selectedProg} style={{
+                display: "inline-flex", alignItems: "center", gap: 8,
+                padding: "14px 28px", borderRadius: 10, border: "none",
+                background: selectedProg ? P.gold : P.creamDark,
+                color: selectedProg ? "#fff" : P.warmGrayLight,
+                fontFamily: F.body, fontSize: 14, fontWeight: 600,
+                cursor: selectedProg ? "pointer" : "not-allowed",
+                boxShadow: selectedProg ? "0 4px 16px rgba(184,134,11,0.3)" : "none",
+                transition: "all 0.2s",
+              }}>
+                ⚖️ {selectedProg ? `Save ${selectedProg.name} to Comparison` : "Select a card above to save"}
+              </button>
+              {saveToast && (
+                <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sage }}>{saveToast.msg}</p>
+              )}
+              <div style={{ marginTop: 10 }}>
+                <a href="/compare" style={{ fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>View saved scenarios →</a>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Text results */}
         {(() => {
           const eligible = programs.filter(p => p.eligible);
@@ -3025,12 +3210,14 @@ export default function MortgageLandingPage() {
     if (path === "calculator") return "calculator";
     if (path === "prequal") return "prequal";
     if (path === "about") return "about";
+    if (path === "compare") return "compare";
     return "main";
   });
 
   if (currentPage === "calculator") return <CalculatorPage />;
   if (currentPage === "prequal") return <PreQualPage />;
   if (currentPage === "about") return <AboutPage />;
+  if (currentPage === "compare") return <ComparePage />;
   return <MainSite />;
 }
 
