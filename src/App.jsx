@@ -1671,7 +1671,11 @@ function CashToClosePage() {
   const [program, setProgram] = useState("Conventional");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
-  const [rate, setRate] = useState(6.5);
+  const [convRate, setConvRate] = useState(6.75);
+  const [fhaRate, setFhaRate] = useState(6.25);
+  const [vaRate, setVaRate] = useState(6.25);
+  const [ratesLoaded, setRatesLoaded] = useState(false);
+  const [rateSource, setRateSource] = useState(null);
   const [term] = useState(30);
   const [closeDate, setCloseDate] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 30);
@@ -1681,6 +1685,37 @@ function CashToClosePage() {
   const [taxMetro, setTaxMetro] = useState("All other counties");
   const [totalCredits, setTotalCredits] = useState(0);
   const [vaUsage, setVaUsage] = useState("first");
+
+  // Active rate switches with selected program
+  const rate = program === "Conventional" ? convRate : program === "FHA" ? fhaRate : vaRate;
+  const setRate = (v) => {
+    if (program === "Conventional") setConvRate(v);
+    else if (program === "FHA") setFhaRate(v);
+    else setVaRate(v);
+  };
+
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125;
+
+  // Fetch live MND rates on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/rates");
+        const data = await res.json();
+        if (data.success && data.rates) {
+          const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
+          const conv30 = find("30-year fixed");
+          const fha = find("fha");
+          const va = find("va");
+          if (conv30) setConvRate(roundRate(parseFloat(conv30.rate)));
+          if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (va) setVaRate(roundRate(parseFloat(va.rate)));
+          setRateSource(data.date || "today");
+          setRatesLoaded(true);
+        }
+      } catch (e) { /* fail silently, use defaults */ }
+    })();
+  }, []);
 
   // Eligibility check: minimum down payment per program
   const minDown = program === "Conventional" ? 3 : program === "FHA" ? 3.5 : 0;
@@ -1826,7 +1861,12 @@ function CashToClosePage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
             <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
-            <CalcInput label="Interest Rate" value={rate} onChange={setRate} suffix="%" step={0.125} min={0} max={20} />
+            <div>
+              <CalcInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} value={rate} onChange={setRate} suffix="%" step={0.125} min={0} max={20} />
+              {ratesLoaded && (
+                <p style={{ fontSize: 10, color: P.sage, marginTop: 4, fontWeight: 600 }}>● Live from Mortgage News Daily</p>
+              )}
+            </div>
             <div>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Estimated Close Date</label>
               <input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none" }} />
@@ -1961,7 +2001,7 @@ function CashToClosePage() {
         )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. Not a Loan Estimate. NMLS# 1119524.
+          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily and rounded to the nearest 0.125%. ` : ""}Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. Not a Loan Estimate. NMLS# 1119524.
         </p>
       </div>
     </div>
