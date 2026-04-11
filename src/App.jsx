@@ -1647,6 +1647,26 @@ function ComparePage() {
 }
 
 function CashToClosePage() {
+  // Tax reserves prepaid schedule by state — # of months collected based on closing month
+  // From CL Guide National Taxes Matrix v32, defaulting to "all remaining" schedule
+  // For 2/13 splits, use 13 (more conservative)
+  const TAX_RESERVE_SCHEDULE = {
+    TN: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    GA: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+    MS: { 1:3, 2:4, 3:5, 4:6, 5:7, 6:8, 7:9, 8:10, 9:11, 10:12, 11:12, 12:2 },
+    AR: { 1:12, 2:1, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9, 11:10, 12:11 },
+    KY: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+  };
+
+  // Tax rate by state and metro (matches the calculator's metro system)
+  const STATE_METROS = {
+    TN: { default: 0.0075, metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
+    GA: { default: 0.0090, metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
+    MS: { default: 0.0080, metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
+    AR: { default: 0.0065, metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
+    KY: { default: 0.0085, metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY (Boone/Kenton/Campbell)": 0.0110, "All other counties": 0.0085 } },
+  };
+
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const [program, setProgram] = useState("Conventional");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
@@ -1658,17 +1678,20 @@ function CashToClosePage() {
     return d.toISOString().split("T")[0];
   });
   const [stateCode, setStateCode] = useState("TN");
-  const [insuranceAnnual, setInsuranceAnnual] = useState(1200);
-  const [taxAnnual, setTaxAnnual] = useState(() => Math.round(350000 * 0.0095));
+  const [taxMetro, setTaxMetro] = useState("All other counties");
   const [sellerCredit, setSellerCredit] = useState(0);
   const [earnestMoney, setEarnestMoney] = useState(0);
   const [vaUsage, setVaUsage] = useState("first");
 
-  // Auto-update tax estimate when home price changes
-  useEffect(() => {
-    const rates = { TN: 0.0075, GA: 0.0090, MS: 0.0080, AR: 0.0065, KY: 0.0085 };
-    setTaxAnnual(Math.round(homePrice * (rates[stateCode] || 0.0080)));
-  }, [homePrice, stateCode]);
+  // Auto-HOI from price × 0.35% (matches calculator)
+  const insuranceAnnual = Math.round(homePrice * 0.0035);
+
+  // Auto-update tax rate when state/metro changes
+  const taxRate = STATE_METROS[stateCode]?.metros?.[taxMetro] ?? STATE_METROS[stateCode]?.default ?? 0.008;
+  const taxAnnual = Math.round(homePrice * taxRate);
+
+  // Reset metro to default when state changes
+  useEffect(() => { setTaxMetro("All other counties"); }, [stateCode]);
 
   const downAmt = homePrice * (downPct / 100);
   const baseLoan = Math.max(homePrice - downAmt, 0);
@@ -1728,8 +1751,12 @@ function CashToClosePage() {
   const prepaidInterest = dailyInterest * daysRemaining;
   const prepaidsTotal = insurancePrepaid + prepaidInterest;
 
-  // Reserves (escrow setup) — typically 2 months tax + 2 months insurance
-  const taxReserves = (taxAnnual / 12) * 2;
+  // Reserves (escrow setup)
+  // Tax reserves: based on state-specific schedule by closing month
+  const closingMonth = closeDateObj.getMonth() + 1; // 1-12
+  const taxReserveMonths = TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth] ?? 2;
+  const taxReserves = (taxAnnual / 12) * taxReserveMonths;
+  // Insurance reserves: standard 2 months
   const insuranceReserves = (insuranceAnnual / 12) * 2;
   const reservesTotal = taxReserves + insuranceReserves;
 
@@ -1802,9 +1829,18 @@ function CashToClosePage() {
                 <option value="KY">Kentucky</option>
               </select>
             </div>
-            <CalcInput label="Annual Insurance" value={insuranceAnnual} onChange={setInsuranceAnnual} prefix="$" step={100} comma />
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
+              <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                {Object.entries(STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
+                  <option key={name} value={name}>{name} ({(r * 100).toFixed(2)}%)</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <CalcInput label="Annual Property Tax (estimated)" value={taxAnnual} onChange={setTaxAnnual} prefix="$" step={100} comma />
+          <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 4, fontStyle: "italic" }}>
+            Auto-calculated: HOI {fmt(insuranceAnnual)}/yr (0.35% of price) · Property tax {fmt(taxAnnual)}/yr ({(taxRate * 100).toFixed(2)}%)
+          </p>
 
           {program === "VA" && (
             <div style={{ marginTop: 12 }}>
@@ -1861,9 +1897,10 @@ function CashToClosePage() {
             <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} bold />
 
             <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Escrow Reserves</h3>
-            <Row label="2 Months Property Tax" val={fmt(taxReserves)} />
+            <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
             <Row label="2 Months Insurance" val={fmt(insuranceReserves)} />
             <Row label="Reserves Subtotal" val={fmt(reservesTotal)} bold />
+            <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
 
             <div style={{ marginTop: 20, padding: "16px", background: P.cream, borderRadius: 10 }}>
               <Row label="Closing Costs (excl. financed fee)" val={fmt(closingCostsExFee)} bold />
