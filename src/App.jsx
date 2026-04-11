@@ -1664,7 +1664,7 @@ function CashToClosePage() {
     GA: { default: 0.0090, metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
     MS: { default: 0.0080, metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
     AR: { default: 0.0065, metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
-    KY: { default: 0.0085, metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY (Boone/Kenton/Campbell)": 0.0110, "All other counties": 0.0085 } },
+    KY: { default: 0.0085, metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
   };
 
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -1679,9 +1679,12 @@ function CashToClosePage() {
   });
   const [stateCode, setStateCode] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("All other counties");
-  const [sellerCredit, setSellerCredit] = useState(0);
-  const [earnestMoney, setEarnestMoney] = useState(0);
+  const [totalCredits, setTotalCredits] = useState(0);
   const [vaUsage, setVaUsage] = useState("first");
+
+  // Eligibility check: minimum down payment per program
+  const minDown = program === "Conventional" ? 3 : program === "FHA" ? 3.5 : 0;
+  const isEligible = downPct >= minDown;
 
   // Auto-HOI from price × 0.35% (matches calculator)
   const insuranceAnnual = Math.round(homePrice * 0.0035);
@@ -1731,11 +1734,11 @@ function CashToClosePage() {
   // AR: $3.30/$1000, typically split or paid by buyer
   // KY: $0.50/$500 ($1.00/$1000), paid by SELLER
   let transferTax = 0, transferTaxNote = "";
-  if (stateCode === "TN") { transferTax = homePrice * 0.0037; transferTaxNote = "TN Realty Transfer Tax (buyer pays)"; }
-  if (stateCode === "GA") { transferTax = 0; transferTaxNote = "GA transfer tax paid by seller"; }
+  if (stateCode === "TN") { transferTax = homePrice * 0.0037; transferTaxNote = "TN Realty Transfer Tax: $0.37 per $100 of value"; }
+  if (stateCode === "GA") { transferTax = homePrice * 0.001; transferTaxNote = "GA Real Estate Transfer Tax: $1.00 per $1,000 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
   if (stateCode === "MS") { transferTax = 0; transferTaxNote = "Mississippi has no state transfer tax"; }
-  if (stateCode === "AR") { transferTax = homePrice * 0.0033; transferTaxNote = "AR Real Estate Transfer Tax"; }
-  if (stateCode === "KY") { transferTax = 0; transferTaxNote = "KY transfer tax paid by seller"; }
+  if (stateCode === "AR") { transferTax = homePrice * 0.0033; transferTaxNote = "AR Real Estate Transfer Tax: $3.30 per $1,000 of value"; }
+  if (stateCode === "KY") { transferTax = homePrice * 0.001; transferTaxNote = "KY Real Estate Transfer Tax: $0.50 per $500 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
 
   // Mortgage recording tax (TN has one!)
   let mortgageTax = 0;
@@ -1763,14 +1766,23 @@ function CashToClosePage() {
   // Totals
   const closingCostsExFee = lenderTotal + titleTotal + transferTax + mortgageTax + prepaidsTotal + reservesTotal;
   const closingCostsIncFee = closingCostsExFee + upfrontFee;
-  const cashToClose = downAmt + closingCostsExFee - sellerCredit - earnestMoney;
+  const cashToClose = downAmt + closingCostsExFee - totalCredits;
 
   const PROG_COLOR = { Conventional: PROGRAM_COLORS.Conventional, FHA: PROGRAM_COLORS.FHA, VA: PROGRAM_COLORS.VA }[program];
 
-  const Row = ({ label, val, sub, bold, color, italic }) => (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", fontSize: sub ? 12 : 13, borderBottom: `1px solid ${P.cream}` }}>
-      <span style={{ color: P.warmGray, fontStyle: italic ? "italic" : "normal", paddingLeft: sub ? 12 : 0 }}>{label}</span>
-      <span style={{ fontWeight: bold ? 700 : 600, color: color || P.text }}>{val}</span>
+  const Row = ({ label, val, sub, bold, color, italic, subtotal }) => (
+    <div style={{
+      display: "flex", justifyContent: "space-between",
+      padding: subtotal ? "10px 14px" : "7px 0",
+      fontSize: sub ? 12 : subtotal ? 14 : 13,
+      borderBottom: subtotal ? "none" : `1px solid ${P.cream}`,
+      background: subtotal ? PROG_COLOR : "transparent",
+      borderRadius: subtotal ? 6 : 0,
+      marginTop: subtotal ? 6 : 0,
+      marginBottom: subtotal ? 4 : 0,
+    }}>
+      <span style={{ color: subtotal ? "rgba(255,255,255,0.85)" : P.warmGray, fontStyle: italic ? "italic" : "normal", paddingLeft: sub ? 12 : 0, fontWeight: subtotal ? 700 : 400, textTransform: subtotal ? "uppercase" : "none", letterSpacing: subtotal ? 0.5 : 0, fontSize: subtotal ? 11 : "inherit" }}>{label}</span>
+      <span style={{ fontWeight: bold || subtotal ? 700 : 600, color: subtotal ? "#fff" : (color || P.text), fontSize: subtotal ? 16 : "inherit" }}>{val}</span>
     </div>
   );
 
@@ -1833,7 +1845,7 @@ function CashToClosePage() {
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
               <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
                 {Object.entries(STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
-                  <option key={name} value={name}>{name} ({(r * 100).toFixed(2)}%)</option>
+                  <option key={name} value={name}>{name}</option>
                 ))}
               </select>
             </div>
@@ -1855,6 +1867,21 @@ function CashToClosePage() {
         </div>
 
         {/* Results */}
+        {!isEligible ? (
+          <div className="content-card" style={{ padding: "40px 32px", textAlign: "center", marginBottom: 16, overflow: "hidden" }}>
+            <div style={{ background: P.warmGrayLight, margin: "-40px -32px 24px", padding: "24px", textAlign: "center" }}>
+              <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.7)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{program}</span>
+              <span style={{ fontFamily: F.display, fontSize: 30, color: "#fff" }}>Ineligible</span>
+            </div>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: P.creamDark, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <span style={{ fontSize: 28 }}>⚠️</span>
+            </div>
+            <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 8 }}>Minimum {minDown}% Down Required</h3>
+            <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
+              {program} loans require a minimum down payment of <strong>{minDown}%</strong> ({fmt(homePrice * (minDown / 100))} on a {fmt(homePrice)} home). Increase your down payment or pick a different loan program above to see your cash to close estimate.
+            </p>
+          </div>
+        ) : (
         <div className="content-card" style={{ overflow: "hidden", marginBottom: 16 }}>
           <div style={{ background: PROG_COLOR, padding: "24px 20px", textAlign: "center" }}>
             <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.8 }}>{program} · Estimated Cash to Close</span>
@@ -1875,7 +1902,7 @@ function CashToClosePage() {
             <Row label="Credit Report" val={fmt(creditReport)} />
             <Row label="Flood Certification" val={fmt(floodCert)} />
             <Row label="Tax Service" val={fmt(taxService)} />
-            <Row label="Lender Fees Subtotal" val={fmt(lenderTotal)} bold />
+            <Row label="Lender Fees Subtotal" val={fmt(lenderTotal)} subtotal />
 
             <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Title & Escrow</h3>
             <Row label="Lender's Title Insurance" val={fmt(lendersTitle)} />
@@ -1884,23 +1911,27 @@ function CashToClosePage() {
             <Row label="Title Search & Exam" val={fmt(titleSearch)} />
             <Row label="Recording Fee" val={fmt(recordingFee)} />
             <Row label="Wire & Notary" val={fmt(wireNotary)} />
-            <Row label="Title & Escrow Subtotal" val={fmt(titleTotal)} bold />
+            <Row label="Title & Escrow Subtotal" val={fmt(titleTotal)} subtotal />
 
             <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Government & Recording</h3>
             <Row label="Transfer Tax" val={fmt(transferTax)} />
             {mortgageTax > 0 && <Row label="Mortgage Recording Tax (TN)" val={fmt(mortgageTax)} />}
             <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{transferTaxNote}</p>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Prepaid Items</h3>
-            <Row label="12 Months Homeowner's Insurance" val={fmt(insurancePrepaid)} />
-            <Row label={`Daily Interest (${daysRemaining} days × ${fmt(dailyInterest)})`} val={fmt(prepaidInterest)} />
-            <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} bold />
+            <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(184,134,11,0.06)", borderRadius: 10, border: `1px solid rgba(184,134,11,0.15)` }}>
+              <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Prepaid Items</h3>
+              <Row label="12 Months Homeowner's Insurance" val={fmt(insurancePrepaid)} />
+              <Row label={`Daily Interest (${daysRemaining} days × ${fmt(dailyInterest)})`} val={fmt(prepaidInterest)} />
+              <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} subtotal />
+            </div>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Escrow Reserves</h3>
-            <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
-            <Row label="2 Months Insurance" val={fmt(insuranceReserves)} />
-            <Row label="Reserves Subtotal" val={fmt(reservesTotal)} bold />
-            <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
+            <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
+              <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
+              <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
+              <Row label="2 Months Insurance" val={fmt(insuranceReserves)} />
+              <Row label="Reserves Subtotal" val={fmt(reservesTotal)} subtotal />
+              <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
+            </div>
 
             <div style={{ marginTop: 20, padding: "16px", background: P.cream, borderRadius: 10 }}>
               <Row label="Closing Costs (excl. financed fee)" val={fmt(closingCostsExFee)} bold />
@@ -1913,14 +1944,12 @@ function CashToClosePage() {
               )}
             </div>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Cash Calculation</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Cash to Close Calculation</h3>
             <Row label="Down Payment" val={fmt(downAmt)} />
             <Row label="+ Closing Costs (excl. financed fee)" val={fmt(closingCostsExFee)} />
-            <div style={{ marginTop: 8, marginBottom: 4 }}>
-              <CalcInput label="− Earnest Money Deposit (already paid)" value={earnestMoney} onChange={setEarnestMoney} prefix="$" step={500} comma />
-            </div>
-            <div style={{ marginTop: 8, marginBottom: 4 }}>
-              <CalcInput label="− Seller Credits / Concessions" value={sellerCredit} onChange={setSellerCredit} prefix="$" step={500} comma />
+            <div style={{ marginTop: 12, marginBottom: 4 }}>
+              <CalcInput label="− Total Credits" value={totalCredits} onChange={setTotalCredits} prefix="$" step={500} comma />
+              <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 4, lineHeight: 1.5 }}>Combine earnest money already paid, seller concessions, lender credits, and any other credits into one total here.</p>
             </div>
 
             <div style={{ marginTop: 16, padding: "16px 18px", background: PROG_COLOR, borderRadius: 10, textAlign: "center" }}>
@@ -1929,6 +1958,7 @@ function CashToClosePage() {
             </div>
           </div>
         </div>
+        )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
           Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. Not a Loan Estimate. NMLS# 1119524.
