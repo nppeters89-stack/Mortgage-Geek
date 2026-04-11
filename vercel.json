@@ -10,6 +10,7 @@
     { "source": "/calculator", "destination": "/" },
     { "source": "/prequal", "destination": "/" },
     { "source": "/about", "destination": "/" },
-    { "source": "/compare", "destination": "/" }
+    { "source": "/compare", "destination": "/" },
+    { "source": "/cash-to-close", "destination": "/" }
   ]
 }
