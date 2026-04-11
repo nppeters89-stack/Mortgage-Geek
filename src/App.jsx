@@ -2007,25 +2007,33 @@ function CashToClosePage() {
             <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
 
-              {/* Escrow Waiver dropdown — Conv only, 20%+ down */}
-              <div style={{ marginBottom: 12, padding: "10px 12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}`, opacity: canWaiveEscrows ? 1 : 0.5 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Waive Escrows?</label>
-                  <select
-                    value={waiveEscrows ? "yes" : "no"}
-                    onChange={(e) => setWaiveEscrows(e.target.value === "yes")}
-                    disabled={!canWaiveEscrows}
-                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "6px 28px 6px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", cursor: canWaiveEscrows ? "pointer" : "not-allowed", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}>
-                    <option value="no">No — Standard Escrow</option>
-                    <option value="yes">Yes — Waive Escrows</option>
-                  </select>
+              {/* Escrow Waiver — Conv only. FHA/VA always require escrows. */}
+              {program === "Conventional" ? (
+                <div style={{ marginBottom: 12, padding: "10px 12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}`, opacity: canWaiveEscrows ? 1 : 0.5 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Waive Escrows?</label>
+                    <select
+                      value={waiveEscrows ? "yes" : "no"}
+                      onChange={(e) => setWaiveEscrows(e.target.value === "yes")}
+                      disabled={!canWaiveEscrows}
+                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "6px 28px 6px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", cursor: canWaiveEscrows ? "pointer" : "not-allowed", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}>
+                      <option value="no">No — Standard Escrow</option>
+                      <option value="yes">Yes — Waive Escrows</option>
+                    </select>
+                  </div>
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6, lineHeight: 1.5 }}>
+                    {canWaiveEscrows
+                      ? "20%+ down required · You'll pay taxes and insurance directly when due (not collected at closing or monthly)"
+                      : "Escrow waiver requires 20% or more down payment"}
+                  </p>
                 </div>
-                <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6, lineHeight: 1.5 }}>
-                  {canWaiveEscrows
-                    ? "Conv only · 20%+ down required · You'll pay taxes and insurance directly when due (not collected at closing or monthly)"
-                    : "Escrow waiver requires Conventional financing with 20% or more down payment"}
-                </p>
-              </div>
+              ) : (
+                <div style={{ marginBottom: 12, padding: "10px 12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}` }}>
+                  <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
+                    <strong style={{ color: P.navy }}>🔒 Escrows required.</strong> {program} loans require an escrow account for property taxes and homeowner's insurance for the life of the loan — escrow waiver is not permitted.
+                  </p>
+                </div>
+              )}
 
               {escrowsWaived ? (
                 <>
@@ -2034,7 +2042,8 @@ function CashToClosePage() {
                 </>
               ) : (
                 <>
-                  <Row label={`${taxReserveMonths} Months Property Tax (${stateCode} schedule, closing in ${closeDateObj.toLocaleString("en-US", { month: "long" })})`} val={fmt(taxReserves)} />
+                  <Row label={`${taxReserveMonths} Months Property Tax`} val={fmt(taxReserves)} />
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: -2, marginBottom: 4, paddingLeft: 0 }}>{stateCode} schedule · closing in {closeDateObj.toLocaleString("en-US", { month: "long" })}</p>
                   <Row label="3 Months Insurance" val={fmt(insuranceReserves)} />
                   <Row label="Reserves Subtotal" val={fmt(reservesTotal)} subtotal />
                   <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
