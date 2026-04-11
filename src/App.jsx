@@ -1592,6 +1592,7 @@ function PreQualPage() {
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   const [downMode, setDownMode] = useState("pct"); // "pct" or "dollar"
+  const [selectedProgram, setSelectedProgram] = useState(null); // null = auto-pick best
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [showStudentCalc, setShowStudentCalc] = useState(false);
   const [studentBalance, setStudentBalance] = useState(0);
@@ -1998,15 +1999,6 @@ function PreQualPage() {
                   </p>
                 </div>
               )}
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
-                <select value={vaUsage} onChange={(e) => setVaUsage(e.target.value)}
-                  style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
-                  <option value="first">First-Time Use</option>
-                  <option value="subsequent">Subsequent Use</option>
-                  <option value="exempt">Exempt (Disability)</option>
-                </select>
-              </div>
               <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Current Debt-Only DTI</span>
                 <span style={{ fontFamily: F.display, fontSize: 22, color: grossIncome > 0 && (monthlyDebts / grossIncome) > 0.30 ? P.gold : P.sage }}>{grossIncome > 0 ? ((monthlyDebts / grossIncome) * 100).toFixed(1) : 0}%</span>
@@ -2092,6 +2084,15 @@ function PreQualPage() {
           </div>
         </div>
 
+        {/* Section divider — Your Results */}
+        <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+          <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${P.creamDark}, transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
+          <div style={{ position: "relative", display: "inline-block", background: P.cream, padding: "0 20px" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold }}>↓ Your Results ↓</span>
+            <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to send that scenario to the calculator</p>
+          </div>
+        </div>
+
         {/* Program result cards */}
         <div className="pq-cards-grid">
           {results.map((prog, i) => {
@@ -2113,9 +2114,19 @@ function PreQualPage() {
 
             const bestPrice = Math.max(...results.filter(r => r.eligible && r.maxPrice > 0).map(r => r.maxPrice));
             const isBest = prog.maxPrice === bestPrice && prog.maxPrice > 0;
+            const isSelected = selectedProgram === prog.name;
 
             return (
-              <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative" }}>
+              <div key={i} className="content-card" onClick={() => setSelectedProgram(isSelected ? null : prog.name)} style={{
+                overflow: "hidden", position: "relative", cursor: "pointer",
+                border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
+                boxShadow: isSelected ? `0 0 0 4px rgba(184,134,11,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
+                transform: isSelected ? "translateY(-2px)" : "translateY(0)",
+                transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
+              }}>
+                {isSelected && (
+                  <span style={{ position: "absolute", top: 8, left: 8, zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "3px 10px", borderRadius: 50, boxShadow: "0 2px 6px rgba(0,0,0,0.2)" }}>✓ Selected</span>
+                )}
                 {/* Header */}
                 <div style={{ background: prog.color, padding: "20px", textAlign: "center", position: "relative" }}>
                   {isBest && (
@@ -2200,6 +2211,18 @@ function PreQualPage() {
                     </div>
                   </div>
 
+                  {prog.name === "VA" && (
+                    <div onClick={(e) => e.stopPropagation()} style={{ marginBottom: 12, padding: "10px 12px", background: P.creamDark, borderRadius: 8 }}>
+                      <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
+                      <select value={vaUsage} onChange={(e) => setVaUsage(e.target.value)}
+                        style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.white, padding: "7px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center" }}>
+                        <option value="first">First-Time Use</option>
+                        <option value="subsequent">Subsequent Use</option>
+                        <option value="exempt">Exempt (Disability)</option>
+                      </select>
+                    </div>
+                  )}
+
                   <p style={{ fontSize: 10, color: P.warmGrayLight, lineHeight: 1.5, fontStyle: "italic" }}>{prog.notes}</p>
                 </div>
               </div>
@@ -2252,13 +2275,20 @@ function PreQualPage() {
 
         {/* Cross-link to calculator */}
         {(() => {
-          const bestPrice = Math.max(...results.filter(r => r.eligible && r.maxPrice > 0).map(r => r.maxPrice), 0);
-          const calcUrl = `/calculator?price=${bestPrice > 0 ? bestPrice : 350000}&down=${downPct}&term=${term}`;
+          const eligible = results.filter(r => r.eligible && r.maxPrice > 0);
+          const selected = selectedProgram ? eligible.find(r => r.name === selectedProgram) : null;
+          const target = selected || eligible.reduce((a, b) => (a && a.maxPrice > b.maxPrice ? a : b), null);
+          const targetPrice = target ? target.maxPrice : 0;
+          const targetName = target ? target.name : "";
+          const calcUrl = `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}`;
           return (
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <a href={calcUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-                🧮 Run {bestPrice > 0 ? fmt(bestPrice) : "a payment scenario"} in the Calculator →
+                🧮 Run {targetPrice > 0 ? `${targetName} ${fmt(targetPrice)}` : "a payment scenario"} in the Calculator →
               </a>
+              {!selectedProgram && eligible.length > 1 && (
+                <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic" }}>Tap a card above to choose a different scenario</p>
+              )}
             </div>
           );
         })()}
