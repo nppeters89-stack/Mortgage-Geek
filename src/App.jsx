@@ -1543,16 +1543,18 @@ function ComparePage() {
                       {[
                         { label: "Home Price", val: fmt(s.homePrice) },
                         { label: "Down Payment", val: `${fmt(s.downAmt)} (${s.downPct}%)` },
-                        { label: "Loan Amount", val: fmt(s.loan) },
+                        { label: "Base Loan Amount", val: fmt(s.baseLoan || (s.homePrice - s.downAmt)) },
+                        ...(s.upfront > 0 ? [{ label: s.upfrontLabel || "Upfront Fee", val: `+ ${fmt(s.upfront)}`, sub: true }] : []),
+                        ...(s.upfront > 0 ? [{ label: "Total Loan (financed)", val: fmt(s.totalLoan || s.loan), bold: true, color: s.color }] : []),
                         { label: "Principal & Interest", val: `${fmt(s.pi)}/mo` },
                         ...(s.mi > 0 ? [{ label: "Mortgage Insurance", val: `${fmt(s.mi)}/mo` }] : []),
                         { label: "Property Tax", val: `${fmt(s.tax)}/mo` },
                         { label: "Insurance", val: `${fmt(s.insurance)}/mo` },
-                        { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true },
-                      ].map((row, ri) => (
-                        <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 12, borderBottom: ri < 7 ? `1px solid ${P.cream}` : "none" }}>
-                          <span style={{ color: P.warmGrayLight }}>{row.label}</span>
-                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.bold ? s.color || P.navy : P.text }}>{row.val}</span>
+                        { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true, color: s.color },
+                      ].map((row, ri, arr) => (
+                        <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: row.sub ? 11 : 12, borderBottom: ri < arr.length - 1 ? `1px solid ${P.cream}` : "none" }}>
+                          <span style={{ color: row.sub ? P.warmGrayLight : P.warmGrayLight, fontStyle: row.sub ? "italic" : "normal" }}>{row.label}</span>
+                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? s.color || P.navy : P.text) }}>{row.val}</span>
                         </div>
                       ))}
                       <button onClick={() => removeScenario(s.id)} style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
@@ -3031,19 +3033,23 @@ function CalculatorPage() {
 
                   {/* Loan details */}
                   <div style={{ background: P.cream, borderRadius: 8, padding: "12px 14px", marginBottom: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
+                      <span style={{ color: P.warmGray }}>Base Loan Amount</span>
+                      <span style={{ fontWeight: 600, color: P.text }}>{fmt(baseLoan)}</span>
+                    </div>
                     {prog.upfront > 0 && (
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
-                        <span style={{ color: P.warmGray }}>{prog.upfrontLabel}</span>
-                        <span style={{ fontWeight: 600, color: P.text }}>{fmt(prog.upfront)}</span>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 11, fontStyle: "italic" }}>
+                        <span style={{ color: P.warmGrayLight }}>+ {prog.upfrontLabel}</span>
+                        <span style={{ fontWeight: 600, color: P.warmGrayLight }}>{fmt(prog.upfront)}</span>
                       </div>
                     )}
                     {prog.isVA && prog.upfront === 0 && (
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, fontSize: 11, fontStyle: "italic" }}>
                         <span style={{ color: P.sage, fontWeight: 600 }}>Funding Fee Waived</span>
                         <span style={{ fontWeight: 600, color: P.sage }}>$0</span>
                       </div>
                     )}
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, paddingTop: 6, borderTop: prog.upfront > 0 || prog.isVA ? `1px solid ${P.creamDark}` : "none" }}>
                       <span style={{ color: P.warmGray }}>Total Loan Amount</span>
                       <span style={{ fontWeight: 700, color: prog.color }}>{fmt(prog.loan)}</span>
                     </div>
@@ -3123,6 +3129,9 @@ function CalculatorPage() {
               program: selectedProg.name,
               color: selectedProg.color,
               homePrice, downPct, downAmt, term, rate: selectedProg.rate,
+              baseLoan, totalLoan: selectedProg.loan,
+              upfront: selectedProg.upfront || 0,
+              upfrontLabel: selectedProg.upfrontLabel || null,
               loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
               tax: taxes, insurance, total: selectedProg.total,
             };
