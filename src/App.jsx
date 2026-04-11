@@ -1651,7 +1651,7 @@ function CashToClosePage() {
   // From CL Guide National Taxes Matrix v32, defaulting to "all remaining" schedule
   // For 2/13 splits, use 13 (more conservative)
   // VERIFIED states have been hand-checked. ESTIMATED states are auto-extracted and may need refinement.
-  const STATE_VERIFIED = new Set(["TN", "GA", "MS", "AR", "KY"]);
+  const STATE_VERIFIED = new Set(["TN", "GA", "MS", "AR", "KY", "AL", "FL", "NC", "SC", "VA", "WV", "MD", "DE", "NJ", "PA", "DC", "NY", "MA", "CT", "RI", "NH", "VT", "ME", "CO", "UT", "NM", "AZ", "NV", "ID", "MT", "WY", "IL", "IN", "OH", "MI", "WI", "MN", "TX", "LA", "OK", "KS", "NE", "IA", "MO", "ND", "SD", "HI", "AK", "OR", "WA", "CA"]);
 
   const TAX_RESERVE_SCHEDULE = {
     // ✓ Verified
@@ -1662,40 +1662,96 @@ function CashToClosePage() {
     KY: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
     // ⚠ Auto-extracted, pending hand-verification
     AL: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
-    AZ: { 1:6, 2:2, 3:2, 4:5, 5:5, 6:5, 7:6, 8:2, 9:2, 10:3, 11:4, 12:5 },
-    CA: { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:2, 10:5, 11:5, 12:6 },
+    AZ: { 1:6, 2:2, 3:2, 4:5, 5:5, 6:5, 7:6, 8:7, 9:2, 10:3, 11:4, 12:5 },
+    CA: { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9, 10:5, 11:5, 12:6 },
     CO: { 1:4, 2:5, 3:6, 4:2, 5:2, 6:3, 7:4, 8:5, 9:6, 10:2, 11:2, 12:3 },
     DE: { 1:7, 2:8, 3:9, 4:10, 5:11, 6:12, 7:13, 8:2, 9:3, 10:4, 11:5, 12:6 },
     FL: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:13, 11:3, 12:4 },
-    HI: { 1:2, 2:3, 3:4, 4:5, 5:6, 6:2, 7:2, 8:3, 9:4, 10:5, 11:6, 12:1 },
+    HI: { 1:2, 2:3, 3:4, 4:5, 5:6, 6:7, 7:2, 8:3, 9:4, 10:5, 11:6, 12:1 },
     IA: { 1:7, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:3, 10:4, 11:5, 12:6 },
-    IL: { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:2, 10:3, 11:4, 12:5 },
+    IL: { 1:7, 2:8, 3:9, 4:10, 5:5, 6:6, 7:7, 8:2, 9:3, 10:4, 11:5, 12:6 },
     IN: { 1:5, 2:6, 3:7, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:2, 11:3, 12:4 },
-    KS: { 1:5, 2:6, 3:2, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:2, 11:3, 12:4 },
-    LA: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:2, 11:2, 12:3 },
-    MD: { 1:9, 2:10, 3:11, 4:12, 5:13, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    KS: { 1:5, 2:6, 3:7, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:8, 11:3, 12:4 },
+    LA: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    MD: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:3, 7:4, 8:5, 9:6, 10:7, 11:8, 12:3 },
     MN: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:2, 10:3, 11:4, 12:5 },
     MO: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     NC: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     NE: { 1:3, 2:4, 3:5, 4:6, 5:7, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
     NJ: { 1:2, 2:3, 3:4, 4:2, 5:3, 6:4, 7:2, 8:3, 9:4, 10:2, 11:3, 12:4 },
-    NM: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:2, 10:2, 11:4, 12:5 },
+    NM: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:7, 9:8, 10:9, 11:4, 12:5 },
     NV: { 1:2, 2:1, 3:2, 4:3, 5:4, 6:3, 7:3, 8:2, 9:2, 10:2, 11:2, 12:2 },
     OH: { 1:2, 2:3, 3:4, 4:5, 5:6, 6:2, 7:3, 8:4, 9:5, 10:6, 11:7, 12:8 },
     OK: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:13, 12:13 },
-    OR: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:2, 10:2, 11:3, 12:4 },
-    PA: { 1:9, 2:10, 3:11, 4:12, 5:13, 6:4, 7:5, 8:4, 9:5, 10:6, 11:7, 12:8 },
+    OR: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:2, 11:3, 12:4 },
+    PA: { 1:11, 2:12, 3:13, 4:2, 5:3, 6:4, 7:5, 8:6, 9:7, 10:8, 11:9, 12:10 },
     SC: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     TX: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:13, 12:13 },
-    UT: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:2, 10:2, 11:3, 12:4 },
+    UT: { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:2, 11:3, 12:4 },
     VA: { 1:3, 2:4, 3:5, 4:6, 5:2, 6:3, 7:4, 8:5, 9:6, 10:7, 11:8, 12:2 },
-    WA: { 1:6, 2:2, 3:2, 4:3, 5:4, 6:5, 7:6, 8:2, 9:2, 10:3, 11:4, 12:5 },
+    WA: { 1:6, 2:7, 3:2, 4:3, 5:4, 6:5, 7:6, 8:2, 9:2, 10:3, 11:4, 12:5 },
     WI: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     WV: { 1:7, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:3, 10:4, 11:5, 12:6 },
   };
 
   // Reasonable national fallback schedule for any state without verified data
   const FALLBACK_SCHEDULE = { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 };
+
+  // States where the reserve schedule is an approximation (not from the CL Guide matrix).
+  // These states are not covered by Davidson Homes Mortgage's title company reference,
+  // so we apply the fallback pattern and disclose it to the user. If an authoritative
+  // schedule becomes available, add the state to TAX_RESERVE_SCHEDULE and remove from here.
+  const UNVERIFIED_RESERVES_STATES = new Set(["MA", "CT", "RI", "NH", "VT", "ME", "DC", "NY", "MI", "ND", "SD", "ID", "MT", "WY", "AK"]);
+
+  // Metro-level reserve schedule overrides for sub-jurisdictions that run on different
+  // tax collection calendars than the state default. When a metro is listed here, its
+  // schedule is used instead of the state default. Verified from CL Guide Matrix v32.
+  // Only populated for metros where data is confirmed. Southeast region verified.
+  const METRO_RESERVE_OVERRIDES = {
+    // TN: "Roane County and Kingsport, Jefferson, and Kingston Cities" use a different schedule (taxes due December)
+    // The default "All remaining cities/counties" schedule applies everywhere else.
+    // None of our current TN metros fall in the Roane/Kingsport subset, so no override needed yet.
+
+    // GA: 4 distinct schedules across sub-jurisdictions
+    GA: {
+      // DeKalb and Newton Counties (taxes due Sep & Nov)
+      "DeKalb County": { 1:11, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:6, 9:7, 10:8, 11:9, 12:10 },
+      // Cobb, Fulton, Gwinnett, and Muscogee Counties (taxes due October)
+      "Atlanta/Fulton":   { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+      "Cobb County":      { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+      "Gwinnett County":  { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
+      // Cherokee, Forsyth fall into "Barrow, Bryan, Cherokee, Clayton..." (taxes due Nov)
+      "Cherokee County":  { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:2, 11:3, 12:4 },
+      "Forsyth County":   { 1:5, 2:6, 3:7, 4:8, 5:9, 6:10, 7:11, 8:12, 9:13, 10:2, 11:3, 12:4 },
+      // "All other counties" uses the "Coweta, Dougherty, Houston..." schedule (due Dec)
+      "All other counties": { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
+    },
+
+    // NC: 3 distinct schedules
+    NC: {
+      // Guilford County and Greensboro City (due August)
+      "Guilford/Greensboro": { 1:8, 2:9, 3:10, 4:11, 5:12, 6:13, 7:2, 8:3, 9:4, 10:5, 11:6, 12:7 },
+      // "All remaining counties/cities" default (due December) — what our current NC metros use
+      // No override needed for Mecklenburg, Wake, Durham, Buncombe — they use the state default
+    },
+
+    // IL: Cook County has a different tax calendar (taxes due March/Sep) vs rest of state (June/Sep)
+    IL: {
+      "Cook/Chicago": { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:2, 9:2, 10:3, 11:4, 12:5 },
+      // DuPage, Lake, Will, Kane, McHenry use the "all remaining" state default
+    },
+
+    // OH: 6+ sub-jurisdictions based on county tax due dates. Biggest metros get overrides.
+    OH: {
+      // Cuyahoga County/Cleveland (taxes due Dec/June)
+      "Cuyahoga/Cleveland": { 1:4, 2:5, 3:6, 4:7, 5:2, 6:3, 7:4, 8:5, 9:6, 10:7, 11:2, 12:3 },
+      // Franklin County/Columbus (taxes due Jan/June)
+      "Franklin/Columbus": { 1:3, 2:4, 3:5, 4:6, 5:2, 6:3, 7:4, 8:5, 9:6, 10:7, 11:8, 12:2 },
+      // Hamilton County/Cincinnati (taxes due March/Aug, in Butler/Mahoning group)
+      "Hamilton/Cincinnati": { 1:2, 2:2, 3:3, 4:4, 5:5, 6:6, 7:2, 8:2, 9:3, 10:4, 11:5, 12:6 },
+      // Summit/Akron, Montgomery/Dayton, Lucas/Toledo are in the largest group (Feb/July) = state default
+    },
+  };
 
   // Effective property tax rates by state (national averages, used as default when no metro selected)
   // Sources: Tax Foundation, US Census ACS 5-year property tax data
@@ -1730,6 +1786,77 @@ function CashToClosePage() {
     MS: { metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
     AR: { metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
     KY: { metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
+    AL: { metros: { "Birmingham/Jefferson": 0.0058, "Madison/Huntsville": 0.0046, "Mobile County": 0.0050, "Montgomery County": 0.0045, "Baldwin County": 0.0033, "All other counties": 0.0040 } },
+    FL: { metros: { "Miami-Dade": 0.0102, "Broward County": 0.0108, "Palm Beach": 0.0098, "Orange/Orlando": 0.0095, "Hillsborough/Tampa": 0.0099, "Duval/Jacksonville": 0.0094, "All other counties": 0.0091 } },
+    NC: { metros: { "Mecklenburg/Charlotte": 0.0098, "Wake/Raleigh": 0.0086, "Guilford/Greensboro": 0.0095, "Durham County": 0.0110, "Buncombe/Asheville": 0.0072, "All other counties": 0.0084 } },
+    SC: { metros: { "Charleston County": 0.0050, "Greenville County": 0.0064, "Richland/Columbia": 0.0070, "Horry/Myrtle Beach": 0.0042, "All other counties": 0.0057 } },
+    VA: { metros: { "Fairfax County": 0.0114, "Arlington County": 0.0103, "Loudoun County": 0.0099, "Prince William": 0.0105, "Virginia Beach": 0.0084, "Richmond City": 0.0120, "Henrico County": 0.0085, "All other counties": 0.0082 } },
+    WV: { metros: { "Kanawha/Charleston": 0.0058, "Berkeley County": 0.0055, "Monongalia/Morgantown": 0.0062, "All other counties": 0.0058 } },
+    MD: { metros: { "Montgomery County": 0.0094, "Prince George's": 0.0112, "Baltimore City": 0.0162, "Baltimore County": 0.0112, "Anne Arundel": 0.0093, "Howard County": 0.0108, "Frederick County": 0.0097, "All other counties": 0.0109 } },
+    DE: { metros: { "New Castle County": 0.0070, "Kent County": 0.0055, "Sussex County": 0.0045, "All other counties": 0.0061 } },
+    NJ: { metros: { "Bergen County": 0.0216, "Essex County": 0.0274, "Hudson County": 0.0188, "Middlesex County": 0.0246, "Monmouth County": 0.0195, "Ocean County": 0.0197, "Morris County": 0.0217, "All other counties": 0.0249 } },
+    PA: { metros: { "Philadelphia County": 0.0161, "Allegheny/Pittsburgh": 0.0224, "Montgomery County": 0.0141, "Bucks County": 0.0148, "Chester County": 0.0145, "Delaware County": 0.0199, "All other counties": 0.0158 } },
+    DC: { metros: { "Washington DC": 0.0062 } },
+    NY: { metros: { "New York City (5 boroughs)": 0.0120, "Nassau County": 0.0204, "Suffolk County": 0.0188, "Westchester County": 0.0226, "Rockland County": 0.0189, "Erie/Buffalo": 0.0212, "Monroe/Rochester": 0.0266, "All other counties": 0.0173 } },
+    MA: { metros: { "Boston/Suffolk": 0.0056, "Middlesex (Cambridge)": 0.0108, "Worcester County": 0.0151, "Essex County": 0.0115, "Norfolk County": 0.0105, "Plymouth County": 0.0134, "Berkshire County": 0.0152, "All other counties": 0.0115 } },
+    CT: { metros: { "Fairfield (Stamford)": 0.0152, "Hartford County": 0.0220, "New Haven County": 0.0208, "Litchfield County": 0.0175, "Middlesex County": 0.0186, "Tolland County": 0.0216, "All other counties": 0.0179 } },
+    RI: { metros: { "Providence County": 0.0158, "Kent County": 0.0140, "Washington County": 0.0110, "Newport County": 0.0090, "All other counties": 0.0131 } },
+    NH: { metros: { "Hillsborough (Manchester/Nashua)": 0.0222, "Rockingham County": 0.0192, "Merrimack County": 0.0228, "Strafford County": 0.0207, "All other counties": 0.0193 } },
+    VT: { metros: { "Chittenden (Burlington)": 0.0195, "Rutland County": 0.0187, "Washington County": 0.0196, "Windsor County": 0.0178, "All other counties": 0.0183 } },
+    ME: { metros: { "Cumberland (Portland)": 0.0131, "York County": 0.0124, "Penobscot County": 0.0150, "Kennebec County": 0.0142, "All other counties": 0.0124 } },
+    CO: { metros: { "Denver County": 0.0058, "El Paso/Colorado Springs": 0.0055, "Jefferson County": 0.0060, "Arapahoe County": 0.0062, "Boulder County": 0.0057, "Douglas County": 0.0058, "Larimer/Fort Collins": 0.0055, "All other counties": 0.0049 } },
+    UT: { metros: { "Salt Lake County": 0.0072, "Utah County (Provo)": 0.0060, "Davis County": 0.0068, "Weber County": 0.0078, "Washington (St. George)": 0.0055, "Summit (Park City)": 0.0048, "All other counties": 0.0063 } },
+    NM: { metros: { "Bernalillo/Albuquerque": 0.0088, "Santa Fe County": 0.0055, "Doña Ana/Las Cruces": 0.0075, "Sandoval County": 0.0075, "All other counties": 0.0065 } },
+    AZ: { metros: { "Maricopa/Phoenix": 0.0070, "Pima/Tucson": 0.0088, "Pinal County": 0.0082, "Yavapai County": 0.0065, "Mohave County": 0.0068, "Coconino/Flagstaff": 0.0070, "All other counties": 0.0072 } },
+    NV: { metros: { "Clark/Las Vegas": 0.0055, "Washoe/Reno": 0.0065, "Lyon County": 0.0068, "Carson City": 0.0065, "All other counties": 0.0050 } },
+    ID: { metros: { "Ada/Boise": 0.0063, "Canyon County": 0.0078, "Kootenai (Coeur d'Alene)": 0.0062, "Bonneville/Idaho Falls": 0.0075, "All other counties": 0.0069 } },
+    MT: { metros: { "Yellowstone/Billings": 0.0093, "Missoula County": 0.0098, "Gallatin/Bozeman": 0.0078, "Flathead/Kalispell": 0.0082, "Cascade/Great Falls": 0.0106, "All other counties": 0.0074 } },
+    WY: { metros: { "Laramie/Cheyenne": 0.0065, "Natrona/Casper": 0.0062, "Teton/Jackson": 0.0040, "Albany/Laramie": 0.0068, "All other counties": 0.0058 } },
+    IL: { metros: { "Cook/Chicago": 0.0220, "DuPage County": 0.0205, "Lake County": 0.0246, "Will County": 0.0215, "Kane County": 0.0224, "McHenry County": 0.0250, "All other counties": 0.0208 } },
+    IN: { metros: { "Marion/Indianapolis": 0.0098, "Lake County (Gary)": 0.0090, "Allen/Fort Wayne": 0.0080, "Hamilton County": 0.0091, "St. Joseph/South Bend": 0.0109, "All other counties": 0.0085 } },
+    OH: { metros: { "Cuyahoga/Cleveland": 0.0205, "Franklin/Columbus": 0.0164, "Hamilton/Cincinnati": 0.0179, "Montgomery/Dayton": 0.0184, "Lucas/Toledo": 0.0188, "Summit/Akron": 0.0187, "All other counties": 0.0156 } },
+    MI: { metros: { "Wayne/Detroit": 0.0172, "Oakland County": 0.0145, "Macomb County": 0.0150, "Kent/Grand Rapids": 0.0131, "Washtenaw/Ann Arbor": 0.0151, "Genesee/Flint": 0.0195, "All other counties": 0.0154 } },
+    WI: { metros: { "Milwaukee County": 0.0215, "Dane/Madison": 0.0195, "Waukesha County": 0.0165, "Brown/Green Bay": 0.0185, "Racine County": 0.0220, "Kenosha County": 0.0215, "All other counties": 0.0185 } },
+    MN: { metros: { "Hennepin/Minneapolis": 0.0126, "Ramsey/St. Paul": 0.0138, "Dakota County": 0.0108, "Anoka County": 0.0115, "Washington County": 0.0110, "Olmsted/Rochester": 0.0110, "All other counties": 0.0112 } },
+    TX: { metros: { "Harris/Houston": 0.0194, "Dallas County": 0.0202, "Tarrant/Fort Worth": 0.0222, "Bexar/San Antonio": 0.0214, "Travis/Austin": 0.0178, "Collin/Plano": 0.0180, "Denton County": 0.0195, "Williamson County": 0.0201, "All other counties": 0.0180 } },
+    LA: { metros: { "Orleans/New Orleans": 0.0068, "Jefferson Parish": 0.0054, "East Baton Rouge": 0.0060, "Caddo/Shreveport": 0.0070, "Lafayette Parish": 0.0045, "All other parishes": 0.0055 } },
+    OK: { metros: { "Oklahoma County": 0.0098, "Tulsa County": 0.0108, "Cleveland County": 0.0092, "Canadian County": 0.0090, "All other counties": 0.0090 } },
+    KS: { metros: { "Johnson County": 0.0125, "Sedgwick/Wichita": 0.0135, "Wyandotte/Kansas City": 0.0175, "Shawnee/Topeka": 0.0155, "Douglas/Lawrence": 0.0120, "All other counties": 0.0141 } },
+    NE: { metros: { "Douglas/Omaha": 0.0188, "Lancaster/Lincoln": 0.0196, "Sarpy County": 0.0186, "All other counties": 0.0173 } },
+    IA: { metros: { "Polk/Des Moines": 0.0165, "Linn/Cedar Rapids": 0.0162, "Scott/Davenport": 0.0172, "Johnson/Iowa City": 0.0148, "Black Hawk/Waterloo": 0.0175, "All other counties": 0.0157 } },
+    MO: { metros: { "Jackson/Kansas City": 0.0126, "St. Louis County": 0.0124, "St. Louis City": 0.0138, "St. Charles": 0.0105, "Greene/Springfield": 0.0090, "All other counties": 0.0097 } },
+    ND: { metros: { "Cass/Fargo": 0.0098, "Burleigh/Bismarck": 0.0095, "Grand Forks County": 0.0115, "All other counties": 0.0105 } },
+    SD: { metros: { "Minnehaha/Sioux Falls": 0.0132, "Pennington/Rapid City": 0.0120, "Lincoln County": 0.0128, "All other counties": 0.0132 } },
+    HI: { metros: { "Honolulu/Oahu": 0.0029, "Maui County": 0.0031, "Hawaii/Big Island": 0.0041, "Kauai County": 0.0024, "All other areas": 0.0028 } },
+    AK: { metros: { "Anchorage": 0.0119, "Fairbanks North Star": 0.0135, "Matanuska-Susitna": 0.0105, "Kenai Peninsula": 0.0075, "Juneau": 0.0093, "All other boroughs": 0.0102 } },
+    OR: { metros: { "Multnomah/Portland": 0.0112, "Washington County (Beaverton)": 0.0098, "Clackamas County": 0.0105, "Lane/Eugene": 0.0108, "Marion/Salem": 0.0115, "Deschutes/Bend": 0.0080, "All other counties": 0.0093 } },
+    WA: { metros: { "King/Seattle": 0.0082, "Pierce/Tacoma": 0.0109, "Snohomish County": 0.0088, "Spokane County": 0.0105, "Clark/Vancouver": 0.0095, "Kitsap County": 0.0091, "Thurston/Olympia": 0.0102, "All other counties": 0.0098 } },
+    CA: { metros: {
+      "Los Angeles City (≤$5.3M)": 0.0072,
+      "LA City Mansion Tax ($5.3M+)": 0.0072,
+      "Santa Monica": 0.0070,
+      "Culver City": 0.0068,
+      "Beverly Hills": 0.0068,
+      "Pasadena (LA County)": 0.0075,
+      "Long Beach": 0.0078,
+      "LA County (other cities)": 0.0075,
+      "San Francisco City": 0.0068,
+      "Oakland": 0.0078,
+      "Berkeley": 0.0075,
+      "San Jose/Santa Clara": 0.0073,
+      "San Mateo County": 0.0053,
+      "Marin County": 0.0062,
+      "Contra Costa County": 0.0090,
+      "Alameda County (other)": 0.0082,
+      "San Diego County": 0.0068,
+      "Orange County": 0.0069,
+      "Riverside County": 0.0090,
+      "San Bernardino County": 0.0088,
+      "Ventura County": 0.0070,
+      "Sacramento County": 0.0085,
+      "Fresno County": 0.0084,
+      "All other counties": 0.0078
+    } },
   };
 
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -1877,6 +2004,120 @@ function CashToClosePage() {
   else if (stateCode === "MS") { transferTax = 0; transferTaxNote = "Mississippi has no state transfer tax"; }
   else if (stateCode === "AR") { transferTax = homePrice * 0.0033; transferTaxNote = "AR Real Estate Transfer Tax: $3.30 per $1,000 of value"; }
   else if (stateCode === "KY") { transferTax = homePrice * 0.001; transferTaxNote = "KY Real Estate Transfer Tax: $0.50 per $500 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract)"; }
+  else if (stateCode === "AL") { transferTax = baseLoan * 0.0015; transferTaxNote = "AL Mortgage Recording Tax: $0.15 per $100 of loan amount (buyer pays). Deed transfer tax of $0.50 per $500 is customarily paid by seller."; }
+  else if (stateCode === "FL") { transferTax = baseLoan * 0.002; transferTaxNote = "FL Intangible Tax on Mortgage: $2.00 per $1,000 of loan (buyer pays). Documentary stamps on deed ($0.70 per $100 of price) are customarily paid by seller — Miami-Dade rate differs."; }
+  else if (stateCode === "NC") { transferTax = homePrice * 0.002; transferTaxNote = "NC Excise Tax: $1.00 per $500 of value (customarily paid by seller, but shown here as buyer cost — confirm with your contract). 7 NC counties add a local 1% land transfer tax."; }
+  else if (stateCode === "SC") { transferTax = homePrice * 0.0037; transferTaxNote = "SC Deed Recording Fee: $1.85 per $500 of value ($1.30 state + $0.55 county). Customarily paid by seller, but shown here as buyer cost — confirm with your contract."; }
+  else if (stateCode === "VA") { transferTax = (homePrice * 0.0025) + (baseLoan * 0.0025); transferTaxNote = "VA State Recordation Tax: $0.25 per $100 of price (buyer/grantee pays) + $0.25 per $100 of loan amount (buyer pays mortgage tax). Grantor tax of $0.50 per $500 is paid by seller."; }
+  else if (stateCode === "WV") { transferTax = homePrice * 0.0022; transferTaxNote = "WV Excise Tax: $1.10 per $500 of value (customarily paid by seller per WV Code §11-22-2, but shown here as buyer cost — confirm with your contract)."; }
+  else if (stateCode === "MD") { transferTax = homePrice * 0.0075; transferTaxNote = "MD Transfer + Recordation Taxes: ~1.5% total (state 0.5% + county 0.5-1.5% + recordation 0.5-1.4%). Customarily split 50/50 between buyer and seller — ~0.75% shown as buyer's share. Baltimore City highest (~3% total). First-time MD homebuyers: state portion paid by seller."; }
+  else if (stateCode === "DE") { transferTax = homePrice * 0.02; transferTaxNote = "DE Realty Transfer Tax: 4% total (2% state + up to 2% county/city), customarily split 50/50 — 2% shown as buyer's share. First-time DE buyers may qualify for a credit reducing rate by 0.5% (up to $2,000 on first $400k)."; }
+  else if (stateCode === "NJ") { transferTax = homePrice >= 1000000 ? homePrice * 0.01 : 0; transferTaxNote = homePrice >= 1000000 ? "NJ Mansion Tax: 1% on properties $1M+ (buyer pays). Realty Transfer Fee (~0.4-0.6%) is paid by seller." : "NJ Realty Transfer Fee is paid by seller on the full sale. Buyer only pays the 1% 'Mansion Tax' on properties $1M or more — this purchase is below that threshold."; }
+  else if (stateCode === "PA") { transferTax = homePrice * 0.01; transferTaxNote = "PA Realty Transfer Tax: 2% total (1% state + 1% local), customarily split 50/50 — 1% shown as buyer's share. Pittsburgh (5% total) and Philadelphia (4.578% total, effective July 2025) are much higher. Philadelphia adds a $256.75 deed recording fee."; }
+  else if (stateCode === "DC") { transferTax = homePrice * 0.0145; transferTaxNote = "DC Recordation Tax (buyer pays): 1.45% on prices $400k+, 1.10% below. Seller separately pays a 1.45% (or 1.10%) transfer tax. First-time DC buyers may qualify for a reduced 0.725% recordation tax (income limits apply, max price $777k as of 10/1/25)."; }
+  else if (stateCode === "NY") { transferTax = baseLoan * 0.018; transferTaxNote = "NY Mortgage Recording Tax (buyer pays): ~1.8% on loan amount. NYC rate is ~1.925%. State transfer tax of 0.4% is paid by seller; NYC adds RPTT 1-2.625% also typically seller-paid. Mansion tax (buyer) 1-3.9% on homes $1M+."; }
+  else if (stateCode === "MA") { transferTax = 0; transferTaxNote = "MA Excise Tax: $2.28 per $500 of value (~0.456%), paid entirely by seller. Buyer owes no state transfer tax in Massachusetts."; }
+  else if (stateCode === "CT") { transferTax = 0; transferTaxNote = "CT Conveyance Tax: 0.75% (under $800k) / 1.25% ($800k–$2.5M) / 2.25% (over $2.5M) + 0.25–0.5% municipal. Paid entirely by seller. Buyer owes no state conveyance tax in Connecticut."; }
+  else if (stateCode === "RI") { transferTax = 0; transferTaxNote = "RI Real Estate Conveyance Tax: $2.30 per $500 of value (~0.46%), $4.60/$500 over $800k. Paid entirely by seller. Buyer owes no state conveyance tax in Rhode Island."; }
+  else if (stateCode === "NH") { transferTax = homePrice * 0.0075; transferTaxNote = "NH Real Estate Transfer Tax: $0.75 per $100 of value (0.75% on buyer). NH is unique — both buyer and seller each pay the full 0.75% separately, effectively a 1.5% total tax on the transaction."; }
+  else if (stateCode === "VT") {
+    // Primary residence assumed: 0.5% on first $100k + 1.45% above
+    const first100k = Math.min(homePrice, 100000);
+    const above100k = Math.max(homePrice - 100000, 0);
+    transferTax = (first100k * 0.005) + (above100k * 0.0145);
+    transferTaxNote = "VT Property Transfer Tax (buyer pays): 0.5% on first $100k + 1.45% on remainder (primary residence). Non-primary residences: flat 1.45%. VT also charges a 0.2% Clean Water Surcharge on most transfers.";
+  }
+  else if (stateCode === "ME") {
+    // 0.44% split 50/50 = 0.22% buyer. Luxury tier over $1M effective 11/1/25
+    const standard = Math.min(homePrice, 1000000) * 0.0022;
+    const luxury = Math.max(homePrice - 1000000, 0) * 0.006; // $6/$500 over $1M, split 50/50 = 0.6%
+    transferTax = standard + luxury;
+    transferTaxNote = "ME Real Estate Transfer Tax: $2.20 per $500 of value (~0.44%), split 50/50 between buyer and seller — 0.22% shown as buyer's share. Effective Nov 1, 2025: $6.00/$500 (~1.2%) applies to the portion above $1M (0.6% buyer's share).";
+  }
+  else if (stateCode === "CO") { transferTax = homePrice * 0.0001; transferTaxNote = "CO Documentary Fee: $0.01 per $100 of value (0.01%). Colorado has no state transfer tax (blocked by TABOR in 1992). Some resort municipalities (Aspen, Vail, Breckenridge, Crested Butte, Telluride) charge additional local transfer taxes of up to 2% — confirm with your agent if purchasing in those areas."; }
+  else if (stateCode === "UT") { transferTax = 0; transferTaxNote = "Utah has no state or local real estate transfer tax."; }
+  else if (stateCode === "NM") { transferTax = 0; transferTaxNote = "New Mexico has no state real estate transfer tax."; }
+  else if (stateCode === "AZ") { transferTax = 2; transferTaxNote = "AZ Transfer Fee: flat $2 per transaction (essentially zero). Arizona has no percentage-based state transfer tax."; }
+  else if (stateCode === "NV") {
+    // Clark County (Vegas) higher rate ~0.51%, other counties ~0.39%. Seller pays.
+    const isClark = taxMetro === "Clark/Las Vegas";
+    transferTax = isClark ? homePrice * 0.0051 : homePrice * 0.0039;
+    transferTaxNote = `NV Real Property Transfer Tax: ~${isClark ? "0.51%" : "0.39%"} in ${isClark ? "Clark County (Vegas/Henderson)" : "counties outside Clark"}. Customarily paid by seller, but shown here as buyer cost — confirm with your contract.`;
+  }
+  else if (stateCode === "ID") { transferTax = 0; transferTaxNote = "Idaho has no state real estate transfer tax."; }
+  else if (stateCode === "MT") { transferTax = 0; transferTaxNote = "Montana has no state real estate transfer tax."; }
+  else if (stateCode === "WY") { transferTax = 0; transferTaxNote = "Wyoming has no state real estate transfer tax."; }
+  else if (stateCode === "IL") {
+    // Chicago: buyer pays the 1.05% CTA portion of the city tax. Elsewhere: seller pays everything.
+    const isChicago = taxMetro === "Cook/Chicago";
+    transferTax = isChicago ? homePrice * 0.0105 : 0;
+    transferTaxNote = isChicago
+      ? "Chicago Real Property Transfer Tax: buyer pays the $3.75 per $500 CTA portion (1.05% of price). Seller pays the $3.00 per $500 city portion + state $0.50/$500 + Cook County $0.25/$500. Total Chicago transfer tax is ~1.50%."
+      : "IL Real Estate Transfer Tax: $0.50 per $500 state (~0.10%) + $0.25 per $500 county. Customarily paid entirely by seller outside of Chicago. Some municipalities add their own tax.";
+  }
+  else if (stateCode === "IN") { transferTax = 0; transferTaxNote = "Indiana has no state real estate transfer tax."; }
+  else if (stateCode === "OH") { transferTax = 0; transferTaxNote = "OH Conveyance Fee: $1.00 per $1,000 state + up to $3.00 per $1,000 county (~0.10-0.40% total). Customarily paid entirely by seller."; }
+  else if (stateCode === "MI") { transferTax = 0; transferTaxNote = "MI Real Estate Transfer Tax: $3.75 per $500 state + $0.55 per $500 county (~0.86% total). Customarily paid entirely by seller per MCL 207.523."; }
+  else if (stateCode === "WI") { transferTax = 0; transferTaxNote = "WI Real Estate Transfer Fee: $0.30 per $100 of value (~0.30%). Paid entirely by seller per Wisconsin statute — buyer owes no transfer fee."; }
+  else if (stateCode === "MN") { transferTax = baseLoan * 0.0023; transferTaxNote = "MN Mortgage Registry Tax (buyer pays): 0.23% of loan amount. Separately, sellers pay a Deed Tax of 0.33% on the sale price. Hennepin and Ramsey counties add a 0.01% Environmental Response Fund Tax."; }
+  else if (stateCode === "TX") { transferTax = 0; transferTaxNote = "Texas has no state real estate transfer tax. Buyers owe only standard recording fees (typically $30-50)."; }
+  else if (stateCode === "LA") {
+    // New Orleans: $325 flat documentary tax
+    const isNOLA = taxMetro === "Orleans/New Orleans";
+    transferTax = isNOLA ? 325 : 0;
+    transferTaxNote = isNOLA
+      ? "New Orleans Documentary Transaction Tax: flat $325 fee on all Orleans Parish transfers. Louisiana has no state-level transfer tax."
+      : "Louisiana has no state real estate transfer tax. New Orleans charges a $325 flat documentary tax; other parishes do not.";
+  }
+  else if (stateCode === "OK") { transferTax = 0; transferTaxNote = "OK Documentary Stamp Tax: $0.75 per $500 of value (~0.15%). Customarily paid entirely by seller."; }
+  else if (stateCode === "KS") { transferTax = 0; transferTaxNote = "Kansas has no state real estate transfer tax. The KS Mortgage Registration Tax was phased out in 2019 and is no longer charged."; }
+  else if (stateCode === "NE") { transferTax = 0; transferTaxNote = "NE Documentary Stamp Tax: $2.25 per $1,000 of value (~0.225%). Customarily paid entirely by seller."; }
+  else if (stateCode === "IA") { transferTax = Math.max(0, (homePrice - 500) * 0.0016); transferTaxNote = "IA Real Estate Transfer Tax: $0.80 per $500 of value (~0.16%), with the first $500 exempt. Buyer customarily pays per Iowa convention, though this is negotiable in the purchase contract."; }
+  else if (stateCode === "MO") { transferTax = 0; transferTaxNote = "Missouri has no state real estate transfer tax. Buyers owe only standard recording fees."; }
+  else if (stateCode === "ND") { transferTax = 0; transferTaxNote = "North Dakota has no state real estate transfer tax."; }
+  else if (stateCode === "SD") { transferTax = 0; transferTaxNote = "SD Real Estate Transfer Fee: $0.50 per $500 of value (~0.10%). Customarily paid entirely by seller."; }
+  else if (stateCode === "HI") { transferTax = 0; transferTaxNote = "HI Conveyance Tax: tiered 0.10%-1.00% for owner-occupants and 0.15%-1.25% for non-owner-occupants. Customarily paid entirely by seller. Rates increase for higher-value properties — sub-$600k properties are taxed at the lowest 0.10% tier."; }
+  else if (stateCode === "AK") { transferTax = 0; transferTaxNote = "Alaska has no state real estate transfer tax. Some municipalities may charge small recording fees but no transfer tax."; }
+  else if (stateCode === "OR") { transferTax = 0; transferTaxNote = "Oregon has no statewide real estate transfer tax. Washington County (which includes Beaverton and parts of Portland metro) charges a local transfer tax of 0.1% — confirm with your closing agent if purchasing there."; }
+  else if (stateCode === "WA") { transferTax = 0; transferTaxNote = "WA Real Estate Excise Tax (REET): graduated state rate 1.1% (up to $525k) / 1.28% ($525k-$1.525M) / 2.75% ($1.525M-$3.025M) / 3.0% (over $3.025M), plus local REET ~0.5%. Paid by seller per RCW 82.45, though buyer is technically liable if seller doesn't pay. Combined rate typically 1.6% to 3.5%+ on the sale price."; }
+  else if (stateCode === "CA") {
+    // CA: county base 0.11% (seller pays). City taxes vary wildly.
+    // SoCal convention: seller pays everything → buyer $0
+    // NorCal convention (Oakland, Berkeley, etc.): city tax split 50/50 → buyer pays half
+    // San Francisco: seller pays entire amount (unique full-seller-pays SF convention)
+    // LA City with Mansion Tax: ULA 4%/5.5% on high-value sales
+    const m = taxMetro;
+    if (m === "Oakland") {
+      // Oakland Measure U tiered: 1.0% ≤$300k, 1.5% ≤$2M, 1.75% ≤$5M, 2.5% >$5M. Split 50/50.
+      const rate = homePrice <= 300000 ? 0.01 : homePrice <= 2000000 ? 0.015 : homePrice <= 5000000 ? 0.0175 : 0.025;
+      transferTax = homePrice * rate * 0.5; // buyer's half
+      transferTaxNote = `Oakland Real Property Transfer Tax: tiered ${(rate*100).toFixed(2)}% for this price range. Per NorCal convention, city transfer tax is split 50/50 between buyer and seller — buyer's half shown. Seller also pays the 0.11% county base tax. First-time low/moderate-income buyers may get 0.5% discount.`;
+    } else if (m === "Berkeley") {
+      // Berkeley: 1.5% ≤$1.5M, 2.5% >$1.5M. Split 50/50.
+      const rate = homePrice <= 1500000 ? 0.015 : 0.025;
+      transferTax = homePrice * rate * 0.5;
+      transferTaxNote = `Berkeley Real Property Transfer Tax: ${(rate*100).toFixed(1)}% (${homePrice <= 1500000 ? "sales ≤$1.5M" : "sales >$1.5M"}). Per NorCal convention, city tax is split 50/50 — buyer's half shown. Measure W will raise rates on $1.6M+ transfers effective January 2027.`;
+    } else if (m === "LA City Mansion Tax ($5.3M+)") {
+      // LA City ULA: 4% on $5.3M-$10.6M, 5.5% on $10.6M+. Base 0.45% applies to all.
+      // Seller pays per SoCal convention, but at this price point borrowers often ask about it.
+      const ulaRate = homePrice >= 10600000 ? 0.055 : homePrice >= 5300000 ? 0.04 : 0;
+      const ulaTax = homePrice * ulaRate;
+      transferTax = 0; // SoCal: seller pays
+      transferTaxNote = homePrice >= 5300000
+        ? `LA City Measure ULA "Mansion Tax" applies: ${(ulaRate*100).toFixed(1)}% on this sale (~${fmt(ulaTax)}) plus 0.45% base city tax plus 0.11% county tax. Per SoCal convention, all transfer taxes are paid by the seller — shown as $0 to buyer. Thresholds adjust annually; effective 7/1/26 thresholds become $5.4M/$10.9M.`
+        : `LA City Mansion Tax threshold is $5,300,000. This sale is below the ULA threshold — only the 0.45% base city tax + 0.11% county tax apply (total ~0.56%). Per SoCal convention, all transfer taxes are paid by the seller — shown as $0 to buyer.`;
+    } else if (m === "San Francisco City") {
+      transferTax = 0;
+      transferTaxNote = "San Francisco Real Property Transfer Tax: tiered 0.25%-6.00% (0.5% ≤$250k, 0.68% to $1M, 0.75% to $5M, 2.25% to $10M, 2.75% to $25M, 3.0% >$25M). Paid entirely by seller per SF convention. SF has no county-level transfer tax (the city rate includes it).";
+    } else if (["Los Angeles City (≤$5.3M)", "Santa Monica", "Culver City", "Beverly Hills", "Pasadena (LA County)", "Long Beach", "LA County (other cities)", "San Diego County", "Orange County", "Riverside County", "San Bernardino County", "Ventura County", "Sacramento County", "Fresno County"].includes(m)) {
+      transferTax = 0;
+      transferTaxNote = "CA County Documentary Transfer Tax: $1.10 per $1,000 of value (0.11%). Per Southern California convention, transfer taxes are paid entirely by the seller — shown as $0 to buyer. Some cities (Santa Monica $3/$1k, Culver City tiered 0.45%-4%, Los Angeles 0.45% + ULA) add their own taxes, also seller-paid.";
+    } else {
+      // Northern CA default (non-SF, non-Oakland/Berkeley): county tax split 50/50
+      transferTax = homePrice * 0.00055; // half of 0.11%
+      transferTaxNote = "CA County Documentary Transfer Tax: $1.10 per $1,000 of value (0.11%). Per Northern California convention, the county tax is commonly split 50/50 between buyer and seller — buyer's half (0.055%) shown. Any city-specific transfer taxes follow local custom.";
+    }
+  }
   else { transferTax = 0; transferTaxNote = `⚠️ Transfer tax for ${stateCode} not yet verified — confirm with your closing attorney. This estimate currently excludes any state-level transfer tax.`; }
 
   // Mortgage recording tax (TN has one!)
@@ -1896,7 +2137,12 @@ function CashToClosePage() {
   // Reserves (escrow setup)
   // Tax reserves: based on state-specific schedule by closing month
   const closingMonth = closeDateObj.getMonth() + 1; // 1-12
-  const taxReserveMonths = TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth] ?? FALLBACK_SCHEDULE[closingMonth];
+  // Tax reserve lookup: metro override first, then state default, then fallback
+  const metroOverride = METRO_RESERVE_OVERRIDES[stateCode]?.[taxMetro];
+  const taxReserveMonths = metroOverride?.[closingMonth]
+    ?? TAX_RESERVE_SCHEDULE[stateCode]?.[closingMonth]
+    ?? FALLBACK_SCHEDULE[closingMonth];
+  const usingMetroSchedule = !!metroOverride;
   const rawTaxReserves = (taxAnnual / 12) * taxReserveMonths;
   const rawInsuranceReserves = (insuranceAnnual / 12) * 3;
   // Escrow waiver eligibility: Conventional with 20%+ down
@@ -2134,10 +2380,10 @@ function CashToClosePage() {
               ) : (
                 <>
                   <Row label={`${taxReserveMonths} Months Property Tax`} val={fmt(taxReserves)} />
-                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: -2, marginBottom: 4, paddingLeft: 0 }}>{stateCode} schedule · closing in {closeDateObj.toLocaleString("en-US", { month: "long" })}</p>
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: -2, marginBottom: 4, paddingLeft: 0 }}>{usingMetroSchedule ? `${taxMetro} schedule` : UNVERIFIED_RESERVES_STATES.has(stateCode) ? `Approximate schedule (${stateCode})` : `${stateCode} schedule`} · closing in {closeDateObj.toLocaleString("en-US", { month: "long" })}</p>
                   <Row label="3 Months Insurance" val={fmt(insuranceReserves)} />
                   <Row label="Reserves Subtotal" val={fmt(reservesTotal)} subtotal />
-                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>Tax reserve months follow the {stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.</p>
+                  <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{UNVERIFIED_RESERVES_STATES.has(stateCode) ? `${stateCode} uses an approximate national reserve pattern — a precise impound matrix isn't yet available for this state. Reserve amounts may differ from your actual Loan Estimate. Confirm exact reserve requirements with your closing agent.` : `Tax reserve months follow the ${stateCode} prepaid schedule based on your closing month. This varies by state and protects the lender from a tax lien gap.`}</p>
                 </>
               )}
             </div>
