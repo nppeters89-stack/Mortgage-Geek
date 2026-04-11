@@ -1490,7 +1490,7 @@ function ComparePage() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
       <style>{globalCSS}{`
-        .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+        .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }
         .compare-card { width: 320px; flex-shrink: 0; }
         @media (max-width: 720px) { .compare-card { width: 100%; max-width: 360px; } }
       `}</style>
@@ -1533,7 +1533,7 @@ function ComparePage() {
               {scenarios.map((s) => {
                 const isBest = s.total === lowestTotal && scenarios.length > 1;
                 return (
-                  <div key={s.id} className="content-card compare-card" style={{ overflow: "visible", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent", marginTop: isBest ? 12 : 0 }}>
+                  <div key={s.id} className="content-card compare-card" style={{ overflow: "visible", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent" }}>
                     {isBest && <span style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "4px 12px", borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap" }}>★ Lowest Payment</span>}
                     <div style={{ background: s.color || P.navy, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
                       <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
