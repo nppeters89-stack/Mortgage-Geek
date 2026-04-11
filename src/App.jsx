@@ -1508,6 +1508,14 @@ function ComparePage() {
           body { background: #fff !important; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
+
+          /* Force all colors and backgrounds to render in PDF */
+          *, *::before, *::after {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+
           .compare-grid {
             display: flex !important;
             flex-wrap: nowrap !important;
@@ -1523,7 +1531,11 @@ function ComparePage() {
             page-break-inside: avoid;
             break-inside: avoid;
           }
-          .content-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+          .content-card { box-shadow: none !important; border: 1px solid #999 !important; }
+
+          /* Darken labels and values in card body for high contrast on white */
+          .compare-card .pdf-label { color: #4a4a4a !important; }
+          .compare-card .pdf-value { color: #000 !important; }
         }
       `}</style>
 
@@ -1601,8 +1613,8 @@ function ComparePage() {
                         { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true, color: cardColor },
                       ].map((row, ri, arr) => (
                         <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: row.sub ? 11 : 12, borderBottom: ri < arr.length - 1 ? `1px solid ${P.cream}` : "none" }}>
-                          <span style={{ color: row.sub ? P.warmGrayLight : P.warmGrayLight, fontStyle: row.sub ? "italic" : "normal" }}>{row.label}</span>
-                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
+                          <span className="pdf-label" style={{ color: P.warmGrayLight, fontStyle: row.sub ? "italic" : "normal" }}>{row.label}</span>
+                          <span className="pdf-value" style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
                         </div>
                       ))}
                       <button onClick={() => removeScenario(s.id)} className="no-print" style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
