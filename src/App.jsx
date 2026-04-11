@@ -1676,12 +1676,16 @@ function ToolsCTA() {
       icon: "🎯", title: "Pre-Qual Simulator", href: "/prequal",
       desc: "Enter your income and debts — see what you can afford under each loan program with real DTI limits.",
     },
+    {
+      icon: "⚖️", title: "Loan Comparison", href: "/compare",
+      desc: "Save up to 3 scenarios from the calculator and stack them side by side to find your best option.",
+    },
   ];
   return (
     <section id="tools-cta" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <div style={{ maxWidth: 720 }}>
-        <SectionHeader eyebrow="Your Toolkit" title="Run the Numbers" subtitle="Two free tools built by a loan originator — not a marketing team. No login, no data collected, no strings attached." />
-        <div className="tools-grid-cta" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ maxWidth: 1080 }}>
+        <SectionHeader eyebrow="Your Toolkit" title="Run the Numbers" subtitle="Free tools built by a loan originator — not a marketing team. No login, no data collected, no strings attached." />
+        <div className="tools-grid-cta" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
           {tools.map((t, i) => (
             <a key={i} href={t.href} className="content-card" style={{
               display: "flex", flexDirection: "column", padding: 0, textDecoration: "none",
@@ -1703,7 +1707,10 @@ function ToolsCTA() {
             </a>
           ))}
         </div>
-        <style>{`@media (max-width: 500px) { .tools-grid-cta, .nextsteps-tools { grid-template-columns: 1fr !important; } }`}</style>
+        <style>{`
+          @media (max-width: 900px) { .tools-grid-cta { grid-template-columns: 1fr 1fr !important; } }
+          @media (max-width: 600px) { .tools-grid-cta, .nextsteps-tools { grid-template-columns: 1fr !important; } }
+        `}</style>
       </div>
     </section>
   );
