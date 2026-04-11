@@ -3217,14 +3217,14 @@ function CalculatorPage() {
               <button onClick={saveScenario} disabled={!selectedProg} style={{
                 display: "inline-flex", alignItems: "center", gap: 8,
                 padding: "14px 28px", borderRadius: 10, border: "none",
-                background: selectedProg ? P.gold : P.creamDark,
+                background: selectedProg ? P.navy : P.creamDark,
                 color: selectedProg ? "#fff" : P.warmGrayLight,
                 fontFamily: F.body, fontSize: 14, fontWeight: 600,
                 cursor: selectedProg ? "pointer" : "not-allowed",
-                boxShadow: selectedProg ? "0 4px 16px rgba(184,134,11,0.3)" : "none",
+                boxShadow: selectedProg ? "0 4px 16px rgba(27,58,75,0.25)" : "none",
                 transition: "all 0.2s",
               }}>
-                ⚖️ {selectedProg ? `Save ${selectedProg.name} to Comparison` : "Select a card above to save"}
+                ⚖️ {selectedProg ? `Save ${selectedProg.name} to Loan Comparison` : "Select a card above to save"}
               </button>
               {saveToast && (
                 <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sage }}>{saveToast.msg}</p>
