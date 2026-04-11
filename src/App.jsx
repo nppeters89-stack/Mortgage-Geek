@@ -336,15 +336,15 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
             ))}
           </nav>
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
-            <svg width="24" height="26" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ marginBottom: 6, opacity: 0.5 }}>
-              <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill="white"/>
-              <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill="#0F2530" stroke="white" strokeWidth="0.5"/>
-              <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="white" strokeWidth="1.5" fill="none"/>
-              <rect x="12" y="22" width="16" height="3" fill="white"/>
-              <rect x="12" y="28" width="16" height="3" fill="white"/>
-            </svg>
             <p style={{ fontSize: 10, lineHeight: 1.5, color: "rgba(255,255,255,0.25)" }}>Educational content only.<br />Not financial advice.</p>
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 4 }}>Equal Housing Lender</p>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+              <svg width="9" height="10" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
+                <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
+                <rect x="12" y="22" width="16" height="3" fill="currentColor"/>
+                <rect x="12" y="28" width="16" height="3" fill="currentColor"/>
+              </svg>
+              <span>Equal Housing Lender</span>
+            </p>
           </div>
         </div>
       </aside>
@@ -1451,16 +1451,15 @@ function AboutPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-          <svg width="30" height="32" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill={P.navy}/>
-            <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill={P.white} stroke={P.navy} strokeWidth="0.5"/>
-            <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke={P.navy} strokeWidth="1.5" fill="none"/>
-            <rect x="12" y="22" width="16" height="3" fill={P.navy}/>
-            <rect x="12" y="28" width="16" height="3" fill={P.navy}/>
+        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
+          <span>NMLS# 1119524 ·</span>
+          <svg width="11" height="12" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
+            <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
+            <rect x="12" y="22" width="16" height="3" fill="currentColor"/>
+            <rect x="12" y="28" width="16" height="3" fill="currentColor"/>
           </svg>
-          <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
-        </div>
+          <span>Equal Housing Lender</span>
+        </p>
       </div>
     </div>
   );
@@ -3407,24 +3406,21 @@ function MainSite() {
         <JargonDecoder />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
-            {/* Equal Housing Logo */}
-            <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-              <svg width="40" height="42" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 0L0 16.5V42H40V16.5L20 0Z" fill={P.navy}/>
-                <path d="M20 2.5L2.5 17.5V40H37.5V17.5L20 2.5Z" fill={P.white} stroke={P.navy} strokeWidth="0.5"/>
-                <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke={P.navy} strokeWidth="1.5" fill="none"/>
-                <rect x="12" y="22" width="16" height="3" fill={P.navy}/>
-                <rect x="12" y="28" width="16" height="3" fill={P.navy}/>
-              </svg>
-              <span style={{ fontSize: 7, fontWeight: 700, color: P.navy, letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center", lineHeight: 1.2, maxWidth: 50 }}>Equal Housing Opportunity</span>
-            </div>
             {/* Disclaimer text */}
             <div style={{ flex: 1, minWidth: 250 }}>
               <p style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 8 }}>🤓 The Mortgage Geek</p>
               <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGrayLight, marginBottom: 8 }}>
                 This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
               </p>
-              <p style={{ fontSize: 11, color: P.warmGrayLight, opacity: 0.6 }}>(615) 656-0737 · NMLS# 1119524 · Equal Housing Lender</p>
+              <p style={{ fontSize: 11, color: P.warmGrayLight, opacity: 0.6, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <span>(615) 656-0737 · NMLS# 1119524 ·</span>
+                <svg width="11" height="12" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
+                  <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
+                  <rect x="12" y="22" width="16" height="3" fill="currentColor"/>
+                  <rect x="12" y="28" width="16" height="3" fill="currentColor"/>
+                </svg>
+                <span>Equal Housing Lender</span>
+              </p>
             </div>
           </div>
         </footer>
