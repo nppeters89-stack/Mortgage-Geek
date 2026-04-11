@@ -1533,9 +1533,9 @@ function ComparePage() {
               {scenarios.map((s) => {
                 const isBest = s.total === lowestTotal && scenarios.length > 1;
                 return (
-                  <div key={s.id} className="content-card compare-card" style={{ overflow: "hidden", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent" }}>
-                    {isBest && <span style={{ position: "absolute", top: 8, right: 8, zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "3px 10px", borderRadius: 50 }}>★ Lowest Payment</span>}
-                    <div style={{ background: s.color || P.navy, padding: "20px", textAlign: "center" }}>
+                  <div key={s.id} className="content-card compare-card" style={{ overflow: "visible", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent", marginTop: isBest ? 12 : 0 }}>
+                    {isBest && <span style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "4px 12px", borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap" }}>★ Lowest Payment</span>}
+                    <div style={{ background: s.color || P.navy, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
                       <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
                       <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
                       <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {s.rate}%</span>
