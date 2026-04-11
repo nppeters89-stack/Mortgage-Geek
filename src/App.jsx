@@ -12,6 +12,13 @@ const P = {
   text: "#2C2825", textLight: "#5C5650",
 };
 
+// Single source of truth for program colors — used in calculator, prequal, and comparison
+const PROGRAM_COLORS = {
+  Conventional: "#1B3A4B", // navy
+  FHA: "#B8860B",          // gold (brand)
+  VA: "#5A7A6E",           // sage
+};
+
 const F = {
   display: "'Instrument Serif', Georgia, serif",
   body: "'DM Sans', -apple-system, sans-serif",
@@ -1532,10 +1539,11 @@ function ComparePage() {
             <div className="compare-grid">
               {scenarios.map((s) => {
                 const isBest = s.total === lowestTotal && scenarios.length > 1;
+                const cardColor = PROGRAM_COLORS[s.program] || s.color || P.navy;
                 return (
                   <div key={s.id} className="content-card compare-card" style={{ overflow: "visible", position: "relative", border: isBest ? `2px solid ${P.gold}` : "2px solid transparent" }}>
                     {isBest && <span style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "4px 12px", borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap" }}>★ Lowest Payment</span>}
-                    <div style={{ background: s.color || P.navy, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
+                    <div style={{ background: cardColor, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
                       <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
                       <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
                       <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {s.rate}%</span>
@@ -1546,16 +1554,16 @@ function ComparePage() {
                         { label: "Down Payment", val: `${fmt(s.downAmt)} (${s.downPct}%)` },
                         { label: "Base Loan Amount", val: fmt(s.baseLoan || (s.homePrice - s.downAmt)) },
                         ...(s.upfront > 0 ? [{ label: s.upfrontLabel || "Upfront Fee", val: `+ ${fmt(s.upfront)}`, sub: true }] : []),
-                        ...(s.upfront > 0 ? [{ label: "Total Loan (financed)", val: fmt(s.totalLoan || s.loan), bold: true, color: s.color }] : []),
+                        ...(s.upfront > 0 ? [{ label: "Total Loan (financed)", val: fmt(s.totalLoan || s.loan), bold: true, color: cardColor }] : []),
                         { label: "Principal & Interest", val: `${fmt(s.pi)}/mo` },
                         ...(s.mi > 0 ? [{ label: "Mortgage Insurance", val: `${fmt(s.mi)}/mo` }] : []),
                         { label: "Property Tax", val: `${fmt(s.tax)}/mo` },
                         { label: "Insurance", val: `${fmt(s.insurance)}/mo` },
-                        { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true, color: s.color },
+                        { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true, color: cardColor },
                       ].map((row, ri, arr) => (
                         <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: row.sub ? 11 : 12, borderBottom: ri < arr.length - 1 ? `1px solid ${P.cream}` : "none" }}>
                           <span style={{ color: row.sub ? P.warmGrayLight : P.warmGrayLight, fontStyle: row.sub ? "italic" : "normal" }}>{row.label}</span>
-                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? s.color || P.navy : P.text) }}>{row.val}</span>
+                          <span style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
                         </div>
                       ))}
                       <button onClick={() => removeScenario(s.id)} style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
@@ -1949,21 +1957,21 @@ function PreQualPage() {
 
   const programs = [
     {
-      name: "Conventional", color: P.navy, rate: convRate, setRate: setConvRate,
+      name: "Conventional", color: PROGRAM_COLORS.Conventional, rate: convRate, setRate: setConvRate,
       frontMax: 0.4999, backMax: 0.4999, miRate: convMiRate, upfrontFee: 0,
       minDown: 3, eligible: dpForCalc >= 3, loanLimit: loanLimits.conv,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
       notes: "Front-end and back-end both 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI. PMI removable at 80% LTV.",
     },
     {
-      name: "FHA", color: "#8B6914", rate: fhaRate, setRate: setFhaRate,
+      name: "FHA", color: PROGRAM_COLORS.FHA, rate: fhaRate, setRate: setFhaRate,
       frontMax: 0.4699, backMax: 0.5699, miRate: fhaMiRate, upfrontFee: 1.75,
       minDown: 3.5, eligible: dpForCalc >= 3.5, loanLimit: loanLimits.fha,
       miLabel: `MIP (${fhaMiRate}%)`,
       notes: "Front-end 46.99%, back-end 56.99%. DTI thresholds assume 680+ FICO. UFMIP (1.75%) financed. MIP for life if <10% down.",
     },
     {
-      name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
+      name: "VA", color: PROGRAM_COLORS.VA, rate: vaRate, setRate: setVaRate,
       frontMax: 0.50, backMax: 0.55, miRate: 0, upfrontFee: vaFeeRate,
       minDown: 0, eligible: true, loanLimit: loanLimits.va,
       miLabel: "No monthly MI",
@@ -2774,21 +2782,21 @@ function CalculatorPage() {
 
   const programs = [
     {
-      name: "Conventional", color: P.navy, loan: convLoan, pi: convPI, mi: convMI,
+      name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate,
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
       eligible: downPct >= 3, minDown: 3,
     },
     {
-      name: "FHA", color: "#8B6914", loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
       eligible: downPct >= 3.5, minDown: 3.5,
     },
     {
-      name: "VA", color: P.sage, loan: vaLoan, pi: vaPI, mi: 0,
+      name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
       miLabel: null,
       upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate,
       note: vaUsage === "exempt"
