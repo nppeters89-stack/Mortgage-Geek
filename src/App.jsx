@@ -2134,24 +2134,35 @@ function PreQualPage() {
                 </div>
 
                 <div style={{ padding: "16px 20px" }}>
-                  {/* DTI breakdown */}
+                  {/* DTI breakdown — two stacked bars */}
                   <div style={{ marginBottom: 14 }}>
-                    {prog.frontMax && (
-                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 6 }}>
-                        <span>Front-End Max Housing</span>
-                        <span style={{ fontWeight: 700, color: prog.bindingConstraint === "front-end" ? prog.color : P.warmGrayLight }}>{fmt(prog.frontMaxHousing)} {prog.bindingConstraint === "front-end" ? "← binding" : ""}</span>
+                    {/* Front-End bar */}
+                    <div style={{ marginBottom: 10 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
+                        <span>Front-End DTI {prog.bindingConstraint === "front-end" && prog.frontMax ? "← binding" : ""}</span>
+                        <span style={{ fontWeight: 700, color: prog.frontMax && prog.bindingConstraint === "front-end" ? prog.color : P.warmGrayLight }}>
+                          {prog.frontMax ? `${((prog.maxPayment / grossIncome) * 100).toFixed(1)}% / ${(prog.frontMax * 100).toFixed(1)}%` : "N/A (VA)"}
+                        </span>
                       </div>
-                    )}
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
-                      <span>Back-End Max (Housing + Debts)</span>
-                      <span style={{ fontWeight: 700, color: prog.bindingConstraint === "back-end" ? prog.color : P.warmGrayLight }}>{fmt(prog.backTotalMax)}</span>
+                      <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>
+                        {prog.frontMax ? (
+                          <div style={{ height: "100%", width: `${Math.min(((prog.maxPayment / grossIncome) / prog.frontMax) * 100, 100)}%`, background: prog.color, borderRadius: 3, transition: "width 0.3s" }} />
+                        ) : (
+                          <div style={{ height: "100%", width: "100%", background: `repeating-linear-gradient(45deg, ${P.creamDark}, ${P.creamDark} 4px, ${P.cream} 4px, ${P.cream} 8px)`, borderRadius: 3 }} />
+                        )}
+                      </div>
                     </div>
-                    <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden", marginBottom: 4 }}>
-                      <div style={{ height: "100%", width: `${Math.min((prog.currentBackDTI / (prog.backMax * 100)) * 100, 100)}%`, background: prog.color, borderRadius: 3 }} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight }}>
-                      <span>Back-End DTI</span>
-                      <span>{prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(1)}%</span>
+                    {/* Back-End bar */}
+                    <div>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
+                        <span>Back-End DTI {prog.bindingConstraint === "back-end" ? "← binding" : ""}</span>
+                        <span style={{ fontWeight: 700, color: prog.bindingConstraint === "back-end" ? prog.color : P.warmGrayLight }}>
+                          {prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${Math.min((prog.currentBackDTI / (prog.backMax * 100)) * 100, 100)}%`, background: prog.color, borderRadius: 3, transition: "width 0.3s" }} />
+                      </div>
                     </div>
                   </div>
 
