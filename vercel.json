@@ -9,6 +9,7 @@
     { "source": "/rates", "destination": "/" },
     { "source": "/calculator", "destination": "/" },
     { "source": "/prequal", "destination": "/" },
-    { "source": "/about", "destination": "/" }
+    { "source": "/about", "destination": "/" },
+    { "source": "/compare", "destination": "/" }
   ]
 }
