@@ -1847,10 +1847,10 @@ function PreQualPage() {
     },
     {
       name: "VA", color: P.sage, rate: vaRate, setRate: setVaRate,
-      frontMax: null, backMax: 0.50, miRate: 0, upfrontFee: vaFeeRate,
+      frontMax: 0.50, backMax: 0.55, miRate: 0, upfrontFee: vaFeeRate,
       minDown: 0, eligible: true, loanLimit: loanLimits.va,
       miLabel: "No monthly MI",
-      notes: `Back-end 50%. DTI thresholds assume 680+ FICO. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 50% with strong residual income.`,
+      notes: `Front-end 50%, back-end 55%. DTI thresholds assume 680+ FICO. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 55% with strong residual income.`,
     },
   ];
 
