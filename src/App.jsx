@@ -1753,9 +1753,42 @@ function CashToClosePage() {
   const creditReport = 75, floodCert = 15, taxService = 80;
   const lenderTotal = underwriting + processing + appraisal + creditReport + floodCert + taxService;
 
-  // Title & Escrow (national approximation, refined for our 5 states)
-  const lendersTitle = Math.max(250, baseLoan * 0.0005); // ~$0.50 per $1k
-  const ownersTitle = homePrice * 0.00575; // ~$5.75 per $1k
+  // Title & Escrow — rates approximated from First American filed schedules for our 5 states
+  // Lender's title: tiered rate, declines as loan amount grows (industry standard)
+  // Roughly: $5/$1k on first $100k, $4/$1k on next $400k, $3/$1k above $500k
+  const calcLendersTitle = (loan) => {
+    if (loan <= 0) return 0;
+    let total = 0;
+    const tier1 = Math.min(loan, 100000);
+    total += tier1 * 0.005;
+    if (loan > 100000) {
+      const tier2 = Math.min(loan - 100000, 400000);
+      total += tier2 * 0.004;
+    }
+    if (loan > 500000) {
+      const tier3 = loan - 500000;
+      total += tier3 * 0.003;
+    }
+    return Math.max(250, total);
+  };
+  // Owner's title: similar tiered structure, slightly higher (covers full equity not just loan)
+  const calcOwnersTitle = (price) => {
+    if (price <= 0) return 0;
+    let total = 0;
+    const tier1 = Math.min(price, 100000);
+    total += tier1 * 0.0058;
+    if (price > 100000) {
+      const tier2 = Math.min(price - 100000, 400000);
+      total += tier2 * 0.0048;
+    }
+    if (price > 500000) {
+      const tier3 = price - 500000;
+      total += tier3 * 0.0038;
+    }
+    return Math.max(300, total);
+  };
+  const lendersTitle = calcLendersTitle(baseLoan);
+  const ownersTitle = calcOwnersTitle(homePrice);
   const settlementFee = 500;
   const titleSearch = 200;
   const recordingFee = 125;
@@ -1869,7 +1902,7 @@ function CashToClosePage() {
             </div>
             <div>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Estimated Close Date</label>
-              <input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none" }} />
+              <input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 8px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, WebkitAppearance: "none" }} />
             </div>
             <div>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
@@ -1956,6 +1989,7 @@ function CashToClosePage() {
             <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Government & Recording</h3>
             <Row label="Transfer Tax" val={fmt(transferTax)} />
             {mortgageTax > 0 && <Row label="Mortgage Recording Tax (TN)" val={fmt(mortgageTax)} />}
+            <Row label="Government & Recording Subtotal" val={fmt(transferTax + mortgageTax)} subtotal />
             <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{transferTaxNote}</p>
 
             <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(184,134,11,0.06)", borderRadius: 10, border: `1px solid rgba(184,134,11,0.15)` }}>
