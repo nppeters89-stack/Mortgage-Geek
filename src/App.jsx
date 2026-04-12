@@ -253,7 +253,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
             </div>
             <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
           </div>
-          <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
+          <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
             {mobileOpen ? "✕" : "☰"}
           </button>
         </div>
@@ -356,7 +356,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
           </div>
         </div>
       </aside>
-      <div className={`sidebar-overlay ${mobileOpen ? "sidebar-overlay-visible" : ""}`} id="sidebar-overlay-drag" onClick={() => { if (mobileOpen) setMobileOpen(false); }} />
+      <div className={`sidebar-overlay ${mobileOpen ? "sidebar-overlay-visible" : ""}`} id="sidebar-overlay-drag" onClick={() => { if (mobileOpen) { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }} />
     </>
   );
 }
@@ -4192,8 +4192,10 @@ function MainSite() {
       if (overlay) overlay.style.opacity = "";
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
+        if (navigator.vibrate) navigator.vibrate(10);
         setMobileOpen(true);
       } else if (mode === "closing" && dx < -SNAP_THRESHOLD) {
+        if (navigator.vibrate) navigator.vibrate(10);
         setMobileOpen(false);
       }
       // If didn't pass threshold, CSS transitions snap back to current state
