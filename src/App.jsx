@@ -834,6 +834,18 @@ function ClosingCosts({ navTarget }) {
                 <strong>Why this matters to you:</strong> Compare your final Closing Disclosure line-by-line against your original Loan Estimate. If fees in the zero-tolerance bucket increased at all, or if 10%-bucket fees collectively jumped more than 10%, your lender owes you money. You have 3 business days to review your Closing Disclosure before closing — use them.
               </p>
             </div>
+
+            {/* Cash to Close Simulator CTA — appears at the end of the deep-dive for engaged readers */}
+            <div style={{ marginTop: 40, padding: "28px 24px", borderRadius: 14, background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, textAlign: "center" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldLight, display: "block", marginBottom: 10, opacity: 0.85 }}>Put It All Together</span>
+              <h3 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3vw, 28px)", color: "#fff", marginBottom: 10, lineHeight: 1.2 }}>See your exact <span style={{ color: P.goldLight }}>cash to close</span> estimate.</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.7)", maxWidth: 460, margin: "0 auto 20px" }}>
+                You know what every cost is — now see how they add up for your scenario. State-specific transfer taxes, metro-level property tax rates, and month-accurate reserve schedules across all 50 states.
+              </p>
+              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>
+                💰 Open the Cash to Close Simulator →
+              </a>
+            </div>
           </div>
         )}
       </div>
@@ -3291,12 +3303,14 @@ function PreQualPage() {
 function JargonDecoder() {
   const [search, setSearch] = useState("");
   const [openTerm, setOpenTerm] = useState(null);
+  const [sectionOpen, setSectionOpen] = useState(false);
 
   const terms = [
     { term: "APR", def: "Annual Percentage Rate — your interest rate plus lender fees, expressed as a yearly rate. APR is always higher than your note rate because it includes costs like origination fees and discount points. Use APR to compare the true cost of loans from different lenders." },
     { term: "Amortization", def: "The process of paying off your loan over time through scheduled payments. Early payments are mostly interest; later payments are mostly principal. A 30-year amortization schedule shows exactly how this shifts month by month." },
     { term: "Appraisal", def: "An independent assessment of a property's market value, ordered by the lender through an Appraisal Management Company (AMC). The lender needs to confirm the home is worth what you're borrowing. Typically $400–$700." },
     { term: "ARM", def: "Adjustable Rate Mortgage — a loan with an interest rate that changes after an initial fixed period. A 7/6 ARM is fixed for 7 years, then adjusts every 6 months based on a market index (usually SOFR). Lower initial rate, but risk of increases later." },
+    { term: "Cash to Close", def: "The total amount of money you need to bring to the closing table to complete your home purchase. It includes your down payment, closing costs, prepaid items (taxes and insurance collected upfront), and escrow reserves, minus any credits like earnest money, seller concessions, or lender credits. This is the real number buyers need to plan for — often significantly more than just the down payment alone." },
     { term: "Clear to Close", def: "The best phrase in the mortgage process. It means the underwriter has approved your loan with all conditions satisfied, and you're authorized to proceed to the closing table." },
     { term: "Closing Disclosure (CD)", def: "A 5-page document you receive at least 3 business days before closing. It details every cost, your loan terms, and your monthly payment. Compare it line-by-line against your Loan Estimate — discrepancies may require a fee cure." },
     { term: "Conforming Loan", def: "A mortgage that meets Fannie Mae or Freddie Mac guidelines, including being under the conforming loan limit ($766,550 in most areas for 2024). Loans above this limit are called jumbo loans." },
@@ -3330,7 +3344,10 @@ function JargonDecoder() {
 
   return (
     <section id="glossary" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="Speak the Language" title="Jargon Decoder" subtitle="Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." />
+      <div onClick={() => setSectionOpen(!sectionOpen)} style={{ cursor: "pointer" }}>
+        <SectionHeader eyebrow="Speak the Language" title={`Jargon Decoder ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." : `Click to reveal ${terms.length} mortgage terms explained in plain language.`} />
+      </div>
+      {sectionOpen && (
       <div style={{ maxWidth: 720 }}>
         {/* Search */}
         <div style={{ marginBottom: 20 }}>
@@ -3375,6 +3392,7 @@ function JargonDecoder() {
           </div>
         )}
       </div>
+      )}
     </section>
   );
 }
