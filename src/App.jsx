@@ -663,7 +663,7 @@ function ActiveLoanProcess({ navTarget }) {
         title="The 30-Day Loan Process"
         subtitle="Once you're under contract, the countdown begins. Here's what happens during the roughly 30 days between a ratified contract and your closing date."
       />
-      <ThirtyDayGraphic activeStep={active} />
+      {!isMobile && <ThirtyDayGraphic activeStep={active} />}
       <div className="process-grid">
         <div className="process-steps">
           {ACTIVE_LOAN_STEPS.map((s, i) => (
@@ -682,6 +682,7 @@ function ActiveLoanProcess({ navTarget }) {
         </div>
         {!isMobile && renderDetail(step)}
       </div>
+      {isMobile && <div style={{ marginTop: 20 }}><ThirtyDayGraphic activeStep={active} /></div>}
     </section>
   );
 }
