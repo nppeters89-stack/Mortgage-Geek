@@ -4106,6 +4106,28 @@ function MainSite() {
   const [navTarget, setNavTarget] = useState(null);
   const [showFloatingCalc, setShowFloatingCalc] = useState(false);
 
+  // Scroll-lock body when sidebar is open on mobile.
+  // Uses position:fixed technique which works reliably on iOS Safari
+  // (plain overflow:hidden on body is ignored by WebKit in many cases).
+  // Preserves the user's scroll position when sidebar closes.
+  useEffect(() => {
+    if (mobileOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      return () => {
+        const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        window.scrollTo(0, savedY);
+      };
+    }
+  }, [mobileOpen]);
+
   // Swipe-to-open/close sidebar — real-time finger tracking
   useEffect(() => {
     const SIDEBAR_W = 280;
