@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Fragment } from "react";
+import { useState, useEffect, useMemo, useRef, Fragment } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -4181,11 +4181,17 @@ function MainSite() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
   const [showFloatingCalc, setShowFloatingCalc] = useState(false);
+  // Signals that a navigation just occurred, so the scroll-lock cleanup
+  // should skip restoring the previous scroll position (the navigation
+  // handler is scrolling to the target section). Prevents a race where
+  // the scroll-restore overrides scrollIntoView on mobile nav clicks.
+  const skipScrollRestore = useRef(false);
 
   // Scroll-lock body when sidebar is open on mobile.
   // Uses position:fixed technique which works reliably on iOS Safari
   // (plain overflow:hidden on body is ignored by WebKit in many cases).
-  // Preserves the user's scroll position when sidebar closes.
+  // Preserves the user's scroll position when sidebar closes — unless a
+  // navigation just fired, in which case we let the nav scroll take effect.
   // Also sets a dark html background so the safe-area zones at top/bottom
   // blend with the sidebar's navy and the overlay's dark wash — otherwise
   // the cream html background shows as an ugly white strip.
@@ -4206,7 +4212,11 @@ function MainSite() {
         document.body.style.overflow = "";
         document.body.style.background = "";
         document.documentElement.style.background = "";
-        window.scrollTo(0, savedY);
+        if (skipScrollRestore.current) {
+          skipScrollRestore.current = false;
+        } else {
+          window.scrollTo(0, savedY);
+        }
       };
     }
   }, [mobileOpen]);
@@ -4332,8 +4342,20 @@ function MainSite() {
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      window.history.replaceState(null, "", `#${id}`);
+      // If sidebar is open on mobile, we need to close it FIRST so the body
+      // becomes unfrozen before scrollIntoView runs. Set the skip flag so the
+      // cleanup doesn't restore the old scroll position, then defer the scroll.
+      if (mobileOpen) {
+        skipScrollRestore.current = true;
+        setMobileOpen(false);
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          window.history.replaceState(null, "", `#${id}`);
+        }, 50);
+      } else {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.history.replaceState(null, "", `#${id}`);
+      }
     }
   };
 
