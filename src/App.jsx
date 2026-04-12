@@ -4338,12 +4338,14 @@ function MainSite() {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #FAF7F2; }
   html { scroll-behavior: smooth; }
 
   /* PWA safe-area handling: adds padding equal to iOS status bar height when
      running as an installed home-screen app with black-translucent status bar.
-     Adds 0 in regular browsers, ~47px on modern iPhones in standalone mode. */
-  .pwa-safe-top { padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important; }
+     Adds 0 in regular browsers, ~47px on modern iPhones in standalone mode.
+     Also makes tool page headers sticky on scroll. */
+  .pwa-safe-top { padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important; position: sticky; top: 0; z-index: 100; }
   .pwa-safe-top-sidebar { padding-top: calc(32px + env(safe-area-inset-top, 0px)) !important; }
   body { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
