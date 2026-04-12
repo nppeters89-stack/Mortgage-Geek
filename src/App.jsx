@@ -185,15 +185,13 @@ const MORTGAGE_STRUCTURE = [
 ];
 
 const NAV_TOPICS = [
-  { id: "getting-started", label: "Getting Started", icon: "🏁", subs: [
-    { label: "Pre-Qualification", id: "getting-started", step: 0 },
-    { label: "Pre-Approval", id: "getting-started", step: 1 },
-    { label: "House Hunting & Contract", id: "getting-started", step: 2 },
-  ]},
-  { id: "process", label: "The 30-Day Process", icon: "📋", subs: [
-    { label: "Loan Processing", id: "process", step: 0 },
-    { label: "Underwriting", id: "process", step: 1 },
-    { label: "Closing", id: "process", step: 2 },
+  { id: "getting-started", label: "Your Mortgage Journey", icon: "🔑", subs: [
+    { label: "1. Pre-Qualification", id: "getting-started", step: 0 },
+    { label: "2. Pre-Approval", id: "getting-started", step: 1 },
+    { label: "3. House Hunting & Contract", id: "getting-started", step: 2 },
+    { label: "4. Loan Processing", id: "process", step: 0 },
+    { label: "5. Underwriting", id: "process", step: 1 },
+    { label: "6. Closing", id: "process", step: 2 },
   ]},
   { id: "types", label: "Mortgage Types", icon: "🏦", subs: [
     { label: "Conventional", id: "types", step: 0 },
@@ -226,7 +224,6 @@ const NAV_TOPICS = [
     { label: "Rate Options & Points", id: "rates", step: 1 },
     { label: "Live Rates", id: "rates", step: 2 },
   ]},
-  { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "next-steps", label: "Get Started", icon: "🚀" },
 ];
 
@@ -235,6 +232,7 @@ const NAV_TOOLS = [
   { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "⚖️", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "💰", href: "/cash-to-close" },
+  { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "glossary", label: "Jargon Decoder", icon: "📖" },
 ];
 
@@ -328,7 +326,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
 
             <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 12px" }} />
             <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>TOOLS</span>
-            {NAV_TOOLS.map((item) => (
+            {NAV_TOOLS.filter(item => item.href).map((item) => (
               <button
                 key={item.id}
                 onClick={() => {
@@ -337,6 +335,22 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                   setMobileOpen(false);
                 }}
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+              >
+                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+            <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 12px" }} />
+            <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>Reference</span>
+            {NAV_TOOLS.filter(item => !item.href).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  onNavigate(item.id);
+                  setMobileOpen(false);
+                }}
+                className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+                style={{ opacity: 0.82 }}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
                 <span>{item.label}</span>
@@ -1254,6 +1268,7 @@ function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, 
 
 function PreApprovalChecklist() {
   const STORAGE_KEY = "mg_checklist";
+  const [sectionOpen, setSectionOpen] = useState(false);
   const [checkedItems, setCheckedItems] = useState(() => {
     try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : {}; }
     catch { return {}; }
@@ -1307,8 +1322,11 @@ function PreApprovalChecklist() {
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
   return (
-    <section id="checklist" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="Get Organized" title="Pre-Approval Checklist" subtitle="Gathering these documents before you apply will speed up your approval and reduce back-and-forth. Check them off as you go." />
+    <section id="checklist" style={{ padding: "64px 40px" }}>
+      <div onClick={() => setSectionOpen(!sectionOpen)} style={{ cursor: "pointer" }}>
+        <SectionHeader eyebrow="Get Organized" title={`Pre-Approval Checklist ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Gathering these documents before you apply will speed up your approval and reduce back-and-forth. Check them off as you go." : (checkedCount > 0 ? `Click to expand — you've checked off ${checkedCount} of ${totalItems} items.` : `Click to reveal ${totalItems} documents to gather before you apply.`)} />
+      </div>
+      {sectionOpen && (
       <div style={{ maxWidth: 720 }}>
         {/* Progress bar */}
         <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24 }}>
@@ -1354,6 +1372,7 @@ function PreApprovalChecklist() {
           </p>
         </div>
       </div>
+      )}
     </section>
   );
 }
@@ -4318,7 +4337,7 @@ function MainSite() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, display: "flex", minHeight: "100vh" }}>
       <style>{globalCSS}</style>
-      <Sidebar activeSection={activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+      <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className="main-content">
         <Hero onNavigate={handleNavigate} />
         <JourneyOverview onNavigate={handleSubNavigate} />
@@ -4329,9 +4348,9 @@ function MainSite() {
         <BorrowerProfile navTarget={navTarget} />
         <MortgageStructure navTarget={navTarget} />
         <InterestRates navTarget={navTarget} />
-        <PreApprovalChecklist />
         <NextSteps />
         <ToolsCTA />
+        <PreApprovalChecklist />
         <JargonDecoder />
         <footer style={{ padding: "40px 40px 32px", borderTop: `1px solid ${P.creamDark}` }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
