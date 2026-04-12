@@ -2920,11 +2920,8 @@ function PreQualPage() {
       <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: `2px solid ${P.gold}` }} />
-            <div>
-              <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff", display: "block", lineHeight: 1.2 }}>The Mortgage Geek</span>
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>NMLS# 1119524</span>
-            </div>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
+            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <a href="tel:+16156560737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
@@ -3690,11 +3687,8 @@ function CalculatorPage() {
       <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", border: `2px solid ${P.gold}` }} />
-            <div>
-              <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff", display: "block", lineHeight: 1.2 }}>The Mortgage Geek</span>
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.4)" }}>NMLS# 1119524</span>
-            </div>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
+            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <a href="tel:+16156560737" style={{
@@ -4294,7 +4288,7 @@ function MainSite() {
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
             {/* Disclaimer text */}
             <div style={{ flex: 1, minWidth: 250 }}>
-              <p style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>🤓 The Mortgage Geek</p>
+              <p style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>The Mortgage Geek 🤓</p>
               <p style={{ fontFamily: F.display, fontSize: 12, color: P.gold, fontStyle: "italic", marginBottom: 12, letterSpacing: 0.3 }}>Mortgages Demystified.</p>
               <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGrayLight, marginBottom: 8 }}>
                 This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
