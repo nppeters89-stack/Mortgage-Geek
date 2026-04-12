@@ -368,7 +368,7 @@ function Hero({ onNavigate }) {
       <div style={{ position: "relative", maxWidth: 680 }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
         <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.2, marginBottom: 20 }}>
-          A mortgage doesn't have to be <span style={{ color: P.goldLight }}>complicated.</span>
+          Mortgages <span style={{ color: P.goldLight }}>Demystified.</span>
         </h2>
         <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: 36 }}>
           Everything you need to understand the mortgage process — from first conversation to closing day — explained in plain language by someone who's done it thousands of times.
@@ -4294,7 +4294,8 @@ function MainSite() {
           <div style={{ display: "flex", alignItems: "flex-start", gap: 24, flexWrap: "wrap", maxWidth: 720 }}>
             {/* Disclaimer text */}
             <div style={{ flex: 1, minWidth: 250 }}>
-              <p style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 8 }}>🤓 The Mortgage Geek</p>
+              <p style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>🤓 The Mortgage Geek</p>
+              <p style={{ fontFamily: F.display, fontSize: 12, color: P.gold, fontStyle: "italic", marginBottom: 12, letterSpacing: 0.3 }}>Mortgages Demystified.</p>
               <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGrayLight, marginBottom: 8 }}>
                 This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
               </p>
