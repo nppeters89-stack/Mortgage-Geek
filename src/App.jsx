@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -237,6 +237,22 @@ const NAV_TOOLS = [
 ];
 
 // ─── Components ──────────────────────────────────────────────────────────────
+
+// Media query hook — returns true when viewport is ≤820px (matches the
+// mobile breakpoint used throughout the CSS). Used to swap layouts between
+// side-by-side (desktop) and accordion (mobile) without DOM gymnastics.
+function useIsMobile(breakpoint = 820) {
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia(`(max-width: ${breakpoint}px)`).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobileOpen }) {
   const [expandedNav, setExpandedNav] = useState(null);
@@ -508,8 +524,34 @@ function JourneyOverview({ onNavigate }) {
 
 function PreContract({ navTarget }) {
   const [active, setActive] = useState(0);
+  const isMobile = useIsMobile();
   useEffect(() => { if (navTarget?.section === "getting-started" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = PRE_CONTRACT_STEPS[active];
+
+  const renderDetail = (s) => (
+    <div className="process-detail">
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{s.num}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "4px 10px", borderRadius: 20, letterSpacing: 0.3 }}>{s.timeframe}</span>
+      </div>
+      <h3 style={{ fontFamily: F.display, fontSize: 24, color: P.navy, marginBottom: 12 }}>{s.title}</h3>
+      <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 24 }}>{s.detail}</p>
+      <div style={{ background: P.cream, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: P.text, fontWeight: 500 }}>{s.tip}</p>
+      </div>
+    </div>
+  );
+
+  const contractDivider = (
+    <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
+      <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, background: `${P.gold}15`, padding: "10px 20px", borderRadius: 10 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold }}>Contract Signed</span>
+        <span style={{ fontSize: 10, color: P.warmGrayLight }}>The 30-day clock starts ↓</span>
+      </div>
+    </div>
+  );
+
   return (
     <section id="getting-started" style={{ padding: "64px 40px" }}>
       <SectionHeader
@@ -520,34 +562,21 @@ function PreContract({ navTarget }) {
       <div className="process-grid">
         <div className="process-steps">
           {PRE_CONTRACT_STEPS.map((s, i) => (
-            <button key={i} onClick={() => setActive(i)} className={`process-step ${active === i ? "process-step-active" : ""}`}>
-              <span className={`process-num ${active === i ? "process-num-active" : ""}`}>{s.num}</span>
-              <div>
-                <span style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</span>
-                <span style={{ display: "block", fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{s.short}</span>
-              </div>
-            </button>
+            <Fragment key={i}>
+              <button onClick={() => setActive(active === i && isMobile ? -1 : i)} className={`process-step ${active === i ? "process-step-active" : ""}`}>
+                <span className={`process-num ${active === i ? "process-num-active" : ""}`}>{s.num}</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{s.short}</span>
+                </div>
+                {isMobile && <span style={{ fontSize: 18, fontWeight: 300, color: P.warmGrayLight, marginLeft: 8 }}>{active === i ? "−" : "+"}</span>}
+              </button>
+              {isMobile && active === i && renderDetail(s)}
+            </Fragment>
           ))}
-          {/* Visual transition arrow */}
-          <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
-            <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, background: `${P.gold}15`, padding: "10px 20px", borderRadius: 10 }}>
-              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold }}>Contract Signed</span>
-              <span style={{ fontSize: 10, color: P.warmGrayLight }}>The 30-day clock starts ↓</span>
-            </div>
-          </div>
+          {contractDivider}
         </div>
-        <div className="process-detail">
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-            <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{step.num}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "4px 10px", borderRadius: 20, letterSpacing: 0.3 }}>{step.timeframe}</span>
-          </div>
-          <h3 style={{ fontFamily: F.display, fontSize: 24, color: P.navy, marginBottom: 12 }}>{step.title}</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 24 }}>{step.detail}</p>
-          <div style={{ background: P.cream, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: P.text, fontWeight: 500 }}>{step.tip}</p>
-          </div>
-        </div>
+        {!isMobile && renderDetail(step)}
       </div>
     </section>
   );
@@ -603,8 +632,28 @@ function ThirtyDayGraphic({ activeStep }) {
 
 function ActiveLoanProcess({ navTarget }) {
   const [active, setActive] = useState(0);
+  const isMobile = useIsMobile();
   useEffect(() => { if (navTarget?.section === "process" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const step = ACTIVE_LOAN_STEPS[active];
+
+  const renderDetail = (s) => (
+    <div className="process-detail">
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{s.num}</span>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "3px 10px", borderRadius: 20 }}>{s.phase}</span>
+          <span style={{ fontSize: 10, color: P.warmGrayLight, fontWeight: 500, padding: "0 10px" }}>Days {s.days}</span>
+        </div>
+      </div>
+      <h3 style={{ fontFamily: F.display, fontSize: 24, color: P.navy, marginBottom: 12 }}>{s.title}</h3>
+      <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 24 }}>{s.detail}</p>
+      <div style={{ background: P.cream, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
+        <p style={{ fontSize: 13, lineHeight: 1.6, color: P.text, fontWeight: 500 }}>{s.tip}</p>
+      </div>
+    </div>
+  );
+
   return (
     <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
@@ -616,30 +665,20 @@ function ActiveLoanProcess({ navTarget }) {
       <div className="process-grid">
         <div className="process-steps">
           {ACTIVE_LOAN_STEPS.map((s, i) => (
-            <button key={i} onClick={() => setActive(i)} className={`process-step ${active === i ? "process-step-active" : ""}`}>
-              <span className={`process-num ${active === i ? "process-num-active" : ""}`}>{s.num}</span>
-              <div>
-                <span style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</span>
-                <span style={{ display: "block", fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{s.short}</span>
-              </div>
-            </button>
+            <Fragment key={i}>
+              <button onClick={() => setActive(active === i && isMobile ? -1 : i)} className={`process-step ${active === i ? "process-step-active" : ""}`}>
+                <span className={`process-num ${active === i ? "process-num-active" : ""}`}>{s.num}</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</span>
+                  <span style={{ display: "block", fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{s.short}</span>
+                </div>
+                {isMobile && <span style={{ fontSize: 18, fontWeight: 300, color: P.warmGrayLight, marginLeft: 8 }}>{active === i ? "−" : "+"}</span>}
+              </button>
+              {isMobile && active === i && renderDetail(s)}
+            </Fragment>
           ))}
         </div>
-        <div className="process-detail">
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-            <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{step.num}</span>
-            <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "3px 10px", borderRadius: 20 }}>{step.phase}</span>
-              <span style={{ fontSize: 10, color: P.warmGrayLight, fontWeight: 500, padding: "0 10px" }}>Days {step.days}</span>
-            </div>
-          </div>
-          <h3 style={{ fontFamily: F.display, fontSize: 24, color: P.navy, marginBottom: 12 }}>{step.title}</h3>
-          <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 24 }}>{step.detail}</p>
-          <div style={{ background: P.cream, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
-            <p style={{ fontSize: 13, lineHeight: 1.6, color: P.text, fontWeight: 500 }}>{step.tip}</p>
-          </div>
-        </div>
+        {!isMobile && renderDetail(step)}
       </div>
     </section>
   );
@@ -4472,6 +4511,9 @@ const globalCSS = `
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
+    /* Mobile accordion: detail panel renders inline below its active step button
+       instead of as a sibling column. Reduce padding for tighter mobile fit. */
+    .process-steps .process-detail { margin: 4px 0 12px; padding: 24px 20px; }
     .calc-grid { flex-direction: column; }
     .calc-grid > *:first-child, .calc-grid > *:last-child { flex: 1 1 auto; }
   }
