@@ -1650,11 +1650,8 @@ function CashToClosePage() {
   // Tax reserves prepaid schedule by state — # of months collected based on closing month
   // From CL Guide National Taxes Matrix v32, defaulting to "all remaining" schedule
   // For 2/13 splits, use 13 (more conservative)
-  // VERIFIED states have been hand-checked. ESTIMATED states are auto-extracted and may need refinement.
-  const STATE_VERIFIED = new Set(["TN", "GA", "MS", "AR", "KY", "AL", "FL", "NC", "SC", "VA", "WV", "MD", "DE", "NJ", "PA", "DC", "NY", "MA", "CT", "RI", "NH", "VT", "ME", "CO", "UT", "NM", "AZ", "NV", "ID", "MT", "WY", "IL", "IN", "OH", "MI", "WI", "MN", "TX", "LA", "OK", "KS", "NE", "IA", "MO", "ND", "SD", "HI", "AK", "OR", "WA", "CA"]);
 
   const TAX_RESERVE_SCHEDULE = {
-    // ✓ Verified
     TN: { 1:4, 2:5, 3:6, 4:7, 5:8, 6:9, 7:10, 8:11, 9:12, 10:13, 11:2, 12:3 },
     GA: { 1:6, 2:7, 3:8, 4:9, 5:10, 6:11, 7:12, 8:13, 9:2, 10:3, 11:4, 12:5 },
     MS: { 1:3, 2:4, 3:5, 4:6, 5:7, 6:8, 7:9, 8:10, 9:11, 10:12, 11:12, 12:2 },
@@ -1922,7 +1919,6 @@ function CashToClosePage() {
   const taxRate = hasMetros
     ? (STATE_METROS[stateCode]?.metros?.[taxMetro] ?? STATE_DEFAULT_TAX_RATES[stateCode] ?? 0.008)
     : (STATE_DEFAULT_TAX_RATES[stateCode] ?? 0.008);
-  const isVerifiedState = STATE_VERIFIED.has(stateCode);
   const taxAnnual = Math.round(homePrice * taxRate);
 
   // Reset metro to default when state changes
@@ -2158,6 +2154,9 @@ function CashToClosePage() {
   const cashToClose = downAmt + closingCostsExFee - totalCredits;
 
   const PROG_COLOR = { Conventional: PROGRAM_COLORS.Conventional, FHA: PROGRAM_COLORS.FHA, VA: PROGRAM_COLORS.VA }[program];
+  // Section header color: gold for Conv/VA (adds contrast against navy/sage subtotal pills),
+  // navy for FHA (gold subtotal pills already contrast against the page, so navy headers stay clean)
+  const headerColor = program === "FHA" ? P.navy : P.gold;
 
   const Row = ({ label, val, sub, bold, color, italic, subtotal }) => (
     <div style={{
@@ -2228,16 +2227,9 @@ function CashToClosePage() {
             <div>
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
               <select value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
-                <optgroup label="✓ Verified">
-                  {ALL_STATES.filter(([code]) => STATE_VERIFIED.has(code)).map(([code, name]) => (
-                    <option key={code} value={code}>{name}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="⚠ Estimated">
-                  {ALL_STATES.filter(([code]) => !STATE_VERIFIED.has(code)).map(([code, name]) => (
-                    <option key={code} value={code}>{name}</option>
-                  ))}
-                </optgroup>
+                {ALL_STATES.map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
               </select>
             </div>
             {hasMetros ? (
@@ -2258,13 +2250,6 @@ function CashToClosePage() {
               </div>
             )}
           </div>
-          {!isVerifiedState && (
-            <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(212,168,67,0.1)", borderRadius: 8, border: `1px solid rgba(212,168,67,0.35)` }}>
-              <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
-                ⚠️ <strong>Estimated state.</strong> Property tax rate is a statewide average and transfer tax may not be included. For precise figures in {ALL_STATES.find(([c]) => c === stateCode)?.[1]}, contact me directly. We're rolling out hand-verified data state-by-state.
-              </p>
-            </div>
-          )}
           <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 4, fontStyle: "italic" }}>
             Auto-calculated: HOI {fmt(insuranceAnnual)}/yr (0.35% of price) · Property tax {fmt(taxAnnual)}/yr ({(taxRate * 100).toFixed(2)}%)
           </p>
@@ -2305,12 +2290,12 @@ function CashToClosePage() {
           </div>
 
           <div style={{ padding: "20px 24px" }}>
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 4 }}>Loan Amount</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 4 }}>Loan Amount</h3>
             <Row label="Base Loan Amount" val={fmt(baseLoan)} />
             {upfrontFee > 0 && <Row label={`+ ${upfrontLabel}`} val={fmt(upfrontFee)} sub italic />}
             <Row label="Total Loan (financed)" val={fmt(totalLoan)} bold color={PROG_COLOR} />
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Lender Fees</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Lender Fees</h3>
             <Row label="Underwriting" val={fmt(underwriting)} />
             <Row label="Processing" val={fmt(processing)} />
             <Row label="Appraisal" val={fmt(appraisal)} />
@@ -2319,7 +2304,7 @@ function CashToClosePage() {
             <Row label="Tax Service" val={fmt(taxService)} />
             <Row label="Lender Fees Subtotal" val={fmt(lenderTotal)} subtotal />
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Title & Escrow</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Title & Escrow</h3>
             <Row label="Lender's Title Insurance" val={fmt(lendersTitle)} />
             <Row label="Owner's Title Insurance" val={fmt(ownersTitle)} />
             <Row label="Settlement / Closing Fee" val={fmt(settlementFee)} />
@@ -2328,21 +2313,21 @@ function CashToClosePage() {
             <Row label="Wire & Notary" val={fmt(wireNotary)} />
             <Row label="Title & Escrow Subtotal" val={fmt(titleTotal)} subtotal />
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 20 }}>Government & Recording</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Government & Recording</h3>
             <Row label="Transfer Tax" val={fmt(transferTax)} />
             {mortgageTax > 0 && <Row label="Mortgage Recording Tax (TN)" val={fmt(mortgageTax)} />}
             <Row label="Government & Recording Subtotal" val={fmt(transferTax + mortgageTax)} subtotal />
             <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{transferTaxNote}</p>
 
             <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(184,134,11,0.06)", borderRadius: 10, border: `1px solid rgba(184,134,11,0.15)` }}>
-              <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Prepaid Items</h3>
+              <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Prepaid Items</h3>
               <Row label="12 Months Homeowner's Insurance" val={fmt(insurancePrepaid)} />
               <Row label={`Daily Interest (${daysRemaining} days × ${fmt(dailyInterest)})`} val={fmt(prepaidInterest)} />
               <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} subtotal />
             </div>
 
             <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
-              <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
+              <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
 
               {/* Escrow Waiver — Conv only. FHA/VA always require escrows. */}
               {program === "Conventional" ? (
@@ -2388,7 +2373,7 @@ function CashToClosePage() {
               )}
             </div>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 12, marginTop: 24, textAlign: "center" }}>Total Closing Costs</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 18, color: headerColor, marginBottom: 12, marginTop: 24, textAlign: "center" }}>Total Closing Costs</h3>
             <div style={{ padding: "18px 20px", background: P.cream, borderRadius: 12, border: `2px solid ${PROG_COLOR}` }}>
               {/* Stack of subtotals */}
               <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, borderBottom: `1px solid ${P.creamDark}` }}>
@@ -2436,7 +2421,7 @@ function CashToClosePage() {
               )}
             </div>
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: P.navy, marginBottom: 8, marginTop: 24 }}>Cash to Close Calculation</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 24 }}>Cash to Close Calculation</h3>
             <Row label="Down Payment" val={fmt(downAmt)} />
             <Row label="+ Total Closing Costs" val={fmt(closingCostsExFee)} />
             <div style={{ marginTop: 12, marginBottom: 4 }}>
