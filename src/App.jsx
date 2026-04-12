@@ -293,10 +293,12 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
               <div key={item.id}>
                 <button
                   onClick={() => {
-                    onNavigate(item.id);
                     if (item.subs) {
+                      // Parent topic with dropdown — expand/collapse only, let user pick sub-item
                       setExpandedNav(expandedNav === item.id ? null : item.id);
                     } else {
+                      // Leaf topic — navigate directly and close mobile sidebar
+                      onNavigate(item.id);
                       setMobileOpen(false);
                     }
                   }}
