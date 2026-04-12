@@ -11,7 +11,8 @@
     { "source": "/prequal", "destination": "/" },
     { "source": "/about", "destination": "/" },
     { "source": "/compare", "destination": "/" },
-    { "source": "/cash-to-close", "destination": "/" }
+    { "source": "/cash-to-close", "destination": "/" },
+    { "source": "/install", "destination": "/" }
   ],
   "headers": [
     {
