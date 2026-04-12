@@ -4234,6 +4234,18 @@ function InstallPage() {
     return iOS && !isSafari;
   })();
 
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const copyCurrentUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + "/install");
+      setCopiedUrl(true);
+      setTimeout(() => setCopiedUrl(false), 2500);
+    } catch {
+      // Clipboard API unavailable (very rare on modern iOS) — fall back to manual prompt
+      window.prompt("Copy this URL and paste it into Safari:", window.location.origin + "/install");
+    }
+  };
+
   const Step = ({ num, title, body }) => (
     <div style={{ display: "flex", gap: 16, marginBottom: 20 }}>
       <div style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", background: P.gold, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.display, fontSize: 16, fontWeight: 700 }}>{num}</div>
@@ -4283,9 +4295,12 @@ function InstallPage() {
         {os === "ios" && (
           <div className="content-card" style={{ padding: "28px 24px" }}>
             {isIosNotSafari && (
-              <div style={{ background: `${P.gold}15`, border: `1px solid ${P.gold}`, borderRadius: 10, padding: "14px 18px", marginBottom: 24 }}>
-                <strong style={{ color: P.navy, fontSize: 13, display: "block", marginBottom: 4 }}>⚠️ You're not in Safari</strong>
-                <p style={{ fontSize: 12, color: P.warmGray, lineHeight: 1.6 }}>Apple restricts app installation to Safari only on iPhone/iPad. Chrome, Brave, and Firefox on iOS can't install web apps. Open this page in <strong>Safari</strong> to continue.</p>
+              <div style={{ background: `${P.gold}15`, border: `1px solid ${P.gold}`, borderRadius: 10, padding: "16px 18px", marginBottom: 24 }}>
+                <strong style={{ color: P.navy, fontSize: 13, display: "block", marginBottom: 6 }}>⚠️ You're not in Safari</strong>
+                <p style={{ fontSize: 12, color: P.warmGray, lineHeight: 1.6, marginBottom: 12 }}>Apple restricts app installation to Safari only on iPhone/iPad — Chrome, Brave, and Firefox can't install web apps on iOS. Copy the link below, then paste it into Safari's address bar.</p>
+                <button onClick={copyCurrentUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 16px", borderRadius: 8, background: copiedUrl ? P.sage : P.navy, color: "#fff", border: "none", fontFamily: F.body, fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "background 0.2s" }}>
+                  {copiedUrl ? (<><span>✓</span><span>Copied — now open Safari</span></>) : (<><span>📋</span><span>Copy install link</span></>)}
+                </button>
               </div>
             )}
             <Step num="1" title="Open in Safari" body="Make sure you're in Safari — not Chrome, Brave, or another browser. Apple only allows Safari to install web apps on iPhone." />
@@ -4329,13 +4344,60 @@ export default function MortgageLandingPage() {
     return "main";
   });
 
-  if (currentPage === "calculator") return <CalculatorPage />;
-  if (currentPage === "prequal") return <PreQualPage />;
-  if (currentPage === "about") return <AboutPage />;
-  if (currentPage === "compare") return <ComparePage />;
-  if (currentPage === "cashtoclose") return <CashToClosePage />;
-  if (currentPage === "install") return <InstallPage />;
-  return <MainSite />;
+  const renderPage = () => {
+    if (currentPage === "calculator") return <CalculatorPage />;
+    if (currentPage === "prequal") return <PreQualPage />;
+    if (currentPage === "about") return <AboutPage />;
+    if (currentPage === "compare") return <ComparePage />;
+    if (currentPage === "cashtoclose") return <CashToClosePage />;
+    if (currentPage === "install") return <InstallPage />;
+    return <MainSite />;
+  };
+
+  return (<>{renderPage()}<WelcomeToast /></>);
+}
+
+// One-time welcome toast shown to newly-installed PWA users on their first
+// launch from the home screen. Uses a localStorage flag to ensure it only
+// appears once per installation. Auto-dismisses after 6 seconds; also
+// dismissible via the × button for users who tap it quickly.
+function WelcomeToast() {
+  const isStandalone = useIsStandalone();
+  const STORAGE_KEY = "mg_welcomed";
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!isStandalone) return;
+    let welcomed = false;
+    try { welcomed = localStorage.getItem(STORAGE_KEY) === "1"; } catch {}
+    if (welcomed) return;
+    // Small delay so it doesn't flash the moment the app opens — feels more intentional
+    const showTimer = setTimeout(() => setVisible(true), 600);
+    const hideTimer = setTimeout(() => setVisible(false), 6600);
+    try { localStorage.setItem(STORAGE_KEY, "1"); } catch {}
+    return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
+  }, [isStandalone]);
+
+  if (!visible) return null;
+  return (
+    <div role="status" style={{
+      position: "fixed", left: 16, right: 16, bottom: `calc(20px + env(safe-area-inset-bottom, 0px))`,
+      maxWidth: 480, margin: "0 auto", zIndex: 300,
+      background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`,
+      color: "#fff", borderRadius: 14, padding: "14px 16px",
+      display: "flex", alignItems: "center", gap: 12,
+      boxShadow: "0 12px 32px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15)",
+      border: `1px solid ${P.gold}40`,
+      animation: "mg-toast-in 0.4s ease-out",
+    }}>
+      <div style={{ fontSize: 28, flexShrink: 0 }}>🎉</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <strong style={{ fontFamily: F.display, fontSize: 15, color: P.goldLight, display: "block", lineHeight: 1.2 }}>You're installed!</strong>
+        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>The Mortgage Geek is now on your home screen. Welcome.</span>
+      </div>
+      <button onClick={() => setVisible(false)} aria-label="Dismiss" style={{ background: "transparent", border: "none", color: "rgba(255,255,255,0.6)", fontSize: 20, cursor: "pointer", padding: 4, lineHeight: 1, flexShrink: 0 }}>×</button>
+    </div>
+  );
 }
 
 function MainSite() {
@@ -4703,5 +4765,10 @@ const globalCSS = `
   }
   @media (max-width: 600px) {
     section { padding-left: 20px !important; padding-right: 20px !important; }
+  }
+
+  @keyframes mg-toast-in {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 `;
