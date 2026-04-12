@@ -4120,6 +4120,7 @@ function MainSite() {
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
+      document.body.style.background = "#0F2530";
       document.documentElement.style.background = "#0F2530";
       return () => {
         const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
@@ -4127,6 +4128,7 @@ function MainSite() {
         document.body.style.top = "";
         document.body.style.width = "";
         document.body.style.overflow = "";
+        document.body.style.background = "";
         document.documentElement.style.background = "";
         window.scrollTo(0, savedY);
       };
