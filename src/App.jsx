@@ -4110,6 +4110,9 @@ function MainSite() {
   // Uses position:fixed technique which works reliably on iOS Safari
   // (plain overflow:hidden on body is ignored by WebKit in many cases).
   // Preserves the user's scroll position when sidebar closes.
+  // Also sets a dark html background so the safe-area zones at top/bottom
+  // blend with the sidebar's navy and the overlay's dark wash — otherwise
+  // the cream html background shows as an ugly white strip.
   useEffect(() => {
     if (mobileOpen) {
       const scrollY = window.scrollY;
@@ -4117,12 +4120,14 @@ function MainSite() {
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
+      document.documentElement.style.background = "#0F2530";
       return () => {
         const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
         document.body.style.position = "";
         document.body.style.top = "";
         document.body.style.width = "";
         document.body.style.overflow = "";
+        document.documentElement.style.background = "";
         window.scrollTo(0, savedY);
       };
     }
