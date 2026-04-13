@@ -1751,6 +1751,7 @@ function ComparePage() {
                         ...(s.mi > 0 ? [{ label: "Mortgage Insurance", val: `${fmt(s.mi)}/mo` }] : []),
                         { label: "Property Tax", val: `${fmt(s.tax)}/mo` },
                         { label: "Insurance", val: `${fmt(s.insurance)}/mo` },
+                        ...(s.hoa > 0 ? [{ label: "HOA Dues", val: `${fmt(s.hoa)}/mo` }] : []),
                         { label: "Total Payment", val: `${fmt(s.total)}/mo`, bold: true, color: cardColor },
                       ].map((row, ri, arr) => (
                         <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: row.sub ? 11 : 12, borderBottom: ri < arr.length - 1 ? `1px solid ${P.cream}` : "none" }}>
@@ -3627,6 +3628,8 @@ function CalculatorPage() {
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("Nashville");
   const [vaUsage, setVaUsage] = useState("first");
+  const [showHoa, setShowHoa] = useState(false);
+  const [hoa, setHoa] = useState(0);
 
   const STATE_TAX_RATES = {
     AL: { name: "Alabama", rate: 0.41, metros: [
@@ -3815,7 +3818,7 @@ function CalculatorPage() {
   const convMiRate = downPct < 5 ? 0.52 : downPct < 10 ? 0.37 : downPct < 20 ? 0.27 : 0;
   const convMI = (baseLoan * (convMiRate / 100)) / 12;
   const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
-  const convTotal = convPI + convMI + taxes + insurance;
+  const convTotal = convPI + convMI + taxes + insurance + hoa;
 
   // FHA
   const fhaUpfront = baseLoan * 0.0175;
@@ -3823,7 +3826,7 @@ function CalculatorPage() {
   const fhaMiRate = downPct < 5 ? 0.55 : 0.50;
   const fhaMI = (baseLoan * (fhaMiRate / 100)) / 12;
   const { monthly: fhaPI } = useMemo(() => generateAmortData(fhaLoan, fhaRate, term), [fhaLoan, fhaRate, term]);
-  const fhaTotal = fhaPI + fhaMI + taxes + insurance;
+  const fhaTotal = fhaPI + fhaMI + taxes + insurance + hoa;
 
   // VA - Funding fee varies by usage type and down payment
   const vaFeeRate = useMemo(() => {
@@ -3836,7 +3839,7 @@ function CalculatorPage() {
   const vaFee = baseLoan * (vaFeeRate / 100);
   const vaLoan = baseLoan + vaFee;
   const { monthly: vaPI } = useMemo(() => generateAmortData(vaLoan, vaRate, term), [vaLoan, vaRate, term]);
-  const vaTotal = vaPI + taxes + insurance;
+  const vaTotal = vaPI + taxes + insurance + hoa;
 
   const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
@@ -3970,6 +3973,14 @@ function CalculatorPage() {
                 )}
               </div>
               <CalcInput label="Monthly Tax" value={taxes} onChange={setTaxes} prefix="$" step={25} />
+              {!showHoa ? (
+                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sage, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
+              ) : (
+                <div>
+                  <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} />
+                  <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: P.warmGrayLight, cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -4073,6 +4084,7 @@ function CalculatorPage() {
                       ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi }] : []),
                       { label: "Taxes", val: taxes },
                       { label: "Insurance", val: insurance },
+                      ...(hoa > 0 ? [{ label: "HOA Dues", val: hoa }] : []),
                     ].map((r, ri) => (
                       <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 12, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
                         <span>{r.label}</span>
@@ -4199,7 +4211,7 @@ function CalculatorPage() {
               upfront: selectedProg.upfront || 0,
               upfrontLabel: selectedProg.upfrontLabel || null,
               loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
-              tax: taxes, insurance, total: selectedProg.total,
+              tax: taxes, insurance, hoa: hoa > 0 ? hoa : 0, total: selectedProg.total,
             };
             saved.push(scenario);
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch {}
