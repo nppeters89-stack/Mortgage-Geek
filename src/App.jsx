@@ -329,8 +329,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 <button
                   onClick={() => {
                     if (item.subs) {
-                      // Parent topic with dropdown — expand/collapse only, let user pick sub-item
+                      // Parent topic with dropdown — expand/collapse AND navigate to section
                       setExpandedNav(expandedNav === item.id ? null : item.id);
+                      onNavigate(item.id);
                     } else {
                       // Leaf topic — navigate directly and close mobile sidebar
                       onNavigate(item.id);
@@ -768,8 +769,13 @@ function ClosingCosts({ navTarget }) {
   const [costPrice, setCostPrice] = useState(350000);
   useEffect(() => {
     if (navTarget?.section === "costs") {
-      if (navTarget.step === "trid") { setShowDetail(true); setOpenTrid(0); }
-      else if (typeof navTarget.step === "number") { setShowDetail(true); setOpenCat(navTarget.step); setOpenItem(null); }
+      if (navTarget.step === "trid") {
+        setShowDetail(true); setOpenTrid(0);
+        setTimeout(() => { const el = document.getElementById("costs-trid"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+      } else if (typeof navTarget.step === "number") {
+        setShowDetail(true); setOpenCat(navTarget.step); setOpenItem(null);
+        setTimeout(() => { const el = document.getElementById(`costs-cat-${navTarget.step}`); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+      }
     }
   }, [navTarget]);
 
@@ -831,7 +837,7 @@ function ClosingCosts({ navTarget }) {
         {showDetail && (
           <>
             {CLOSING_COSTS.map((cat, ci) => (
-              <div key={ci} className="content-card" style={{ marginBottom: 10 }}>
+              <div key={ci} id={`costs-cat-${ci}`} className="content-card" style={{ marginBottom: 10 }}>
                 <button onClick={() => { setOpenCat(openCat === ci ? -1 : ci); setOpenItem(null); }} className={`costs-cat-head ${openCat === ci ? "costs-cat-head-active" : ""}`}>
                   <span>{cat.category}</span>
                   <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -856,7 +862,7 @@ function ClosingCosts({ navTarget }) {
 
         {/* TRID section also inside detail view */}
         {showDetail && (
-          <div style={{ marginTop: 48 }}>
+          <div id="costs-trid" style={{ marginTop: 48 }}>
             <div style={{ marginBottom: 28 }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>Your Protection</span>
               <h3 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3vw, 30px)", color: P.navy, marginBottom: 10, lineHeight: 1.15 }}>TRID Fee Tolerance Matrix</h3>
