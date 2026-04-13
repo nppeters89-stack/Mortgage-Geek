@@ -4264,8 +4264,9 @@ function InstallPage() {
   );
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", margin: 0 }}>
+      <style>{globalCSS}</style>
+      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
