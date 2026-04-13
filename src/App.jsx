@@ -276,6 +276,7 @@ function useIsStandalone() {
 
 function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobileOpen }) {
   const [expandedNav, setExpandedNav] = useState(null);
+  const isMobile = useIsMobile();
   const isStandalone = useIsStandalone();
 
   return (
@@ -329,9 +330,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 <button
                   onClick={() => {
                     if (item.subs) {
-                      // Parent topic with dropdown — expand/collapse AND navigate to section
+                      // Parent topic with dropdown — expand/collapse; also navigate on desktop
                       setExpandedNav(expandedNav === item.id ? null : item.id);
-                      onNavigate(item.id);
+                      if (!isMobile) onNavigate(item.id);
                     } else {
                       // Leaf topic — navigate directly and close mobile sidebar
                       onNavigate(item.id);
