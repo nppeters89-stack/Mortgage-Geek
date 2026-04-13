@@ -2286,6 +2286,18 @@ function CashToClosePage() {
   const [totalCredits, setTotalCredits] = useState(0);
   const [waiveEscrows, setWaiveEscrows] = useState(false);
   const [vaUsage, setVaUsage] = useState("first");
+  // Editable lender fees
+  const [feeUnderwriting, setFeeUnderwriting] = useState(1500);
+  const [feeProcessing, setFeeProcessing] = useState(750);
+  const [feeAppraisal, setFeeAppraisal] = useState(() => program === "VA" ? 650 : program === "FHA" ? 550 : 600);
+  const [feeCreditReport, setFeeCreditReport] = useState(300);
+  const [feeFloodCert, setFeeFloodCert] = useState(15);
+  const [feeTaxService, setFeeTaxService] = useState(80);
+  // Discount points — synced dollar/pct fields
+  const [discountPointsPct, setDiscountPointsPct] = useState(0);
+  const [discountPointsDollar, setDiscountPointsDollar] = useState(0);
+  const [showPointsInfo, setShowPointsInfo] = useState(false);
+  useEffect(() => { setFeeAppraisal(program === "VA" ? 650 : program === "FHA" ? 550 : 600); }, [program]);
 
   // Active rate switches with selected program
   const rate = program === "Conventional" ? convRate : program === "FHA" ? fhaRate : vaRate;
@@ -2338,6 +2350,9 @@ function CashToClosePage() {
   const downAmt = homePrice * (downPct / 100);
   const baseLoan = Math.max(homePrice - downAmt, 0);
 
+  const handlePointsPctChange = (v) => { setDiscountPointsPct(v); setDiscountPointsDollar(Math.round(baseLoan * (v / 100))); };
+  const handlePointsDollarChange = (v) => { setDiscountPointsDollar(v); setDiscountPointsPct(baseLoan > 0 ? Math.round((v / baseLoan) * 100000) / 1000 : 0); };
+
   // Upfront fees (financed)
   let upfrontFee = 0, upfrontLabel = "";
   if (program === "FHA") { upfrontFee = baseLoan * 0.0175; upfrontLabel = "UFMIP (1.75%)"; }
@@ -2351,11 +2366,11 @@ function CashToClosePage() {
   }
   const totalLoan = baseLoan + upfrontFee;
 
-  // Lender fees
-  const underwriting = 1500, processing = 750;
-  const appraisal = program === "VA" ? 650 : program === "FHA" ? 550 : 600;
-  const creditReport = 300, floodCert = 15, taxService = 80;
-  const lenderTotal = underwriting + processing + appraisal + creditReport + floodCert + taxService;
+  // Lender fees (editable)
+  const underwriting = feeUnderwriting, processing = feeProcessing;
+  const appraisal = feeAppraisal;
+  const creditReport = feeCreditReport, floodCert = feeFloodCert, taxService = feeTaxService;
+  const lenderTotal = underwriting + processing + appraisal + creditReport + floodCert + taxService + discountPointsDollar;
 
   // Title & Escrow — rates approximated from First American filed schedules for our 5 states
   // Lender's title: tiered rate, declines as loan amount grows (industry standard)
@@ -2748,14 +2763,43 @@ function CashToClosePage() {
             {upfrontFee > 0 && <Row label={`+ ${upfrontLabel}`} val={fmt(upfrontFee)} sub italic />}
             <Row label="Total Loan (financed)" val={fmt(totalLoan)} bold color={PROG_COLOR} />
 
-            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Lender Fees</h3>
-            <Row label="Underwriting" val={fmt(underwriting)} />
-            <Row label="Processing" val={fmt(processing)} />
-            <Row label="Appraisal" val={fmt(appraisal)} />
-            <Row label="Credit Report" val={fmt(creditReport)} />
-            <Row label="Flood Certification" val={fmt(floodCert)} />
-            <Row label="Tax Service" val={fmt(taxService)} />
-            <Row label="Lender Fees Subtotal" val={fmt(lenderTotal)} subtotal />
+            <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Lender Fees <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(editable)</span></h3>
+            <CalcInput label="Underwriting" value={feeUnderwriting} onChange={setFeeUnderwriting} prefix="$" step={50} comma />
+            <CalcInput label="Processing" value={feeProcessing} onChange={setFeeProcessing} prefix="$" step={50} comma />
+            <CalcInput label="Appraisal" value={feeAppraisal} onChange={setFeeAppraisal} prefix="$" step={25} comma />
+            <CalcInput label="Credit Report" value={feeCreditReport} onChange={setFeeCreditReport} prefix="$" step={25} comma />
+            <CalcInput label="Flood Certification" value={feeFloodCert} onChange={setFeeFloodCert} prefix="$" step={5} />
+            <CalcInput label="Tax Service" value={feeTaxService} onChange={setFeeTaxService} prefix="$" step={10} />
+
+            {/* Discount Points */}
+            <div style={{ marginTop: 10, padding: "12px 14px", background: P.cream, borderRadius: 8, border: `1px solid ${P.creamDark}` }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: P.text }}>Discount Points</span>
+                <button onClick={() => setShowPointsInfo(!showPointsInfo)} style={{ background: "none", border: "none", fontSize: 11, color: P.sage, fontWeight: 600, cursor: "pointer", fontFamily: F.body, textDecoration: "underline" }}>{showPointsInfo ? "Hide info ↑" : "What are points? ↓"}</button>
+              </div>
+              {showPointsInfo && (
+                <div style={{ marginBottom: 12, padding: "12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}` }}>
+                  <p style={{ fontSize: 12, lineHeight: 1.65, color: P.warmGray, marginBottom: 8 }}>
+                    <strong style={{ color: P.navy }}>Discount points</strong> are upfront fees paid to the lender at closing to "buy down" your interest rate. Each point costs <strong>1% of the loan amount</strong> (e.g., 1 point on a $300,000 loan = $3,000).
+                  </p>
+                  <p style={{ fontSize: 12, lineHeight: 1.65, color: P.warmGray, marginBottom: 8 }}>
+                    Points are a trade-off: <strong>more cash upfront = lower monthly payment</strong>. Whether points make sense depends on how long you keep the loan. The "break-even" point is typically 4–7 years — if you sell or refinance before then, you may not recoup the upfront cost.
+                  </p>
+                  <p style={{ fontSize: 12, lineHeight: 1.65, color: P.warmGray }}>
+                    Common increments: 0.125, 0.250, 0.375, 0.500, 0.750, 1.000. Your Loan Estimate will show exactly how many points (if any) your rate includes. Points are a <strong>Reg Z finance charge</strong> and are factored into your APR.
+                  </p>
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                <CalcInput label="Points (%)" value={discountPointsPct} onChange={handlePointsPctChange} suffix="%" step={0.125} min={0} max={5} />
+                <CalcInput label="Points ($)" value={discountPointsDollar} onChange={handlePointsDollarChange} prefix="$" step={100} comma />
+              </div>
+              {discountPointsDollar > 0 && (
+                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 4, textAlign: "center" }}>{discountPointsPct.toFixed(3)}% of {fmt(baseLoan)} loan = {fmt(discountPointsDollar)}</p>
+              )}
+            </div>
+
+            <div style={{ marginTop: 10 }}><Row label="Lender Fees + Points Subtotal" val={fmt(lenderTotal)} subtotal /></div>
 
             <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 20 }}>Title & Escrow</h3>
             <Row label="Lender's Title Insurance" val={fmt(lendersTitle)} />
