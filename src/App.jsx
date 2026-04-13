@@ -5048,11 +5048,11 @@ function MainSite() {
         skipScrollRestore.current = true;
         setMobileOpen(false);
         setTimeout(() => {
-          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          el.scrollIntoView({ behavior: "instant", block: "start" });
           window.history.replaceState(null, "", `#${id}`);
         }, 50);
       } else {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.scrollIntoView({ behavior: "instant", block: "start" });
         window.history.replaceState(null, "", `#${id}`);
       }
     }
@@ -5076,7 +5076,7 @@ function MainSite() {
       if (target) {
         const el = document.getElementById(target);
         if (el) {
-          setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+          setTimeout(() => el.scrollIntoView({ behavior: "instant", block: "start" }), 300);
         }
       }
     };
@@ -5165,7 +5165,7 @@ const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { background: #FAF7F2; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: auto; }
 
   /* PWA safe-area handling: adds padding equal to iOS status bar height when
      running as an installed home-screen app with black-translucent status bar.
