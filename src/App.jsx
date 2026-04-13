@@ -3419,7 +3419,21 @@ function PreQualPage() {
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
-    return { ...prog, eligible: isEligible, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay, cappedByMinDown };
+    // APR calculation for the max scenario
+    const aprLenderFees = 1500 + 750 + (prog.name === "VA" ? 650 : prog.name === "FHA" ? 550 : 600) + 300 + 15 + 80;
+    const aprUpfront = maxLoan * (prog.upfrontFee / 100);
+    const aprCharges = aprLenderFees + aprUpfront;
+    let aprMI = 0, aprMiMonths = 0;
+    if (prog.name === "FHA") {
+      aprMI = (maxLoan * (prog.miRate / 100)) / 12;
+      aprMiMonths = dpForCalc < 10 ? term * 12 : 132;
+    } else if (prog.name === "Conventional" && dpForCalc < 20) {
+      aprMI = (maxLoan * (prog.miRate / 100)) / 12;
+      aprMiMonths = 120;
+    }
+    const apr = maxTotalLoan > 0 ? calculateAPR(maxTotalLoan, aprCharges, prog.rate, term, aprMI, aprMiMonths) : 0;
+
+    return { ...prog, eligible: isEligible, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay, cappedByMinDown, apr };
   });
 
   return (
@@ -3728,6 +3742,16 @@ function PreQualPage() {
                   )}
 
                   <p style={{ fontSize: 10, color: P.warmGrayLight, lineHeight: 1.5, fontStyle: "italic" }}>{prog.notes}</p>
+
+                  {/* APR */}
+                  {prog.apr > 0 && (
+                    <div style={{ marginTop: 10, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR at Max Purchase</span>
+                      <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
+                      <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Note rate {Number(prog.rate).toFixed(3)}% · Includes lender fees{prog.upfrontFee > 0 ? `, ${prog.name === "FHA" ? "UFMIP" : "VA funding fee"}` : ""}{prog.miRate > 0 ? ", monthly MI" : ""}</p>
+                      <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             );
