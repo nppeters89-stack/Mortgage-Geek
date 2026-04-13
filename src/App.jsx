@@ -133,7 +133,7 @@ const TRID_BUCKETS = [
   },
   {
     category: "No Tolerance (Unlimited)",
-    limit: "Unlimited",
+    limit: "∞",
     limitNote: "Good faith only",
     color: "#5A7A6E",
     examples: "Prepaid interest, property insurance premiums, property taxes, HOA fees, and services where the borrower chose a provider not on the lender's list",
