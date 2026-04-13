@@ -201,6 +201,7 @@ const NAV_TOPICS = [
     { label: "Jumbo", id: "types", step: 4 },
   ]},
   { id: "costs", label: "Closing Costs", icon: "💰", subs: [
+    { label: "All About", id: "costs", step: "top" },
     { label: "Lender Fees", id: "costs", step: 0 },
     { label: "Title & Settlement", id: "costs", step: 1 },
     { label: "Third-Party Services", id: "costs", step: 2 },
@@ -770,7 +771,9 @@ function ClosingCosts({ navTarget }) {
   const [costPrice, setCostPrice] = useState(350000);
   useEffect(() => {
     if (navTarget?.section === "costs") {
-      if (navTarget.step === "trid") {
+      if (navTarget.step === "top") {
+        setTimeout(() => { const el = document.getElementById("costs"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
+      } else if (navTarget.step === "trid") {
         setShowDetail(true); setOpenTrid(0);
         setTimeout(() => { const el = document.getElementById("costs-trid"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 100);
       } else if (typeof navTarget.step === "number") {
