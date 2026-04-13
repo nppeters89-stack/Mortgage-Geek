@@ -2269,12 +2269,14 @@ function CashToClosePage() {
   };
 
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
-  const [program, setProgram] = useState("Conventional");
+  const paramProgram = params.get("program");
+  const paramRate = parseFloat(params.get("rate"));
+  const [program, setProgram] = useState(["Conventional", "FHA", "VA"].includes(paramProgram) ? paramProgram : "Conventional");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
-  const [convRate, setConvRate] = useState(6.75);
-  const [fhaRate, setFhaRate] = useState(6.25);
-  const [vaRate, setVaRate] = useState(6.25);
+  const [convRate, setConvRate] = useState(paramProgram === "Conventional" && paramRate > 0 ? paramRate : 6.75);
+  const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
+  const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
   const [term] = useState(30);
@@ -2282,11 +2284,14 @@ function CashToClosePage() {
     const d = new Date(); d.setDate(d.getDate() + 30);
     return d.toISOString().split("T")[0];
   });
-  const [stateCode, setStateCode] = useState("TN");
-  const [taxMetro, setTaxMetro] = useState("All other counties");
+  const paramState = params.get("state");
+  const paramMetro = params.get("metro");
+  const [stateCode, setStateCode] = useState(paramState || "TN");
+  const [taxMetro, setTaxMetro] = useState(paramMetro || "All other counties");
   const [totalCredits, setTotalCredits] = useState(0);
   const [waiveEscrows, setWaiveEscrows] = useState(false);
-  const [vaUsage, setVaUsage] = useState("first");
+  const paramVaUsage = params.get("vaUsage");
+  const [vaUsage, setVaUsage] = useState(["first", "subsequent", "exempt"].includes(paramVaUsage) ? paramVaUsage : "first");
   // Editable lender fees
   const [feeUnderwriting, setFeeUnderwriting] = useState(1500);
   const [feeProcessing, setFeeProcessing] = useState(750);
@@ -2321,9 +2326,9 @@ function CashToClosePage() {
           const conv30 = find("30-year fixed");
           const fha = find("fha");
           const va = find("va");
-          if (conv30) setConvRate(roundRate(parseFloat(conv30.rate)));
-          if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
-          if (va) setVaRate(roundRate(parseFloat(va.rate)));
+          if (conv30 && !(paramProgram === "Conventional" && paramRate > 0)) setConvRate(roundRate(parseFloat(conv30.rate)));
+          if (fha && !(paramProgram === "FHA" && paramRate > 0)) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
@@ -4497,7 +4502,7 @@ function CalculatorPage() {
                   <div style={{ marginTop: 12, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR</span>
                     <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
-                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
+                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
                     <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                   </div>
                 </div>
@@ -4638,7 +4643,7 @@ function CalculatorPage() {
 
         {/* Cross-link to prequal */}
         <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <a href={`/cash-to-close?price=${homePrice}&down=${downPct}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
+          <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
             ⓘ See APR estimate (true cost of credit) in Cash to Close →
           </a>
         </div>
