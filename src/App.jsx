@@ -2279,7 +2279,7 @@ function CashToClosePage() {
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
-  const [term] = useState(30);
+  const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [closeDate, setCloseDate] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 30);
     return d.toISOString().split("T")[0];
@@ -2688,6 +2688,14 @@ function CashToClosePage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
             <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
             <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
+            <div>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Term</label>
+              <div style={{ display: "flex", gap: 4 }}>
+                {[15, 30].map((t) => (
+                  <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "9px 0" }}>{t} yr</button>
+                ))}
+              </div>
+            </div>
             <div>
               <CalcInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} value={rate} onChange={setRate} suffix="%" step={0.125} min={0} max={20} />
               {ratesLoaded && (
@@ -4526,7 +4534,7 @@ function CalculatorPage() {
                   <div style={{ marginTop: 12, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR</span>
                     <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
-                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
+                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
                     <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                   </div>
                 </div>
@@ -4667,7 +4675,7 @@ function CalculatorPage() {
 
         {/* Cross-link to prequal */}
         <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
+          <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
             ⓘ See APR estimate (true cost of credit) in Cash to Close →
           </a>
         </div>
