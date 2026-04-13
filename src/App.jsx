@@ -1798,7 +1798,7 @@ function ComparePage() {
             {selectedId && (() => {
               const s = scenarios.find(sc => sc.id === selectedId);
               if (!s) return null;
-              const calcUrl = `/calculator?price=${s.homePrice}&down=${s.downPct}&term=${s.term}`;
+              const calcUrl = `/calculator?price=${s.homePrice}&down=${s.downPct}&term=${s.term}&rate=${s.rate}&program=${encodeURIComponent(s.program)}&tax=${s.tax}&insurance=${s.insurance}${s.hoa > 0 ? `&hoa=${s.hoa}` : ""}`;
               return (
                 <div className="no-print" style={{ textAlign: "center", marginTop: 28 }}>
                   <p style={{ fontSize: 12, color: P.warmGray, marginBottom: 10 }}>Selected: <strong>{s.program} · {s.term}yr · {fmt(s.total)}/mo</strong></p>
@@ -3607,12 +3607,14 @@ function RateInput({ label, rate, setRate, color }) {
 
 function CalculatorPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const paramRate = parseFloat(params.get("rate"));
+  const paramProgram = params.get("program");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
-  const [convRate, setConvRate] = useState(6.75);
+  const [convRate, setConvRate] = useState(paramProgram === "Conventional" && paramRate > 0 ? paramRate : 6.75);
   const [convRate30Api, setConvRate30Api] = useState(6.75);
   const [convRate15Api, setConvRate15Api] = useState(6.0);
-  const [fhaRate, setFhaRate] = useState(6.25);
-  const [vaRate, setVaRate] = useState(6.25);
+  const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
+  const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
@@ -3628,8 +3630,9 @@ function CalculatorPage() {
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("Nashville");
   const [vaUsage, setVaUsage] = useState("first");
-  const [showHoa, setShowHoa] = useState(false);
-  const [hoa, setHoa] = useState(0);
+  const paramHoa = parseFloat(params.get("hoa"));
+  const [showHoa, setShowHoa] = useState(paramHoa > 0);
+  const [hoa, setHoa] = useState(paramHoa > 0 ? paramHoa : 0);
 
   const STATE_TAX_RATES = {
     AL: { name: "Alabama", rate: 0.41, metros: [
@@ -3771,6 +3774,15 @@ function CalculatorPage() {
 
   const [insurance, setInsurance] = useState(Math.round((350000 * 0.0035) / 12));
   useEffect(() => { setInsurance(Math.round((homePrice * 0.0035) / 12)); }, [homePrice]);
+
+  // Override taxes/insurance from URL params (e.g. loaded from comparison tool)
+  useEffect(() => {
+    const pTax = parseFloat(params.get("tax"));
+    const pIns = parseFloat(params.get("insurance"));
+    if (pTax > 0) setTimeout(() => setTaxes(pTax), 0);
+    if (pIns > 0) setTimeout(() => setInsurance(pIns), 0);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
 
@@ -3793,9 +3805,9 @@ function CalculatorPage() {
           const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
           setConvRate30Api(r30);
           setConvRate15Api(r15);
-          setConvRate(term === 15 ? r15 : r30);
-          if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
-          if (va) setVaRate(roundRate(parseFloat(va.rate)));
+          if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(term === 15 ? r15 : r30);
+          if (fha && !(paramProgram === "FHA" && paramRate > 0)) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
