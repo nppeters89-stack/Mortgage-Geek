@@ -1080,7 +1080,7 @@ function AmortizationChart({ principal = 300000, rate = 7, years = 30 }) {
     <div className="content-card" style={{ maxWidth: 720, padding: "28px 24px" }}>
       <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 4 }}>How Your Payment Shifts Over Time</h4>
       <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.5, marginBottom: 16 }}>
-        {fmt(principal)} loan at {rate}% over {years} years — watch how interest dominates early, then principal takes over
+        {fmt(principal)} loan at {Number(rate).toFixed(3)}% over {years} years — watch how interest dominates early, then principal takes over
       </p>
       <div style={{ display: "flex", gap: 20, marginBottom: 16 }}>
         <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 500, color: P.warmGray }}>
@@ -1448,7 +1448,7 @@ function InterestRates({ navTarget }) {
               <div style={{ textAlign: "center", marginBottom: 20 }}>
                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Real-World Example</span>
                 <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 6 }}>Same Rate. Different Cost.</h4>
-                <p style={{ fontSize: 13, color: P.warmGray }}>FHA loan · $300,000 · 3.5% down · {exRate}% note rate · 30-year fixed</p>
+                <p style={{ fontSize: 13, color: P.warmGray }}>FHA loan · $300,000 · 3.5% down · {exRate.toFixed(3)}% note rate · 30-year fixed</p>
               </div>
 
               {/* Lender headers */}
@@ -1490,13 +1490,13 @@ function InterestRates({ navTarget }) {
                 <div style={{ background: `${P.sage}12`, border: `2px solid ${P.sage}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.sage, display: "block", marginBottom: 4 }}>Lender A · APR</span>
                   <span style={{ fontFamily: F.display, fontSize: 32, color: P.sage, display: "block" }}>{aAPR.toFixed(3)}%</span>
-                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(aTotal)}</span>
                 </div>
                 <div style={{ background: `${P.goldMuted}12`, border: `2px solid ${P.goldMuted}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 4 }}>Lender B · APR</span>
                   <span style={{ fontFamily: F.display, fontSize: 32, color: P.goldMuted, display: "block" }}>{bAPR.toFixed(3)}%</span>
-                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(bTotal)}</span>
                 </div>
               </div>
@@ -1959,7 +1959,7 @@ function ComparePage() {
                     <div className="card-header" style={{ background: cardColor, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
                       <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
                       <span className="card-total" style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
-                      <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {s.rate}%</span>
+                      <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {Number(s.rate).toFixed(3)}%</span>
                     </div>
                     <div style={{ padding: "16px 20px" }}>
                       {[
@@ -1985,7 +1985,7 @@ function ComparePage() {
                         <div style={{ marginTop: 10, padding: "8px 10px", background: P.cream, borderRadius: 6, textAlign: "center" }}>
                           <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Est. APR </span>
                           <span style={{ fontFamily: F.display, fontSize: 18, color: cardColor }}>{s.apr.toFixed(3)}%</span>
-                          <span style={{ fontSize: 9, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Note rate {s.rate}%</span>
+                          <span style={{ fontSize: 9, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Note rate {Number(s.rate).toFixed(3)}%</span>
                         </div>
                       )}
                       {/* Geek Tips */}
@@ -2892,7 +2892,7 @@ function CashToClosePage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, gap: 12, flexWrap: "wrap" }}>
                 <div>
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Estimated APR</span>
-                  <span style={{ fontSize: 10, color: P.warmGrayLight }}>Note rate {rate}% · {term}-year term</span>
+                  <span style={{ fontSize: 10, color: P.warmGrayLight }}>Note rate {Number(rate).toFixed(3)}% · {term}-year term</span>
                 </div>
                 <span style={{ fontFamily: F.display, fontSize: 30, color: PROG_COLOR, fontWeight: 600 }}>{estimatedAPR.toFixed(3)}%</span>
               </div>
@@ -3589,7 +3589,7 @@ function PreQualPage() {
                   <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.5)", marginBottom: 2 }}>{prog.name} · Max Purchase</span>
                   <span style={{ fontFamily: F.display, fontSize: 34, color: "#fff" }}>{fmt(prog.maxPrice)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>
-                    {prog.rate}% · {prog.overLimit ? "capped at loan limit" : prog.cappedByMinDown ? `capped at ${prog.minDown}% min down` : `${prog.bindingConstraint} DTI binding`}
+                    {Number(prog.rate).toFixed(3)}% · {prog.overLimit ? "capped at loan limit" : prog.cappedByMinDown ? `capped at ${prog.minDown}% min down` : `${prog.bindingConstraint} DTI binding`}
                   </span>
                   {prog.overLimit && (
                     <span style={{ display: "inline-block", marginTop: 6, fontSize: 10, fontWeight: 600, background: "rgba(255,255,255,0.15)", color: "#fff", padding: "3px 10px", borderRadius: 10 }}>
@@ -3860,8 +3860,9 @@ function JargonDecoder() {
 }
 
 function RateInput({ label, rate, setRate, color }) {
-  const [localVal, setLocalVal] = useState(String(rate));
-  useEffect(() => { setLocalVal(String(rate)); }, [rate]);
+  const fmtRate = (r) => Number(r).toFixed(3);
+  const [localVal, setLocalVal] = useState(fmtRate(rate));
+  useEffect(() => { setLocalVal(fmtRate(rate)); }, [rate]);
   const handleChange = (e) => {
     setLocalVal(e.target.value);
     const v = parseFloat(e.target.value);
@@ -3869,9 +3870,9 @@ function RateInput({ label, rate, setRate, color }) {
   };
   const handleBlur = () => {
     const v = parseFloat(localVal);
-    if (isNaN(v) || v < 0) { setRate(0); setLocalVal("0"); }
-    else if (v > 15) { setRate(15); setLocalVal("15"); }
-    else { setRate(v); setLocalVal(String(v)); }
+    if (isNaN(v) || v < 0) { setRate(0); setLocalVal(fmtRate(0)); }
+    else if (v > 15) { setRate(15); setLocalVal(fmtRate(15)); }
+    else { setRate(v); setLocalVal(fmtRate(v)); }
   };
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", borderRadius: 8, background: P.cream, border: `1px solid ${P.creamDark}` }}>
@@ -4384,7 +4385,7 @@ function CalculatorPage() {
                   )}
                   <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
                   <span style={{ fontFamily: F.display, fontSize: 40, color: "#fff" }}>{fmt(prog.total)}</span>
-                  <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {prog.rate}% rate</span>
+                  <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {Number(prog.rate).toFixed(3)}% rate</span>
                 </div>
 
                 <div style={{ padding: "20px" }}>
@@ -4564,7 +4565,7 @@ function CalculatorPage() {
         {(() => {
           const eligible = programs.filter(p => p.eligible);
           const winner = eligible.length > 0 ? eligible.reduce((a, b) => a.total < b.total ? a : b) : null;
-          const lines = eligible.map(p => `${p.name}: ${fmt(p.total)}/mo (${p.rate}%)${p.total === lowestTotal ? " ← Lowest" : ""}`).join("\n");
+          const lines = eligible.map(p => `${p.name}: ${fmt(p.total)}/mo (${Number(p.rate).toFixed(3)}%)${p.total === lowestTotal ? " ← Lowest" : ""}`).join("\n");
           const body = encodeURIComponent(
             `Hi! Here's my mortgage scenario from MortgageGeek.ai:\n\n` +
             `${fmt(homePrice)} home | ${downPct}% down | ${term}yr\n\n` +
