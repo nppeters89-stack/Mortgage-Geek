@@ -4753,7 +4753,9 @@ const globalCSS = `
   .calc-grid > *:first-child { flex: 1 1 300px; }
   .calc-grid > *:last-child { flex: 1 1 360px; }
 
+  section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
+    section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
     .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; will-change: transform; }
     .sidebar-open { transform: translateX(0); }
     .sidebar-dragging { transition: none !important; }
