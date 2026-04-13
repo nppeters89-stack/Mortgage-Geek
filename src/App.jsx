@@ -1626,7 +1626,7 @@ function ComparePage() {
         .print-only { display: none; }
 
         @media print {
-          @page { size: landscape; margin: 0.4in; }
+          @page { size: portrait; margin: 0.3in; }
           body { background: #fff !important; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
@@ -1642,8 +1642,9 @@ function ComparePage() {
             display: flex !important;
             flex-wrap: nowrap !important;
             justify-content: center !important;
-            gap: 12px !important;
-            padding-top: 20px !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding-top: 12px !important;
             page-break-inside: avoid;
           }
           .compare-card {
@@ -1652,12 +1653,19 @@ function ComparePage() {
             box-shadow: none !important;
             page-break-inside: avoid;
             break-inside: avoid;
+            font-size: 9px !important;
           }
+          .compare-card .card-header { padding: 12px 14px !important; }
+          .compare-card .card-total { font-size: 20px !important; }
+          .compare-card div, .compare-card span, .compare-card strong { font-size: 9px !important; }
+          .compare-card .card-total { font-size: 20px !important; }
+          .compare-card ul { margin: 3px 0 0 !important; padding-left: 12px !important; }
+          .compare-card li { margin-bottom: 1px !important; font-size: 8px !important; line-height: 1.4 !important; }
           .content-card { box-shadow: none !important; border: 1px solid #999 !important; }
 
           /* Darken labels and values in card body for high contrast on white */
-          .compare-card .pdf-label { color: #4a4a4a !important; }
-          .compare-card .pdf-value { color: #000 !important; }
+          .compare-card .pdf-label { color: #4a4a4a !important; font-size: 9px !important; }
+          .compare-card .pdf-value { color: #000 !important; font-size: 9px !important; }
         }
       `}</style>
 
@@ -1727,9 +1735,9 @@ function ComparePage() {
                 return (
                   <div key={s.id} className="content-card compare-card" onClick={() => setSelectedId(isSelected ? null : s.id)} style={{ overflow: "visible", position: "relative", border: isSelected ? `2px solid ${cardColor}` : isBest ? `2px solid ${P.gold}` : "2px solid transparent", cursor: "pointer", transition: "border-color 0.2s, box-shadow 0.2s", boxShadow: isSelected ? `0 0 0 3px ${cardColor}30` : undefined }}>
                     {isBest && <span style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", zIndex: 5, background: P.gold, color: "#fff", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "4px 12px", borderRadius: 50, boxShadow: "0 2px 8px rgba(0,0,0,0.2)", whiteSpace: "nowrap" }}>★ Lowest Payment</span>}
-                    <div style={{ background: cardColor, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
+                    <div className="card-header" style={{ background: cardColor, padding: "20px", textAlign: "center", borderRadius: "10px 10px 0 0" }}>
                       <span style={{ display: "block", fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{s.program} · {s.term}yr</span>
-                      <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
+                      <span className="card-total" style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>{fmt(s.total)}/mo</span>
                       <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>{fmt(s.homePrice)} · {s.downPct}% down · {s.rate}%</span>
                     </div>
                     <div style={{ padding: "16px 20px" }}>
