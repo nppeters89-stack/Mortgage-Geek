@@ -1833,6 +1833,14 @@ function ComparePage() {
                           <span className="pdf-value" style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
                         </div>
                       ))}
+                      {/* APR */}
+                      {s.apr > 0 && (
+                        <div style={{ marginTop: 10, padding: "8px 10px", background: P.cream, borderRadius: 6, textAlign: "center" }}>
+                          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Est. APR </span>
+                          <span style={{ fontFamily: F.display, fontSize: 18, color: cardColor }}>{s.apr.toFixed(3)}%</span>
+                          <span style={{ fontSize: 9, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Note rate {s.rate}%</span>
+                        </div>
+                      )}
                       {/* Geek Tips */}
                       <div style={{ marginTop: 14, padding: "10px 12px", background: P.cream, borderRadius: 8, fontSize: 11, lineHeight: 1.6, color: P.warmGray }}>
                         <span style={{ fontSize: 13 }}>🤓</span> <strong style={{ color: P.text }}>Geek Tips:</strong>
@@ -3982,25 +3990,42 @@ function CalculatorPage() {
 
   const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
+  // Lender fees for APR calculation (matches Cash to Close simulator)
+  const calcLenderFees = 1500 + 750 + 600 + 300 + 15 + 80; // underwriting + processing + appraisal + credit + flood + tax service
+
+  // APR per program — includes lender fees, upfront MI, and monthly MI per Reg Z §1026.4(b)(5)
+  const convAprCharges = calcLenderFees;
+  const convAprMI = downPct < 20 ? (baseLoan * (convMiRate / 100)) / 12 : 0;
+  const convAprMiMonths = downPct < 20 ? 120 : 0;
+  const convAPR = calculateAPR(convLoan, convAprCharges, convRate, term, convAprMI, convAprMiMonths);
+
+  const fhaAprCharges = calcLenderFees + fhaUpfront;
+  const fhaAprMI = (baseLoan * (fhaMiRate / 100)) / 12;
+  const fhaAprMiMonths = downPct < 10 ? term * 12 : 132;
+  const fhaAPR = calculateAPR(fhaLoan, fhaAprCharges, fhaRate, term, fhaAprMI, fhaAprMiMonths);
+
+  const vaAprCharges = calcLenderFees + vaFee;
+  const vaAPR = calculateAPR(vaLoan, vaAprCharges, vaRate, term, 0, 0);
+
   const programs = [
     {
       name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
-      upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate,
+      upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate, apr: convAPR,
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
       eligible: downPct >= 3, minDown: 3,
     },
     {
       name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
       miLabel: `MIP (${fhaMiRate}%)`,
-      upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate,
+      upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate, apr: fhaAPR,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
       eligible: downPct >= 3.5, minDown: 3.5,
     },
     {
       name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
       miLabel: null,
-      upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate,
+      upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate, apr: vaAPR,
       note: vaUsage === "exempt"
         ? "Funding fee waived — service-connected disability"
         : `No monthly MI — ${vaUsageLabels[vaUsage].toLowerCase()}, ${downPct >= 10 ? "10%+ down" : downPct >= 5 ? "5–9.99% down" : "<5% down"}`,
@@ -4274,6 +4299,13 @@ function CalculatorPage() {
 
                   {/* Note */}
                   <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", fontStyle: "italic" }}>{prog.note}</p>
+
+                  {/* APR */}
+                  <div style={{ marginTop: 12, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR</span>
+                    <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
+                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
+                  </div>
                 </div>
               </div>
             );
@@ -4350,7 +4382,7 @@ function CalculatorPage() {
               upfront: selectedProg.upfront || 0,
               upfrontLabel: selectedProg.upfrontLabel || null,
               loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
-              tax: taxes, insurance, hoa: hoa > 0 ? hoa : 0, total: selectedProg.total,
+              tax: taxes, insurance, hoa: hoa > 0 ? hoa : 0, total: selectedProg.total, apr: selectedProg.apr,
             };
             saved.push(scenario);
             try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch {}
