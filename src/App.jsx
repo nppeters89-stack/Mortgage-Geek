@@ -1750,7 +1750,36 @@ function ComparePage() {
                           <span className="pdf-value" style={{ fontWeight: row.bold ? 700 : 600, color: row.color || (row.bold ? cardColor : P.text) }}>{row.val}</span>
                         </div>
                       ))}
-                      <button onClick={() => removeScenario(s.id)} className="no-print" style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
+                      {/* Geek Tips */}
+                      <div style={{ marginTop: 14, padding: "10px 12px", background: P.cream, borderRadius: 8, fontSize: 11, lineHeight: 1.6, color: P.warmGray }}>
+                        <span style={{ fontSize: 13 }}>🤓</span> <strong style={{ color: P.text }}>Geek Tips:</strong>
+                        {s.program === "Conventional" && (
+                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                            <li>PMI drops off automatically at 80% LTV — no refinance needed.</li>
+                            <li>Conventional loans can sometimes be <strong>recast</strong>: make a large lump-sum payment toward principal, and the lender recalculates your monthly payment at the same rate and term — lowering it without refinancing.</li>
+                            <li>Best rates go to 740+ credit scores; pricing adjustments increase below 700.</li>
+                          </ul>
+                        )}
+                        {s.program === "FHA" && (
+                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                            {s.downPct >= 10 ? (
+                              <li>With 10%+ down, your monthly mortgage insurance (MIP) <strong>drops off after 11 years</strong> — unlike FHA loans with less than 10% down, which carry MIP for the life of the loan.</li>
+                            ) : (
+                              <li>With less than 10% down, MIP stays for the <strong>life of the loan</strong>. Refinancing to conventional once you hit 80% LTV is the typical exit strategy.</li>
+                            )}
+                            <li>FHA loans are <strong>assumable</strong> — a future buyer can take over your loan at your locked-in rate, which can be a major selling advantage if rates rise.</li>
+                            <li>More lenient credit and DTI requirements than conventional.</li>
+                          </ul>
+                        )}
+                        {s.program === "VA" && (
+                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                            <li>No monthly mortgage insurance — ever. The VA funding fee is a one-time cost.</li>
+                            <li>VA loans are <strong>assumable</strong> — a future buyer (even a non-veteran) can assume your rate and terms, which is a powerful advantage in a rising-rate market.</li>
+                            <li>No down payment required and typically the lowest rates available.</li>
+                          </ul>
+                        )}
+                      </div>
+                      <button onClick={(e) => { e.stopPropagation(); removeScenario(s.id); }} className="no-print" style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
                     </div>
                   </div>
                 );
