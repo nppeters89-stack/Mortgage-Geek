@@ -2146,9 +2146,9 @@ function CashToClosePage() {
   const totalLoan = baseLoan + upfrontFee;
 
   // Lender fees
-  const underwriting = 1000, processing = 500;
+  const underwriting = 1500, processing = 750;
   const appraisal = program === "VA" ? 650 : program === "FHA" ? 550 : 600;
-  const creditReport = 75, floodCert = 15, taxService = 80;
+  const creditReport = 300, floodCert = 15, taxService = 80;
   const lenderTotal = underwriting + processing + appraisal + creditReport + floodCert + taxService;
 
   // Title & Escrow — rates approximated from First American filed schedules for our 5 states
