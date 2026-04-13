@@ -298,6 +298,7 @@ const NAV_TOPICS = [
     { label: "What Drives Rates", id: "rates", step: 0 },
     { label: "Rate Options & Points", id: "rates", step: 1 },
     { label: "Live Rates", id: "rates", step: 2 },
+    { label: "APR", id: "rates", step: 3 },
   ]},
   { id: "next-steps", label: "Get Started", icon: "🚀" },
 ];
@@ -1159,7 +1160,7 @@ function InterestRates({ navTarget }) {
     }
   }, [navTarget]);
 
-  const tabs = ["What Drives Rates", "Rate Options & Points", "Live Rates"];
+  const tabs = ["What Drives Rates", "Rate Options & Points", "Live Rates", "APR"];
 
   const fetchRates = async () => {
     setRateLoading(true);
@@ -1379,6 +1380,152 @@ function InterestRates({ navTarget }) {
           </div>
         </div>
       )}
+
+      {activeTab === 3 && (() => {
+        // APR comparison example: Two FHA lenders, same note rate, different fee structures
+        const exLoan = 300000;
+        const exUpfront = exLoan * 0.0175; // UFMIP
+        const exTotalLoan = exLoan + exUpfront;
+        const exRate = 6.5;
+        const exTerm = 30;
+        const exMipRate = 0.0055;
+        const exMonthlyMI = (exLoan * exMipRate) / 12;
+        const exMiMonths = exTerm * 12; // life of loan, <10% down
+
+        // Lender A: no points, lower fees
+        const aOrigin = 0;
+        const aUnderwriting = 1200;
+        const aProcessing = 500;
+        const aCredit = 75;
+        const aAppraisal = 550;
+        const aFlood = 15;
+        const aTaxSvc = 80;
+        const aPoints = 0;
+        const aPointsCost = 0;
+        const aTotal = aOrigin + aUnderwriting + aProcessing + aCredit + aAppraisal + aFlood + aTaxSvc + aPointsCost;
+        const aCharges = aTotal + exUpfront;
+        const aAPR = calculateAPR(exTotalLoan, aCharges, exRate, exTerm, exMonthlyMI, exMiMonths);
+
+        // Lender B: 1 full discount point, higher fees
+        const bOrigin = 500;
+        const bUnderwriting = 1500;
+        const bProcessing = 750;
+        const bCredit = 300;
+        const bAppraisal = 550;
+        const bFlood = 15;
+        const bTaxSvc = 80;
+        const bPoints = 1;
+        const bPointsCost = exLoan * (bPoints / 100);
+        const bTotal = bOrigin + bUnderwriting + bProcessing + bCredit + bAppraisal + bFlood + bTaxSvc + bPointsCost;
+        const bCharges = bTotal + exUpfront;
+        const bAPR = calculateAPR(exTotalLoan, bCharges, exRate, exTerm, exMonthlyMI, exMiMonths);
+
+        const FeeRow = ({ label, a, b }) => (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "5px 0", borderBottom: `1px solid ${P.cream}`, fontSize: 12 }}>
+            <span style={{ color: P.warmGray }}>{label}</span>
+            <span style={{ textAlign: "right", fontWeight: 600, color: P.text }}>{fmt(a)}</span>
+            <span style={{ textAlign: "right", fontWeight: 600, color: P.text }}>{fmt(b)}</span>
+          </div>
+        );
+
+        return (
+          <div style={{ maxWidth: 720 }}>
+            <div className="content-card" style={{ padding: 28, marginBottom: 20 }}>
+              <h4 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 12 }}>What is APR?</h4>
+              <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 16 }}>
+                The <strong style={{ color: P.text }}>Annual Percentage Rate (APR)</strong> is a standardized measure of your total borrowing cost, mandated by the federal Truth in Lending Act (Reg Z). It takes your note rate and factors in lender fees, discount points, upfront mortgage insurance, and monthly mortgage insurance premiums for the period they're required — expressing it all as a single annual percentage.
+              </p>
+              <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 16 }}>
+                <strong style={{ color: P.text }}>Why it matters:</strong> Two lenders can quote you the exact same interest rate, but one could cost you thousands more in fees. The note rate only tells you the interest charged on the loan balance. APR reveals the <em>true cost of credit</em> — making it the best apples-to-apples comparison tool when shopping lenders.
+              </p>
+              <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray }}>
+                <strong style={{ color: P.text }}>What's included in APR:</strong> Lender origination fees, underwriting, processing, discount points, upfront MIP (FHA) or VA funding fee, monthly mortgage insurance, and prepaid interest. <strong style={{ color: P.text }}>What's excluded:</strong> Title fees, recording fees, transfer taxes, homeowner's insurance, and escrow deposits — because these costs don't go to the lender.
+              </p>
+            </div>
+
+            {/* Side-by-side lender comparison */}
+            <div className="content-card" style={{ padding: 28, marginBottom: 20 }}>
+              <div style={{ textAlign: "center", marginBottom: 20 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Real-World Example</span>
+                <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 6 }}>Same Rate. Different Cost.</h4>
+                <p style={{ fontSize: 13, color: P.warmGray }}>FHA loan · $300,000 · 3.5% down · {exRate}% note rate · 30-year fixed</p>
+              </div>
+
+              {/* Lender headers */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <div />
+                <div style={{ textAlign: "right" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: P.sage, display: "block" }}>Lender A</span>
+                  <span style={{ fontSize: 10, color: P.warmGrayLight }}>No points, lower fees</span>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: P.goldMuted, display: "block" }}>Lender B</span>
+                  <span style={{ fontSize: 10, color: P.warmGrayLight }}>1 point + higher fees</span>
+                </div>
+              </div>
+
+              {/* Fee breakdown */}
+              <FeeRow label="Origination Fee" a={aOrigin} b={bOrigin} />
+              <FeeRow label="Underwriting" a={aUnderwriting} b={bUnderwriting} />
+              <FeeRow label="Processing" a={aProcessing} b={bProcessing} />
+              <FeeRow label="Credit Report" a={aCredit} b={bCredit} />
+              <FeeRow label="Appraisal" a={aAppraisal} b={bAppraisal} />
+              <FeeRow label="Flood Cert + Tax Svc" a={aFlood + aTaxSvc} b={bFlood + bTaxSvc} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "5px 0", borderBottom: `1px solid ${P.cream}`, fontSize: 12 }}>
+                <span style={{ color: P.warmGray }}>Discount Points</span>
+                <span style={{ textAlign: "right", fontWeight: 600, color: P.sage }}>{aPoints} pts ({fmt(aPointsCost)})</span>
+                <span style={{ textAlign: "right", fontWeight: 600, color: P.goldMuted }}>{bPoints} pt ({fmt(bPointsCost)})</span>
+              </div>
+              <FeeRow label="UFMIP (1.75%)" a={exUpfront} b={exUpfront} />
+
+              {/* Totals */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "8px 0", marginTop: 4, borderTop: `2px solid ${P.navy}`, fontSize: 13, fontWeight: 700 }}>
+                <span style={{ color: P.navy }}>Total Finance Charges</span>
+                <span style={{ textAlign: "right", color: P.sage }}>{fmt(aCharges)}</span>
+                <span style={{ textAlign: "right", color: P.goldMuted }}>{fmt(bCharges)}</span>
+              </div>
+
+              {/* APR result cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 20 }}>
+                <div style={{ background: `${P.sage}12`, border: `2px solid ${P.sage}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.sage, display: "block", marginBottom: 4 }}>Lender A · APR</span>
+                  <span style={{ fontFamily: F.display, fontSize: 32, color: P.sage, display: "block" }}>{aAPR.toFixed(3)}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(aTotal)}</span>
+                </div>
+                <div style={{ background: `${P.goldMuted}12`, border: `2px solid ${P.goldMuted}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 4 }}>Lender B · APR</span>
+                  <span style={{ fontFamily: F.display, fontSize: 32, color: P.goldMuted, display: "block" }}>{bAPR.toFixed(3)}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate}%</span>
+                  <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(bTotal)}</span>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 16, textAlign: "center" }}>
+                <p style={{ fontSize: 13, color: P.text, fontWeight: 600, marginBottom: 4 }}>Same rate. Lender B costs {fmt(bCharges - aCharges)} more.</p>
+                <p style={{ fontSize: 12, color: P.warmGray }}>APR reveals the difference: {bAPR.toFixed(3)}% vs {aAPR.toFixed(3)}%</p>
+              </div>
+            </div>
+
+            {/* Geek tip */}
+            <div className="content-card" style={{ padding: "18px 20px", display: "flex", gap: 12 }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+              <div>
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: P.warmGray, marginBottom: 10 }}>
+                  <strong style={{ color: P.text }}>Geek Tip:</strong> Always compare APR — not just the rate — when shopping lenders. A lower rate with high points or fees can cost more over the life of the loan than a slightly higher rate with lower fees. The Loan Estimate (page 3) is required to show APR, so request one from every lender you're considering.
+                </p>
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: P.warmGray }}>
+                  <strong style={{ color: P.text }}>One caveat:</strong> APR assumes you keep the loan for the full term. If you plan to sell or refinance within 5–7 years, a higher-fee/lower-rate option may actually cost more because you don't hold the loan long enough to recoup the upfront cost. In that case, compare total cost over your expected holding period, not just APR.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ textAlign: "center", marginTop: 24 }}>
+              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>💰 See Your Estimated APR in Cash to Close →</a>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }
