@@ -3849,11 +3849,6 @@ function PreQualPage() {
           const calcUrl = `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}`;
           return (
             <>
-            <div style={{ textAlign: "center", marginBottom: 12 }}>
-              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
-                ⓘ See APR estimate (true cost of credit) in Cash to Close →
-              </a>
-            </div>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <a href={calcUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
                 🧮 {targetPrice > 0 ? `Run ${targetName} ${fmt(targetPrice)}` : "Open the Calculator"} →
@@ -4679,11 +4674,6 @@ function CalculatorPage() {
         })()}
 
         {/* Cross-link to prequal */}
-        <div style={{ textAlign: "center", marginBottom: 12 }}>
-          <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>
-            ⓘ See APR estimate (true cost of credit) in Cash to Close →
-          </a>
-        </div>
 
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
