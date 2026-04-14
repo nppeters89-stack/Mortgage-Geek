@@ -5066,10 +5066,11 @@ function MainSite() {
       requestAnimationFrame(() => {
         const currentY = window.scrollY;
         const delta = currentY - lastScrollY.current;
+        const nearBottom = (window.innerHeight + currentY) >= (document.documentElement.scrollHeight - 150);
         // delta > 0 = scrolling down (finger up) → hide toolbar
         // delta < 0 = scrolling up (finger down) → show toolbar
-        if (currentY < 100) {
-          // Near top of page — hide toolbar
+        if (currentY < 100 || nearBottom) {
+          // Near top or bottom of page — hide toolbar
           offset = TOOLBAR_H;
         } else {
           offset = Math.max(0, Math.min(TOOLBAR_H, offset + delta));
@@ -5204,7 +5205,7 @@ function MainSite() {
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           display: "flex", justifyContent: "space-around", alignItems: "center",
-          height: isStandalone ? 68 : 56, paddingTop: isStandalone ? 24 : 16,
+          height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16,
         }}>
           {[
             { icon: "🧮", label: "Calculator", href: "/calculator" },
