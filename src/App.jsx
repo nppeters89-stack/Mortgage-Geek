@@ -5206,7 +5206,7 @@ function MainSite() {
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          display: "flex", justifyContent: "space-around", alignItems: "center",
+          display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, margin: "0 auto",
           height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16,
         }}>
           {[
