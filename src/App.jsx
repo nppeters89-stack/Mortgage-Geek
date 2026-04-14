@@ -1849,6 +1849,7 @@ function ComparePage() {
         @media print {
           @page { size: portrait; margin: 0.25in; }
           body { background: #fff !important; }
+          body > div, body > div > div { min-height: auto !important; background: #fff !important; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
 
