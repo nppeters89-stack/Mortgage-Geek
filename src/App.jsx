@@ -1850,6 +1850,8 @@ function ComparePage() {
           @page { size: portrait; margin: 0.25in; }
           body { background: #fff !important; }
           body > div, body > div > div { min-height: auto !important; background: #fff !important; }
+          body > div > div > div { padding: 10px 12px 4px !important; }
+          .print-only { margin-top: 6px !important; padding-top: 4px !important; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
 
