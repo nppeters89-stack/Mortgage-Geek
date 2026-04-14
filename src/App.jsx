@@ -4898,7 +4898,8 @@ function MainSite() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
   const isStandalone = useIsStandalone();
-  const [toolbarOffset, setToolbarOffset] = useState(56); // fully hidden (toolbar height)
+  const toolbarH = isStandalone ? 76 : 56;
+  const [toolbarOffset, setToolbarOffset] = useState(76); // start fully hidden
   const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
   // should skip restoring the previous scroll position (the navigation
@@ -5056,7 +5057,7 @@ function MainSite() {
   // Bottom toolbar — X-style: shows on scroll-up (finger down), hides on scroll-down (finger up)
   // Tracks scroll delta and moves toolbar in lockstep with finger speed
   useEffect(() => {
-    const TOOLBAR_H = 56;
+    const TOOLBAR_H = toolbarH;
     let offset = TOOLBAR_H; // start hidden
     let ticking = false;
 
@@ -5082,7 +5083,7 @@ function MainSite() {
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [toolbarH]);
 
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
@@ -5195,7 +5196,7 @@ function MainSite() {
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
           overflow: "hidden",
-          pointerEvents: toolbarOffset >= 56 ? "none" : "auto",
+          pointerEvents: toolbarOffset >= toolbarH ? "none" : "auto",
         }}>
         <nav style={{
           transform: `translateY(${toolbarOffset}px)`,
