@@ -1757,7 +1757,7 @@ function AboutPage() {
         </div>
       </div>
 
-      <div style={{ padding: "48px 24px 64px", maxWidth: 800, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 800, margin: "0 auto" }}>
         {/* Headshot + intro */}
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap", alignItems: "center", marginBottom: 48 }}>
           <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `4px solid ${P.gold}`, boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}>
@@ -1962,7 +1962,7 @@ function ComparePage() {
         </div>
       </div>
 
-      <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         {/* Print-only branded header */}
         <div className="print-only" style={{ marginBottom: 20, paddingBottom: 16, borderBottom: `2px solid ${P.navy}` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -2718,7 +2718,7 @@ function CashToClosePage() {
         </div>
       </div>
 
-      <div style={{ padding: "40px 24px 64px", maxWidth: 760, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 760, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>The Bottom Line</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Cash to Close Simulator</h1>
@@ -3534,7 +3534,7 @@ function PreQualPage() {
         </div>
       </div>
 
-      <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Pre-Qual Simulator</h1>
@@ -4340,7 +4340,7 @@ function CalculatorPage() {
         </div>
       </div>
 
-      <div style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Mortgage Payment Calculator</h1>
@@ -4742,7 +4742,7 @@ function InstallPage() {
         </div>
       </div>
 
-      <div style={{ padding: "40px 24px 64px", maxWidth: 640, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 640, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>One-Tap Access</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 10 }}>Install The Mortgage Geek</h1>
@@ -5181,6 +5181,8 @@ const globalCSS = `
      Adds 0 in regular browsers, ~47px on modern iPhones in standalone mode.
      Also makes tool page headers sticky on scroll. */
   .pwa-safe-top { padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important; position: sticky; top: 0; z-index: 100; }
+  @media (max-width: 900px) { .pwa-safe-top { position: fixed !important; top: 0; left: 0; right: 0; z-index: 200; }
+    .tool-page-content { padding-top: calc(76px + env(safe-area-inset-top, 0px)) !important; } }
   .pwa-safe-top-sidebar { padding-top: calc(32px + env(safe-area-inset-top, 0px)) !important; }
   body { padding-bottom: 0; }
 
