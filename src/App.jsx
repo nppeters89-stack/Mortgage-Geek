@@ -4975,8 +4975,9 @@ function MainSite() {
         if (!isHorizontal) { tracking = false; return; }
         const main = getMain();
         const bar = getBar();
-        if (main) main.classList.add("sidebar-dragging");
+        if (main) { main.classList.add("sidebar-dragging"); main.style.touchAction = "none"; }
         if (bar) bar.classList.add("sidebar-dragging");
+        document.body.style.overflow = "hidden";
       }
 
       if (!dirLocked || !isHorizontal) return;
@@ -5016,8 +5017,9 @@ function MainSite() {
       if (bar) bar.classList.remove("sidebar-dragging");
 
       // Clear inline styles — let CSS classes handle the snap
-      if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); }
+      if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); main.style.touchAction = ""; }
       if (bar) bar.style.transform = "";
+      document.body.style.overflow = "";
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
         if (navigator.vibrate) navigator.vibrate(10);
@@ -5259,8 +5261,8 @@ const globalCSS = `
     .mobile-bar-open { transform: translateX(280px); }
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; overscroll-behavior: none; }
     .main-content::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 200vh; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
-    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
-    .main-content-open::after { pointer-events: auto; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; touch-action: none; }
+    .main-content-open::after { pointer-events: auto; touch-action: none; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
     /* Mobile accordion: detail panel renders inline below its active step button
