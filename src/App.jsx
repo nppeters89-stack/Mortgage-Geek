@@ -5202,8 +5202,8 @@ function MainSite() {
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          display: "flex", justifyContent: "center", alignItems: "center",
-          gap: 0, height: 56, paddingTop: 6,
+          display: "flex", justifyContent: "space-around", alignItems: "center",
+          height: 56, paddingTop: 16,
         }}>
           {[
             { icon: "🧮", label: "Calculator", href: "/calculator" },
@@ -5213,7 +5213,7 @@ function MainSite() {
           ].map((t) => (
             <a key={t.href} href={t.href} style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-              textDecoration: "none", width: 72, padding: "0",
+              textDecoration: "none", flex: 1, padding: "0",
             }}>
               <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
