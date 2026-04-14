@@ -5151,7 +5151,7 @@ function MainSite() {
   }, []);
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: "#0F2530", display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
@@ -5234,9 +5234,9 @@ function MainSite() {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { background: #0F2530; height: 100%; overflow-x: hidden; }
-  body { background: #0F2530; margin: 0; overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; position: relative; min-height: 100%; min-height: 100dvh; }
-  #root { min-height: 100%; min-height: 100dvh; overflow-x: hidden; }
+  html { background: #FAF7F2; height: 100%; }
+  body { background: #FAF7F2; margin: 0; min-height: 100%; min-height: 100dvh; }
+  #root { min-height: 100%; min-height: 100dvh; }
   html { scroll-behavior: auto; }
 
   /* PWA safe-area handling: adds padding equal to iOS status bar height when
@@ -5296,6 +5296,8 @@ const globalCSS = `
 
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
+    html, body { background: #0F2530 !important; overflow-x: hidden; }
+    body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
     .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; bottom: 0; left: 0; width: 280px; }
     .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
