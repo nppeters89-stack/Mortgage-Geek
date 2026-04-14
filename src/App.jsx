@@ -4952,7 +4952,6 @@ function MainSite() {
 
     const getMain = () => document.querySelector(".main-content");
     const getBar = () => document.querySelector(".mobile-bar");
-    const getOverlay = () => document.getElementById("sidebar-overlay-drag");
 
     const onTouchStart = (e) => {
       const touch = e.touches[0];
@@ -4985,20 +4984,16 @@ function MainSite() {
         dirLocked = true;
         isHorizontal = Math.abs(dx) > Math.abs(dy);
         if (!isHorizontal) { tracking = false; return; }
-        // Disable transitions for real-time tracking
         const main = getMain();
         const bar = getBar();
-        const overlay = getOverlay();
         if (main) main.classList.add("sidebar-dragging");
         if (bar) bar.classList.add("sidebar-dragging");
-        if (overlay) overlay.classList.add("sidebar-dragging");
       }
 
       if (!dirLocked || !isHorizontal) return;
 
       const main = getMain();
       const bar = getBar();
-      const overlay = getOverlay();
       if (!main) return;
 
       if (mode === "opening") {
@@ -5007,8 +5002,8 @@ function MainSite() {
         const radius = Math.round(pct * 16);
         main.style.transform = `translateX(${dragPx}px)`;
         main.style.borderRadius = `${radius}px`;
+        main.style.setProperty("--sidebar-dim", pct);
         if (bar) bar.style.transform = `translateX(${dragPx}px)`;
-        if (overlay) { overlay.style.opacity = pct; overlay.style.transform = `translateX(${dragPx}px)`; }
       } else if (mode === "closing") {
         const dragPx = Math.max(0, Math.min(-dx, SIDEBAR_W));
         const pct = 1 - (dragPx / SIDEBAR_W);
@@ -5016,8 +5011,8 @@ function MainSite() {
         const radius = Math.round(pct * 16);
         main.style.transform = `translateX(${offset}px)`;
         main.style.borderRadius = `${radius}px`;
+        main.style.setProperty("--sidebar-dim", pct);
         if (bar) bar.style.transform = `translateX(${offset}px)`;
-        if (overlay) { overlay.style.opacity = pct; overlay.style.transform = `translateX(${offset}px)`; }
       }
     };
 
@@ -5026,17 +5021,14 @@ function MainSite() {
       const dx = currentX - startX;
       const main = getMain();
       const bar = getBar();
-      const overlay = getOverlay();
 
       // Re-enable CSS transitions for snap
       if (main) main.classList.remove("sidebar-dragging");
       if (bar) bar.classList.remove("sidebar-dragging");
-      if (overlay) overlay.classList.remove("sidebar-dragging");
 
       // Clear inline styles — let CSS classes handle the snap
-      if (main) { main.style.transform = ""; main.style.borderRadius = ""; }
+      if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); }
       if (bar) bar.style.transform = "";
-      if (overlay) { overlay.style.opacity = ""; overlay.style.transform = ""; }
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
         if (navigator.vibrate) navigator.vibrate(10);
@@ -5130,7 +5122,7 @@ function MainSite() {
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, display: "flex", minHeight: "100vh" }}>
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
-      <main className="main-content">
+      <main className="main-content" onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
         <Hero onNavigate={handleNavigate} />
         <JourneyOverview onNavigate={handleSubNavigate} />
         <PreContract navTarget={navTarget} />
@@ -5205,7 +5197,7 @@ const globalCSS = `
      Also makes tool page headers sticky on scroll. */
   .pwa-safe-top { padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important; position: sticky; top: 0; z-index: 100; }
   .pwa-safe-top-sidebar { padding-top: calc(32px + env(safe-area-inset-top, 0px)) !important; }
-  body { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { padding-bottom: 0; }
 
   /* Hide Call/Text button labels on narrow screens — keeps the tool page headers
      from wrapping to two rows. Icons remain as universal glyphs. */
@@ -5257,15 +5249,17 @@ const globalCSS = `
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
-    .sidebar-overlay { display: block; position: fixed; top: 0; bottom: 0; left: 0; right: -280px; background: rgba(0,0,0,0.5); z-index: 160; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; will-change: transform, opacity; transform: translateX(0); }
-    .sidebar-overlay-visible { opacity: 1; pointer-events: auto; transform: translateX(280px); }
+    .sidebar-overlay { display: none; }
+    .sidebar-overlay-visible { display: none; }
     .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100vh; }
-    .main-content-open { transform: translateX(280px); border-radius: 16px; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); }
+    .main-content::after { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
+    .main-content-open::after { pointer-events: auto; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
     /* Mobile accordion: detail panel renders inline below its active step button
