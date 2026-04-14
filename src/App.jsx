@@ -4897,7 +4897,7 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
-  const [toolbarOffset, setToolbarOffset] = useState(60); // 60 = fully hidden (toolbar height)
+  const [toolbarOffset, setToolbarOffset] = useState(72); // 72 = fully hidden (toolbar height)
   const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
   // should skip restoring the previous scroll position (the navigation
@@ -5055,7 +5055,7 @@ function MainSite() {
   // Bottom toolbar — X-style: shows on scroll-up (finger down), hides on scroll-down (finger up)
   // Tracks scroll delta and moves toolbar in lockstep with finger speed
   useEffect(() => {
-    const TOOLBAR_H = 60;
+    const TOOLBAR_H = 72;
     let offset = TOOLBAR_H; // start hidden
     let ticking = false;
 
@@ -5190,16 +5190,20 @@ function MainSite() {
 
       {/* Bottom toolbar — X-style auto-hide on scroll */}
       {!mobileOpen && (
-        <nav style={{
+        <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
+          overflow: "hidden",
+          pointerEvents: toolbarOffset >= 72 ? "none" : "auto",
+        }}>
+        <nav style={{
           transform: `translateY(${toolbarOffset}px)`,
           willChange: "transform",
-          background: "rgba(15, 37, 48, 0.92)",
+          background: "rgba(15, 37, 48, 0.94)",
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           display: "flex", justifyContent: "space-around", alignItems: "center",
-          height: 60,
+          height: 72,
         }}>
           {[
             { icon: "🧮", label: "Calculator", href: "/calculator" },
@@ -5216,6 +5220,7 @@ function MainSite() {
             </a>
           ))}
         </nav>
+        </div>
       )}
     </div>
   );
