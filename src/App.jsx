@@ -1983,8 +1983,8 @@ function ComparePage() {
                       {/* APR */}
                       {s.apr > 0 && (
                         <div style={{ marginTop: 10, padding: "8px 10px", background: P.cream, borderRadius: 6, textAlign: "center" }}>
-                          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Est. APR </span>
-                          <span style={{ fontFamily: F.display, fontSize: 18, color: cardColor }}>{s.apr.toFixed(3)}%</span>
+                          <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR</span>
+                          <span style={{ fontFamily: F.display, fontSize: 18, color: cardColor, display: "block" }}>{s.apr.toFixed(3)}%</span>
                           <span style={{ fontSize: 9, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Note rate {Number(s.rate).toFixed(3)}%</span>
                           <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                         </div>
