@@ -4915,14 +4915,15 @@ function MainSite() {
   useEffect(() => {
     if (mobileOpen) {
       const scrollY = window.scrollY;
+      const main = document.querySelector(".main-content");
+      const bar = document.querySelector(".mobile-bar");
+      // Freeze body scroll
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
-      // Add open classes to main-content and mobile-bar
-      const main = document.querySelector(".main-content");
-      const bar = document.querySelector(".mobile-bar");
-      if (main) main.classList.add("main-content-open");
+      // Make main content fixed to viewport, scroll it to preserve visual position
+      if (main) { main.classList.add("main-content-open"); main.scrollTop = scrollY; }
       if (bar) bar.classList.add("mobile-bar-open");
       return () => {
         const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
@@ -5261,7 +5262,7 @@ const globalCSS = `
     .mobile-bar-open { transform: translateX(280px); }
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100vh; min-height: 100dvh; overscroll-behavior: none; }
     .main-content::after { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
-    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 16px; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 16px; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; height: auto; min-height: 0; }
     .main-content-open::after { pointer-events: auto; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
