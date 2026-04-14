@@ -1530,6 +1530,54 @@ function InterestRates({ navTarget }) {
   );
 }
 
+function MobileToolbar() {
+  const isMobile = useIsMobile();
+  const isStandalone = useIsStandalone();
+  const toolbarH = isStandalone ? 76 : 56;
+  const [offset, setOffset] = useState(toolbarH);
+  const lastY = useRef(0);
+  useEffect(() => {
+    if (!isMobile) return;
+    let off = toolbarH;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const delta = y - lastY.current;
+        const nearBottom = (window.innerHeight + y) >= (document.documentElement.scrollHeight - 150);
+        if (y < 100 || nearBottom) { off = toolbarH; } else { off = Math.max(0, Math.min(toolbarH, off + delta)); }
+        lastY.current = y;
+        setOffset(off);
+        ticking = false;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isMobile, toolbarH]);
+  if (!isMobile) return null;
+  return (
+    <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150, overflow: "hidden", pointerEvents: offset >= toolbarH ? "none" : "auto" }}>
+      <nav style={{ transform: `translateY(${offset}px)`, willChange: "transform", background: "rgba(15, 37, 48, 0.75)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: "env(safe-area-inset-bottom, 0px)", display: "flex", justifyContent: "center", alignItems: "center", height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
+          {[
+            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
+            { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
+            { icon: "⚖️", label: "Compare", href: "/compare" },
+            { icon: "🧮", label: "Calculator", href: "/calculator" },
+          ].map((t) => (
+            <a key={t.href} href={t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
+              <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
+
 function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999, comma }) {
   const isEmpty = value === "" || value === null || value === undefined;
   const fmtComma = (v) => (v === "" || v === null || v === undefined) ? "" : comma ? Number(v).toLocaleString("en-US") : String(v);
@@ -1808,6 +1856,7 @@ function AboutPage() {
           <span>Equal Housing Lender</span>
         </p>
       </div>
+      <MobileToolbar />
     </div>
   );
 }
@@ -2056,6 +2105,7 @@ function ComparePage() {
           Educational only · Not a loan estimate or commitment to lend · Rates and terms subject to change · NMLS# 1119524 · Equal Housing Lender · mortgagegeek.ai
         </div>
       </div>
+      <MobileToolbar />
     </div>
   );
 }
@@ -2973,6 +3023,7 @@ function CashToClosePage() {
           {ratesLoaded ? `Rates auto-populated from Mortgage News Daily and rounded to the nearest 0.125%. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS# 1119524.
         </p>
       </div>
+      <MobileToolbar />
     </div>
   );
 }
@@ -3847,6 +3898,7 @@ function PreQualPage() {
           This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
         </p>
       </div>
+      <MobileToolbar />
     </div>
   );
 }
@@ -4701,6 +4753,7 @@ function CalculatorPage() {
           This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
         </p>
       </div>
+      <MobileToolbar />
     </div>
   );
 }
@@ -4899,9 +4952,6 @@ function MainSite() {
   const [navTarget, setNavTarget] = useState(null);
   const isMobile = useIsMobile();
   const isStandalone = useIsStandalone();
-  const toolbarH = isStandalone ? 76 : 56;
-  const [toolbarOffset, setToolbarOffset] = useState(76); // start fully hidden
-  const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
   // should skip restoring the previous scroll position (the navigation
   // handler is scrolling to the target section). Prevents a race where
@@ -5055,37 +5105,6 @@ function MainSite() {
     };
   }, [mobileOpen]);
 
-  // Bottom toolbar — X-style: shows on scroll-up (finger down), hides on scroll-down (finger up)
-  // Tracks scroll delta and moves toolbar in lockstep with finger speed
-  useEffect(() => {
-    const TOOLBAR_H = toolbarH;
-    let offset = TOOLBAR_H; // start hidden
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const currentY = window.scrollY;
-        const delta = currentY - lastScrollY.current;
-        const nearBottom = (window.innerHeight + currentY) >= (document.documentElement.scrollHeight - 150);
-        // delta > 0 = scrolling down (finger up) → hide toolbar
-        // delta < 0 = scrolling up (finger down) → show toolbar
-        if (currentY < 100 || nearBottom) {
-          // Near top or bottom of page — hide toolbar
-          offset = TOOLBAR_H;
-        } else {
-          offset = Math.max(0, Math.min(TOOLBAR_H, offset + delta));
-        }
-        lastScrollY.current = currentY;
-        setToolbarOffset(offset);
-        ticking = false;
-      });
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [toolbarH]);
-
   // Prevent overscroll bounce at page boundaries on mobile (reveals sidebar behind)
   useEffect(() => {
     if (!isMobile) return;
@@ -5214,42 +5233,7 @@ function MainSite() {
         </footer>
       </main>
 
-      {/* Bottom toolbar — X-style auto-hide on scroll (mobile/PWA only) */}
-      {!mobileOpen && isMobile && (
-        <div style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
-          overflow: "hidden",
-          pointerEvents: toolbarOffset >= toolbarH ? "none" : "auto",
-        }}>
-        <nav style={{
-          transform: `translateY(${toolbarOffset}px)`,
-          willChange: "transform",
-          background: "rgba(15, 37, 48, 0.75)",
-          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          display: "flex", justifyContent: "center", alignItems: "center",
-          height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
-            {[
-              { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
-              { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
-              { icon: "⚖️", label: "Compare", href: "/compare" },
-              { icon: "🧮", label: "Calculator", href: "/calculator" },
-            ].map((t) => (
-              <a key={t.href} href={t.href} style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                textDecoration: "none", padding: "0",
-              }}>
-                <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
-                <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
-              </a>
-            ))}
-          </div>
-        </nav>
-        </div>
-      )}
+      {!mobileOpen && <MobileToolbar />}
     </div>
   );
 }
