@@ -2955,13 +2955,11 @@ function CashToClosePage() {
             </div>
 
             {/* APR disclosure — Reg Z compliance for borrower comparison */}
-            <div style={{ marginTop: 14, padding: "16px 18px", background: P.cream, borderRadius: 10, border: `1px solid ${P.creamDark}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, gap: 12, flexWrap: "wrap" }}>
-                <div>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Estimated APR</span>
-                  <span style={{ fontSize: 10, color: P.warmGrayLight }}>Note rate {Number(rate).toFixed(3)}% · {term}-year term</span>
-                </div>
-                <span style={{ fontFamily: F.display, fontSize: 30, color: PROG_COLOR, fontWeight: 600 }}>{estimatedAPR.toFixed(3)}%</span>
+            <div style={{ marginTop: 14, padding: "16px 18px", background: P.cream, borderRadius: 10, border: `1px solid ${P.creamDark}`, textAlign: "center" }}>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>Estimated APR</span>
+                <span style={{ fontFamily: F.display, fontSize: 30, color: PROG_COLOR, fontWeight: 600, display: "block" }}>{estimatedAPR.toFixed(3)}%</span>
+                <span style={{ fontSize: 10, color: P.warmGrayLight, display: "block", marginTop: 4 }}>Note rate {Number(rate).toFixed(3)}% · {term}-year term</span>
               </div>
               <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGray, marginTop: 8, paddingTop: 10, borderTop: `1px solid ${P.creamDark}` }}>
                 <strong style={{ color: P.navy }}>What is APR?</strong> The Annual Percentage Rate reflects your note rate plus lender fees, prepaid interest, upfront mortgage insurance, and monthly mortgage insurance premiums for the period required — expressed as an annual rate. APR is typically higher than your note rate and is the standard apples-to-apples comparison number across lenders. This estimate includes lender fees ({fmt(lenderTotal)}){upfrontFee > 0 ? `, upfront ${program === "FHA" ? "MIP" : "VA funding fee"} (${fmt(upfrontFee)})` : ""}, prepaid interest ({fmt(prepaidInterest)}){aprMonthlyMI > 0 ? `, and monthly MI of ${fmt(aprMonthlyMI)} for ${aprMiMonths} months` : ""}. Title fees, taxes, and insurance are excluded per Reg Z Appendix J. <strong>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</strong>
