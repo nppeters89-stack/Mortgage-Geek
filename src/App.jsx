@@ -4897,6 +4897,7 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
+  const isMobile = useIsMobile();
   const isStandalone = useIsStandalone();
   const toolbarH = isStandalone ? 76 : 56;
   const [toolbarOffset, setToolbarOffset] = useState(76); // start fully hidden
@@ -5191,8 +5192,8 @@ function MainSite() {
         </footer>
       </main>
 
-      {/* Bottom toolbar — X-style auto-hide on scroll */}
-      {!mobileOpen && (
+      {/* Bottom toolbar — X-style auto-hide on scroll (mobile/PWA only) */}
+      {!mobileOpen && isMobile && (
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
           overflow: "hidden",
