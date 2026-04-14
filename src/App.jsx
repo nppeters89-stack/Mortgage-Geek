@@ -2704,7 +2704,7 @@ function CashToClosePage() {
               </div>
             </div>
             <div>
-              <CalcInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} value={rate} onChange={setRate} suffix="%" step={0.125} min={0} max={20} />
+              <RateInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} rate={rate} setRate={setRate} color={PROG_COLOR} />
               {ratesLoaded && (
                 <p style={{ fontSize: 10, color: P.sage, marginTop: 4, fontWeight: 600 }}>● Live from Mortgage News Daily</p>
               )}
