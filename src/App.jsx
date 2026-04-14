@@ -5163,7 +5163,7 @@ function MainSite() {
       <a
         href="#tools-cta"
         style={{
-          position: "fixed", bottom: 24, right: 24, zIndex: 100,
+          position: "fixed", bottom: `calc(24px + env(safe-area-inset-bottom, 0px))`, right: 24, zIndex: 150,
           display: "flex", alignItems: "center", gap: 8,
           padding: "12px 20px", borderRadius: 50,
           background: P.gold, color: "#fff",
