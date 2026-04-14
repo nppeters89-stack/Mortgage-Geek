@@ -5206,23 +5206,25 @@ function MainSite() {
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, margin: "0 auto",
+          display: "flex", justifyContent: "center", alignItems: "center",
           height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16,
         }}>
-          {[
-            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
-            { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
-            { icon: "⚖️", label: "Compare", href: "/compare" },
-            { icon: "🧮", label: "Calculator", href: "/calculator" },
-          ].map((t) => (
-            <a key={t.href} href={t.href} style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-              textDecoration: "none", flex: 1, padding: "0",
-            }}>
-              <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
-              <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
-            </a>
-          ))}
+          <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
+            {[
+              { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
+              { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
+              { icon: "⚖️", label: "Compare", href: "/compare" },
+              { icon: "🧮", label: "Calculator", href: "/calculator" },
+            ].map((t) => (
+              <a key={t.href} href={t.href} style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                textDecoration: "none", padding: "0",
+              }}>
+                <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
+                <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
+              </a>
+            ))}
+          </div>
         </nav>
         </div>
       )}
