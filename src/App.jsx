@@ -5086,6 +5086,25 @@ function MainSite() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [toolbarH]);
 
+  // Prevent overscroll bounce at page boundaries on mobile (reveals sidebar behind)
+  useEffect(() => {
+    if (!isMobile) return;
+    let startY = 0;
+    const onTouchStart = (e) => { startY = e.touches[0].clientY; };
+    const onTouchMove = (e) => {
+      const dy = e.touches[0].clientY - startY;
+      const atTop = window.scrollY <= 0 && dy > 0;
+      const atBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && dy < 0;
+      if (atTop || atBottom) e.preventDefault();
+    };
+    document.addEventListener("touchstart", onTouchStart, { passive: true });
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      document.removeEventListener("touchstart", onTouchStart);
+      document.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [isMobile]);
+
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
     if (el) {
