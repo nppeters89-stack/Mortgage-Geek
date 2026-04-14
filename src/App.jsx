@@ -4897,7 +4897,8 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
-  const [showFloatingCalc, setShowFloatingCalc] = useState(false);
+  const [toolbarOffset, setToolbarOffset] = useState(60); // 60 = fully hidden (toolbar height)
+  const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
   // should skip restoring the previous scroll position (the navigation
   // handler is scrolling to the target section). Prevents a race where
@@ -5051,11 +5052,31 @@ function MainSite() {
     };
   }, [mobileOpen]);
 
+  // Bottom toolbar — X-style: shows on scroll-up (finger down), hides on scroll-down (finger up)
+  // Tracks scroll delta and moves toolbar in lockstep with finger speed
   useEffect(() => {
+    const TOOLBAR_H = 60;
+    let offset = TOOLBAR_H; // start hidden
+    let ticking = false;
+
     const handleScroll = () => {
-      const toolsSection = document.getElementById("tools-cta");
-      const toolsVisible = toolsSection ? toolsSection.getBoundingClientRect().top < window.innerHeight : false;
-      setShowFloatingCalc(window.scrollY > 400 && !toolsVisible);
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY.current;
+        // delta > 0 = scrolling down (finger up) → hide toolbar
+        // delta < 0 = scrolling up (finger down) → show toolbar
+        if (currentY < 100) {
+          // Near top of page — hide toolbar
+          offset = TOOLBAR_H;
+        } else {
+          offset = Math.max(0, Math.min(TOOLBAR_H, offset + delta));
+        }
+        lastScrollY.current = currentY;
+        setToolbarOffset(offset);
+        ticking = false;
+      });
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -5167,26 +5188,35 @@ function MainSite() {
         </footer>
       </main>
 
-      {/* Floating tools button */}
-      <a
-        href="#tools-cta"
-        style={{
-          position: "fixed", bottom: `calc(24px + env(safe-area-inset-bottom, 0px))`, right: 24, zIndex: 150,
-          display: "flex", alignItems: "center", gap: 8,
-          padding: "12px 20px", borderRadius: 50,
-          background: P.gold, color: "#fff",
-          fontFamily: F.body, fontSize: 14, fontWeight: 600,
-          textDecoration: "none",
-          boxShadow: "0 4px 20px rgba(184,134,11,0.35), 0 2px 8px rgba(0,0,0,0.1)",
-          transform: showFloatingCalc ? "translateY(0)" : "translateY(100px)",
-          opacity: showFloatingCalc ? 1 : 0,
-          transition: "all 0.3s ease",
-          pointerEvents: showFloatingCalc ? "auto" : "none",
-        }}
-      >
-        <span style={{ fontSize: 16 }}>🛠</span>
-        Tools
-      </a>
+      {/* Bottom toolbar — X-style auto-hide on scroll */}
+      {!mobileOpen && (
+        <nav style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
+          transform: `translateY(${toolbarOffset}px)`,
+          willChange: "transform",
+          background: "rgba(15, 37, 48, 0.92)",
+          backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          display: "flex", justifyContent: "space-around", alignItems: "center",
+          height: 60,
+        }}>
+          {[
+            { icon: "🧮", label: "Calculator", href: "/calculator" },
+            { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
+            { icon: "⚖️", label: "Compare", href: "/compare" },
+            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
+          ].map((t) => (
+            <a key={t.href} href={t.href} style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+              textDecoration: "none", flex: 1, padding: "8px 0",
+            }}>
+              <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
+            </a>
+          ))}
+        </nav>
+      )}
     </div>
   );
 }
