@@ -4905,24 +4905,19 @@ function MainSite() {
   const skipScrollRestore = useRef(false);
   const skipTransition = useRef(false);
 
-  // Scroll-lock body when sidebar is open on mobile.
-  // Uses position:fixed technique which works reliably on iOS Safari
-  // (plain overflow:hidden on body is ignored by WebKit in many cases).
-  // Preserves the user's scroll position when sidebar closes — unless a
-  // navigation just fired, in which case we let the nav scroll take effect.
-  // Also sets a dark html background so the safe-area zones at top/bottom
-  // blend with the sidebar's navy and the overlay's dark wash — otherwise
-  // the cream html background shows as an ugly white strip.
+  // Scroll-lock: block ALL touch-scroll on iOS except within the sidebar.
+  // CSS overflow:hidden doesn't work on iOS Safari — must use JS preventDefault.
   useLayoutEffect(() => {
     if (mobileOpen) {
-      // Prevent scrolling without moving the body — no visual shift, no flash
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none";
+      const onTouchMove = (e) => {
+        // Allow scrolling inside the sidebar, block everywhere else
+        const sidebar = document.querySelector(".sidebar");
+        if (sidebar && sidebar.contains(e.target)) return;
+        e.preventDefault();
+      };
+      document.addEventListener("touchmove", onTouchMove, { passive: false });
       return () => {
-        document.documentElement.style.overflow = "";
-        document.body.style.overflow = "";
-        document.body.style.touchAction = "";
+        document.removeEventListener("touchmove", onTouchMove);
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
         }
@@ -4938,9 +4933,21 @@ function MainSite() {
     let startX = 0, startY = 0, currentX = 0;
     let tracking = false, dirLocked = false, isHorizontal = false;
     let mode = null; // "opening" or "closing"
+    let scrollBlocker = null;
 
     const getMain = () => document.querySelector(".main-content");
     const getBar = () => document.querySelector(".mobile-bar");
+
+    const addScrollBlocker = () => {
+      if (scrollBlocker) return;
+      scrollBlocker = (e) => { e.preventDefault(); };
+      document.addEventListener("touchmove", scrollBlocker, { passive: false });
+    };
+    const removeScrollBlocker = () => {
+      if (!scrollBlocker) return;
+      document.removeEventListener("touchmove", scrollBlocker);
+      scrollBlocker = null;
+    };
 
     const onTouchStart = (e) => {
       const touch = e.touches[0];
@@ -4975,9 +4982,9 @@ function MainSite() {
         if (!isHorizontal) { tracking = false; return; }
         const main = getMain();
         const bar = getBar();
-        if (main) { main.classList.add("sidebar-dragging"); main.style.touchAction = "none"; }
+        if (main) main.classList.add("sidebar-dragging");
         if (bar) bar.classList.add("sidebar-dragging");
-        document.body.style.overflow = "hidden";
+        addScrollBlocker();
       }
 
       if (!dirLocked || !isHorizontal) return;
@@ -5017,9 +5024,9 @@ function MainSite() {
       if (bar) bar.classList.remove("sidebar-dragging");
 
       // Clear inline styles — let CSS classes handle the snap
-      if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); main.style.touchAction = ""; }
+      if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); }
       if (bar) bar.style.transform = "";
-      document.body.style.overflow = "";
+      removeScrollBlocker();
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
         if (navigator.vibrate) navigator.vibrate(10);
@@ -5040,6 +5047,7 @@ function MainSite() {
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("touchmove", onTouchMove);
       document.removeEventListener("touchend", onTouchEnd);
+      removeScrollBlocker();
     };
   }, [mobileOpen]);
 
@@ -5261,8 +5269,8 @@ const globalCSS = `
     .mobile-bar-open { transform: translateX(280px); }
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; overscroll-behavior: none; }
     .main-content::after { content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 200vh; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
-    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; touch-action: none; }
-    .main-content-open::after { pointer-events: auto; touch-action: none; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
+    .main-content-open::after { pointer-events: auto; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
     /* Mobile accordion: detail panel renders inline below its active step button
