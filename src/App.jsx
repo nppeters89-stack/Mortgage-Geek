@@ -5092,6 +5092,9 @@ function MainSite() {
     let startY = 0;
     const onTouchStart = (e) => { startY = e.touches[0].clientY; };
     const onTouchMove = (e) => {
+      // Allow scrolling inside the sidebar
+      const sidebar = document.querySelector(".sidebar");
+      if (sidebar && sidebar.contains(e.target)) return;
       const dy = e.touches[0].clientY - startY;
       const atTop = window.scrollY <= 0 && dy > 0;
       const atBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && dy < 0;
