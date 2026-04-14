@@ -4919,16 +4919,19 @@ function MainSite() {
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
       document.body.style.overflow = "hidden";
-      document.body.style.background = "#0F2530";
-      document.documentElement.style.background = "#0F2530";
+      // Add open classes to main-content and mobile-bar
+      const main = document.querySelector(".main-content");
+      const bar = document.querySelector(".mobile-bar");
+      if (main) main.classList.add("main-content-open");
+      if (bar) bar.classList.add("mobile-bar-open");
       return () => {
         const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
         document.body.style.position = "";
         document.body.style.top = "";
         document.body.style.width = "";
         document.body.style.overflow = "";
-        document.body.style.background = "";
-        document.documentElement.style.background = "";
+        if (main) main.classList.remove("main-content-open");
+        if (bar) bar.classList.remove("mobile-bar-open");
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
         } else {
@@ -4938,7 +4941,7 @@ function MainSite() {
     }
   }, [mobileOpen]);
 
-  // Swipe-to-open/close sidebar — real-time finger tracking
+  // Swipe-to-open/close sidebar — X-style reveal (main content slides right)
   useEffect(() => {
     const SIDEBAR_W = 280;
     const EDGE_ZONE = window.innerWidth / 2;
@@ -4947,7 +4950,8 @@ function MainSite() {
     let tracking = false, dirLocked = false, isHorizontal = false;
     let mode = null; // "opening" or "closing"
 
-    const getSidebar = () => document.querySelector(".sidebar");
+    const getMain = () => document.querySelector(".main-content");
+    const getBar = () => document.querySelector(".mobile-bar");
     const getOverlay = () => document.getElementById("sidebar-overlay-drag");
 
     const onTouchStart = (e) => {
@@ -4982,29 +4986,37 @@ function MainSite() {
         isHorizontal = Math.abs(dx) > Math.abs(dy);
         if (!isHorizontal) { tracking = false; return; }
         // Disable transitions for real-time tracking
-        const sidebar = getSidebar();
+        const main = getMain();
+        const bar = getBar();
         const overlay = getOverlay();
-        if (sidebar) sidebar.classList.add("sidebar-dragging");
+        if (main) main.classList.add("sidebar-dragging");
+        if (bar) bar.classList.add("sidebar-dragging");
         if (overlay) overlay.classList.add("sidebar-dragging");
       }
 
       if (!dirLocked || !isHorizontal) return;
 
-      const sidebar = getSidebar();
+      const main = getMain();
+      const bar = getBar();
       const overlay = getOverlay();
-      if (!sidebar) return;
+      if (!main) return;
 
       if (mode === "opening") {
-        // dragPx: 0 (closed) to SIDEBAR_W (fully open)
         const dragPx = Math.max(0, Math.min(dx, SIDEBAR_W));
         const pct = dragPx / SIDEBAR_W;
-        sidebar.style.transform = `translateX(${-SIDEBAR_W + dragPx}px)`;
+        const radius = Math.round(pct * 16);
+        main.style.transform = `translateX(${dragPx}px)`;
+        main.style.borderRadius = `${radius}px`;
+        if (bar) bar.style.transform = `translateX(${dragPx}px)`;
         if (overlay) overlay.style.opacity = pct;
       } else if (mode === "closing") {
-        // dx is negative when swiping left
         const dragPx = Math.max(0, Math.min(-dx, SIDEBAR_W));
         const pct = 1 - (dragPx / SIDEBAR_W);
-        sidebar.style.transform = `translateX(${-dragPx}px)`;
+        const offset = SIDEBAR_W - dragPx;
+        const radius = Math.round(pct * 16);
+        main.style.transform = `translateX(${offset}px)`;
+        main.style.borderRadius = `${radius}px`;
+        if (bar) bar.style.transform = `translateX(${offset}px)`;
         if (overlay) overlay.style.opacity = pct;
       }
     };
@@ -5012,15 +5024,18 @@ function MainSite() {
     const onTouchEnd = () => {
       if (!tracking || !isHorizontal) { tracking = false; return; }
       const dx = currentX - startX;
-      const sidebar = getSidebar();
+      const main = getMain();
+      const bar = getBar();
       const overlay = getOverlay();
 
       // Re-enable CSS transitions for snap
-      if (sidebar) sidebar.classList.remove("sidebar-dragging");
+      if (main) main.classList.remove("sidebar-dragging");
+      if (bar) bar.classList.remove("sidebar-dragging");
       if (overlay) overlay.classList.remove("sidebar-dragging");
 
       // Clear inline styles — let CSS classes handle the snap
-      if (sidebar) sidebar.style.transform = "";
+      if (main) { main.style.transform = ""; main.style.borderRadius = ""; }
+      if (bar) bar.style.transform = "";
       if (overlay) overlay.style.opacity = "";
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
@@ -5030,7 +5045,6 @@ function MainSite() {
         if (navigator.vibrate) navigator.vibrate(10);
         setMobileOpen(false);
       }
-      // If didn't pass threshold, CSS transitions snap back to current state
 
       tracking = false;
       mode = null;
@@ -5243,13 +5257,15 @@ const globalCSS = `
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; padding-top: 56px; will-change: transform; }
-    .sidebar-open { transform: translateX(0); }
+    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 100; }
+    .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
     .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .sidebar-overlay-visible { opacity: 1; pointer-events: auto; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); }
-    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
+    .mobile-bar-open { transform: translateX(280px); }
+    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px; overflow: hidden; }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
     /* Mobile accordion: detail panel renders inline below its active step button
