@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, Fragment } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, Fragment } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -4903,6 +4903,7 @@ function MainSite() {
   // handler is scrolling to the target section). Prevents a race where
   // the scroll-restore overrides scrollIntoView on mobile nav clicks.
   const skipScrollRestore = useRef(false);
+  const skipTransition = useRef(false);
 
   // Scroll-lock body when sidebar is open on mobile.
   // Uses position:fixed technique which works reliably on iOS Safari
@@ -4912,10 +4913,10 @@ function MainSite() {
   // Also sets a dark html background so the safe-area zones at top/bottom
   // blend with the sidebar's navy and the overlay's dark wash — otherwise
   // the cream html background shows as an ugly white strip.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (mobileOpen) {
       const scrollY = window.scrollY;
-      // Freeze body scroll
+      // Freeze body scroll — useLayoutEffect fires before browser paint
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.left = "0";
@@ -5068,11 +5069,23 @@ function MainSite() {
       // cleanup doesn't restore the old scroll position, then defer the scroll.
       if (mobileOpen) {
         skipScrollRestore.current = true;
+        skipTransition.current = true;
+        // Disable transition so content snaps back instantly (no navy flash)
+        const main = document.querySelector(".main-content");
+        const bar = document.querySelector(".mobile-bar");
+        if (main) main.style.transition = "none";
+        if (bar) bar.style.transition = "none";
         setMobileOpen(false);
-        setTimeout(() => {
+        // Wait one frame for DOM to update, then scroll and restore transitions
+        requestAnimationFrame(() => {
           el.scrollIntoView({ behavior: "instant", block: "start" });
           window.history.replaceState(null, "", `#${id}`);
-        }, 50);
+          requestAnimationFrame(() => {
+            if (main) main.style.transition = "";
+            if (bar) bar.style.transition = "";
+            skipTransition.current = false;
+          });
+        });
       } else {
         el.scrollIntoView({ behavior: "instant", block: "start" });
         window.history.replaceState(null, "", `#${id}`);
