@@ -5182,7 +5182,7 @@ const globalCSS = `
      Also makes tool page headers sticky on scroll. */
   .pwa-safe-top { padding-top: calc(20px + env(safe-area-inset-top, 0px)) !important; position: sticky; top: 0; z-index: 100; }
   @media (max-width: 900px) { .pwa-safe-top { position: fixed !important; top: 0; left: 0; right: 0; z-index: 200; }
-    .tool-page-content { padding-top: calc(76px + env(safe-area-inset-top, 0px)) !important; } }
+    .tool-page-content { padding-top: calc(100px + env(safe-area-inset-top, 0px)) !important; } }
   .pwa-safe-top-sidebar { padding-top: calc(32px + env(safe-area-inset-top, 0px)) !important; }
   body { padding-bottom: 0; }
 
