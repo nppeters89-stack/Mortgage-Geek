@@ -4897,6 +4897,7 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
+  const isStandalone = useIsStandalone();
   const [toolbarOffset, setToolbarOffset] = useState(56); // fully hidden (toolbar height)
   const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
@@ -5203,7 +5204,7 @@ function MainSite() {
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
           display: "flex", justifyContent: "space-around", alignItems: "center",
-          height: 56, paddingTop: 16,
+          height: isStandalone ? 68 : 56, paddingTop: isStandalone ? 24 : 16,
         }}>
           {[
             { icon: "🧮", label: "Calculator", href: "/calculator" },
