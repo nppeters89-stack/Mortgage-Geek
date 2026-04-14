@@ -4915,26 +4915,16 @@ function MainSite() {
   // the cream html background shows as an ugly white strip.
   useLayoutEffect(() => {
     if (mobileOpen) {
-      const scrollY = window.scrollY;
-      // Freeze body scroll — useLayoutEffect fires before browser paint
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      document.body.style.bottom = `-${scrollY}px`;
+      // Prevent scrolling without moving the body — no visual shift, no flash
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
       return () => {
-        const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        document.body.style.bottom = "";
+        document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
+        document.body.style.touchAction = "";
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
-        } else {
-          window.scrollTo(0, savedY);
         }
       };
     }
@@ -5068,8 +5058,6 @@ function MainSite() {
       // becomes unfrozen before scrollIntoView runs. Set the skip flag so the
       // cleanup doesn't restore the old scroll position, then defer the scroll.
       if (mobileOpen) {
-        skipScrollRestore.current = true;
-        skipTransition.current = true;
         // Disable transition so content snaps back instantly (no navy flash)
         const main = document.querySelector(".main-content");
         const bar = document.querySelector(".mobile-bar");
@@ -5083,7 +5071,6 @@ function MainSite() {
           requestAnimationFrame(() => {
             if (main) main.style.transition = "";
             if (bar) bar.style.transition = "";
-            skipTransition.current = false;
           });
         });
       } else {
