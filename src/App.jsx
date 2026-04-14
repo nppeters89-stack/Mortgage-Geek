@@ -5210,10 +5210,10 @@ function MainSite() {
           height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16,
         }}>
           {[
-            { icon: "🧮", label: "Calculator", href: "/calculator" },
+            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
             { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
             { icon: "⚖️", label: "Compare", href: "/compare" },
-            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
+            { icon: "🧮", label: "Calculator", href: "/calculator" },
           ].map((t) => (
             <a key={t.href} href={t.href} style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
