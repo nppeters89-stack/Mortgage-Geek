@@ -1847,7 +1847,7 @@ function ComparePage() {
         .print-only { display: none; }
 
         @media print {
-          @page { size: portrait; margin: 0.3in; }
+          @page { size: portrait; margin: 0.25in; }
           body { background: #fff !important; }
           .no-print { display: none !important; }
           .print-only { display: block !important; }
@@ -1864,8 +1864,8 @@ function ComparePage() {
             flex-wrap: nowrap !important;
             justify-content: center !important;
             align-items: flex-start !important;
-            gap: 8px !important;
-            padding-top: 12px !important;
+            gap: 5px !important;
+            padding-top: 8px !important;
             page-break-inside: avoid;
           }
           .compare-card {
@@ -1874,19 +1874,18 @@ function ComparePage() {
             box-shadow: none !important;
             page-break-inside: avoid;
             break-inside: avoid;
-            font-size: 9px !important;
           }
-          .compare-card .card-header { padding: 12px 14px !important; }
-          .compare-card .card-total { font-size: 20px !important; }
-          .compare-card div, .compare-card span, .compare-card strong { font-size: 9px !important; }
-          .compare-card .card-total { font-size: 20px !important; }
-          .compare-card ul { margin: 3px 0 0 !important; padding-left: 12px !important; }
-          .compare-card li { margin-bottom: 1px !important; font-size: 8px !important; line-height: 1.4 !important; }
+          .compare-card .card-header { padding: 8px 10px !important; }
+          .compare-card .card-total { font-size: 15px !important; }
+          .compare-card div, .compare-card span, .compare-card strong, .compare-card p { font-size: 6.5px !important; line-height: 1.25 !important; }
+          .compare-card .card-total { font-size: 15px !important; }
+          .compare-card ul { margin: 2px 0 0 !important; padding-left: 9px !important; }
+          .compare-card li { margin-bottom: 0 !important; font-size: 6px !important; line-height: 1.2 !important; }
           .content-card { box-shadow: none !important; border: 1px solid #999 !important; }
 
           /* Darken labels and values in card body for high contrast on white */
-          .compare-card .pdf-label { color: #4a4a4a !important; font-size: 9px !important; }
-          .compare-card .pdf-value { color: #000 !important; font-size: 9px !important; }
+          .compare-card .pdf-label { color: #4a4a4a !important; font-size: 6.5px !important; }
+          .compare-card .pdf-value { color: #000 !important; font-size: 6.5px !important; }
         }
       `}</style>
 
