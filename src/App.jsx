@@ -1530,7 +1530,7 @@ function InterestRates({ navTarget }) {
   );
 }
 
-function MobileToolbar() {
+function MobileToolbar({ hrefOverrides = {} }) {
   const isMobile = useIsMobile();
   const isStandalone = useIsStandalone();
   const toolbarH = isStandalone ? 76 : 56;
@@ -1567,7 +1567,7 @@ function MobileToolbar() {
             { icon: "⚖️", label: "Compare", href: "/compare" },
             { icon: "🧮", label: "Calculator", href: "/calculator" },
           ].map((t) => (
-            <a key={t.href} href={t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
+            <a key={t.href} href={hrefOverrides[t.href] || t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
               <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
             </a>
@@ -4684,11 +4684,6 @@ function CalculatorPage() {
             ⓘ See APR estimate (true cost of credit) in Cash to Close →
           </a>
         </div>
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <a href={`/prequal?down=${downPct}&term=${term}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
-            🎯 Open the Pre-Qual Simulator →
-          </a>
-        </div>
 
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
@@ -4696,7 +4691,7 @@ function CalculatorPage() {
           This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
         </p>
       </div>
-      <MobileToolbar />
+      <MobileToolbar hrefOverrides={{ "/prequal": `/prequal?down=${downPct}&term=${term}` }} />
     </div>
   );
 }
