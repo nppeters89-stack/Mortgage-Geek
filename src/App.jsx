@@ -5188,9 +5188,9 @@ function MainSite() {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { background: #0F2530; height: 100%; overflow-x: hidden; }
-  body { background: #0F2530; min-height: 100%; min-height: 100dvh; margin: 0; overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
-  #root { min-height: 100%; min-height: 100dvh; overflow-x: hidden; }
+  html { background: magenta; height: 100%; overflow-x: hidden; }
+  body { background: cyan; min-height: 100%; min-height: 100dvh; margin: 0; overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+  #root { min-height: 100%; min-height: 100dvh; overflow-x: hidden; outline: 3px solid yellow; }
   html { scroll-behavior: auto; }
 
   /* PWA safe-area handling: adds padding equal to iOS status bar height when
@@ -5251,8 +5251,8 @@ const globalCSS = `
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; top: 0; bottom: 0; left: 0; width: 280px; }
-    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
+    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; top: 0; bottom: 0; left: 0; width: 280px; outline: 3px solid red; }
+    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: lime; z-index: -1; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
     .sidebar-overlay { display: none; }
