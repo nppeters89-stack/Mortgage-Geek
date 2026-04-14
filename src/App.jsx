@@ -304,7 +304,7 @@ const NAV_TOPICS = [
 ];
 
 const NAV_TOOLS = [
-  { id: "calculator", label: "Payment Calculator", icon: "🧮", href: "/calculator" },
+  { id: "calculator", label: "Mortgage Calculator", icon: "🧮", href: "/calculator" },
   { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "⚖️", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "💰", href: "/cash-to-close" },
@@ -3091,7 +3091,7 @@ function NextSteps() {
                   <span style={{ fontSize: 20 }}>🧮</span>
                   <div>
                     <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>Run the numbers</span>
-                    <span style={{ display: "block", fontSize: 11, opacity: 0.5 }}>Payment Calculator</span>
+                    <span style={{ display: "block", fontSize: 11, opacity: 0.5 }}>Mortgage Calculator</span>
                   </div>
                 </a>
               </div>
@@ -3108,7 +3108,7 @@ function NextSteps() {
 function ToolsCTA() {
   const tools = [
     {
-      icon: "🧮", title: "Payment Calculator", href: "/calculator",
+      icon: "🧮", title: "Mortgage Calculator", href: "/calculator",
       desc: "Same house, three programs. Compare Conventional, FHA, and VA payment breakdowns with live rates.",
     },
     {
@@ -4343,7 +4343,7 @@ function CalculatorPage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Mortgage Payment Calculator 🧮</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Mortgage Calculator 🧮</h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 540, margin: "0 auto" }}>One set of inputs, three loan programs. See how Conventional, FHA, and VA stack up for the same home.</p>
         </div>
 
