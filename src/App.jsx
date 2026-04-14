@@ -5240,7 +5240,7 @@ function MainSite() {
                 textDecoration: "none", padding: "0",
               }}>
                 <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
-                <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
+                <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
               </a>
             ))}
           </div>
