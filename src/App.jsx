@@ -2646,6 +2646,7 @@ function CashToClosePage() {
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 600px) { .ctc-grid { grid-template-columns: 1fr; } }
         .ctc-loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        @media (max-width: 600px) { .ctc-loc-grid { grid-template-columns: 1fr; } }
       `}</style>
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
