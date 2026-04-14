@@ -5202,7 +5202,7 @@ function MainSite() {
         <nav style={{
           transform: `translateY(${toolbarOffset}px)`,
           willChange: "transform",
-          background: "rgba(15, 37, 48, 0.94)",
+          background: "rgba(15, 37, 48, 0.75)",
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
