@@ -5196,7 +5196,7 @@ function MainSite() {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { background: #FAF7F2; }
+  html, body { background: #0F2530; }
   html { scroll-behavior: auto; }
 
   /* PWA safe-area handling: adds padding equal to iOS status bar height when
@@ -5257,15 +5257,15 @@ const globalCSS = `
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
   @media (max-width: 900px) {
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 100; }
+    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
-    .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .sidebar-overlay { display: block; position: fixed; top: 0; bottom: 0; left: 280px; right: 0; background: rgba(0,0,0,0.5); z-index: 160; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .sidebar-overlay-visible { opacity: 1; pointer-events: auto; }
     .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
-    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; }
-    .main-content-open { transform: translateX(280px); border-radius: 16px; overflow: hidden; }
+    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100vh; }
+    .main-content-open { transform: translateX(280px); border-radius: 16px; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); }
     .process-grid { flex-direction: column; }
     .process-steps { flex: 1 1 auto; }
     /* Mobile accordion: detail panel renders inline below its active step button
