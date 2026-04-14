@@ -4897,7 +4897,7 @@ function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navTarget, setNavTarget] = useState(null);
-  const [toolbarOffset, setToolbarOffset] = useState(72); // 72 = fully hidden (toolbar height)
+  const [toolbarOffset, setToolbarOffset] = useState(56); // fully hidden (toolbar height)
   const lastScrollY = useRef(0);
   // Signals that a navigation just occurred, so the scroll-lock cleanup
   // should skip restoring the previous scroll position (the navigation
@@ -5055,7 +5055,7 @@ function MainSite() {
   // Bottom toolbar — X-style: shows on scroll-up (finger down), hides on scroll-down (finger up)
   // Tracks scroll delta and moves toolbar in lockstep with finger speed
   useEffect(() => {
-    const TOOLBAR_H = 72;
+    const TOOLBAR_H = 56;
     let offset = TOOLBAR_H; // start hidden
     let ticking = false;
 
@@ -5193,7 +5193,7 @@ function MainSite() {
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150,
           overflow: "hidden",
-          pointerEvents: toolbarOffset >= 72 ? "none" : "auto",
+          pointerEvents: toolbarOffset >= 56 ? "none" : "auto",
         }}>
         <nav style={{
           transform: `translateY(${toolbarOffset}px)`,
@@ -5202,8 +5202,8 @@ function MainSite() {
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          display: "flex", justifyContent: "center", alignItems: "flex-end",
-          gap: 0, height: 72, paddingTop: 14,
+          display: "flex", justifyContent: "center", alignItems: "center",
+          gap: 0, height: 56, paddingTop: 6,
         }}>
           {[
             { icon: "🧮", label: "Calculator", href: "/calculator" },
@@ -5213,7 +5213,7 @@ function MainSite() {
           ].map((t) => (
             <a key={t.href} href={t.href} style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-              textDecoration: "none", width: 72, padding: "0 0 8px",
+              textDecoration: "none", width: 72, padding: "0",
             }}>
               <span style={{ fontSize: 22, lineHeight: 1 }}>{t.icon}</span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.6)", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
