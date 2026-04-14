@@ -1687,7 +1687,7 @@ function PreApprovalChecklist() {
 
 function AboutPage() {
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}</style>
 
       {/* Header */}
@@ -1838,7 +1838,7 @@ function ComparePage() {
   const lowestTotal = scenarios.length > 0 ? Math.min(...scenarios.map(s => s.total)) : 0;
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}{`
         .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }
         .compare-card { width: 320px; flex-shrink: 0; }
@@ -2641,7 +2641,7 @@ function CashToClosePage() {
   );
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}{`
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 600px) { .ctc-grid { grid-template-columns: 1fr; } }
@@ -3452,7 +3452,7 @@ function PreQualPage() {
   });
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}{`
         .pq-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .pq-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
@@ -4277,7 +4277,7 @@ function CalculatorPage() {
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh" }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
@@ -4749,7 +4749,7 @@ function InstallPage() {
   );
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", margin: 0 }}>
+    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100vh", margin: 0, paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <style>{globalCSS}</style>
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
@@ -5126,7 +5126,7 @@ function MainSite() {
     <div style={{ fontFamily: F.body, color: P.text, background: "#0F2530", display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
-      <main className="main-content" onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
+      <main className="main-content" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
         <Hero onNavigate={handleNavigate} />
         <JourneyOverview onNavigate={handleSubNavigate} />
         <PreContract navTarget={navTarget} />
@@ -5219,7 +5219,7 @@ const globalCSS = `
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
