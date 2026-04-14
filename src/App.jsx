@@ -357,7 +357,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
 
   return (
     <>
-      <div className="mobile-bar">
+      <div className={`mobile-bar ${mobileOpen ? "mobile-bar-open" : ""}`}>
         <div className="mobile-bar-inner">
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -4915,8 +4915,6 @@ function MainSite() {
   useEffect(() => {
     if (mobileOpen) {
       const scrollY = window.scrollY;
-      const main = document.querySelector(".main-content");
-      const bar = document.querySelector(".mobile-bar");
       // Freeze body scroll
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
@@ -4924,8 +4922,6 @@ function MainSite() {
       document.body.style.right = "0";
       document.body.style.bottom = `-${scrollY}px`;
       document.body.style.overflow = "hidden";
-      if (main) main.classList.add("main-content-open");
-      if (bar) bar.classList.add("mobile-bar-open");
       return () => {
         const savedY = Math.abs(parseInt(document.body.style.top || "0", 10));
         document.body.style.position = "";
@@ -4934,8 +4930,6 @@ function MainSite() {
         document.body.style.right = "";
         document.body.style.bottom = "";
         document.body.style.overflow = "";
-        if (main) main.classList.remove("main-content-open");
-        if (bar) bar.classList.remove("mobile-bar-open");
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
         } else {
@@ -5126,7 +5120,7 @@ function MainSite() {
     <div style={{ fontFamily: F.body, color: P.text, background: "#0F2530", display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
-      <main className="main-content" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
+      <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
         <Hero onNavigate={handleNavigate} />
         <JourneyOverview onNavigate={handleSubNavigate} />
         <PreContract navTarget={navTarget} />
