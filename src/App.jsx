@@ -5008,7 +5008,7 @@ function MainSite() {
         main.style.transform = `translateX(${dragPx}px)`;
         main.style.borderRadius = `${radius}px`;
         if (bar) bar.style.transform = `translateX(${dragPx}px)`;
-        if (overlay) overlay.style.opacity = pct;
+        if (overlay) { overlay.style.opacity = pct; overlay.style.transform = `translateX(${dragPx}px)`; }
       } else if (mode === "closing") {
         const dragPx = Math.max(0, Math.min(-dx, SIDEBAR_W));
         const pct = 1 - (dragPx / SIDEBAR_W);
@@ -5017,7 +5017,7 @@ function MainSite() {
         main.style.transform = `translateX(${offset}px)`;
         main.style.borderRadius = `${radius}px`;
         if (bar) bar.style.transform = `translateX(${offset}px)`;
-        if (overlay) overlay.style.opacity = pct;
+        if (overlay) { overlay.style.opacity = pct; overlay.style.transform = `translateX(${offset}px)`; }
       }
     };
 
@@ -5036,7 +5036,7 @@ function MainSite() {
       // Clear inline styles — let CSS classes handle the snap
       if (main) { main.style.transform = ""; main.style.borderRadius = ""; }
       if (bar) bar.style.transform = "";
-      if (overlay) overlay.style.opacity = "";
+      if (overlay) { overlay.style.opacity = ""; overlay.style.transform = ""; }
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
         if (navigator.vibrate) navigator.vibrate(10);
@@ -5260,8 +5260,8 @@ const globalCSS = `
     .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
-    .sidebar-overlay { display: block; position: fixed; top: 0; bottom: 0; left: 280px; right: 0; background: rgba(0,0,0,0.5); z-index: 160; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    .sidebar-overlay-visible { opacity: 1; pointer-events: auto; }
+    .sidebar-overlay { display: block; position: fixed; top: 0; bottom: 0; left: 0; right: -280px; background: rgba(0,0,0,0.5); z-index: 160; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; will-change: transform, opacity; transform: translateX(0); }
+    .sidebar-overlay-visible { opacity: 1; pointer-events: auto; transform: translateX(280px); }
     .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
     .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); transition: transform 0.3s ease, border-radius 0.3s ease; will-change: transform; position: relative; z-index: 130; background: #FAF7F2; min-height: 100vh; }
