@@ -2961,7 +2961,7 @@ function CashToClosePage() {
                 <span style={{ fontFamily: F.display, fontSize: 30, color: PROG_COLOR, fontWeight: 600, display: "block" }}>{estimatedAPR.toFixed(3)}%</span>
                 <span style={{ fontSize: 10, color: P.warmGrayLight, display: "block", marginTop: 4 }}>Note rate {Number(rate).toFixed(3)}% · {term}-year term</span>
               </div>
-              <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGray, marginTop: 8, paddingTop: 10, borderTop: `1px solid ${P.creamDark}` }}>
+              <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGray, marginTop: 8, paddingTop: 10, borderTop: `1px solid ${P.creamDark}`, textAlign: "left" }}>
                 <strong style={{ color: P.navy }}>What is APR?</strong> The Annual Percentage Rate reflects your note rate plus lender fees, prepaid interest, upfront mortgage insurance, and monthly mortgage insurance premiums for the period required — expressed as an annual rate. APR is typically higher than your note rate and is the standard apples-to-apples comparison number across lenders. This estimate includes lender fees ({fmt(lenderTotal)}){upfrontFee > 0 ? `, upfront ${program === "FHA" ? "MIP" : "VA funding fee"} (${fmt(upfrontFee)})` : ""}, prepaid interest ({fmt(prepaidInterest)}){aprMonthlyMI > 0 ? `, and monthly MI of ${fmt(aprMonthlyMI)} for ${aprMiMonths} months` : ""}. Title fees, taxes, and insurance are excluded per Reg Z Appendix J. <strong>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</strong>
               </p>
             </div>
