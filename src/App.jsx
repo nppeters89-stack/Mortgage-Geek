@@ -5188,7 +5188,7 @@ function MainSite() {
 const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { background: #0F2530; height: 100%; overflow: hidden; }
+  html { background: #0F2530; height: 100%; overflow-x: hidden; }
   body { background: #0F2530; min-height: 100%; min-height: 100dvh; margin: 0; overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
   #root { min-height: 100%; min-height: 100dvh; overflow-x: hidden; }
   html { scroll-behavior: auto; }
