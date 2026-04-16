@@ -4910,7 +4910,7 @@ function MainSite() {
   // Swipe-to-open/close sidebar — X-style reveal (main content slides right)
   useEffect(() => {
     const SIDEBAR_W = 280;
-    const EDGE_ZONE = window.innerWidth / 2;
+    const EDGE_ZONE = window.innerWidth;
     const SNAP_THRESHOLD = 80;
     let startX = 0, startY = 0, currentX = 0;
     let tracking = false, dirLocked = false, isHorizontal = false;
