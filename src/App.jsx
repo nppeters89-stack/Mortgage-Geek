@@ -2331,6 +2331,7 @@ function CashToClosePage() {
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
+  const [rateLoading, setRateLoading] = useState(true);
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [closeDate, setCloseDate] = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 30);
@@ -2367,9 +2368,11 @@ function CashToClosePage() {
 
   const roundRate = (r) => Math.round(r / 0.125) * 0.125;
 
-  // Fetch live MND rates on mount
+  // Fetch live MND rates on mount. Sets rateLoading=true during fetch,
+  // rateLoading=false + ratesLoaded=true + rateSource=date when complete.
   useEffect(() => {
     (async () => {
+      setRateLoading(true);
       try {
         const res = await fetch("/api/rates");
         const data = await res.json();
@@ -2385,6 +2388,7 @@ function CashToClosePage() {
           setRatesLoaded(true);
         }
       } catch (e) { /* fail silently, use defaults */ }
+      setRateLoading(false);
     })();
   }, []);
 
@@ -2755,8 +2759,17 @@ function CashToClosePage() {
             </div>
             <div>
               <RateInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} rate={rate} setRate={setRate} color={PROG_COLOR} />
-              {ratesLoaded && (
-                <p style={{ fontSize: 10, color: P.sage, marginTop: 4, fontWeight: 600 }}>● Live from Mortgage News Daily</p>
+              {rateLoading && (
+                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 4, fontWeight: 500, fontStyle: "italic" }}>
+                  <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: P.warmGrayLight, marginRight: 6, verticalAlign: "middle", animation: "rate-pulse 1.2s ease-in-out infinite" }} />
+                  Loading today's rates...
+                </p>
+              )}
+              {!rateLoading && ratesLoaded && (
+                <p style={{ fontSize: 10, color: P.sage, marginTop: 4, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.sage, display: "inline-block" }} />
+                  Live · {rateSource || "today"}
+                </p>
               )}
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
@@ -5265,5 +5278,10 @@ const globalCSS = `
   @keyframes mg-toast-in {
     from { transform: translateY(40px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes rate-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.9; }
   }
 `;
