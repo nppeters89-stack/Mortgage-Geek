@@ -2026,13 +2026,16 @@ function AboutPage() {
         {/* Bio */}
         <div style={{ maxWidth: 640, marginBottom: 48 }}>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            I've spent most of my career as the in-house lender for new construction builders — the person sitting at the sales office who had to know every loan program cold, because a family's dream home depended on it. Over 12 years, I've closed hundreds of purchase transactions across Tennessee, Georgia, and California, working hand-in-hand with builders, title companies, and underwriters to get deals across the finish line.
+            For twelve years, I sat at the sales desk in new construction model homes — the guy families came to when the house they'd just fallen in love with was contingent on a loan I had to make work. Some weeks I closed five. Some weeks I had to tell someone no and help them understand why, then build a path to yes.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            That new construction background is why this site exists. When you're the builder's lender, you see every scenario — the first-time buyer with a 580 credit score, the VA borrower who's been told "no" three times, the self-employed borrower whose income doesn't fit a neat box. You learn to structure loans creatively, explain complex things simply, and fight for approvals that other originators might give up on.
+            Builder lending teaches you the edges of the mortgage world in a way retail banking never will. The first-time buyer with a 580 credit score and a real story behind it. The VA borrower who's been turned down more than once by lenders who didn't understand the file. The self-employed borrower whose tax returns look nothing like a W-2 but who's sitting on strong cash flow. I've structured approvals for all of them — not by bending rules, but by understanding which rules actually apply and which are just lazy overlays.
+          </p>
+          <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
+            The Mortgage Geek exists because most mortgage websites are either generic rate-bait or thinly disguised lead forms. Neither respects the borrower. This site is the opposite bet: give you the real information, the real tools, and a real human to text when you're ready. No drip campaigns. No "apply now" before you know what you're applying for. Just a plain-English answer to whatever you need.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray }}>
-            Now I'm taking everything I've learned and making it directly available to you. No builder middleman, no sales office — just a straight line between you and someone who actually understands how mortgages work. That's what The Mortgage Geek is about: real knowledge, no gatekeeping.
+            If you're anywhere in the mortgage process — from "I'm just curious what I can afford" to "I have an accepted offer and my current lender just went silent" — shoot me a text. That's not a marketing promise. That's the number at the bottom of this page buzzing on my phone.
           </p>
         </div>
 
