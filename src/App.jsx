@@ -5147,8 +5147,16 @@ const globalCSS = `
        exists BEFORE the sidebar-open transition starts. On iOS, applying
        will-change at the same frame as a transform change caused the element
        to snap to end-state before the layer was ready, making main-content
-       arrive ahead of the (already composited) .mobile-bar. */
-    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; }
+       arrive ahead of the (already composited) .mobile-bar.
+
+       touch-action: pan-y blocks iOS from interpreting horizontal drags as
+       a native pan/back-swipe gesture on main-content. Without this, iOS
+       was compounding its own horizontal gesture with our JS translateX,
+       causing main-content to drag much further right than the finger and
+       snap back on release. The header is position:fixed so iOS native
+       gestures don't affect it — hence it was the only element that moved
+       correctly before this fix. */
+    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
     .main-content::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
     .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
     .main-content-open::after { pointer-events: auto; }
