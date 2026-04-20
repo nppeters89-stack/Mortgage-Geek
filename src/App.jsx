@@ -964,13 +964,15 @@ function ThirtyDayGraphic({ activeStep }) {
           <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 2 }}>The 30-Day Timeline</h4>
           <p style={{ fontSize: 12, color: P.warmGrayLight }}>Contract to keys — here's how the time breaks down</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, background: `${P.navy}08`, padding: "8px 14px", borderRadius: 8 }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <div style={{ display: "flex", alignItems: "center", gap: 10, background: `${P.navy}08`, padding: "8px 14px", borderRadius: 8, flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" style={{ flexShrink: 0 }}>
             <circle cx="10" cy="10" r="9" stroke={P.navy} strokeWidth="1.5" fill="none" />
             <path d="M10 5V10.5L13.5 13" stroke={P.navy} strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>30–45</span>
-          <span style={{ fontSize: 11, fontWeight: 600, color: P.warmGray, lineHeight: 1.2 }}>days<br/>typical</span>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1 }}>
+            <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy, lineHeight: 1.1 }}>30–45</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: P.warmGray, letterSpacing: 0.3, marginTop: 2 }}>days typical</span>
+          </div>
         </div>
       </div>
       {/* Timeline bar */}
