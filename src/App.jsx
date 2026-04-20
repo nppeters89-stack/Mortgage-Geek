@@ -526,7 +526,7 @@ const NAV_TOPICS = [
     { label: "USDA", id: "types", step: 3 },
     { label: "Jumbo", id: "types", step: 4 },
   ]},
-  { id: "costs", label: "Closing Costs", icon: "💰", subs: [
+  { id: "costs", label: "Closing Costs", icon: "🧾", subs: [
     { label: "All About", id: "costs", step: "top" },
     { label: "Lender Fees", id: "costs", step: 0 },
     { label: "Title & Settlement", id: "costs", step: 1 },
