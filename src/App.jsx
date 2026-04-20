@@ -483,7 +483,7 @@ const BORROWER_PROFILE = [
   { title: "Assets & Reserves", sections: [
     { heading: "What Counts", content: "Checking and savings accounts, investment accounts (stocks, bonds, mutual funds), retirement accounts (401k, IRA — typically 60–70% of vested value), gift funds from family (with proper documentation), and proceeds from the sale of another property." },
     { heading: "Sourcing & Seasoning", content: "Lenders need to trace every dollar. Large deposits (anything that isn't a payroll deposit) need a paper trail. 'Seasoned' funds (in your account for 60+ days) raise fewer questions. Cash deposits are the hardest to document — avoid them during the loan process." },
-    { heading: "What Counts as a Large Deposit", content: "The threshold depends on your loan program. Conventional (Fannie Mae) flags any single deposit over 50% of your monthly qualifying income — so if you earn $6,000/mo, any deposit over $3,000 triggers a review. FHA uses a different rule: any deposit over 1% of the sales price. On a $400k home, that's $4,000. VA follows a similar 'unusual deposit' standard, typically around 2% of the loan amount. Deposits that are clearly sourced on the statement (payroll, Social Security, tax refunds, verified account-to-account transfers) don't require further documentation. Everything else — bonuses deposited by check, transfers from accounts you haven't disclosed, cash deposits, Venmo/Zelle transfers — needs a paper trail showing where it came from." },
+    { heading: "What Counts as a Large Deposit", tip: true, content: "The threshold depends on your loan program. Conventional (Fannie Mae) flags any single deposit over 50% of your monthly qualifying income — so if you earn $6,000/mo, any deposit over $3,000 triggers a review. FHA uses a different rule: any deposit over 1% of the sales price. On a $400k home, that's $4,000. VA follows a similar 'unusual deposit' standard, typically around 2% of the loan amount. Deposits that are clearly sourced on the statement (payroll, Social Security, tax refunds, verified account-to-account transfers) don't require further documentation. Everything else — bonuses deposited by check, transfers from accounts you haven't disclosed, cash deposits, Venmo/Zelle transfers — needs a paper trail showing where it came from." },
     { heading: "Reserves", content: "Reserves are the funds left over after your down payment and closing costs. Expressed in months of mortgage payments (PITIA: principal, interest, taxes, insurance, and HOA). Some programs require 2–6 months of reserves. More reserves = lower risk = better terms." },
   ]},
   { title: "Property & Real Estate", sections: [
@@ -1284,7 +1284,9 @@ function ClosingCosts({ navTarget }) {
 
 function BorrowerProfile({ navTarget }) {
   const [active, setActive] = useState(0);
+  const [expandedTips, setExpandedTips] = useState({});
   useEffect(() => { if (navTarget?.section === "profile" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
+  useEffect(() => { setExpandedTips({}); }, [active]);
   return (
     <section id="profile" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." />
@@ -1294,12 +1296,34 @@ function BorrowerProfile({ navTarget }) {
         ))}
       </div>
       <div style={{ maxWidth: 720, display: "flex", flexDirection: "column", gap: 16 }}>
-        {BORROWER_PROFILE[active].sections.map((s, i) => (
-          <div key={i} className="content-card" style={{ padding: "24px 28px" }}>
-            <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 8 }}>{s.heading}</h4>
-            <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{s.content}</p>
-          </div>
-        ))}
+        {BORROWER_PROFILE[active].sections.map((s, i) => {
+          if (s.tip) {
+            const isExpanded = !!expandedTips[i];
+            return (
+              <div key={i} style={{ background: P.cream, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0" }}>
+                <button
+                  onClick={() => setExpandedTips((prev) => ({ ...prev, [i]: !prev[i] }))}
+                  style={{ background: "none", border: "none", padding: 0, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: F.body, textAlign: "left" }}
+                >
+                  <span>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: P.text }}>{s.heading}</span>
+                  </span>
+                  <span style={{ fontSize: 11, color: P.gold, transition: "transform 0.2s", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", marginLeft: 12 }}>▼</span>
+                </button>
+                {isExpanded && (
+                  <p style={{ fontSize: 13, lineHeight: 1.65, color: P.text, fontWeight: 500, marginTop: 12 }}>{s.content}</p>
+                )}
+              </div>
+            );
+          }
+          return (
+            <div key={i} className="content-card" style={{ padding: "24px 28px" }}>
+              <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 8 }}>{s.heading}</h4>
+              <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{s.content}</p>
+            </div>
+          );
+        })}
       </div>
     </section>
   );
