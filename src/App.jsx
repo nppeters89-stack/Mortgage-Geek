@@ -4837,7 +4837,7 @@ export default function MortgageLandingPage() {
 // dismissible via the × button for users who tap it quickly.
 function WelcomeToast() {
   const isStandalone = useIsStandalone();
-  const STORAGE_KEY = "mg_welcomed";
+  const STORAGE_KEY = "mg_welcomed_pwa";
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
