@@ -4784,29 +4784,12 @@ function MainSite() {
   const skipScrollRestore = useRef(false);
   const skipTransition = useRef(false);
 
-  // Scroll-lock: freeze body in place while sidebar is open.
-  // Uses position:fixed technique — the only reliable cross-browser lock on
-  // iOS Safari and Android Chrome. preventDefault-on-touchmove is unreliable
-  // on modern iOS and can let scrolls through, letting the user drag the
-  // dimmed main content past its translated position.
+  // Scroll-lock: block ALL touch-scroll on iOS except within the sidebar.
+  // CSS overflow:hidden doesn't work on iOS Safari — must use JS preventDefault.
   useLayoutEffect(() => {
     if (mobileOpen) {
-      const scrollY = window.scrollY;
-      const body = document.body;
-      const prev = {
-        position: body.style.position,
-        top: body.style.top,
-        left: body.style.left,
-        right: body.style.right,
-        width: body.style.width,
-      };
-      body.style.position = "fixed";
-      body.style.top = `-${scrollY}px`;
-      body.style.left = "0";
-      body.style.right = "0";
-      body.style.width = "100%";
-      // Still block document-level touchmove outside sidebar as belt-and-suspenders
       const onTouchMove = (e) => {
+        // Allow scrolling inside the sidebar, block everywhere else
         const sidebar = document.querySelector(".sidebar");
         if (sidebar && sidebar.contains(e.target)) return;
         e.preventDefault();
@@ -4814,15 +4797,8 @@ function MainSite() {
       document.addEventListener("touchmove", onTouchMove, { passive: false });
       return () => {
         document.removeEventListener("touchmove", onTouchMove);
-        body.style.position = prev.position;
-        body.style.top = prev.top;
-        body.style.left = prev.left;
-        body.style.right = prev.right;
-        body.style.width = prev.width;
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
-        } else {
-          window.scrollTo(0, scrollY);
         }
       };
     }
