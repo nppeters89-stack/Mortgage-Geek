@@ -4930,27 +4930,12 @@ function MainSite() {
     };
   }, [mobileOpen]);
 
-  // Prevent overscroll bounce at page boundaries on mobile (reveals sidebar behind)
-  useEffect(() => {
-    if (!isMobile) return;
-    let startY = 0;
-    const onTouchStart = (e) => { startY = e.touches[0].clientY; };
-    const onTouchMove = (e) => {
-      // Allow scrolling inside the sidebar
-      const sidebar = document.querySelector(".sidebar");
-      if (sidebar && sidebar.contains(e.target)) return;
-      const dy = e.touches[0].clientY - startY;
-      const atTop = window.scrollY <= 0 && dy > 0;
-      const atBottom = (window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 1 && dy < 0;
-      if (atTop || atBottom) e.preventDefault();
-    };
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchmove", onTouchMove);
-    };
-  }, [isMobile]);
+  // Overscroll bounce is prevented via CSS `overscroll-behavior: none` on
+  // body and .main-content (see globalCSS). A prior JS implementation attached
+  // a non-passive touchmove listener to document, which froze scrolling on
+  // Android Chrome because it forces touchmove onto the JS main thread and
+  // disables compositor scrolling. CSS handles the same job natively on
+  // iOS Safari 16+ and all modern Android browsers.
 
   const handleNavigate = (id) => {
     const el = document.getElementById(id);
