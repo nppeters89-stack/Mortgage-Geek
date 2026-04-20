@@ -5006,7 +5006,7 @@ function MainSite() {
   }, []);
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
+    <div className="app-root" style={{ fontFamily: F.body, color: P.text, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
@@ -5127,11 +5127,15 @@ const globalCSS = `
   html.sidebar-locked,
   html.sidebar-locked body { overflow: hidden !important; height: 100% !important; }
 
+  /* App root: inherit html/body background (cream on desktop, navy on mobile).
+     Prevents a flash of cream showing behind the sidebar during fast swipes. */
+  .app-root { background: transparent; }
+
   @media (max-width: 900px) {
     html, body { background: #0F2530 !important; }
     body { overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; left: 0; width: 280px; height: 100vh; height: 100dvh; bottom: auto; }
+    .sidebar { transform: translateZ(0); padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; left: 0; width: 280px; height: 100vh; height: 100dvh; bottom: auto; }
     .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
