@@ -5120,7 +5120,7 @@ const globalCSS = `
     html, body { background: #0F2530 !important; }
     body { overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
-    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; bottom: 0; left: 0; width: 280px; }
+    .sidebar { transform: none; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; left: 0; width: 280px; height: 100vh; height: 100dvh; bottom: auto; }
     .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
