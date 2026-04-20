@@ -4784,12 +4784,14 @@ function MainSite() {
   const skipScrollRestore = useRef(false);
   const skipTransition = useRef(false);
 
-  // Scroll-lock: block ALL touch-scroll on iOS except within the sidebar.
-  // CSS overflow:hidden doesn't work on iOS Safari — must use JS preventDefault.
+  // Scroll-lock: when sidebar is open, add `sidebar-locked` class to <html>.
+  // CSS then applies overflow:hidden + height:100% to html/body so neither
+  // can scroll. preventDefault on document touchmove (outside the sidebar)
+  // is kept as belt-and-suspenders for iOS Safari.
   useLayoutEffect(() => {
     if (mobileOpen) {
+      document.documentElement.classList.add("sidebar-locked");
       const onTouchMove = (e) => {
-        // Allow scrolling inside the sidebar, block everywhere else
         const sidebar = document.querySelector(".sidebar");
         if (sidebar && sidebar.contains(e.target)) return;
         e.preventDefault();
@@ -4797,6 +4799,7 @@ function MainSite() {
       document.addEventListener("touchmove", onTouchMove, { passive: false });
       return () => {
         document.removeEventListener("touchmove", onTouchMove);
+        document.documentElement.classList.remove("sidebar-locked");
         if (skipScrollRestore.current) {
           skipScrollRestore.current = false;
         }
@@ -5116,6 +5119,14 @@ const globalCSS = `
   .calc-grid > *:last-child { flex: 1 1 360px; }
 
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
+
+  /* When sidebar is open, freeze document scroll by constraining html/body
+     to viewport height with overflow hidden. Applied via JS class toggle on
+     <html>. Scroll position is preserved because overflow:hidden does not
+     reset scrollTop on the root scroller. */
+  html.sidebar-locked,
+  html.sidebar-locked body { overflow: hidden !important; height: 100% !important; }
+
   @media (max-width: 900px) {
     html, body { background: #0F2530 !important; }
     body { overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
