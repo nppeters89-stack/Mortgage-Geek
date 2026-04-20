@@ -5120,12 +5120,14 @@ const globalCSS = `
 
   section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
 
-  /* When sidebar is open, freeze document scroll by constraining html/body
-     to viewport height with overflow hidden. Applied via JS class toggle on
-     <html>. Scroll position is preserved because overflow:hidden does not
-     reset scrollTop on the root scroller. */
+  /* When sidebar is open, freeze document scroll via overflow:hidden.
+     touch-action:none prevents iOS touch-scroll from driving the root
+     scroller. We intentionally DO NOT set height:100% here — doing so
+     reflows html/body and causes iOS to visually jump the viewport back
+     to the top of the page while locked. overflow:hidden alone locks
+     scrolling while preserving the current scroll position. */
   html.sidebar-locked,
-  html.sidebar-locked body { overflow: hidden !important; height: 100% !important; }
+  html.sidebar-locked body { overflow: hidden !important; touch-action: none !important; }
 
   /* App root: inherit html/body background (cream on desktop, navy on mobile).
      Prevents a flash of cream showing behind the sidebar during fast swipes. */
