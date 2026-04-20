@@ -2026,7 +2026,7 @@ function AboutPage() {
         {/* Bio */}
         <div style={{ maxWidth: 640, marginBottom: 48 }}>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            For twelve years, I sat at the sales desk in new construction model homes — the guy families came to when the house they'd just fallen in love with was contingent on a loan I had to make work. Some weeks I closed five. Some weeks I had to tell someone no and help them understand why, then build a path to yes.
+            For twelve years, I sat at the sales desk in new construction model homes — the person families walked up to after they'd fallen in love with a house, needing someone to turn that feeling into a set of numbers that worked. Some of those conversations ended in approvals. Others ended with me explaining why the answer was "not yet," and what we could do about it.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
             Builder lending teaches you the edges of the mortgage world in a way retail banking never will. The first-time buyer with a 580 credit score and a real story behind it. The VA borrower who's been turned down more than once by lenders who didn't understand the file. The self-employed borrower whose tax returns look nothing like a W-2 but who's sitting on strong cash flow. I've structured approvals for all of them — not by bending rules, but by understanding which rules actually apply and which are just lazy overlays.
