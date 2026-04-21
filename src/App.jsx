@@ -1413,7 +1413,7 @@ function MortgageTypes({ navTarget }) {
                 key={m.name}
                 onClick={() => setActive(i)}
                 className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}
-                style={{ flex: "1 1 0", minWidth: 90 }}
+                style={{ flex: "1 1 0", minWidth: 100, padding: "9px 8px" }}
               >
                 {m.name}
               </button>
@@ -1433,7 +1433,7 @@ function MortgageTypes({ navTarget }) {
                   key={m.name}
                   onClick={() => setActive(i)}
                   className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}
-                  style={{ flex: "1 1 0", minWidth: 90 }}
+                  style={{ flex: "1 1 0", minWidth: 100, padding: "9px 8px" }}
                 >
                   {m.name}
                 </button>
