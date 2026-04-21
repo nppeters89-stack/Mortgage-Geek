@@ -2334,13 +2334,13 @@ function AboutPage() {
             For twelve years, I worked the sales desk in new construction model homes. I was the person families approached after falling in love with a house — the one responsible for turning that excitement into numbers that actually worked. Some conversations ended in approvals. Others required me to gently explain why the answer was "not yet," and what steps we could take to change that.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            Builder lending teaches you the edges of the mortgage world in a way retail banking never will. The first-time buyer with a 580 credit score and a real story behind it. The VA borrower who's been turned down more than once by lenders who didn't understand the file. The self-employed borrower whose tax returns look nothing like a W-2 but who's sitting on strong cash flow. I've structured approvals for all of them — not by bending rules, but by understanding which rules actually apply and which are just lazy overlays.
+            Builder lending taught me the real edges of the mortgage world in a way retail banking never could. Over the years, I've assisted countless homebuyers of all types and navigated virtually every loan scenario imaginable. In every case, I didn't bend the rules. I simply understood which ones actually applied and which were just unnecessary overlays.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
             The Mortgage Geek exists because most mortgage websites are either generic rate-bait or thinly disguised lead forms. Neither respects the borrower. This site is the opposite bet: give you the real information, the real tools, and a real human to text when you're ready. No drip campaigns. No "apply now" before you know what you're applying for. Just a plain-English answer to whatever you need.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray }}>
-            If you're anywhere in the mortgage process — from "I'm just curious what I can afford" to "I have an accepted offer and my current lender just went silent" — shoot me a text. That's not a marketing promise. That's the number at the bottom of this page buzzing on my phone.
+            If you're anywhere in the mortgage process — whether you're just curious about what you can afford or you've already accepted an offer and your current lender has gone silent — feel free to text me. I'm happy to help, no matter what stage you're at.
           </p>
         </div>
 
