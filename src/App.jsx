@@ -762,7 +762,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 }}
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
               >
-                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon}
+                </span>
                 <span>{item.label}</span>
               </button>
             ))}
@@ -778,7 +780,9 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
                 style={{ opacity: 0.82 }}
               >
-                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0 }}>{item.icon}</span>
+                <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon}
+                </span>
                 <span>{item.label}</span>
               </button>
             ))}
@@ -4401,7 +4405,7 @@ function CalculatorPage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
             Mortgage Calculator
             <MortgageCalcIcon size={32} />
           </h1>
