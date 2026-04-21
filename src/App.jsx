@@ -710,6 +710,23 @@ const NAV_TOPICS = [
     { label: "USDA", id: "types", step: 3 },
     { label: "Jumbo", id: "types", step: 4 },
   ]},
+  { id: "structure", label: "Mortgage Structure", icon: "🏗", subs: [
+    { label: "Loan Term", id: "structure", step: 0 },
+    { label: "Fixed vs. ARM", id: "structure", step: 1 },
+    { label: "Amortization", id: "structure", step: 2 },
+  ]},
+  { id: "profile", label: "Borrower Profile", icon: "👤", subs: [
+    { label: "Credit", id: "profile", step: 0 },
+    { label: "Income & Employment", id: "profile", step: 1 },
+    { label: "Assets & Reserves", id: "profile", step: 2 },
+    { label: "Property & Real Estate", id: "profile", step: 3 },
+  ]},
+  { id: "rates", label: "Interest Rates", icon: "📈", subs: [
+    { label: "What Drives Rates", id: "rates", step: 0 },
+    { label: "Rate Options & Points", id: "rates", step: 1 },
+    { label: "Live Rates", id: "rates", step: 2 },
+    { label: "APR", id: "rates", step: 3 },
+  ]},
   { id: "costs", label: "Closing Costs", icon: "🧾", subs: [
     { label: "All About", id: "costs", step: "top" },
     { label: "Lender Fees", id: "costs", step: 0 },
@@ -718,23 +735,6 @@ const NAV_TOPICS = [
     { label: "Government Fees", id: "costs", step: 3 },
     { label: "Prepaids & Escrow", id: "costs", step: 4 },
     { label: "TRID Fee Tolerances", id: "costs", step: "trid" },
-  ]},
-  { id: "profile", label: "Borrower Profile", icon: "👤", subs: [
-    { label: "Credit", id: "profile", step: 0 },
-    { label: "Income & Employment", id: "profile", step: 1 },
-    { label: "Assets & Reserves", id: "profile", step: 2 },
-    { label: "Property & Real Estate", id: "profile", step: 3 },
-  ]},
-  { id: "structure", label: "Mortgage Structure", icon: "🏗", subs: [
-    { label: "Loan Term", id: "structure", step: 0 },
-    { label: "Fixed vs. ARM", id: "structure", step: 1 },
-    { label: "Amortization", id: "structure", step: 2 },
-  ]},
-  { id: "rates", label: "Interest Rates", icon: "📈", subs: [
-    { label: "What Drives Rates", id: "rates", step: 0 },
-    { label: "Rate Options & Points", id: "rates", step: 1 },
-    { label: "Live Rates", id: "rates", step: 2 },
-    { label: "APR", id: "rates", step: 3 },
   ]},
   { id: "next-steps", label: "Get Started", icon: "🚀" },
 ];
