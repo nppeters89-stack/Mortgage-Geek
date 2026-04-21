@@ -4463,6 +4463,11 @@ function CalculatorPage() {
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
+  const [extraConfig, setExtraConfig] = useState({});
+  const getExtraConfig = (programName) => extraConfig[programName] || { enabled: false, strategy: "monthly", amount: 0 };
+  const updateExtraConfig = (programName, updates) => {
+    setExtraConfig((prev) => ({ ...prev, [programName]: { ...getExtraConfig(programName), ...updates } }));
+  };
   useEffect(() => { setDownDollarOverride(null); }, [homePrice]); // reset override when price changes
 
   const handleDownPctChange = (v) => { setDownPct(v); setDownDollarOverride(null); };
@@ -4886,6 +4891,121 @@ function CalculatorPage() {
 
                   {/* Note */}
                   <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", fontStyle: "italic" }}>{prog.note}</p>
+
+                  {/* Pay it off faster */}
+                  {(() => {
+                    const cfg = getExtraConfig(prog.name);
+                    const biweeklyEquivalent = Math.round(prog.pi / 12);
+                    return (
+                      <div style={{ marginTop: 12 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); updateExtraConfig(prog.name, { enabled: !cfg.enabled }); }}
+                          style={{
+                            width: "100%",
+                            background: cfg.enabled ? prog.color : P.cream,
+                            color: cfg.enabled ? "#fff" : P.text,
+                            border: `1px solid ${cfg.enabled ? prog.color : P.creamDark}`,
+                            borderRadius: 8,
+                            padding: "10px 12px",
+                            fontSize: 12,
+                            fontWeight: 600,
+                            fontFamily: F.body,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                          }}
+                        >
+                          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 14 }}>⚡</span>
+                            <span>Pay it off faster</span>
+                          </span>
+                          <span style={{ fontSize: 14, opacity: 0.7 }}>{cfg.enabled ? "▾" : "▸"}</span>
+                        </button>
+
+                        {cfg.enabled && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ marginTop: 10, padding: "14px 14px 12px", background: P.cream, borderRadius: 8, border: `1px solid ${P.creamDark}` }}
+                          >
+                            <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 8 }}>Strategy</label>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 6, marginBottom: 12 }}>
+                              {[
+                                { key: "monthly", label: "Monthly" },
+                                { key: "annual", label: "Annual" },
+                                { key: "biweekly", label: "Bi-weekly" },
+                              ].map((s) => {
+                                const active = cfg.strategy === s.key;
+                                return (
+                                  <button
+                                    key={s.key}
+                                    onClick={(e) => { e.stopPropagation(); updateExtraConfig(prog.name, { strategy: s.key }); }}
+                                    style={{
+                                      background: active ? prog.color : "#fff",
+                                      color: active ? "#fff" : P.text,
+                                      border: `1px solid ${active ? prog.color : P.creamDark}`,
+                                      borderRadius: 6,
+                                      padding: "8px 4px",
+                                      fontSize: 11,
+                                      fontWeight: 600,
+                                      fontFamily: F.body,
+                                      cursor: "pointer",
+                                      transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                                    }}
+                                  >
+                                    {s.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {cfg.strategy === "biweekly" ? (
+                              <div style={{ background: "#fff", borderRadius: 6, padding: "10px 12px", border: `1px solid ${P.creamDark}` }}>
+                                <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
+                                  Paying half your P&I every two weeks results in 26 half-payments (13 full) per year — one extra monthly payment, split into <strong style={{ color: P.text }}>{fmt(biweeklyEquivalent)}/mo</strong> equivalent.
+                                </p>
+                              </div>
+                            ) : (
+                              <div>
+                                <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>
+                                  Extra {cfg.strategy === "annual" ? "per year" : "per month"}
+                                </label>
+                                <div style={{ position: "relative" }}>
+                                  <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: P.warmGrayLight, fontWeight: 600 }}>$</span>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={cfg.amount || ""}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => { e.stopPropagation(); updateExtraConfig(prog.name, { amount: parseFloat(e.target.value) || 0 }); }}
+                                    placeholder="0"
+                                    style={{
+                                      width: "100%",
+                                      background: "#fff",
+                                      border: `1px solid ${P.creamDark}`,
+                                      borderRadius: 6,
+                                      padding: "10px 12px 10px 24px",
+                                      fontSize: 13,
+                                      fontFamily: F.body,
+                                      fontWeight: 600,
+                                      color: P.text,
+                                      outline: "none",
+                                      boxSizing: "border-box",
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 10, marginBottom: 0, lineHeight: 1.5, fontStyle: "italic", textAlign: "center" }}>
+                              Payoff projection coming soon — math wiring in Phase 3.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* APR */}
                   <div style={{ marginTop: 12, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
