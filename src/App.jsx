@@ -439,6 +439,78 @@ function CompareIcon({ size = 24, variant = "navy", style = {} }) {
   );
 }
 
+function PreQualIcon({ size = 24, variant = "navy", style = {} }) {
+  // Body color flips by variant — gauge arc, symbols, and tick mark inherit
+  const arcColor = variant === "cream" ? P.cream : P.navy;
+  // Gold elements (needle, hub) stay gold in both variants — they're the signature accent
+  const showSymbols = size >= 40;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 72 72"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      {/* Gauge arc */}
+      <path
+        d="M 8 50 A 28 28 0 0 1 64 50"
+        stroke={arcColor}
+        strokeWidth={size <= 22 ? 6 : size <= 32 ? 5 : 4}
+        fill="none"
+        strokeLinecap="round"
+      />
+      {/* ¢ on the lower-left (only at 40px+) */}
+      {showSymbols && (
+        <text
+          x="16"
+          y="48"
+          textAnchor="middle"
+          fontFamily="'DM Sans', sans-serif"
+          fontSize="13"
+          fontWeight="700"
+          fill={arcColor}
+        >
+          ¢
+        </text>
+      )}
+      {/* Top tick mark (only at 40px+) */}
+      {showSymbols && (
+        <line
+          x1="36" y1="22" x2="36" y2="17"
+          stroke={arcColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      )}
+      {/* $ on the lower-right (only at 40px+) */}
+      {showSymbols && (
+        <text
+          x="56"
+          y="48"
+          textAnchor="middle"
+          fontFamily="'DM Sans', sans-serif"
+          fontSize="14"
+          fontWeight="700"
+          fill={arcColor}
+        >
+          $
+        </text>
+      )}
+      {/* Gold needle pointing toward $ */}
+      <line
+        x1="36" y1="50" x2="52" y2="30"
+        stroke={P.gold}
+        strokeWidth={size <= 22 ? 6 : size <= 32 ? 5 : 3.5}
+        strokeLinecap="round"
+      />
+      {/* Gold hub */}
+      <circle cx="36" cy="50" r={size <= 22 ? 6 : size <= 32 ? 5 : 4} fill={P.gold} />
+    </svg>
+  );
+}
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const PRE_CONTRACT_STEPS = [
@@ -624,7 +696,7 @@ const NAV_TOPICS = [
 
 const NAV_TOOLS = [
   { id: "calculator", label: "Mortgage Calculator", icon: "__CALC_ICON__", href: "/calculator" },
-  { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
+  { id: "prequal", label: "Pre-Qual Simulator", icon: "__PREQUAL_ICON__", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "💰", href: "/cash-to-close" },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
@@ -739,7 +811,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
+                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
                     </span>
                     <span>{item.label}</span>
                   </span>
@@ -789,7 +861,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -807,7 +879,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 style={{ opacity: 0.82 }}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -1995,13 +2067,13 @@ function MobileToolbar({ hrefOverrides = {} }) {
         <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
           {[
             { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
-            { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
+            { icon: "__PREQUAL_ICON__", label: "Pre-Qual", href: "/prequal" },
             { icon: "__COMPARE_ICON__", label: "Compare", href: "/compare" },
             { icon: "__CALC_ICON__", label: "Calculator", href: "/calculator" },
           ].map((t) => (
             <a key={t.href} href={hrefOverrides[t.href] || t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
               <span style={{ fontSize: 22, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon}
+                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={22} variant="cream" /> : t.icon}
               </span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
             </a>
@@ -3425,7 +3497,9 @@ function NextSteps() {
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
                   textDecoration: "none", color: "rgba(255,255,255,0.7)",
                 }}>
-                  <span style={{ fontSize: 20 }}>🎯</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 24 }}>
+                    <PreQualIcon size={22} variant="cream" />
+                  </span>
                   <div>
                     <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>What can I afford?</span>
                     <span style={{ display: "block", fontSize: 11, opacity: 0.5 }}>Pre-Qual Simulator</span>
@@ -3463,7 +3537,7 @@ function ToolsCTA() {
       desc: "Same house, three programs. Compare Conventional, FHA, and VA payment breakdowns with live rates.",
     },
     {
-      icon: "🎯", title: "Pre-Qual Simulator", href: "/prequal",
+      icon: "__PREQUAL_ICON__", title: "Pre-Qual Simulator", href: "/prequal",
       desc: "Enter your income and debts — see what you can afford under each loan program with real DTI limits.",
     },
     {
@@ -3490,14 +3564,14 @@ function ToolsCTA() {
             >
               <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
                 <span style={{ fontSize: 36, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, height: 44 }}>
-                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon}
+                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon}
                 </span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff", display: "block" }}>{t.title}</span>
               </div>
               <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray, flex: 1 }}>{t.desc}</p>
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 13, fontWeight: 600, color: P.gold }}>
-                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon} →
+                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={14} variant="navy" /> : t.icon} →
                 </span>
               </div>
             </a>
@@ -3752,7 +3826,10 @@ function PreQualPage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Pre-Qual Simulator 🎯</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            Pre-Qual Simulator
+            <PreQualIcon size={32} variant="navy" />
+          </h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Enter your income and debts. See what you qualify for under each loan program — with their real DTI limits and mortgage insurance rules.</p>
         </div>
 
