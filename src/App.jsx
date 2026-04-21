@@ -45,7 +45,17 @@ const SHARED_STATE_TAX_RATES = {
   AZ: { name: "Arizona", rate: 0.62, metros: [
     { name: "Phoenix/Maricopa", rate: 0.64 }, { name: "Tucson/Pima", rate: 0.93 },
   ]},
-  AR: { name: "Arkansas", rate: 0.62 },
+  AR: { name: "Arkansas", rate: 0.87, metros: [
+    { name: "Benton County", rate: 1.03 },
+    { name: "Craighead County", rate: 0.81 },
+    { name: "Faulkner County", rate: 0.86 },
+    { name: "Greene County", rate: 0.75 },
+    { name: "Lonoke County", rate: 0.72 },
+    { name: "Pulaski County", rate: 1.20 },
+    { name: "Saline County", rate: 0.87 },
+    { name: "Washington County", rate: 0.96 },
+    { name: "White County", rate: 0.61 },
+  ]},
   CA: { name: "California", rate: 0.71, metros: [
     { name: "Los Angeles", rate: 0.76, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
     { name: "San Francisco", rate: 0.68, limits: { fha: 1149825, conv: 1149825, va: 1149825 } },
@@ -185,7 +195,7 @@ const SHARED_STATE_TAX_RATES = {
 // Used by CashToClosePage. Rates are expressed as decimals (e.g., 0.0095 = 0.95%)
 // because they're multiplied directly by home price in the reserve math.
 const CASH_STATE_DEFAULT_TAX_RATES = {
-  AL:0.0040, AK:0.0117, AZ:0.0066, AR:0.0065, CA:0.0073, CO:0.0051, CT:0.0214, DE:0.0061, DC:0.0062,
+  AL:0.0040, AK:0.0117, AZ:0.0066, AR:0.0087, CA:0.0073, CO:0.0051, CT:0.0214, DE:0.0061, DC:0.0062,
   FL:0.0091, GA:0.0090, HI:0.0028, ID:0.0069, IL:0.0223, IN:0.0085, IA:0.0157, KS:0.0141, KY:0.0085,
   LA:0.0055, ME:0.0136, MD:0.0109, MA:0.0123, MI:0.0154, MN:0.0112, MS:0.0110, MO:0.0097, MT:0.0084,
   NE:0.0173, NV:0.0060, NH:0.0218, NJ:0.0249, NM:0.0080, NY:0.0173, NC:0.0084, ND:0.0098, OH:0.0156,
@@ -198,7 +208,7 @@ const CASH_STATE_METROS = {
   TN: { metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
   GA: { metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
   MS: { metros: { "DeSoto County": 0.0110, "Forrest County": 0.0155, "George County": 0.0080, "Harrison County": 0.0101, "Hinds County": 0.0149, "Jackson County": 0.0117, "Lamar County": 0.0109, "Madison County": 0.0102, "Marshall County": 0.0106, "Rankin County": 0.0112, "All other counties": 0.0110 } },
-  AR: { metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
+  AR: { metros: { "Benton County": 0.0103, "Craighead County": 0.0081, "Faulkner County": 0.0086, "Greene County": 0.0075, "Lonoke County": 0.0072, "Pulaski County": 0.0120, "Saline County": 0.0087, "Washington County": 0.0096, "White County": 0.0061, "All other counties": 0.0087 } },
   KY: { metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
   AL: { metros: { "Birmingham/Jefferson": 0.0058, "Madison/Huntsville": 0.0046, "Mobile County": 0.0050, "Montgomery County": 0.0045, "Baldwin County": 0.0033, "All other counties": 0.0040 } },
   FL: { metros: { "Miami-Dade": 0.0102, "Broward County": 0.0108, "Palm Beach": 0.0098, "Orange/Orlando": 0.0095, "Hillsborough/Tampa": 0.0099, "Duval/Jacksonville": 0.0094, "All other counties": 0.0091 } },
