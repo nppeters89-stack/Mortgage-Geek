@@ -413,6 +413,32 @@ function MortgageCalcIcon({ size = 24, style = {} }) {
   );
 }
 
+function CompareIcon({ size = 24, variant = "navy", style = {} }) {
+  const ringColor = variant === "cream" ? P.cream : P.navy;
+  // Slightly thicker stroke at very small sizes to maintain visibility after browser downscaling
+  const strokeWidth = size <= 22 ? 5 : 3.5;
+  const dotRadius = size <= 22 ? 5.5 : 4.5;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 72 72"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      {/* Top circle */}
+      <circle cx="36" cy="26" r="22" fill="none" stroke={ringColor} strokeWidth={strokeWidth} />
+      {/* Bottom-left circle */}
+      <circle cx="24" cy="46" r="22" fill="none" stroke={ringColor} strokeWidth={strokeWidth} />
+      {/* Bottom-right circle */}
+      <circle cx="48" cy="46" r="22" fill="none" stroke={ringColor} strokeWidth={strokeWidth} />
+      {/* Gold dot at centroid */}
+      <circle cx="36" cy="39" r={dotRadius} fill={P.gold} />
+    </svg>
+  );
+}
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const PRE_CONTRACT_STEPS = [
@@ -599,7 +625,7 @@ const NAV_TOPICS = [
 const NAV_TOOLS = [
   { id: "calculator", label: "Mortgage Calculator", icon: "__CALC_ICON__", href: "/calculator" },
   { id: "prequal", label: "Pre-Qual Simulator", icon: "🎯", href: "/prequal" },
-  { id: "compare", label: "Loan Comparison", icon: "⚖️", href: "/compare" },
+  { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "💰", href: "/cash-to-close" },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "glossary", label: "Jargon Decoder", icon: "📖" },
@@ -713,7 +739,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon}
+                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
                     </span>
                     <span>{item.label}</span>
                   </span>
@@ -763,7 +789,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -781,7 +807,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 style={{ opacity: 0.82 }}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -1970,12 +1996,12 @@ function MobileToolbar({ hrefOverrides = {} }) {
           {[
             { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
             { icon: "🎯", label: "Pre-Qual", href: "/prequal" },
-            { icon: "⚖️", label: "Compare", href: "/compare" },
+            { icon: "__COMPARE_ICON__", label: "Compare", href: "/compare" },
             { icon: "__CALC_ICON__", label: "Calculator", href: "/calculator" },
           ].map((t) => (
             <a key={t.href} href={hrefOverrides[t.href] || t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
               <span style={{ fontSize: 22, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} /> : t.icon}
+                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon}
               </span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
             </a>
@@ -2387,13 +2413,18 @@ function ComparePage() {
 
         <div className="no-print" style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side by Side</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Loan Comparison Tool ⚖️</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            Loan Comparison Tool
+            <CompareIcon size={32} variant="navy" />
+          </h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Save up to 3 scenarios from the calculator and compare them side by side. Your scenarios are saved on this device.</p>
         </div>
 
         {scenarios.length === 0 ? (
           <div className="content-card" style={{ padding: "48px 32px", textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-            <span style={{ fontSize: 48, display: "block", marginBottom: 12 }}>⚖️</span>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+              <CompareIcon size={56} variant="navy" />
+            </div>
             <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 8 }}>No scenarios saved yet</h3>
             <p style={{ fontSize: 14, color: P.warmGray, marginBottom: 24, lineHeight: 1.6 }}>
               Head to the calculator, build a scenario, select a loan program, and tap "Save to Comparison." Come back here to see them stacked side by side.
@@ -3436,7 +3467,7 @@ function ToolsCTA() {
       desc: "Enter your income and debts — see what you can afford under each loan program with real DTI limits.",
     },
     {
-      icon: "⚖️", title: "Loan Comparison", href: "/compare",
+      icon: "__COMPARE_ICON__", title: "Loan Comparison", href: "/compare",
       desc: "Save up to 3 scenarios from the calculator and stack them side by side to find your best option.",
     },
     {
@@ -3459,14 +3490,14 @@ function ToolsCTA() {
             >
               <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
                 <span style={{ fontSize: 36, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, height: 44 }}>
-                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} /> : t.icon}
+                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon}
                 </span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff", display: "block" }}>{t.title}</span>
               </div>
               <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray, flex: 1 }}>{t.desc}</p>
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 13, fontWeight: 600, color: P.gold }}>
-                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon} →
+                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon} →
                 </span>
               </div>
             </a>
@@ -4728,7 +4759,10 @@ function CalculatorPage() {
                 boxShadow: selectedProg ? "0 4px 16px rgba(27,58,75,0.25)" : "none",
                 transition: "all 0.2s",
               }}>
-                ⚖️ {selectedProg ? `Save ${selectedProg.name} to Loan Comparison` : "Select a card above to save"}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
+                  <CompareIcon size={18} variant="cream" />
+                  {selectedProg ? `Save ${selectedProg.name} to Loan Comparison` : "Select a card above to save"}
+                </span>
               </button>
               {saveToast && (
                 <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sage }}>{saveToast.msg}</p>
