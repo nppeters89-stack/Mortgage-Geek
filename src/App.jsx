@@ -2334,7 +2334,7 @@ function AboutPage() {
             For twelve years, I worked the sales desk in new construction model homes. I was the person families approached after falling in love with a house — the one responsible for turning that excitement into numbers that actually worked. Some conversations ended in approvals. Others required me to gently explain why the answer was "not yet," and what steps we could take to change that.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            Builder lending taught me the real edges of the mortgage world in a way retail banking never could. Over the years, I've assisted countless homebuyers of all types and navigated virtually every loan scenario imaginable. In every case, I didn't bend the rules. I simply understood which ones actually applied and which were just unnecessary overlays.
+            Builder lending taught me the real edges of the mortgage world in a way retail banking never could. Over the years, I've assisted countless homebuyers of all types and navigated virtually every loan scenario imaginable. I learned how to structure deals that were favorable and perfectly tailored to each customer's specific needs and situation.
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
             The Mortgage Geek exists because most mortgage websites are either generic rate-bait or thinly disguised lead forms. Neither respects the borrower. This site is the opposite bet: give you the real information, the real tools, and a real human to text when you're ready. No drip campaigns. No "apply now" before you know what you're applying for. Just a plain-English answer to whatever you need.
