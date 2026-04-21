@@ -278,26 +278,125 @@ const ALL_STATES_LIST = [
 
 const fmt = (n) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
-function generateAmortData(principal, annualRate, years) {
+function generateAmortData(principal, annualRate, years, options = {}) {
+  // Backward compatible: when called without options, behavior is identical to before.
+  // Options:
+  //   strategy: "none" | "monthly" | "annual" | "biweekly" (default "none")
+  //   extraAmount: dollars applied monthly or annually (per strategy)
+  //   monthlyMI, miMonths, homeValue, miDropoffType: used to compute MI savings when extra payments
+  //     drop LTV below 78% (Conv) or simply shorten the term (FHA life-of-loan).
+  const {
+    strategy = "none",
+    extraAmount = 0,
+    monthlyMI = 0,
+    miMonths = 0,
+    homeValue = 0,
+    miDropoffType = "none",
+  } = options;
+
   const monthlyRate = annualRate / 100 / 12;
   const n = years * 12;
-  const monthly = monthlyRate > 0
+  const baseMonthly = monthlyRate > 0
     ? (principal * (monthlyRate * Math.pow(1 + monthlyRate, n))) / (Math.pow(1 + monthlyRate, n) - 1)
     : principal / n;
+
+  // Bi-weekly collapses to "one extra monthly payment per year", spread across 12 months.
+  // Annual P&I impact is identical to true 26-half-payment bi-weekly.
+  const effectiveMonthlyExtra =
+    strategy === "monthly" ? extraAmount :
+    strategy === "biweekly" ? baseMonthly / 12 :
+    0;
+  const annualExtraOnce = strategy === "annual" ? extraAmount : 0;
+
   let balance = principal;
   const data = [];
-  for (let yr = 1; yr <= years; yr++) {
-    let yearInterest = 0, yearPrincipal = 0;
-    for (let m = 0; m < 12; m++) {
-      const intPmt = balance * monthlyRate;
-      const prinPmt = monthly - intPmt;
-      yearInterest += intPmt;
-      yearPrincipal += prinPmt;
-      balance -= prinPmt;
+  let totalInterestPaid = 0;
+  let payoffMonth = null;
+  let miEndMonth = null;
+  let miPaidTotal = 0;
+
+  const maxMonths = years * 12;
+  let yearInterest = 0;
+  let yearPrincipal = 0;
+
+  for (let mIdx = 0; mIdx < maxMonths && balance > 0.01; mIdx++) {
+    const monthNumber = mIdx + 1;
+    const yr = Math.floor(mIdx / 12) + 1;
+    const monthInYear = mIdx % 12;
+
+    const intPmt = balance * monthlyRate;
+    let prinPmt = baseMonthly - intPmt + effectiveMonthlyExtra;
+
+    if (annualExtraOnce > 0 && monthInYear === 11) {
+      prinPmt += annualExtraOnce;
     }
-    data.push({ year: yr, principal: Math.round(yearPrincipal), interest: Math.round(yearInterest), balance: Math.max(0, Math.round(balance)) });
+
+    if (prinPmt > balance) prinPmt = balance;
+
+    balance -= prinPmt;
+    totalInterestPaid += intPmt;
+    yearInterest += intPmt;
+    yearPrincipal += prinPmt;
+
+    // MI tracking — stop counting MI once it drops off
+    if (miEndMonth === null && miDropoffType !== "none") {
+      let miStillActive = true;
+      if (miDropoffType === "ltv" && homeValue > 0) {
+        // Conv PMI auto-drops at 78% LTV of original value (HPA 1998)
+        if (balance / homeValue <= 0.78) {
+          miStillActive = false;
+          miEndMonth = monthNumber;
+        }
+      } else if (miDropoffType === "term") {
+        if (monthNumber > miMonths) {
+          miStillActive = false;
+          miEndMonth = monthNumber;
+        }
+      }
+      if (miStillActive) {
+        miPaidTotal += monthlyMI;
+      }
+    }
+
+    if (balance <= 0.01 && payoffMonth === null) {
+      payoffMonth = monthNumber;
+    }
+
+    // Close out the year record at month 12 or on payoff — whichever comes first
+    if (monthInYear === 11 || balance <= 0.01) {
+      data.push({
+        year: yr,
+        principal: Math.round(yearPrincipal),
+        interest: Math.round(yearInterest),
+        balance: Math.max(0, Math.round(balance)),
+      });
+      yearInterest = 0;
+      yearPrincipal = 0;
+    }
   }
-  return { data, monthly };
+
+  if (payoffMonth === null) payoffMonth = maxMonths;
+  if (miEndMonth === null && miDropoffType !== "none") {
+    miEndMonth = payoffMonth;
+  }
+
+  return {
+    data,
+    monthly: baseMonthly,
+    payoffMonth,
+    totalInterest: Math.round(totalInterestPaid),
+    miEndMonth,
+    miPaidTotal: Math.round(miPaidTotal),
+  };
+}
+
+function formatPayoff(months) {
+  if (!months || months <= 0) return "—";
+  const yrs = Math.floor(months / 12);
+  const mos = months % 12;
+  if (yrs === 0) return mos + " mo";
+  if (mos === 0) return yrs + " yr";
+  return yrs + " yr " + mos + " mo";
 }
 
 // Calculate APR per Reg Z Appendix J using bisection method on a variable payment stream.
