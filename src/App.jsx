@@ -97,7 +97,7 @@ const SHARED_STATE_TAX_RATES = {
     { name: "Minneapolis/Hennepin", rate: 1.18 }, { name: "St Paul/Ramsey", rate: 1.24 },
   ]},
   MS: { name: "Mississippi", rate: 1.10, metros: [
-    { name: "DeSoto County", rate: 0.80 },
+    { name: "DeSoto County", rate: 1.10 },
     { name: "Forrest County", rate: 1.55 },
     { name: "George County", rate: 0.80 },
     { name: "Harrison County", rate: 1.01 },
@@ -197,7 +197,7 @@ const CASH_STATE_DEFAULT_TAX_RATES = {
 const CASH_STATE_METROS = {
   TN: { metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
   GA: { metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
-  MS: { metros: { "DeSoto County": 0.0080, "Forrest County": 0.0155, "George County": 0.0080, "Harrison County": 0.0101, "Hinds County": 0.0149, "Jackson County": 0.0117, "Lamar County": 0.0109, "Madison County": 0.0102, "Marshall County": 0.0106, "Rankin County": 0.0112, "All other counties": 0.0110 } },
+  MS: { metros: { "DeSoto County": 0.0110, "Forrest County": 0.0155, "George County": 0.0080, "Harrison County": 0.0101, "Hinds County": 0.0149, "Jackson County": 0.0117, "Lamar County": 0.0109, "Madison County": 0.0102, "Marshall County": 0.0106, "Rankin County": 0.0112, "All other counties": 0.0110 } },
   AR: { metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
   KY: { metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
   AL: { metros: { "Birmingham/Jefferson": 0.0058, "Madison/Huntsville": 0.0046, "Mobile County": 0.0050, "Montgomery County": 0.0045, "Baldwin County": 0.0033, "All other counties": 0.0040 } },
