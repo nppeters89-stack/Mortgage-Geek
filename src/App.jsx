@@ -5350,10 +5350,10 @@ function MainSite() {
         <PreContract navTarget={navTarget} />
         <ActiveLoanProcess navTarget={navTarget} />
         <MortgageTypes navTarget={navTarget} />
-        <ClosingCosts navTarget={navTarget} />
-        <BorrowerProfile navTarget={navTarget} />
         <MortgageStructure navTarget={navTarget} />
+        <BorrowerProfile navTarget={navTarget} />
         <InterestRates navTarget={navTarget} />
+        <ClosingCosts navTarget={navTarget} />
         <NextSteps />
         <ToolsCTA />
         <PreApprovalChecklist />
