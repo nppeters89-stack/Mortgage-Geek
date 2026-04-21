@@ -511,6 +511,51 @@ function PreQualIcon({ size = 24, variant = "navy", style = {} }) {
   );
 }
 
+function CashToCloseIcon({ size = 24, variant = "navy", style = {} }) {
+  // Door body color flips by variant
+  const doorColor = variant === "cream" ? P.cream : P.navy;
+  // Inner panel uses a slightly darker shade of the body color for depth
+  const panelColor = variant === "cream" ? P.creamDark : P.navyDark;
+  // Gold elements ($ and knob) stay gold in both variants
+  const showDetails = size >= 28;
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 72 72"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      {/* Door silhouette with rounded top */}
+      <path
+        d="M 18 12 Q 18 8 22 8 L 50 8 Q 54 8 54 12 L 54 64 L 18 64 Z"
+        fill={doorColor}
+      />
+      {/* Inner panel (only at 28px+) */}
+      {showDetails && (
+        <rect x="22" y="14" width="28" height="46" rx="2" fill={panelColor} />
+      )}
+      {/* Gold $ — sized differently based on whether the panel is showing */}
+      <text
+        x="36"
+        y={showDetails ? 44 : 46}
+        textAnchor="middle"
+        fontFamily="'DM Sans', sans-serif"
+        fontSize={showDetails ? 22 : 34}
+        fontWeight="700"
+        fill={P.gold}
+      >
+        $
+      </text>
+      {/* Gold knob (only at 28px+) */}
+      {showDetails && (
+        <circle cx="48" cy="40" r="1.8" fill={P.gold} />
+      )}
+    </svg>
+  );
+}
+
 // ─── Data ────────────────────────────────────────────────────────────────────
 
 const PRE_CONTRACT_STEPS = [
@@ -698,7 +743,7 @@ const NAV_TOOLS = [
   { id: "calculator", label: "Mortgage Calculator", icon: "__CALC_ICON__", href: "/calculator" },
   { id: "prequal", label: "Pre-Qual Simulator", icon: "__PREQUAL_ICON__", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
-  { id: "cashtoclose", label: "Cash to Close", icon: "💰", href: "/cash-to-close" },
+  { id: "cashtoclose", label: "Cash to Close", icon: "__CASH_ICON__", href: "/cash-to-close" },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "glossary", label: "Jargon Decoder", icon: "📖" },
 ];
@@ -811,7 +856,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
+                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon}
                     </span>
                     <span>{item.label}</span>
                   </span>
@@ -861,7 +906,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -879,7 +924,7 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
                 style={{ opacity: 0.82 }}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -1418,7 +1463,10 @@ function ClosingCosts({ navTarget }) {
                 You know what every cost is — now see how they add up for your scenario. State-specific transfer taxes, metro-level property tax rates, and month-accurate reserve schedules across all 50 states.
               </p>
               <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>
-                💰 Open the Cash to Close Simulator →
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <CashToCloseIcon size={18} variant="navy" />
+                  Open the Cash to Close Simulator →
+                </span>
               </a>
             </div>
           </div>
@@ -2025,7 +2073,10 @@ function InterestRates({ navTarget }) {
             </div>
 
             <div style={{ textAlign: "center", marginTop: 24 }}>
-              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>💰 See Your Estimated APR in Cash to Close →</a>
+              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+                <CashToCloseIcon size={18} variant="navy" />
+                See Your Estimated APR in Cash to Close →
+              </a>
             </div>
           </div>
         );
@@ -2066,14 +2117,14 @@ function MobileToolbar({ hrefOverrides = {} }) {
       <nav style={{ transform: `translateY(${offset}px)`, willChange: "transform", background: "rgba(15, 37, 48, 0.75)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: `max(${isStandalone ? 32 : 16}px, env(safe-area-inset-bottom, 0px))`, display: "flex", justifyContent: "center", alignItems: "center", height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : 16 }}>
         <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
           {[
-            { icon: "💰", label: "Cash to Close", href: "/cash-to-close" },
+            { icon: "__CASH_ICON__", label: "Cash to Close", href: "/cash-to-close" },
             { icon: "__PREQUAL_ICON__", label: "Pre-Qual", href: "/prequal" },
             { icon: "__COMPARE_ICON__", label: "Compare", href: "/compare" },
             { icon: "__CALC_ICON__", label: "Calculator", href: "/calculator" },
           ].map((t) => (
             <a key={t.href} href={hrefOverrides[t.href] || t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
               <span style={{ fontSize: 22, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={22} variant="cream" /> : t.icon}
+                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={22} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={22} variant="cream" /> : t.icon}
               </span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
             </a>
@@ -3133,7 +3184,10 @@ function CashToClosePage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 760, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>The Bottom Line</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8 }}>Cash to Close Simulator 💰</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+            Cash to Close Simulator
+            <CashToCloseIcon size={32} variant="navy" />
+          </h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 520, margin: "0 auto" }}>Estimate exactly how much money you'll need at the closing table — down payment, closing costs, prepaids, reserves, and credits.</p>
         </div>
 
@@ -3545,7 +3599,7 @@ function ToolsCTA() {
       desc: "Save up to 3 scenarios from the calculator and stack them side by side to find your best option.",
     },
     {
-      icon: "💰", title: "Cash to Close", href: "/cash-to-close",
+      icon: "__CASH_ICON__", title: "Cash to Close", href: "/cash-to-close",
       desc: "Estimate how much money you'll need at the closing table — down payment, closing costs, prepaids, and reserves.",
     },
   ];
@@ -3564,14 +3618,14 @@ function ToolsCTA() {
             >
               <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
                 <span style={{ fontSize: 36, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, height: 44 }}>
-                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon}
+                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={48} variant="cream" /> : t.icon}
                 </span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff", display: "block" }}>{t.title}</span>
               </div>
               <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray, flex: 1 }}>{t.desc}</p>
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 13, fontWeight: 600, color: P.gold }}>
-                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={14} variant="navy" /> : t.icon} →
+                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={14} variant="navy" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={14} variant="navy" /> : t.icon} →
                 </span>
               </div>
             </a>
