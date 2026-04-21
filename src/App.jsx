@@ -4998,9 +4998,140 @@ function CalculatorPage() {
                               </div>
                             )}
 
-                            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 10, marginBottom: 0, lineHeight: 1.5, fontStyle: "italic", textAlign: "center" }}>
-                              Payoff projection coming soon — math wiring in Phase 3.
-                            </p>
+                            {/* Compute original vs improved scenarios */}
+                            {(() => {
+                              const isConv = prog.name === "Conventional";
+                              const isFHA = prog.name === "FHA";
+
+                              let miDropoffType = "none";
+                              let miMonths = 0;
+                              if (isConv && prog.mi > 0) {
+                                miDropoffType = "ltv";
+                                miMonths = term * 12;
+                              } else if (isFHA) {
+                                miDropoffType = "term";
+                                miMonths = downPct < 10 ? term * 12 : 132;
+                              }
+
+                              const originalResult = generateAmortData(prog.loan, prog.rate, term, {
+                                strategy: "none",
+                                monthlyMI: prog.mi,
+                                miMonths,
+                                homeValue: homePrice,
+                                miDropoffType,
+                              });
+
+                              const improvedResult = generateAmortData(prog.loan, prog.rate, term, {
+                                strategy: cfg.strategy,
+                                extraAmount: cfg.amount,
+                                monthlyMI: prog.mi,
+                                miMonths,
+                                homeValue: homePrice,
+                                miDropoffType,
+                              });
+
+                              const hasMeaningfulInput =
+                                cfg.strategy === "biweekly" ||
+                                (cfg.amount && cfg.amount > 0);
+
+                              if (!hasMeaningfulInput) {
+                                return (
+                                  <div style={{ marginTop: 12, padding: "14px 16px", background: P.cream, borderRadius: 6, textAlign: "center" }}>
+                                    <p style={{ fontSize: 12, color: P.warmGrayLight, fontStyle: "italic" }}>
+                                      Enter an amount above to see your savings.
+                                    </p>
+                                  </div>
+                                );
+                              }
+
+                              const interestSaved = originalResult.totalInterest - improvedResult.totalInterest;
+                              const monthsSaved = originalResult.payoffMonth - improvedResult.payoffMonth;
+
+                              const miSaved = originalResult.miPaidTotal - improvedResult.miPaidTotal;
+                              const miMonthsSaved = (originalResult.miEndMonth || 0) - (improvedResult.miEndMonth || 0);
+                              const showPmiNote = (isConv || isFHA) && miSaved > 100;
+
+                              const headlineLabel =
+                                cfg.strategy === "biweekly" ? "Bi-weekly payments" :
+                                cfg.strategy === "annual" ? `$${cfg.amount.toLocaleString()}/year extra` :
+                                `$${cfg.amount.toLocaleString()}/month extra`;
+
+                              return (
+                                <div style={{ marginTop: 12, background: "linear-gradient(135deg, " + P.creamDark + " 0%, " + P.cream + " 100%)", borderRadius: 8, padding: "14px 12px" }}>
+                                  <div style={{ textAlign: "center", marginBottom: 12 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 2 }}>
+                                      Your Impact
+                                    </span>
+                                    <div style={{ fontFamily: F.display, fontSize: 17, color: P.navy }}>
+                                      {headlineLabel}
+                                    </div>
+                                  </div>
+
+                                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+                                    <div style={{ background: "#fff", borderRadius: 6, padding: "10px 11px", borderTop: `2px solid ${P.warmGrayLight}` }}>
+                                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 4 }}>
+                                        Original
+                                      </div>
+                                      <div style={{ marginBottom: 6 }}>
+                                        <div style={{ fontSize: 10, color: P.warmGray, lineHeight: 1.2 }}>Loan term</div>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: P.navy, fontVariantNumeric: "tabular-nums", lineHeight: 1.25 }}>
+                                          {formatPayoff(originalResult.payoffMonth)}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: 10, color: P.warmGray, lineHeight: 1.2 }}>Total interest</div>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: P.navy, fontVariantNumeric: "tabular-nums", lineHeight: 1.25 }}>
+                                          {fmt(originalResult.totalInterest)}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div style={{ background: "#fff", borderRadius: 6, padding: "10px 11px", borderTop: `2px solid ${P.gold}` }}>
+                                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.gold, marginBottom: 4 }}>
+                                        With extra
+                                      </div>
+                                      <div style={{ marginBottom: 6 }}>
+                                        <div style={{ fontSize: 10, color: P.warmGray, lineHeight: 1.2 }}>Payoff in</div>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: P.navy, fontVariantNumeric: "tabular-nums", lineHeight: 1.25 }}>
+                                          {formatPayoff(improvedResult.payoffMonth)}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <div style={{ fontSize: 10, color: P.warmGray, lineHeight: 1.2 }}>Total interest</div>
+                                        <div style={{ fontSize: 14, fontWeight: 600, color: P.navy, fontVariantNumeric: "tabular-nums", lineHeight: 1.25 }}>
+                                          {fmt(improvedResult.totalInterest)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div style={{ background: P.navy, color: P.cream, borderRadius: 6, padding: "10px 14px", textAlign: "center" }}>
+                                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: P.goldLight, textTransform: "uppercase", marginBottom: 2 }}>
+                                      You save
+                                    </div>
+                                    <div style={{ fontSize: 16, fontWeight: 700, color: P.cream, fontVariantNumeric: "tabular-nums", lineHeight: 1.4 }}>
+                                      <span style={{ display: "block" }}>
+                                        <strong style={{ color: P.goldLight }}>{fmt(interestSaved)}</strong> in interest
+                                      </span>
+                                      <span style={{ display: "block", fontSize: 13, fontWeight: 500, opacity: 0.92, marginTop: 2 }}>
+                                        Pay off <strong style={{ color: P.goldLight, fontWeight: 700 }}>{formatPayoff(monthsSaved)}</strong> sooner
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {showPmiNote && (
+                                    <div style={{ marginTop: 8, padding: "7px 11px", background: "rgba(184, 134, 11, 0.08)", borderRadius: 4, borderLeft: `2px solid ${P.gold}` }}>
+                                      <p style={{ fontSize: 10.5, color: P.warmGray, lineHeight: 1.4 }}>
+                                        <strong style={{ color: P.navy }}>{isFHA ? "Note:" : "Bonus:"}</strong>{" "}
+                                        {isFHA
+                                          ? `FHA MIP runs the life of the loan with <10% down, but ends ${formatPayoff(miMonthsSaved)} earlier with these payments.`
+                                          : `PMI also drops off ${formatPayoff(miMonthsSaved)} earlier, saving an additional ${fmt(miSaved)}.`}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                         )}
                       </div>
