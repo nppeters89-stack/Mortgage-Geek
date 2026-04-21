@@ -3438,7 +3438,7 @@ function NextSteps() {
                   textDecoration: "none", color: "rgba(255,255,255,0.7)",
                 }}>
                   <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 24 }}>
-                    <MortgageCalcIcon size={22} />
+                    <MortgageCalcIcon size={22} variant="cream" />
                   </span>
                   <div>
                     <span style={{ display: "block", fontSize: 14, fontWeight: 600 }}>Run the numbers</span>
