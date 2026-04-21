@@ -96,7 +96,18 @@ const SHARED_STATE_TAX_RATES = {
   MN: { name: "Minnesota", rate: 1.12, metros: [
     { name: "Minneapolis/Hennepin", rate: 1.18 }, { name: "St Paul/Ramsey", rate: 1.24 },
   ]},
-  MS: { name: "Mississippi", rate: 0.65 },
+  MS: { name: "Mississippi", rate: 1.10, metros: [
+    { name: "DeSoto County", rate: 0.80 },
+    { name: "Forrest County", rate: 1.55 },
+    { name: "George County", rate: 0.80 },
+    { name: "Harrison County", rate: 1.01 },
+    { name: "Hinds County", rate: 1.49 },
+    { name: "Jackson County", rate: 1.17 },
+    { name: "Lamar County", rate: 1.09 },
+    { name: "Madison County", rate: 1.02 },
+    { name: "Marshall County", rate: 1.06 },
+    { name: "Rankin County", rate: 1.12 },
+  ]},
   MO: { name: "Missouri", rate: 0.97, metros: [
     { name: "St Louis City", rate: 1.38 }, { name: "Kansas City/Jackson", rate: 1.22 },
   ]},
@@ -176,7 +187,7 @@ const SHARED_STATE_TAX_RATES = {
 const CASH_STATE_DEFAULT_TAX_RATES = {
   AL:0.0040, AK:0.0117, AZ:0.0066, AR:0.0065, CA:0.0073, CO:0.0051, CT:0.0214, DE:0.0061, DC:0.0062,
   FL:0.0091, GA:0.0090, HI:0.0028, ID:0.0069, IL:0.0223, IN:0.0085, IA:0.0157, KS:0.0141, KY:0.0085,
-  LA:0.0055, ME:0.0136, MD:0.0109, MA:0.0123, MI:0.0154, MN:0.0112, MS:0.0080, MO:0.0097, MT:0.0084,
+  LA:0.0055, ME:0.0136, MD:0.0109, MA:0.0123, MI:0.0154, MN:0.0112, MS:0.0110, MO:0.0097, MT:0.0084,
   NE:0.0173, NV:0.0060, NH:0.0218, NJ:0.0249, NM:0.0080, NY:0.0173, NC:0.0084, ND:0.0098, OH:0.0156,
   OK:0.0090, OR:0.0093, PA:0.0158, RI:0.0163, SC:0.0057, SD:0.0132, TN:0.0075, TX:0.0180, UT:0.0066,
   VT:0.0190, VA:0.0082, WA:0.0098, WV:0.0058, WI:0.0185, WY:0.0061,
@@ -186,7 +197,7 @@ const CASH_STATE_DEFAULT_TAX_RATES = {
 const CASH_STATE_METROS = {
   TN: { metros: { "Nashville/Davidson": 0.0095, "Memphis/Shelby": 0.0148, "Knoxville/Knox": 0.0085, "Chattanooga/Hamilton": 0.0090, "Williamson County": 0.0066, "Rutherford County": 0.0080, "All other counties": 0.0075 } },
   GA: { metros: { "Atlanta/Fulton": 0.0110, "DeKalb County": 0.0125, "Cobb County": 0.0085, "Gwinnett County": 0.0105, "Cherokee County": 0.0078, "Forsyth County": 0.0070, "All other counties": 0.0090 } },
-  MS: { metros: { "Jackson/Hinds": 0.0140, "DeSoto County": 0.0090, "Madison County": 0.0085, "Rankin County": 0.0090, "All other counties": 0.0080 } },
+  MS: { metros: { "DeSoto County": 0.0080, "Forrest County": 0.0155, "George County": 0.0080, "Harrison County": 0.0101, "Hinds County": 0.0149, "Jackson County": 0.0117, "Lamar County": 0.0109, "Madison County": 0.0102, "Marshall County": 0.0106, "Rankin County": 0.0112, "All other counties": 0.0110 } },
   AR: { metros: { "Little Rock/Pulaski": 0.0090, "Benton County": 0.0070, "Washington County": 0.0070, "All other counties": 0.0065 } },
   KY: { metros: { "Louisville/Jefferson": 0.0120, "Lexington/Fayette": 0.0095, "Northern KY": 0.0110, "All other counties": 0.0085 } },
   AL: { metros: { "Birmingham/Jefferson": 0.0058, "Madison/Huntsville": 0.0046, "Mobile County": 0.0050, "Montgomery County": 0.0045, "Baldwin County": 0.0033, "All other counties": 0.0040 } },
