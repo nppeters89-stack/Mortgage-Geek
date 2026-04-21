@@ -4440,7 +4440,7 @@ function CalculatorPage() {
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
             Mortgage Calculator
-            <MortgageCalcIcon size={32} />
+            <MortgageCalcIcon size={26} />
           </h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 540, margin: "0 auto" }}>One set of inputs, three loan programs. See how Conventional, FHA, and VA stack up for the same home.</p>
         </div>
