@@ -3564,7 +3564,7 @@ function ToolsCTA() {
             >
               <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
                 <span style={{ fontSize: 36, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, height: 44 }}>
-                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon}
+                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon}
                 </span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff", display: "block" }}>{t.title}</span>
               </div>
