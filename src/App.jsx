@@ -1401,10 +1401,46 @@ function MortgageTypes({ navTarget }) {
   return (
     <section id="types" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." />
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
-        {MORTGAGE_TYPES.map((m, i) => (
-          <button key={m.name} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{m.name}</button>
-        ))}
+      {/* Two-row grouped tab layout: Standard programs (5) + Specialized programs (2) */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 8 }}>
+            Standard Programs
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {MORTGAGE_TYPES.slice(0, 5).map((m, i) => (
+              <button
+                key={m.name}
+                onClick={() => setActive(i)}
+                className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}
+                style={{ flex: "1 1 0", minWidth: 90 }}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 8 }}>
+            Specialized Programs
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {MORTGAGE_TYPES.slice(5).map((m, idx) => {
+              const i = idx + 5;
+              return (
+                <button
+                  key={m.name}
+                  onClick={() => setActive(i)}
+                  className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}
+                  style={{ flex: "1 1 0", minWidth: 90 }}
+                >
+                  {m.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
       <div className="content-card" style={{ maxWidth: 720 }}>
         <div style={{ padding: "28px 32px 20px", borderBottom: `1px solid ${P.creamDark}` }}>
