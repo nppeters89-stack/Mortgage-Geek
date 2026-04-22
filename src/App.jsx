@@ -4937,38 +4937,6 @@ function CalculatorPage() {
           </div>
         </div>
 
-        {/* County loan limit warning — appears when base loan exceeds any program's limit */}
-        {overLimitPrograms.length > 0 && (
-          <div style={{
-            maxWidth: 800, margin: "0 auto 12px",
-            padding: "14px 18px",
-            background: "rgba(184, 134, 11, 0.08)",
-            border: `1px solid rgba(184, 134, 11, 0.35)`,
-            borderLeft: `4px solid ${P.gold}`,
-            borderRadius: 10,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 16 }}>⚠️</span>
-              <span style={{ fontFamily: F.body, fontSize: 13, fontWeight: 700, color: P.navy, letterSpacing: 0.2 }}>
-                Loan amount exceeds the {countyLabel} county limit
-              </span>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {overLimitPrograms.map((p) => {
-                const neededDown = homePrice - p.loanLimit;
-                const neededPct = homePrice > 0 ? (neededDown / homePrice) * 100 : 0;
-                return (
-                  <p key={p.name} style={{ fontSize: 12, color: P.text, lineHeight: 1.5, margin: 0 }}>
-                    <strong style={{ color: p.color }}>{p.name}:</strong>{" "}
-                    Limit is <strong>{fmt(p.loanLimit)}</strong>. Increase down payment to at least{" "}
-                    <strong>{fmt(neededDown)}</strong> ({neededPct.toFixed(1)}%) to stay within the limit.
-                  </p>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
         {/* Per-program rate inputs — NAVY TREATMENT for visual prominence */}
         <div style={{
           background: P.navy,
@@ -5062,9 +5030,37 @@ function CalculatorPage() {
                     </div>
                     <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>Minimum {prog.minDown}% Down Required</p>
                     <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray }}>
-                      {prog.name} loans require a minimum down payment of {prog.minDown}% ({fmt(homePrice * (prog.minDown / 100))}). 
+                      {prog.name} loans require a minimum down payment of {prog.minDown}% ({fmt(homePrice * (prog.minDown / 100))}).
                       Increase your down payment to see {prog.name} payment details.
                     </p>
+                  </div>
+                </div>
+              );
+            }
+
+            if (prog.overLimit) {
+              const neededDown = homePrice - prog.loanLimit;
+              const neededPct = homePrice > 0 ? (neededDown / homePrice) * 100 : 0;
+              return (
+                <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative", opacity: 0.65 }}>
+                  <div style={{ background: P.warmGrayLight, padding: "24px 20px", textAlign: "center" }}>
+                    <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
+                    <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>Over Loan Limit</span>
+                  </div>
+                  <div style={{ padding: "28px 20px", textAlign: "center" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(184, 134, 11, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                      <span style={{ fontSize: 24 }}>⚠️</span>
+                    </div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>Exceeds {countyLabel} {prog.name} Limit</p>
+                    <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray, marginBottom: 10 }}>
+                      The {prog.name} loan limit for this area is <strong style={{ color: P.text }}>{fmt(prog.loanLimit)}</strong>. Your current loan amount of <strong style={{ color: P.text }}>{fmt(baseLoan)}</strong> exceeds it.
+                    </p>
+                    <div style={{ background: "rgba(184, 134, 11, 0.08)", border: "1px solid rgba(184, 134, 11, 0.25)", borderRadius: 8, padding: "10px 12px" }}>
+                      <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.gold, marginBottom: 4 }}>To Qualify</p>
+                      <p style={{ fontSize: 13, color: P.text, lineHeight: 1.5 }}>
+                        Increase down payment to at least <strong>{fmt(neededDown)}</strong> ({neededPct.toFixed(1)}%)
+                      </p>
+                    </div>
                   </div>
                 </div>
               );
