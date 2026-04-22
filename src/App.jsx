@@ -3338,7 +3338,10 @@ function CashToClosePage() {
       <style>{globalCSS}{`
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 600px) { .ctc-grid { grid-template-columns: 1fr; } }
-        .ctc-loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ctc-loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; margin-bottom: 12px; }
+        .ctc-loc-grid > .ctc-date-cell { display: flex; flex-direction: column; }
+        .ctc-loc-grid > .ctc-date-cell input { flex: 1; }
+        .ctc-loc-grid > .ctc-location-stack { display: flex; flex-direction: column; gap: 12px; }
         @media (max-width: 600px) { .ctc-loc-grid { grid-template-columns: 1fr; } }
       `}</style>
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
@@ -3388,63 +3391,96 @@ function CashToClosePage() {
             </div>
           </div>
 
+          {/* Tier 2 — Term + Home Price */}
           <div className="ctc-grid">
-            <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
-            <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Term</label>
-              <div style={{ display: "flex", gap: 4 }}>
-                {[15, 30].map((t) => (
-                  <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "11px 0", fontSize: 14 }}>{t} yr</button>
-                ))}
-              </div>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Loan Term</label>
+              <select value={term} onChange={(e) => setTerm(parseInt(e.target.value))} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                <option value={30}>30 years</option>
+                <option value={15}>15 years</option>
+              </select>
             </div>
-            <div>
-              <RateInput label={`${program} Rate${ratesLoaded ? " · Live" : ""}`} rate={rate} setRate={setRate} color={PROG_COLOR} />
+            <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
+          </div>
+
+          {/* Tier 3 — Down Payment + Live Rate */}
+          <div className="ctc-grid">
+            <CalcInput label="Down Payment %" value={downPct} onChange={setDownPct} suffix="%" step={0.5} min={0} max={100} />
+            <div style={{
+              border: `1.5px solid ${P.gold}`,
+              borderRadius: 8,
+              background: "linear-gradient(135deg, rgba(184, 134, 11, 0.04) 0%, rgba(212, 168, 67, 0.06) 100%)",
+              padding: "8px 12px 10px",
+              position: "relative",
+            }}>
+              {!rateLoading && ratesLoaded && (
+                <span style={{
+                  position: "absolute",
+                  top: -7,
+                  right: 10,
+                  background: P.gold,
+                  color: "#fff",
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  padding: "2px 7px",
+                  borderRadius: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}>
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#fff", display: "inline-block" }} />
+                  LIVE
+                </span>
+              )}
+              <RateInput label={`${program} Rate`} rate={rate} setRate={setRate} color={PROG_COLOR} />
               {rateLoading && (
-                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 4, fontWeight: 500, fontStyle: "italic" }}>
+                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 2, fontWeight: 500, fontStyle: "italic" }}>
                   <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: P.warmGrayLight, marginRight: 6, verticalAlign: "middle", animation: "rate-pulse 1.2s ease-in-out infinite" }} />
                   Loading today's rates...
                 </p>
               )}
-              {!rateLoading && ratesLoaded && (
-                <p style={{ fontSize: 10, color: P.sage, marginTop: 4, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.sage, display: "inline-block" }} />
-                  Live · {rateSource || "today"}
+              {!rateLoading && ratesLoaded && rateSource && (
+                <p style={{ fontSize: 10, color: P.warmGray, marginTop: 2, fontWeight: 500, fontStyle: "italic" }}>
+                  {rateSource}
                 </p>
               )}
             </div>
-            <div style={{ gridColumn: "1 / -1" }}>
+          </div>
+
+          {/* Tier 4 — Close Date (left) + State/County stack (right) */}
+          <div className="ctc-loc-grid">
+            <div className="ctc-date-cell">
               <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Estimated Close Date</label>
               <input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, WebkitAppearance: "none" }} />
             </div>
-          </div>
-          <div className="ctc-loc-grid" style={{ marginBottom: 12 }}>
-            <div>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
-              <select value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
-                {ALL_STATES_LIST.map(([code, name]) => (
-                  <option key={code} value={code}>{name}</option>
-                ))}
-              </select>
-            </div>
-            {hasMetros ? (
+            <div className="ctc-location-stack">
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
-                <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
-                  {Object.entries(CASH_STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
-                    <option key={name} value={name}>{name}</option>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
+                <select value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                  {ALL_STATES_LIST.map(([code, name]) => (
+                    <option key={code} value={code}>{name}</option>
                   ))}
                 </select>
               </div>
-            ) : (
-              <div>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Property Tax Rate</label>
-                <div style={{ width: "100%", border: `1px dashed ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.warmGray }}>
-                  Statewide avg ({(taxRate * 100).toFixed(2)}%)
+              {hasMetros ? (
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
+                  <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                    {Object.entries(CASH_STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Property Tax Rate</label>
+                  <div style={{ width: "100%", border: `1px dashed ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.warmGray }}>
+                    Statewide avg ({(taxRate * 100).toFixed(2)}%)
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 4, fontStyle: "italic" }}>
             Auto-calculated: HOI {fmt(insuranceAnnual)}/yr (0.35% of price) · Property tax {fmt(taxAnnual)}/yr ({(taxRate * 100).toFixed(2)}%)
