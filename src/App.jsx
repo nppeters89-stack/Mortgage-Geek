@@ -4747,10 +4747,9 @@ function CalculatorPage() {
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-        .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .calc-tax-group { display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid ${P.creamDark}; border-radius: 10px; background: rgba(184, 134, 11, 0.05); }
-        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: ${P.gold}; }
-        .calc-base-loan-row { margin-top: 16px; padding: 16px 20px; background: ${P.creamDark}; border-radius: 10px; text-align: center; }
+        .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B8860B; }
         @media (max-width: 700px) {
           .calc-input-cols { grid-template-columns: 1fr; }
           .calc-cards-grid { grid-template-columns: 1fr; }
@@ -4804,36 +4803,45 @@ function CalculatorPage() {
         {/* Input card - 2 column layout */}
         <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
           <div className="calc-input-cols">
-            {/* Left column - Price & Down Payment */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
-              <div className="calc-dp-row">
-                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
-                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
-              </div>
-            </div>
-            {/* Right column - Term, Insurance, Taxes */}
+            {/* LEFT COLUMN — Loan structure & amount */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
                 <select
                   value={term}
-                  onChange={(e) => setTerm(Number(e.target.value))}
-                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                  onChange={(e) => setTerm(parseInt(e.target.value))}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                 >
                   <option value={30}>30 years</option>
                   <option value={15}>15 years</option>
                 </select>
               </div>
+
+              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
+
+              <div className="calc-dp-row">
+                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
+                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
+              </div>
+
+              <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
+                <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy }}>{fmt(baseLoan)}</span>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN — Monthly escrow items */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+
               <div className="calc-tax-group">
-                <span className="calc-tax-group-label">Property Tax</span>
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <div className="calc-tax-group-label">Property Tax</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
                   <select
                     value={taxState}
                     onChange={(e) => setTaxState(e.target.value)}
-                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.white, padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                   >
                     {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
                       <option key={code} value={code}>{s.name}</option>
@@ -4843,7 +4851,7 @@ function CalculatorPage() {
                     <select
                       value={taxMetro}
                       onChange={(e) => setTaxMetro(e.target.value)}
-                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.white, padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                     >
                       <option value="">State Avg ({stateData.rate}%)</option>
                       {metroList.map((m) => (
@@ -4852,21 +4860,21 @@ function CalculatorPage() {
                     </select>
                   )}
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
-                  <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, overflow: "hidden", background: P.white }}>
-                    <span style={{ padding: "9px 0 9px 12px", fontSize: 14, color: P.warmGray, fontWeight: 600 }}>$</span>
+                  <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                     <input
-                      type="number"
-                      value={taxes}
-                      onChange={(e) => setTaxes(Number(e.target.value) || 0)}
-                      step={25}
-                      min={0}
-                      style={{ flex: 1, border: "none", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", background: "transparent", width: "100%" }}
+                      type="text"
+                      inputMode="decimal"
+                      value={taxes.toLocaleString("en-US")}
+                      onChange={(e) => { const v = parseFloat(e.target.value.replace(/,/g, "")); if (!isNaN(v)) setTaxes(v); else if (e.target.value === "") setTaxes(0); }}
+                      style={{ flex: 1, border: "none", background: "transparent", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, width: "100%" }}
                     />
                   </div>
                 </div>
               </div>
+
               {!showHoa ? (
                 <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sage, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
               ) : (
@@ -4876,10 +4884,6 @@ function CalculatorPage() {
                 </div>
               )}
             </div>
-          </div>
-          <div className="calc-base-loan-row">
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>Base Loan Amount</span>
-            <span style={{ fontFamily: F.display, fontSize: 28, color: P.navy }}>{fmt(baseLoan)}</span>
           </div>
         </div>
 
