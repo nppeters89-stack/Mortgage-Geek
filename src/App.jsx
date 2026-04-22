@@ -1644,7 +1644,7 @@ function ClosingCosts({ navTarget }) {
               </p>
               <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <CashToCloseIcon size={18} variant="navy" />
+                  <CashToCloseIcon size={18} variant="cream" />
                   Open the Cash to Close Simulator →
                 </span>
               </a>
