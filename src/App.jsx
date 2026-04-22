@@ -4647,6 +4647,7 @@ function CalculatorPage() {
   const metroList = stateData?.metros || [];
   const selectedMetro = metroList.find(m => m.name === taxMetro);
   const taxRate = selectedMetro ? selectedMetro.rate : stateData?.rate || 0.56;
+  const loanLimits = selectedMetro?.limits || stateData?.limits || DEFAULT_LIMITS;
   const [taxes, setTaxes] = useState(Math.round((350000 * (0.95 / 100)) / 12));
   useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, taxMetro, homePrice]);
   // Reset metro when state changes
@@ -4763,6 +4764,7 @@ function CalculatorPage() {
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate, apr: convAPR,
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
       eligible: downPct >= 3, minDown: 3,
+      loanLimit: loanLimits.conv, overLimit: baseLoan > loanLimits.conv,
     },
     {
       name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
@@ -4770,6 +4772,7 @@ function CalculatorPage() {
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate, apr: fhaAPR,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
       eligible: downPct >= 3.5, minDown: 3.5,
+      loanLimit: loanLimits.fha, overLimit: baseLoan > loanLimits.fha,
     },
     {
       name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
@@ -4779,8 +4782,12 @@ function CalculatorPage() {
         ? "Funding fee waived — service-connected disability"
         : `No monthly MI — ${vaUsageLabels[vaUsage].toLowerCase()}, ${downPct >= 10 ? "10%+ down" : downPct >= 5 ? "5–9.99% down" : "<5% down"}`,
       isVA: true, eligible: true, minDown: 0,
+      loanLimit: loanLimits.va, overLimit: baseLoan > loanLimits.va,
     },
   ];
+
+  const overLimitPrograms = programs.filter(p => p.overLimit && p.eligible);
+  const countyLabel = selectedMetro ? selectedMetro.name : (stateData ? `${stateData.name} default` : "county");
 
   const eligibleTotals = programs.filter(p => p.eligible).map(p => p.total);
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
@@ -4929,6 +4936,38 @@ function CalculatorPage() {
             </div>
           </div>
         </div>
+
+        {/* County loan limit warning — appears when base loan exceeds any program's limit */}
+        {overLimitPrograms.length > 0 && (
+          <div style={{
+            maxWidth: 800, margin: "0 auto 12px",
+            padding: "14px 18px",
+            background: "rgba(184, 134, 11, 0.08)",
+            border: `1px solid rgba(184, 134, 11, 0.35)`,
+            borderLeft: `4px solid ${P.gold}`,
+            borderRadius: 10,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 16 }}>⚠️</span>
+              <span style={{ fontFamily: F.body, fontSize: 13, fontWeight: 700, color: P.navy, letterSpacing: 0.2 }}>
+                Loan amount exceeds the {countyLabel} county limit
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {overLimitPrograms.map((p) => {
+                const neededDown = homePrice - p.loanLimit;
+                const neededPct = homePrice > 0 ? (neededDown / homePrice) * 100 : 0;
+                return (
+                  <p key={p.name} style={{ fontSize: 12, color: P.text, lineHeight: 1.5, margin: 0 }}>
+                    <strong style={{ color: p.color }}>{p.name}:</strong>{" "}
+                    Limit is <strong>{fmt(p.loanLimit)}</strong>. Increase down payment to at least{" "}
+                    <strong>{fmt(neededDown)}</strong> ({neededPct.toFixed(1)}%) to stay within the limit.
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Per-program rate inputs — NAVY TREATMENT for visual prominence */}
         <div style={{
