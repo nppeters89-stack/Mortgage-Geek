@@ -4952,7 +4952,7 @@ function CalculatorPage() {
 
       {/* RESULTS ZONE — deeper cream background extends from divider down to end of page */}
       <div style={{ background: P.creamDark, paddingBottom: 64 }}>
-        <div className="tool-page-content" style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
           {/* Section divider — Your Results (background pill now matches the new deeper bg) */}
           <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
             <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
