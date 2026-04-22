@@ -4093,7 +4093,7 @@ function PreQualPage() {
         </div>
       </div>
 
-      <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 1100, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
@@ -4206,19 +4206,54 @@ function PreQualPage() {
           </div>
         </div>
 
-        {/* Rate inputs */}
-        <div className="content-card" style={{ padding: "16px 28px", marginBottom: 32, maxWidth: 800, margin: "0 auto 32px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Interest Rates by Program</span>
+        {/* Per-program rate inputs — NAVY TREATMENT for visual prominence */}
+        <div style={{
+          background: P.navy,
+          borderRadius: 14,
+          padding: "18px 28px 22px",
+          marginBottom: 32,
+          maxWidth: 800,
+          margin: "0 auto 32px",
+          boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
+          borderTop: `3px solid ${P.gold}`,
+          position: "relative",
+          overflow: "hidden",
+        }}>
+          {/* Subtle gold radial glow in top-right corner for warmth */}
+          <div style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            width: 180,
+            height: "100%",
+            background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Header row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8, position: "relative", zIndex: 1 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Interest Rates by Program</span>
             {ratesLoaded && (
-              <span style={{ fontSize: 11, color: P.sage, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.sage, display: "inline-block" }} />
-                Live · {rateSource}
+              <span style={{ fontSize: 11, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: P.goldLight,
+                  display: "inline-block",
+                  boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
+                  animation: "rate-pulse 2s ease-in-out infinite",
+                }} />
+                Live rates loaded · {rateSource}
               </span>
             )}
           </div>
-          <p style={{ fontSize: 11, color: P.warmGrayLight, marginBottom: 12 }}>National averages via MND. Adjust to match your quote.</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+
+          {/* Disclaimer */}
+          <p style={{ fontSize: 11, color: P.cream, opacity: 0.65, marginBottom: 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
+            National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
+          </p>
+
+          {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
               { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
@@ -4227,16 +4262,24 @@ function PreQualPage() {
               <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
             ))}
           </div>
-        </div>
 
-        {/* Section divider — Your Results */}
-        <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
-          <div style={{ height: 1, background: `linear-gradient(to right, transparent, ${P.creamDark}, transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
-          <div style={{ position: "relative", display: "inline-block", background: P.cream, padding: "0 20px" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold }}>↓ Your Results ↓</span>
-            <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to send that scenario to the calculator</p>
-          </div>
+          {!ratesLoaded && (
+            <p style={{ fontSize: 11, color: P.cream, opacity: 0.6, marginTop: 10, fontStyle: "italic", position: "relative", zIndex: 1 }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
+          )}
         </div>
+      </div>
+
+      {/* RESULTS ZONE — deeper cream background extends from divider down to end of page */}
+      <div style={{ background: P.creamDark, paddingBottom: 64 }}>
+        <div style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
+          {/* Section divider — Your Results (background pill now matches the new deeper bg) */}
+          <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+            <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
+            <div style={{ position: "relative", display: "inline-block", background: P.creamDark, padding: "0 20px" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold }}>↓ Your Results ↓</span>
+              <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to send that scenario to the calculator</p>
+            </div>
+          </div>
 
         {/* Program result cards */}
         <div className="pq-cards-grid">
@@ -4425,6 +4468,7 @@ function PreQualPage() {
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
           This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
         </p>
+        </div>
       </div>
       <MobileToolbar />
     </div>
