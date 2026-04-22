@@ -652,12 +652,12 @@ function PreQualIcon({ size = 24, variant = "navy", style = {} }) {
 }
 
 function CashToCloseIcon({ size = 24, variant = "navy", style = {} }) {
-  // Door body color flips by variant
-  const doorColor = variant === "cream" ? P.cream : P.navy;
-  // Inner panel uses a slightly darker shade of the body color for depth
-  const panelColor = variant === "cream" ? P.creamDark : P.navyDark;
-  // Gold elements ($ and knob) stay gold in both variants
-  const showDetails = size >= 28;
+  const outlineColor = variant === "cream" ? P.cream : P.navy;
+  const dollarColor = variant === "cream" ? P.cream : P.gold;
+  const strokeWidth = size <= 22 ? 4 : size <= 30 ? 3.6 : size <= 44 ? 3.2 : 3;
+  const fontSize = size <= 22 ? 36 : size <= 30 ? 34 : 32;
+  const baseline = size <= 22 ? 50 : size <= 30 ? 49 : 48;
+
   return (
     <svg
       width={size}
@@ -667,31 +667,25 @@ function CashToCloseIcon({ size = 24, variant = "navy", style = {} }) {
       style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}
       aria-hidden="true"
     >
-      {/* Door silhouette with rounded top */}
       <path
-        d="M 18 12 Q 18 8 22 8 L 50 8 Q 54 8 54 12 L 54 64 L 18 64 Z"
-        fill={doorColor}
+        d="M 36 12 L 62 32 L 62 58 L 10 58 L 10 32 Z"
+        fill="none"
+        stroke={outlineColor}
+        strokeWidth={strokeWidth}
+        strokeLinejoin="round"
+        strokeLinecap="round"
       />
-      {/* Inner panel (only at 28px+) */}
-      {showDetails && (
-        <rect x="22" y="14" width="28" height="46" rx="2" fill={panelColor} />
-      )}
-      {/* Gold $ — sized differently based on whether the panel is showing */}
       <text
         x="36"
-        y={showDetails ? 44 : 46}
+        y={baseline}
         textAnchor="middle"
         fontFamily="'DM Sans', sans-serif"
-        fontSize={showDetails ? 22 : 34}
+        fontSize={fontSize}
         fontWeight="700"
-        fill={P.gold}
+        fill={dollarColor}
       >
         $
       </text>
-      {/* Gold knob (only at 28px+) */}
-      {showDetails && (
-        <circle cx="48" cy="40" r="1.8" fill={P.gold} />
-      )}
     </svg>
   );
 }
