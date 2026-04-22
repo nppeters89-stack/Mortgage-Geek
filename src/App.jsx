@@ -4145,20 +4145,19 @@ function PreQualPage() {
                   </p>
                 </div>
               )}
-              <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
-                <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Current Debt-Only DTI</span>
-                <span style={{ fontFamily: F.display, fontSize: 22, color: grossIncome > 0 && (monthlyDebts / grossIncome) > 0.30 ? P.gold : P.sage }}>{grossIncome > 0 ? ((monthlyDebts / grossIncome) * 100).toFixed(1) : 0}%</span>
-              </div>
             </div>
             {/* Right column — Loan Details */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Term</label>
-                <div style={{ display: "flex", gap: 4 }}>
-                  {[15, 30].map((t) => (
-                    <button key={t} onClick={() => setTerm(t)} className={`tab-btn ${term === t ? "tab-btn-active" : ""}`} style={{ flex: 1, padding: "9px 0" }}>{t} yr</button>
-                  ))}
-                </div>
+                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+                <select
+                  value={term}
+                  onChange={(e) => setTerm(parseInt(e.target.value))}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                >
+                  <option value={30}>30 years</option>
+                  <option value={15}>15 years</option>
+                </select>
               </div>
               <div style={{ border: `1px solid ${P.creamDark}`, borderRadius: 10, padding: "14px 14px 10px", background: P.white }}>
                 <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.navy, display: "block", marginBottom: 10 }}>Down Payment</label>
