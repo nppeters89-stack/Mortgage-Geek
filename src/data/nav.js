@@ -1,0 +1,57 @@
+export const NAV_TOPICS = [
+  { id: "getting-started", label: "Your Mortgage Journey", icon: "🔑", subs: [
+    { label: "1. Pre-Qualification", id: "getting-started", step: 0 },
+    { label: "2. Pre-Approval", id: "getting-started", step: 1 },
+    { label: "3. House Hunting & Contract", id: "getting-started", step: 2 },
+    { label: "4. Loan Processing", id: "process", step: 0 },
+    { label: "5. Underwriting", id: "process", step: 1 },
+    { label: "6. Closing", id: "process", step: 2 },
+  ]},
+  { id: "types", label: "Mortgage Types", icon: "🏦", subs: [
+    { label: "Conventional", id: "types", step: 0 },
+    { label: "FHA", id: "types", step: 1 },
+    { label: "VA", id: "types", step: 2 },
+    { label: "USDA", id: "types", step: 3 },
+    { label: "Jumbo", id: "types", step: 4 },
+    { label: "Non-QM", id: "types", step: 5 },
+    { label: "DSCR", id: "types", step: 6 },
+  ]},
+  { id: "structure", label: "Mortgage Structure", icon: "🏗", subs: [
+    { label: "Loan Term", id: "structure", step: 0 },
+    { label: "Fixed vs. ARM", id: "structure", step: 1 },
+    { label: "Amortization", id: "structure", step: 2 },
+    { label: "Other Loan Features", id: "structure", step: 3 },
+  ]},
+  { id: "profile", label: "Borrower Profile", icon: "👤", subs: [
+    { label: "Credit", id: "profile", step: 0 },
+    { label: "Income & Employment", id: "profile", step: 1 },
+    { label: "Assets & Reserves", id: "profile", step: 2 },
+    { label: "Property & Real Estate", id: "profile", step: 3 },
+  ]},
+  { id: "rates", label: "Interest Rates", icon: "📈", subs: [
+    { label: "What Drives Rates", id: "rates", step: 0 },
+    { label: "Rate Options & Points", id: "rates", step: 1 },
+    { label: "Live Rates", id: "rates", step: 2 },
+    { label: "APR", id: "rates", step: 3 },
+  ]},
+  { id: "costs", label: "Closing Costs", icon: "🧾", subs: [
+    { label: "All About", id: "costs", step: "top" },
+    { label: "Lender Fees", id: "costs", step: 0 },
+    { label: "Title & Settlement", id: "costs", step: 1 },
+    { label: "Third-Party Services", id: "costs", step: 2 },
+    { label: "Government Fees", id: "costs", step: 3 },
+    { label: "Prepaids & Escrow", id: "costs", step: 4 },
+    { label: "TRID Fee Tolerances", id: "costs", step: "trid" },
+  ]},
+  { id: "next-steps", label: "Get Started", icon: "🚀" },
+];
+
+export const NAV_TOOLS = [
+  { id: "calculator", label: "Mortgage Calculator", icon: "__CALC_ICON__", href: "/calculator" },
+  { id: "prequal", label: "Pre-Qual Simulator", icon: "__PREQUAL_ICON__", href: "/prequal" },
+  { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
+  { id: "cashtoclose", label: "Cash to Close", icon: "__CASH_ICON__", href: "/cash-to-close" },
+  { id: "deepdives", label: "Deep Dives", icon: "🐳", href: "/deep-dives", reference: true },
+  { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
+  { id: "glossary", label: "Jargon Decoder", icon: "📖" },
+];
