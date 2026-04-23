@@ -1058,23 +1058,37 @@ function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobi
             ))}
             <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 12px" }} />
             <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>Reference</span>
-            {NAV_TOOLS.filter(item => !item.href || item.reference).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  if (item.href) { window.location.href = item.href; return; }
-                  onNavigate(item.id);
-                  setMobileOpen(false);
-                }}
-                className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
-                style={{ opacity: 0.82 }}
-              >
+            {NAV_TOOLS.filter(item => !item.href || item.reference).map((item) => {
+              const iconNode = (
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon}
                 </span>
-                <span>{item.label}</span>
-              </button>
-            ))}
+              );
+              if (item.href) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+                    style={{ opacity: 0.82, textDecoration: "none" }}
+                  >
+                    {iconNode}
+                    <span>{item.label}</span>
+                  </a>
+                );
+              }
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => { onNavigate(item.id); setMobileOpen(false); }}
+                  className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
+                  style={{ opacity: 0.82 }}
+                >
+                  {iconNode}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </nav>
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <p style={{ fontSize: 10, lineHeight: 1.5, color: "rgba(255,255,255,0.25)" }}>Educational content only.<br />Not financial advice.</p>
