@@ -5681,7 +5681,6 @@ function DeepDivesHubPage() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
-      <Sidebar activeSection="deepdives" />
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
@@ -5885,8 +5884,6 @@ function DerogatoryCreditPage() {
           .dd-table thead th, .dd-table tbody td { padding: 8px 10px; }
         }
       `}</style>
-
-      <Sidebar activeSection="deepdives" />
 
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
