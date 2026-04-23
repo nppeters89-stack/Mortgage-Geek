@@ -651,9 +651,9 @@ function PreQualIcon({ size = 24, variant = "navy", style = {} }) {
   );
 }
 
-function CashToCloseIcon({ size = 24, variant = "navy", style = {} }) {
+function CashToCloseIcon({ size = 24, variant = "navy", dollarColor: dollarOverride, style = {} }) {
   const outlineColor = variant === "cream" ? P.cream : P.navy;
-  const dollarColor = P.gold;
+  const dollarColor = dollarOverride || P.gold;
   const strokeWidth = size <= 22 ? 5 : 3.5;
   const fontSize = size <= 22 ? 36 : size <= 30 ? 34 : 32;
   const baseline = size <= 22 ? 50 : size <= 30 ? 49 : 48;
@@ -1660,7 +1660,7 @@ function ClosingCosts({ navTarget }) {
               </p>
               <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                  <CashToCloseIcon size={18} variant="cream" />
+                  <CashToCloseIcon size={18} variant="cream" dollarColor="#fff" />
                   Open the Cash to Close Simulator →
                 </span>
               </a>
