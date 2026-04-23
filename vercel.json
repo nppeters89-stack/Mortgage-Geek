@@ -12,7 +12,9 @@
     { "source": "/about", "destination": "/" },
     { "source": "/compare", "destination": "/" },
     { "source": "/cash-to-close", "destination": "/" },
-    { "source": "/install", "destination": "/" }
+    { "source": "/install", "destination": "/" },
+    { "source": "/deep-dives", "destination": "/" },
+    { "source": "/deep-dives/:slug*", "destination": "/" }
   ],
   "headers": [
     {
