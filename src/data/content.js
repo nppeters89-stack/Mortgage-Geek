@@ -84,7 +84,7 @@ export const TRID_BUCKETS = [
     category: "No Tolerance (Unlimited)",
     limit: "∞",
     limitNote: "Good faith only",
-    color: "#5A7A6E",
+    color: "#3F5A4F",
     examples: "Prepaid interest, property insurance premiums, property taxes, HOA fees, and services where the borrower chose a provider not on the lender's list",
     cure: "None — as long as the original estimate was disclosed in good faith based on the best information available",
     detail: "These fees can increase by any amount without triggering a fee cure, provided the lender made the original estimate in good faith using the best information reasonably available at the time. The rationale: these are costs the lender doesn't control — insurance premiums are set by carriers, property taxes by municipalities, and prepaid interest depends on your closing date. If you shop for a service (like a home inspection) and pick a provider outside the lender's written list, that fee also moves here — giving you freedom to choose, but removing the lender's obligation to guarantee the price.",

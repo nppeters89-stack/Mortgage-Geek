@@ -211,7 +211,7 @@ export function CalculatorPage() {
         .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
-        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B8860B; }
+        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
         @media (max-width: 700px) {
           .calc-input-cols { grid-template-columns: 1fr; }
           .calc-cards-grid { grid-template-columns: 1fr; }
@@ -272,7 +272,7 @@ export function CalculatorPage() {
                 <select
                   value={term}
                   onChange={(e) => setTerm(parseInt(e.target.value))}
-                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                 >
                   <option value={30}>30 years</option>
                   <option value={15}>15 years</option>
@@ -303,7 +303,7 @@ export function CalculatorPage() {
                   <select
                     value={taxState}
                     onChange={(e) => setTaxState(e.target.value)}
-                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                    style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                   >
                     {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
                       <option key={code} value={code}>{s.name}</option>
@@ -313,7 +313,7 @@ export function CalculatorPage() {
                     <select
                       value={taxMetro}
                       onChange={(e) => setTaxMetro(e.target.value)}
-                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                     >
                       <option value="">State Avg ({stateData.rate}%)</option>
                       {metroList.map((m) => (
@@ -338,7 +338,7 @@ export function CalculatorPage() {
               </div>
 
               {!showHoa ? (
-                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sage, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
+                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sageDark, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
               ) : (
                 <div>
                   <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} />
@@ -530,7 +530,7 @@ export function CalculatorPage() {
                       <select
                         value={vaUsage}
                         onChange={(e) => setVaUsage(e.target.value)}
-                        style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "8px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center" }}
+                        style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "8px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 10px center" }}
                       >
                         <option value="first">First-Time Use</option>
                         <option value="subsequent">Subsequent Use</option>
@@ -920,7 +920,7 @@ export function CalculatorPage() {
                 </span>
               </button>
               {saveToast && (
-                <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sage }}>{saveToast.msg}</p>
+                <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sageDark }}>{saveToast.msg}</p>
               )}
               <div style={{ marginTop: 10 }}>
                 <a href="/compare" style={{ fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>View saved scenarios →</a>

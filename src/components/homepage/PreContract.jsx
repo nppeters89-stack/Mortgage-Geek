@@ -14,7 +14,7 @@ export function PreContract({ navTarget }) {
     <div className="process-detail">
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{s.num}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "4px 10px", borderRadius: 20, letterSpacing: 0.3 }}>{s.timeframe}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: P.sageDark, background: `${P.sage}15`, padding: "4px 10px", borderRadius: 20, letterSpacing: 0.3 }}>{s.timeframe}</span>
       </div>
       <h3 style={{ fontFamily: F.display, fontSize: 24, color: P.navy, marginBottom: 12 }}>{s.title}</h3>
       <p style={{ fontSize: 14, lineHeight: 1.75, color: P.warmGray, marginBottom: 24 }}>{s.detail}</p>

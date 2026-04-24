@@ -82,7 +82,7 @@ export function PreApprovalChecklist() {
             <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6, textAlign: "center" }}>Your progress is saved automatically</p>
           )}
           {checkedCount === totalItems && (
-            <p style={{ fontSize: 12, color: P.sage, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
+            <p style={{ fontSize: 12, color: P.sageDark, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
           )}
         </div>
 

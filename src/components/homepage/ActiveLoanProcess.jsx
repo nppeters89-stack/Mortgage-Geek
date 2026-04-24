@@ -16,7 +16,7 @@ export function ActiveLoanProcess({ navTarget }) {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
         <span style={{ fontFamily: F.display, fontSize: 48, color: P.creamDark, lineHeight: 1 }}>{s.num}</span>
         <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: P.sage, background: `${P.sage}15`, padding: "3px 10px", borderRadius: 20 }}>{s.phase}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, color: P.sageDark, background: `${P.sage}15`, padding: "3px 10px", borderRadius: 20 }}>{s.phase}</span>
           <span style={{ fontSize: 10, color: P.warmGrayLight, fontWeight: 500, padding: "0 10px" }}>Days {s.days}</span>
         </div>
       </div>

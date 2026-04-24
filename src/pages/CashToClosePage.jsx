@@ -704,7 +704,7 @@ export function CashToClosePage() {
             <div style={{ marginTop: 10, padding: "12px 14px", background: P.cream, borderRadius: 8, border: `1px solid ${P.creamDark}` }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontSize: 12, fontWeight: 700, color: P.text }}>Discount Points</span>
-                <button onClick={() => setShowPointsInfo(!showPointsInfo)} style={{ background: "none", border: "none", fontSize: 11, color: P.sage, fontWeight: 600, cursor: "pointer", fontFamily: F.body, textDecoration: "underline" }}>{showPointsInfo ? "Hide info ↑" : "What are points? ↓"}</button>
+                <button onClick={() => setShowPointsInfo(!showPointsInfo)} style={{ background: "none", border: "none", fontSize: 11, color: P.sageDark, fontWeight: 600, cursor: "pointer", fontFamily: F.body, textDecoration: "underline" }}>{showPointsInfo ? "Hide info ↑" : "What are points? ↓"}</button>
               </div>
               {showPointsInfo && (
                 <div style={{ marginBottom: 12, padding: "12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}` }}>
@@ -764,7 +764,7 @@ export function CashToClosePage() {
                       value={waiveEscrows ? "yes" : "no"}
                       onChange={(e) => setWaiveEscrows(e.target.value === "yes")}
                       disabled={!canWaiveEscrows}
-                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "6px 28px 6px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", cursor: canWaiveEscrows ? "pointer" : "not-allowed", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239B9488' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}>
+                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 6, background: P.cream, padding: "6px 28px 6px 10px", fontSize: 12, fontFamily: F.body, fontWeight: 700, color: P.text, outline: "none", cursor: canWaiveEscrows ? "pointer" : "not-allowed", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center" }}>
                       <option value="no">No — Standard Escrow</option>
                       <option value="yes">Yes — Waive Escrows</option>
                     </select>
@@ -785,7 +785,7 @@ export function CashToClosePage() {
 
               {escrowsWaived ? (
                 <>
-                  <p style={{ fontSize: 12, color: P.sage, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
+                  <p style={{ fontSize: 12, color: P.sageDark, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
                   <Row label="Reserves Subtotal" val={fmt(0)} subtotal />
                 </>
               ) : (
