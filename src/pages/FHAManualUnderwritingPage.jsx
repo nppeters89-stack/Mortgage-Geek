@@ -367,7 +367,18 @@ export function FHAManualUnderwritingPage() {
           <TipBody text="A common piece of bad advice floating around online is &quot;dispute your negative accounts before you apply for a mortgage.&quot; If you follow that advice and push your disputed balance above $1,000, you just forced yourself into a manual underwrite. Talk to an LO before disputing anything within 6 months of a loan application." />
         </GeekTip>
 
-        <H2>The DTI and compensating factors grid</H2>
+        <div style={{ textAlign: "center", marginTop: 56, marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 14 }}>
+            <div style={{ width: 48, height: 1, background: P.gold }} />
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldMuted }}>
+              HUD 4000.1 · The Chart
+            </span>
+            <div style={{ width: 48, height: 1, background: P.gold }} />
+          </div>
+          <h2 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3.2vw, 32px)", color: P.navy, fontWeight: 400, lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 1.5, margin: 0 }}>
+            FHA Manual DTI &amp; Compensating Factors Grid
+          </h2>
+        </div>
         <Para>
           This is the piece of FHA manual underwriting that most borrowers have never seen, and it's the single most important chart in HUD 4000.1 for anyone trying to figure out whether they can get approved on a manual.
         </Para>
