@@ -49,7 +49,7 @@ export function PreContract({ navTarget }) {
                 <span className={`process-num ${active === i ? "process-num-active" : ""}`}>{s.num}</span>
                 <div style={{ flex: 1 }}>
                   <span style={{ display: "block", fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{s.title}</span>
-                  <span style={{ display: "block", fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>{s.short}</span>
+                  <span style={{ display: "block", fontSize: 12, color: P.warmGray, lineHeight: 1.4 }}>{s.short}</span>
                 </div>
                 {isMobile && <span style={{ fontSize: 18, fontWeight: 300, color: P.warmGrayLight, marginLeft: 8 }}>{active === i ? "−" : "+"}</span>}
               </button>
