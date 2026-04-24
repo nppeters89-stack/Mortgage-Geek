@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { P, F } from "../../theme";
 import { fmt } from "../../utils/format";
 import { CLOSING_COSTS, TRID_BUCKETS } from "../../data/content";
@@ -11,6 +11,7 @@ export function ClosingCosts({ navTarget }) {
   const [openItem, setOpenItem] = useState(null);
   const [openTrid, setOpenTrid] = useState(null);
   const [costPrice, setCostPrice] = useState(350000);
+  const priceInputId = useId();
   useEffect(() => {
     if (navTarget?.section === "costs") {
       if (navTarget.step === "top") {
@@ -41,10 +42,10 @@ export function ClosingCosts({ navTarget }) {
           </p>
           <div style={{ display: "flex", gap: 12, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 20 }}>
             <div style={{ flex: "1 1 200px" }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Purchase Price</label>
+              <label htmlFor={priceInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Purchase Price</label>
               <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "9px 12px" }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
-                <input type="text" inputMode="decimal" value={costPrice.toLocaleString("en-US")}
+                <input id={priceInputId} type="text" inputMode="decimal" value={costPrice.toLocaleString("en-US")}
                   onChange={(e) => { const v = parseFloat(e.target.value.replace(/,/g, "")); if (!isNaN(v)) setCostPrice(v); }}
                   style={{ flex: 1, border: "none", background: "transparent", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", width: "100%" }}
                 />

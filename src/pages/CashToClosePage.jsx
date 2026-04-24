@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from "../data/taxRates";
 import { fmt } from "../utils/format";
@@ -131,6 +131,7 @@ export function CashToClosePage() {
     const d = new Date(); d.setDate(d.getDate() + 30);
     return d.toISOString().split("T")[0];
   });
+  const closeDateId = useId();
   const paramState = params.get("state");
   const paramMetro = params.get("metro");
   const [stateCode, setStateCode] = useState(paramState || "TN");
@@ -616,8 +617,8 @@ export function CashToClosePage() {
           {/* Tier 4 — Close Date (left) + State/County stack (right) */}
           <div className="ctc-loc-grid">
             <div className="ctc-date-cell">
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Estimated Close Date</label>
-              <input type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, WebkitAppearance: "none" }} />
+              <label htmlFor={closeDateId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Estimated Close Date</label>
+              <input id={closeDateId} type="date" value={closeDate} onChange={(e) => setCloseDate(e.target.value)} style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, WebkitAppearance: "none" }} />
             </div>
             <div className="ctc-location-stack">
               <div>

@@ -62,6 +62,7 @@ export function JargonDecoder() {
             <input
               type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Search terms..."
+              aria-label="Search mortgage terms"
               style={{ flex: 1, border: "none", background: "transparent", fontSize: 14, fontFamily: F.body, color: P.text, outline: "none" }}
             />
             {search && <button onClick={() => setSearch("")} style={{ background: "none", border: "none", fontSize: 16, color: P.warmGrayLight, cursor: "pointer" }}>✕</button>}

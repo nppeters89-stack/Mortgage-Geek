@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
@@ -51,6 +51,7 @@ export function CalculatorPage() {
   const taxRate = selectedMetro ? selectedMetro.rate : stateData?.rate || 0.56;
   const loanLimits = selectedMetro?.limits || stateData?.limits || DEFAULT_LIMITS;
   const [taxes, setTaxes] = useState(Math.round((350000 * (0.95 / 100)) / 12));
+  const taxesInputId = useId();
   useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, taxMetro, homePrice]);
   // Reset metro when state changes
   useEffect(() => {
@@ -323,10 +324,11 @@ export function CalculatorPage() {
                   )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
+                  <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
                   <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                     <input
+                      id={taxesInputId}
                       type="text"
                       inputMode="decimal"
                       value={taxes.toLocaleString("en-US")}
@@ -642,12 +644,13 @@ export function CalculatorPage() {
                               </div>
                             ) : (
                               <div>
-                                <label style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>
+                                <label htmlFor={`extra-payment-${prog.name}`} style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>
                                   Extra {cfg.strategy === "annual" ? "per year" : "per month"}
                                 </label>
                                 <div style={{ position: "relative" }}>
                                   <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", fontSize: 13, color: P.warmGrayLight, fontWeight: 600 }}>$</span>
                                   <input
+                                    id={`extra-payment-${prog.name}`}
                                     type="number"
                                     min="0"
                                     value={cfg.amount || ""}
