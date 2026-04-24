@@ -14,12 +14,22 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
     <>
       <div className={`mobile-bar ${mobileOpen ? "mobile-bar-open" : ""}`}>
         <div className="mobile-bar-inner">
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <a
+            href="/"
+            onClick={(e) => {
+              if (window.location.pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                setMobileOpen(false);
+              }
+            }}
+            style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", color: "inherit", cursor: "pointer" }}
+          >
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <span style={{ fontSize: 16, lineHeight: 1 }}>🤓</span>
             </div>
             <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
-          </div>
+          </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
             {mobileOpen ? "✕" : "☰"}
           </button>
@@ -31,10 +41,22 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.gold}`, background: "rgba(255,255,255,0.05)" }}>
               <img src={HEADSHOT} alt="Nick Peters, mortgage loan officer" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
-            <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
-              <span style={{ fontSize: 26, lineHeight: 1 }}>🤓</span>
-            </div>
-            <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
+            <a
+              href="/"
+              onClick={(e) => {
+                if (window.location.pathname === "/") {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  setMobileOpen(false);
+                }
+              }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer" }}
+            >
+              <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
+                <span style={{ fontSize: 26, lineHeight: 1 }}>🤓</span>
+              </div>
+              <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
+            </a>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <a href="/about" style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textDecoration: "none", marginTop: 6, display: "inline-block", transition: "color 0.15s" }} onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.7)"} onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.35)"}>About Nick →</a>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}><a href="tel:+16156560737" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>(615) 656-0737</a></p>
