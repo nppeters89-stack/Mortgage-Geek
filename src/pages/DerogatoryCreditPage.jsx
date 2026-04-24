@@ -132,7 +132,7 @@ export function DerogatoryCreditPage() {
   };
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
       <SEOHead
         title="FHA, VA, Conventional Bankruptcy Wait Periods — 2026 Complete Guide"
         description="Full comparison of mortgage wait periods after bankruptcy, foreclosure, short sale, and late payments. Conventional, FHA, VA, USDA — with handbook citations."
@@ -226,7 +226,7 @@ export function DerogatoryCreditPage() {
                   }}
                 >
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, fontWeight: 400, lineHeight: 1.2, marginBottom: 4 }}>{acc.title}</h3>
+                    <h2 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, fontWeight: 400, lineHeight: 1.2, marginBottom: 4 }}>{acc.title}</h2>
                     {!isOpen && (
                       <p style={{ fontSize: 13, color: P.warmGray, lineHeight: 1.5 }}>{acc.summary}</p>
                     )}
@@ -294,6 +294,6 @@ export function DerogatoryCreditPage() {
       </div>
 
       <MobileToolbar />
-    </div>
+    </main>
   );
 }

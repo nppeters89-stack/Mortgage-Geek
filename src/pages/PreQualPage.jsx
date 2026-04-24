@@ -217,7 +217,7 @@ export function PreQualPage() {
   });
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
         title="Pre-Qualification Calculator — See What Mortgage You Can Afford"
         description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, and VA. Free pre-qualification estimate, no credit check."
@@ -636,6 +636,6 @@ export function PreQualPage() {
         </div>
       </div>
       <MobileToolbar />
-    </div>
+    </main>
   );
 }

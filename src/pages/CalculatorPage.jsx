@@ -195,7 +195,7 @@ export function CalculatorPage() {
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
         title="Mortgage Calculator — Compare Conventional, FHA, and VA Side by Side"
         description="Calculate monthly payments and see how Conventional, FHA, and VA loans compare for the same home. Includes PMI, MIP, and live rates."
@@ -939,6 +939,6 @@ export function CalculatorPage() {
         </div>
       </div>
       <MobileToolbar hrefOverrides={{ "/prequal": `/prequal?down=${downPct}&term=${term}` }} />
-    </div>
+    </main>
   );
 }

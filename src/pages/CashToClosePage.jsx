@@ -489,7 +489,7 @@ export function CashToClosePage() {
   );
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
         title="Cash to Close Calculator — Estimate Your Closing Costs by State"
         description="See exactly how much cash you need at closing. Includes down payment, closing costs, prepaids, and escrows — calculated for your specific state and county."
@@ -880,6 +880,6 @@ export function CashToClosePage() {
         </p>
       </div>
       <MobileToolbar />
-    </div>
+    </main>
   );
 }

@@ -46,7 +46,7 @@ export function InstallPage() {
   );
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
       <SEOHead
         title="Install The Mortgage Geek — Add to Home Screen"
         description="Install The Mortgage Geek as an app on your phone or tablet. Access mortgage calculators and guides offline, anytime."
@@ -121,6 +121,6 @@ export function InstallPage() {
           Questions? Call Nick at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a>. No account needed — just tap the icon.
         </p>
       </div>
-    </div>
+    </main>
   );
 }

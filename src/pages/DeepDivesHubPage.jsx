@@ -14,7 +14,7 @@ export function DeepDivesHubPage() {
   ];
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
       <SEOHead
         title="Mortgage Deep Dives — Detailed Guides for Every Loan Question"
         description="Comprehensive comparison guides for complex mortgage scenarios. Bankruptcy wait periods, manual underwriting, gift funds — real answers from a 12-year pro."
@@ -78,6 +78,6 @@ export function DeepDivesHubPage() {
       </div>
 
       <MobileToolbar />
-    </div>
+    </main>
   );
 }

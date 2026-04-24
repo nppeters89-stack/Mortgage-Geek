@@ -32,7 +32,7 @@ export function ComparePage() {
   const lowestTotal = scenarios.length > 0 ? Math.min(...scenarios.map(s => s.total)) : 0;
 
   return (
-    <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
         title="Side-by-Side Loan Comparison Tool — Save and Compare Scenarios"
         description="Save up to 3 loan scenarios and compare them side by side. Different rates, terms, down payments — see the real difference in monthly payment and total cost."
@@ -266,6 +266,6 @@ export function ComparePage() {
         </div>
       </div>
       <MobileToolbar />
-    </div>
+    </main>
   );
 }
