@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { WelcomeToast } from "./components/WelcomeToast";
-import { AboutPage } from "./pages/AboutPage";
-import { ComparePage } from "./pages/ComparePage";
-import { CashToClosePage } from "./pages/CashToClosePage";
-import { PreQualPage } from "./pages/PreQualPage";
-import { CalculatorPage } from "./pages/CalculatorPage";
-import { InstallPage } from "./pages/InstallPage";
-import { DeepDivesHubPage } from "./pages/DeepDivesHubPage";
-import { DerogatoryCreditPage } from "./pages/DerogatoryCreditPage";
-import { MainSite } from "./pages/MainSite";
+
+const AboutPage = lazy(() => import("./pages/AboutPage").then(m => ({ default: m.AboutPage })));
+const ComparePage = lazy(() => import("./pages/ComparePage").then(m => ({ default: m.ComparePage })));
+const CashToClosePage = lazy(() => import("./pages/CashToClosePage").then(m => ({ default: m.CashToClosePage })));
+const PreQualPage = lazy(() => import("./pages/PreQualPage").then(m => ({ default: m.PreQualPage })));
+const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then(m => ({ default: m.CalculatorPage })));
+const InstallPage = lazy(() => import("./pages/InstallPage").then(m => ({ default: m.InstallPage })));
+const DeepDivesHubPage = lazy(() => import("./pages/DeepDivesHubPage").then(m => ({ default: m.DeepDivesHubPage })));
+const DerogatoryCreditPage = lazy(() => import("./pages/DerogatoryCreditPage").then(m => ({ default: m.DerogatoryCreditPage })));
+const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -36,5 +37,26 @@ export default function MortgageLandingPage() {
     return <MainSite />;
   };
 
-  return (<>{renderPage()}<WelcomeToast /></>);
+  return (
+    <>
+      <Suspense fallback={
+        <div style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#FAF7F2",
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "14px",
+          color: "#6B6358",
+          letterSpacing: "0.5px"
+        }}>
+          Loading…
+        </div>
+      }>
+        {renderPage()}
+      </Suspense>
+      <WelcomeToast />
+    </>
+  );
 }
