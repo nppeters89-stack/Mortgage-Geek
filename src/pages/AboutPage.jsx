@@ -39,7 +39,7 @@ export function AboutPage() {
             <img src={HEADSHOT} alt="Nick Peters, mortgage loan officer with 12+ years of experience" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
             <h1 style={{ fontFamily: F.display, fontSize: "clamp(28px, 4vw, 38px)", color: P.navy, marginBottom: 6 }}>Nick Peters</h1>
             <p style={{ fontSize: 14, color: P.warmGray }}>Mortgage Loan Originator · NMLS# 1119524</p>
             <p style={{ fontSize: 13, color: P.warmGrayLight, marginTop: 2 }}>Nashville, TN · Licensed since 2014</p>

@@ -304,7 +304,7 @@ export function InterestRates({ navTarget }) {
             {/* Side-by-side lender comparison */}
             <div className="content-card" style={{ padding: 28, marginBottom: 20 }}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Real-World Example</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Real-World Example</span>
                 <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 6 }}>Same Rate. Different Cost.</h4>
                 <p style={{ fontSize: 13, color: P.warmGray }}>FHA loan · $300,000 · 3.5% down · {exRate.toFixed(3)}% note rate · 30-year fixed</p>
               </div>

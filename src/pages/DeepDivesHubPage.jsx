@@ -41,7 +41,7 @@ export function DeepDivesHubPage() {
       <div className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <span style={{ fontSize: 36, display: "block", marginBottom: 12 }}>🐳</span>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 10 }}>Deep Dives</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 10 }}>Deep Dives</span>
           <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, marginBottom: 14 }}>
             Where <em style={{ fontStyle: "italic", color: P.gold }}>real questions</em> get real answers.
           </h1>

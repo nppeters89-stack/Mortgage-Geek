@@ -258,7 +258,7 @@ export function CalculatorPage() {
 
       <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
             Mortgage Calculator
             <MortgageCalcIcon size={26} />
@@ -427,7 +427,7 @@ export function CalculatorPage() {
           <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
             <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
             <div style={{ position: "relative", display: "inline-block", background: P.creamDark, padding: "0 20px" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold }}>↓ Your Results ↓</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>↓ Your Results ↓</span>
               <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to select it, then save to the Loan Comparison Tool</p>
             </div>
           </div>
@@ -476,7 +476,7 @@ export function CalculatorPage() {
                       The {prog.name} loan limit for this area is <strong style={{ color: P.text }}>{fmt(prog.loanLimit)}</strong>. Your current loan amount of <strong style={{ color: P.text }}>{fmt(baseLoan)}</strong> exceeds it.
                     </p>
                     <div style={{ background: "rgba(184, 134, 11, 0.08)", border: "1px solid rgba(184, 134, 11, 0.25)", borderRadius: 8, padding: "10px 12px" }}>
-                      <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.gold, marginBottom: 4 }}>To Qualify</p>
+                      <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldMuted, marginBottom: 4 }}>To Qualify</p>
                       <p style={{ fontSize: 13, color: P.text, lineHeight: 1.5 }}>
                         Increase down payment to at least <strong>{fmt(neededDown)}</strong> ({neededPct.toFixed(1)}%)
                       </p>
@@ -743,7 +743,7 @@ export function CalculatorPage() {
                               return (
                                 <div style={{ marginTop: 12, background: "linear-gradient(135deg, " + P.creamDark + " 0%, " + P.cream + " 100%)", borderRadius: 8, padding: "14px 12px" }}>
                                   <div style={{ textAlign: "center", marginBottom: 12 }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 2 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 2 }}>
                                       Your Impact
                                     </span>
                                     <div style={{ fontFamily: F.display, fontSize: 17, color: P.navy }}>
@@ -771,7 +771,7 @@ export function CalculatorPage() {
                                     </div>
 
                                     <div style={{ background: "#fff", borderRadius: 6, padding: "10px 11px", borderTop: `2px solid ${P.gold}` }}>
-                                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.gold, marginBottom: 4 }}>
+                                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 4 }}>
                                         With extra
                                       </div>
                                       <div style={{ marginBottom: 6 }}>

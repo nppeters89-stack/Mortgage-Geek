@@ -52,7 +52,7 @@ export function GiftFundsGrid() {
       </div>
 
       <div style={{ background: P.white, borderLeft: `3px solid ${P.gold}`, padding: "14px 18px", borderRadius: "0 8px 8px 0", marginTop: 14 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Privacy Tip</span>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 5 }}>🤓 Privacy Tip</span>
         <p style={{ fontSize: 13, lineHeight: 1.65, color: P.text, fontWeight: 600, marginBottom: 6 }}>
           Keep the gift in the donor's account until closing — and we won't need their bank statements.
         </p>

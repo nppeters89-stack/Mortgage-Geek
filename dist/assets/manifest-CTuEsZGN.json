@@ -1,0 +1,62 @@
+{
+  "name": "The Mortgage Geek",
+  "short_name": "Mortgage Geek",
+  "description": "Mortgages demystified. Compare loan programs, estimate cash to close, and understand the mortgage process in plain language.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAF7F2",
+  "theme_color": "#0F2530",
+  "scope": "/",
+  "lang": "en-US",
+  "categories": ["finance", "productivity", "business"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Payment Calculator",
+      "short_name": "Calculator",
+      "description": "Compare loan program payments side by side",
+      "url": "/calculator",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pre-Qual Simulator",
+      "short_name": "Pre-Qual",
+      "description": "Estimate how much home you can afford",
+      "url": "/prequal",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Cash to Close",
+      "short_name": "Cash to Close",
+      "description": "See how much cash you need at closing",
+      "url": "/cash-to-close",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

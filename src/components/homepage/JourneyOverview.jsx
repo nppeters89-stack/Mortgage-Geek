@@ -52,7 +52,7 @@ export function JourneyOverview({ onNavigate }) {
           {/* Contract signed divider — perfectly centered */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "20px 0" }}>
             <div style={{ flex: 1, height: 1, background: P.creamDark }} />
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: P.gold, whiteSpace: "nowrap" }}>▼ CONTRACT SIGNED ▼</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: P.goldMuted, whiteSpace: "nowrap" }}>▼ CONTRACT SIGNED ▼</span>
             <div style={{ flex: 1, height: 1, background: P.creamDark }} />
           </div>
 

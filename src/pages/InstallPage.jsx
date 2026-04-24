@@ -65,7 +65,7 @@ export function InstallPage() {
 
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 640, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>One-Tap Access</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>One-Tap Access</span>
           <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 10 }}>Install The Mortgage Geek</h1>
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 520, margin: "0 auto", lineHeight: 1.6 }}>Add this site to your home screen and it works like a real app — launches full-screen with its own icon, opens faster, and works offline.</p>
         </div>
