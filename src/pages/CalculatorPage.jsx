@@ -7,6 +7,7 @@ import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
+import { SEOHead } from "../components/SEOHead";
 
 export function CalculatorPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -194,6 +195,11 @@ export function CalculatorPage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+      <SEOHead
+        title="Mortgage Calculator — Compare Conventional, FHA, and VA Side by Side"
+        description="Calculate monthly payments and see how Conventional, FHA, and VA loans compare for the same home. Includes PMI, MIP, and live rates."
+        path="/calculator"
+      />
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }

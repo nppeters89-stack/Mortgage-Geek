@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
+import { SEOHead } from "../components/SEOHead";
 
 export function DerogatoryCreditPage() {
   const [openAccordion, setOpenAccordion] = useState("chapter7");
@@ -131,6 +132,11 @@ export function DerogatoryCreditPage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
+      <SEOHead
+        title="FHA, VA, Conventional Bankruptcy Wait Periods — 2026 Complete Guide"
+        description="Full comparison of mortgage wait periods after bankruptcy, foreclosure, short sale, and late payments. Conventional, FHA, VA, USDA — with handbook citations."
+        path="/deep-dives/derogatory-credit"
+      />
       <style>{globalCSS}</style>
       <style>{`
         .dd-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; }

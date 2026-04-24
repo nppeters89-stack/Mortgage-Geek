@@ -7,6 +7,7 @@ import { CashToCloseIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
+import { SEOHead } from "../components/SEOHead";
 
 export function CashToClosePage() {
   // Tax reserves prepaid schedule by state — # of months collected based on closing month
@@ -488,6 +489,11 @@ export function CashToClosePage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+      <SEOHead
+        title="Cash to Close Calculator — Estimate Your Closing Costs by State"
+        description="See exactly how much cash you need at closing. Includes down payment, closing costs, prepaids, and escrows — calculated for your specific state and county."
+        path="/cash-to-close"
+      />
       <style>{globalCSS}{`
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 600px) { .ctc-grid { grid-template-columns: 1fr; } }

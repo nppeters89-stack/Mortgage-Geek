@@ -16,6 +16,7 @@ import { PreApprovalChecklist } from "../components/homepage/PreApprovalChecklis
 import { NextSteps } from "../components/homepage/NextSteps";
 import { ToolsCTA } from "../components/homepage/ToolsCTA";
 import { JargonDecoder } from "../components/homepage/JargonDecoder";
+import { SEOHead } from "../components/SEOHead";
 
 export function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -253,6 +254,11 @@ export function MainSite() {
 
   return (
     <div className="app-root" style={{ fontFamily: F.body, color: P.text, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
+      <SEOHead
+        title="The Mortgage Geek — Plain-English Mortgage Tools & Guides"
+        description="Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm."
+        path="/"
+      />
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>

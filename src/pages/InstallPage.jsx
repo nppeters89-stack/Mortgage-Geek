@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
+import { SEOHead } from "../components/SEOHead";
 
 export function InstallPage() {
   // Auto-detect OS from user agent. Default to iOS if unclear (iOS has the worst
@@ -46,6 +47,11 @@ export function InstallPage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
+      <SEOHead
+        title="Install The Mortgage Geek — Add to Home Screen"
+        description="Install The Mortgage Geek as an app on your phone or tablet. Access mortgage calculators and guides offline, anytime."
+        path="/install"
+      />
       <style>{globalCSS}</style>
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>

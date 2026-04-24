@@ -1,10 +1,16 @@
 import { P, F, globalCSS } from "../theme";
 import { HEADSHOT } from "../data/headshot";
 import { MobileToolbar } from "../components/MobileToolbar";
+import { SEOHead } from "../components/SEOHead";
 
 export function AboutPage() {
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+      <SEOHead
+        title="About Nick Peters — Mortgage Loan Officer | NMLS# 1119524"
+        description="12+ years helping first-time buyers through the mortgage process. Licensed in multiple states. Straight answers, no jargon — based in Tennessee."
+        path="/about"
+      />
       <style>{globalCSS}</style>
 
       {/* Header */}

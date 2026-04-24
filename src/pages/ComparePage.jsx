@@ -3,6 +3,7 @@ import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { fmt } from "../utils/format";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
+import { SEOHead } from "../components/SEOHead";
 
 export function ComparePage() {
   const STORAGE_KEY = "mg_compare_scenarios";
@@ -31,6 +32,11 @@ export function ComparePage() {
 
   return (
     <div style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+      <SEOHead
+        title="Side-by-Side Loan Comparison Tool — Save and Compare Scenarios"
+        description="Save up to 3 loan scenarios and compare them side by side. Different rates, terms, down payments — see the real difference in monthly payment and total cost."
+        path="/compare"
+      />
       <style>{globalCSS}{`
         .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }
         .compare-card { width: 320px; flex-shrink: 0; }
