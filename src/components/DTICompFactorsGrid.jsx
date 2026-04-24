@@ -5,14 +5,14 @@ const ROWS = [
   {
     id: "sub-580",
     score: "500–579 or no score",
-    ratios: "31 / 43",
+    ratios: "31% / 43%",
     summary: "Compensating factors not available",
     detail: {
       text: "Borrowers with scores below 580 or no credit score cannot exceed 31/43 on a manual. Compensating factors can't stretch this tier.",
       bullets: [
         "Housing ratio cap: 31%",
         "Total DTI cap: 43%",
-        "Energy-efficient homes may stretch to 33 / 45",
+        "Energy-efficient homes may stretch to 33% / 45%",
         "No compensating factors can unlock higher ratios at this credit tier",
       ],
     },
@@ -20,14 +20,14 @@ const ROWS = [
   {
     id: "baseline",
     score: "580 and above",
-    ratios: "31 / 43",
+    ratios: "31% / 43%",
     summary: "No compensating factors required",
     detail: {
       text: "This is the baseline tier. If your ratios are at or below 31/43, you don't need to document any compensating factors on a manual.",
       bullets: [
         "Housing ratio cap: 31%",
         "Total DTI cap: 43%",
-        "Energy-efficient homes may stretch to 33 / 45",
+        "Energy-efficient homes may stretch to 33% / 45%",
         "Still requires the 1-month reserves baseline from borrower's own funds",
       ],
     },
@@ -35,7 +35,7 @@ const ROWS = [
   {
     id: "one-factor",
     score: "580 and above",
-    ratios: "37 / 47",
+    ratios: "37% / 47%",
     summary: "One compensating factor required",
     detail: {
       text: "To stretch into this tier, you need ONE of the following documented compensating factors:",
@@ -49,7 +49,7 @@ const ROWS = [
   {
     id: "no-disc",
     score: "580 and above",
-    ratios: "40 / 40",
+    ratios: "40% / 40%",
     summary: "No discretionary debt (sole factor)",
     detail: {
       text: "This tier is unique. The ONLY compensating factor that qualifies is no discretionary debt, and it stands alone.",
@@ -64,14 +64,14 @@ const ROWS = [
   {
     id: "two-factors",
     score: "580 and above",
-    ratios: "40 / 50",
+    ratios: "40% / 50%",
     summary: "Two compensating factors required",
     detail: {
       text: "The top tier HUD allows on a manual. Needs TWO of the following documented factors:",
       bullets: [
         "Verified cash reserves (3+ months for 1–2 unit, 6+ months for 3–4 unit)",
         "Minimal increase in housing payment (within $100 or 5% of current)",
-        "Significant additional income not included in qualifying income (12+ months history, documented to continue, only usable between 37/47 and 40/50)",
+        "Significant additional income not included in qualifying income (12+ months history, documented to continue, only usable between 37% / 47% and 40% / 50%)",
         "Residual income meeting VA's regional standard",
       ],
     },

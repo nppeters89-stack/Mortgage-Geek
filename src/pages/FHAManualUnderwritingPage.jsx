@@ -376,11 +376,11 @@ export function FHAManualUnderwritingPage() {
 
         <H3>How to read this grid</H3>
         <Para>
-          The grid shows the maximum ratios HUD allows at each credit tier. Your ratios are:
+          The grid shows the maximum ratios HUD allows at each credit tier. In each "X% / Y%" pair, the first number is your housing ratio and the second is your total DTI:
         </Para>
         <Bullets items={[
-          "**Housing ratio (front-end):** Proposed PITI (principal, interest, taxes, insurance) divided by gross monthly income",
-          "**Total DTI (back-end):** All monthly debts (including the proposed PITI) divided by gross monthly income",
+          "**First number — Housing ratio (front-end):** Proposed PITI (principal, interest, taxes, insurance) divided by gross monthly income",
+          "**Second number — Total DTI (back-end):** All monthly debts (including the proposed PITI) divided by gross monthly income",
         ]} />
         <Para>
           If your ratios fall below the "no compensating factors required" tier, you don't need to document comp factors on a manual. If they push higher, you need enough documented comp factors to support the next tier up. Not sure what your ratios actually are? The <a href="/calculator" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>payment calculator</a> and <a href="/prequal" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>pre-qualification tool</a> give you a working estimate in under a minute.
@@ -535,7 +535,7 @@ export function FHAManualUnderwritingPage() {
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Working through a manual underwrite?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>nick@mortgagegeek.ai</a>.
+            Call me at <a href="tel:+16156560737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Real-world scenario questions are my favorite kind of conversation.
