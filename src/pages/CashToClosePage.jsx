@@ -132,6 +132,11 @@ export function CashToClosePage() {
     return d.toISOString().split("T")[0];
   });
   const closeDateId = useId();
+  const termSelectId = useId();
+  const stateSelectId = useId();
+  const metroSelectId = useId();
+  const vaUsageSelectId = useId();
+  const waiveEscrowsSelectId = useId();
   const paramState = params.get("state");
   const paramMetro = params.get("metro");
   const [stateCode, setStateCode] = useState(paramState || "TN");
@@ -560,8 +565,8 @@ export function CashToClosePage() {
           {/* Tier 2 — Term + Home Price */}
           <div className="ctc-grid">
             <div>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Loan Term</label>
-              <select value={term} onChange={(e) => setTerm(parseInt(e.target.value))} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+              <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>Loan Term</label>
+              <select id={termSelectId} value={term} onChange={(e) => setTerm(parseInt(e.target.value))} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
                 <option value={30}>30 years</option>
                 <option value={15}>15 years</option>
               </select>
@@ -622,8 +627,8 @@ export function CashToClosePage() {
             </div>
             <div className="ctc-location-stack">
               <div>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
-                <select value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                <label htmlFor={stateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>State</label>
+                <select id={stateSelectId} value={stateCode} onChange={(e) => setStateCode(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
                   {ALL_STATES_LIST.map(([code, name]) => (
                     <option key={code} value={code}>{name}</option>
                   ))}
@@ -631,8 +636,8 @@ export function CashToClosePage() {
               </div>
               {hasMetros ? (
                 <div>
-                  <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
-                  <select value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+                  <label htmlFor={metroSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>County / Metro Area</label>
+                  <select id={metroSelectId} value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
                     {Object.entries(CASH_STATE_METROS[stateCode]?.metros || {}).map(([name, r]) => (
                       <option key={name} value={name}>{name}</option>
                     ))}
@@ -654,8 +659,8 @@ export function CashToClosePage() {
 
           {program === "VA" && (
             <div style={{ marginTop: 12 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>VA Eligibility</label>
-              <select value={vaUsage} onChange={(e) => setVaUsage(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
+              <label htmlFor={vaUsageSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 5 }}>VA Eligibility</label>
+              <select id={vaUsageSelectId} value={vaUsage} onChange={(e) => setVaUsage(e.target.value)} style={{ width: "100%", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none" }}>
                 <option value="first">First-Time Use</option>
                 <option value="subsequent">Subsequent Use</option>
                 <option value="exempt">Exempt (Disability)</option>
@@ -760,8 +765,9 @@ export function CashToClosePage() {
               {program === "Conventional" ? (
                 <div style={{ marginBottom: 12, padding: "10px 12px", background: P.white, borderRadius: 8, border: `1px solid ${P.creamDark}`, opacity: canWaiveEscrows ? 1 : 0.5 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                    <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Waive Escrows?</label>
+                    <label htmlFor={waiveEscrowsSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Waive Escrows?</label>
                     <select
+                      id={waiveEscrowsSelectId}
                       value={waiveEscrows ? "yes" : "no"}
                       onChange={(e) => setWaiveEscrows(e.target.value === "yes")}
                       disabled={!canWaiveEscrows}
