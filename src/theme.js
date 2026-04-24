@@ -5,8 +5,8 @@ export const P = {
   navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
   gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
   cream: "#FAF7F2", creamDark: "#F0EBE3",
-  warmGray: "#6B6358", warmGrayLight: "#9B9488",
-  white: "#FFFFFF", sage: "#5A7A6E",
+  warmGray: "#6B6358", warmGrayLight: "#6F6860",
+  white: "#FFFFFF", sage: "#5A7A6E", sageDark: "#3F5A4F",
   text: "#2C2825", textLight: "#5C5650",
 };
 
@@ -66,7 +66,7 @@ export const globalCSS = `
 
   .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #9B9488; cursor: pointer; transition: all 0.15s; }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #6F6860; cursor: pointer; transition: all 0.15s; }
   .tab-btn:hover { border-color: #1B3A4B; color: #1B3A4B; }
   .tab-btn-active { background: #1B3A4B !important; color: #fff !important; border-color: #1B3A4B !important; }
 
@@ -75,7 +75,7 @@ export const globalCSS = `
   .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B6358; cursor: pointer; text-align: left; transition: all 0.15s; }
   .process-step:hover { background: rgba(255,255,255,0.6); }
   .process-step-active { background: #fff !important; color: #2C2825 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #9B9488; min-width: 28px; line-height: 1.3; }
+  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #6F6860; min-width: 28px; line-height: 1.3; }
   .process-num-active { color: #B8860B !important; }
   .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
 
