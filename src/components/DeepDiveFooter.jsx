@@ -3,12 +3,13 @@ import { P, F } from "../theme";
 export function DeepDiveFooter() {
   return (
     <footer style={{ borderTop: `1px solid ${P.creamDark}`, marginTop: 48, paddingTop: 28, paddingBottom: 16, textAlign: "center" }}>
-      <p style={{ fontFamily: F.display, fontSize: 15, color: P.navy, marginBottom: 4 }}>
+      <p style={{ fontFamily: F.display, fontSize: 15, color: P.navy, marginBottom: 6 }}>
         Nick Peters <span style={{ color: P.gold }}>🤓</span>
       </p>
-      <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-        <span>NMLS# 1119524</span>
-        <span aria-hidden="true">·</span>
+      <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, marginBottom: 6 }}>
+        NMLS# 1119524
+      </p>
+      <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
         <svg
           width="12"
           height="13"
