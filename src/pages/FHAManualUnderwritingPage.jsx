@@ -367,41 +367,52 @@ export function FHAManualUnderwritingPage() {
           <TipBody text="A common piece of bad advice floating around online is &quot;dispute your negative accounts before you apply for a mortgage.&quot; If you follow that advice and push your disputed balance above $1,000, you just forced yourself into a manual underwrite. Talk to an LO before disputing anything within 6 months of a loan application." />
         </GeekTip>
 
-        <div style={{ textAlign: "center", marginTop: 56, marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 14 }}>
-            <div style={{ width: 48, height: 1, background: P.gold }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldMuted }}>
-              HUD 4000.1 · The Chart
-            </span>
-            <div style={{ width: 48, height: 1, background: P.gold }} />
+        <div style={{
+          background: P.creamDark,
+          marginLeft: "calc(-1 * (100vw - 100%) / 2)",
+          marginRight: "calc(-1 * (100vw - 100%) / 2)",
+          paddingLeft: "calc((100vw - 100%) / 2)",
+          paddingRight: "calc((100vw - 100%) / 2)",
+          paddingTop: 48,
+          paddingBottom: 56,
+          marginTop: 48,
+        }}>
+          <div style={{ textAlign: "center", marginBottom: 22 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginBottom: 14 }}>
+              <div style={{ width: 48, height: 1, background: P.gold }} />
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldMuted }}>
+                HUD 4000.1 · The Chart
+              </span>
+              <div style={{ width: 48, height: 1, background: P.gold }} />
+            </div>
+            <h2 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3.2vw, 32px)", color: P.navy, fontWeight: 500, lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 1.5, margin: 0 }}>
+              FHA Manual DTI &amp; Compensating Factors Grid
+            </h2>
           </div>
-          <h2 style={{ fontFamily: F.display, fontSize: "clamp(22px, 3.2vw, 32px)", color: P.navy, fontWeight: 400, lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 1.5, margin: 0 }}>
-            FHA Manual DTI &amp; Compensating Factors Grid
-          </h2>
+          <Para>
+            This is the piece of FHA manual underwriting that most borrowers have never seen, and it's the single most important chart in HUD 4000.1 for anyone trying to figure out whether they can get approved on a manual.
+          </Para>
+          <Para>
+            The grid shows the maximum debt-to-income ratios HUD allows on a manual underwrite, based on the borrower's credit score and what compensating factors are documented. Higher DTI requires more (and more specific) compensating factors.
+          </Para>
+          <Para>
+            Click any row to expand the requirements.
+          </Para>
+
+          <DTICompFactorsGrid />
+
+          <H3>How to read this grid</H3>
+          <Para>
+            The grid shows the maximum ratios HUD allows at each credit tier. In each "X% / Y%" pair, the first number is your housing ratio and the second is your total DTI:
+          </Para>
+          <Bullets items={[
+            "**First number — Housing ratio (front-end):** Proposed PITI (principal, interest, taxes, insurance) divided by gross monthly income",
+            "**Second number — Total DTI (back-end):** All monthly debts (including the proposed PITI) divided by gross monthly income",
+          ]} />
+          <Para>
+            If your ratios fall below the "no compensating factors required" tier, you don't need to document comp factors on a manual. If they push higher, you need enough documented comp factors to support the next tier up. Not sure what your ratios actually are? The <a href="/calculator" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>payment calculator</a> and <a href="/prequal" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>pre-qualification tool</a> give you a working estimate in under a minute.
+          </Para>
         </div>
-        <Para>
-          This is the piece of FHA manual underwriting that most borrowers have never seen, and it's the single most important chart in HUD 4000.1 for anyone trying to figure out whether they can get approved on a manual.
-        </Para>
-        <Para>
-          The grid shows the maximum debt-to-income ratios HUD allows on a manual underwrite, based on the borrower's credit score and what compensating factors are documented. Higher DTI requires more (and more specific) compensating factors.
-        </Para>
-        <Para>
-          Click any row to expand the requirements.
-        </Para>
-
-        <DTICompFactorsGrid />
-
-        <H3>How to read this grid</H3>
-        <Para>
-          The grid shows the maximum ratios HUD allows at each credit tier. In each "X% / Y%" pair, the first number is your housing ratio and the second is your total DTI:
-        </Para>
-        <Bullets items={[
-          "**First number — Housing ratio (front-end):** Proposed PITI (principal, interest, taxes, insurance) divided by gross monthly income",
-          "**Second number — Total DTI (back-end):** All monthly debts (including the proposed PITI) divided by gross monthly income",
-        ]} />
-        <Para>
-          If your ratios fall below the "no compensating factors required" tier, you don't need to document comp factors on a manual. If they push higher, you need enough documented comp factors to support the next tier up. Not sure what your ratios actually are? The <a href="/calculator" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>payment calculator</a> and <a href="/prequal" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>pre-qualification tool</a> give you a working estimate in under a minute.
-        </Para>
 
         <H3>The compensating factors, defined</H3>
         <Para>
