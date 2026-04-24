@@ -4,7 +4,7 @@ import { P, F } from "../theme";
 const ROWS = [
   {
     id: "sub-580",
-    score: "500–579 or no score",
+    score: "FICOs 500–579 or no score",
     ratios: "31% / 43%",
     summary: "Compensating factors not available",
     detail: {
@@ -19,7 +19,7 @@ const ROWS = [
   },
   {
     id: "baseline",
-    score: "580 and above",
+    score: "FICOs 580 and above",
     ratios: "31% / 43%",
     summary: "No compensating factors required",
     detail: {
@@ -34,7 +34,7 @@ const ROWS = [
   },
   {
     id: "one-factor",
-    score: "580 and above",
+    score: "FICOs 580 and above",
     ratios: "37% / 47%",
     summary: "One compensating factor required",
     detail: {
@@ -48,7 +48,7 @@ const ROWS = [
   },
   {
     id: "no-disc",
-    score: "580 and above",
+    score: "FICOs 580 and above",
     ratios: "40% / 40%",
     summary: "No discretionary debt (sole factor)",
     detail: {
@@ -63,7 +63,7 @@ const ROWS = [
   },
   {
     id: "two-factors",
-    score: "580 and above",
+    score: "FICOs 580 and above",
     ratios: "40% / 50%",
     summary: "Two compensating factors required",
     detail: {
@@ -145,7 +145,7 @@ export function DTICompFactorsGrid() {
           font-weight: 700;
           letter-spacing: 2.2px;
           text-transform: uppercase;
-          color: ${P.goldLight};
+          color: ${P.gold};
           margin-bottom: 10px;
         }
         .dti-row-ratios {
