@@ -29,7 +29,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
         <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", padding: "0 0 24px" }}>
           <div className="pwa-safe-top-sidebar" style={{ padding: "16px 24px 24px", borderBottom: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <div style={{ width: 110, height: 110, borderRadius: "50%", overflow: "hidden", margin: "0 auto 16px", border: `3px solid ${P.gold}`, background: "rgba(255,255,255,0.05)" }}>
-              <img src={HEADSHOT} alt="The Mortgage Geek" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src={HEADSHOT} alt="Nick Peters, mortgage loan officer" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
               <span style={{ fontSize: 26, lineHeight: 1 }}>🤓</span>
@@ -167,7 +167,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
           <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", textAlign: "center" }}>
             <p style={{ fontSize: 10, lineHeight: 1.5, color: "rgba(255,255,255,0.25)" }}>Educational content only.<br />Not financial advice.</p>
             <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", marginTop: 6, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
-              <svg width="9" height="10" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
+              <svg width="9" height="10" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ verticalAlign: "middle" }}>
                 <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
                 <rect x="12" y="22" width="16" height="3" fill="currentColor"/>
                 <rect x="12" y="28" width="16" height="3" fill="currentColor"/>

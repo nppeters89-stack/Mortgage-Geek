@@ -36,7 +36,7 @@ export function AboutPage() {
         {/* Headshot + intro */}
         <div style={{ display: "flex", gap: 32, flexWrap: "wrap", alignItems: "center", marginBottom: 48 }}>
           <div style={{ width: 140, height: 140, borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `4px solid ${P.gold}`, boxShadow: "0 8px 30px rgba(0,0,0,0.12)" }}>
-            <img src={HEADSHOT} alt="Nick Peters" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <img src={HEADSHOT} alt="Nick Peters, mortgage loan officer with 12+ years of experience" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div style={{ flex: 1, minWidth: 220 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
