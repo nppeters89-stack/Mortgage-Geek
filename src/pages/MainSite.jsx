@@ -17,7 +17,6 @@ import { NextSteps } from "../components/homepage/NextSteps";
 import { ToolsCTA } from "../components/homepage/ToolsCTA";
 import { JargonDecoder } from "../components/homepage/JargonDecoder";
 import { SEOHead } from "../components/SEOHead";
-import { financialServiceSchema } from "../utils/schema";
 
 export function MainSite() {
   const [activeSection, setActiveSection] = useState("hero");
@@ -259,7 +258,6 @@ export function MainSite() {
         title="The Mortgage Geek — Plain-English Mortgage Tools & Guides"
         description="Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm."
         path="/"
-        schema={financialServiceSchema()}
       />
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
