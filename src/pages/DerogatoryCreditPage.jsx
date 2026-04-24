@@ -25,7 +25,7 @@ export function DerogatoryCreditPage() {
       explainer: [
         "Chapter 7 is \"liquidation\" bankruptcy — non-exempt assets sold off, unsecured debts discharged, fresh start. Because it's the more severe of the two personal bankruptcy types, every agency imposes a wait period before the borrower can qualify for a new mortgage.",
         "The clock starts on the **discharge date** (the date the court officially wiped the debts), *not* the filing date. This matters — if someone filed in January 2024 but wasn't discharged until October 2024, the wait period starts from October.",
-        "**Extenuating circumstances** can cut the wait period roughly in half, but the bar is high. The bankruptcy must have resulted from events genuinely beyond the borrower's control, documented with proof, and the borrower must have re-established a pattern of responsible credit use since. For FHA and VA specifically, these files require **manual underwriting** — meaning an actual human underwriter reviews and approves rather than the automated system.",
+        "**Extenuating circumstances** can cut the wait period roughly in half, but the bar is high. The bankruptcy must have resulted from events genuinely beyond the borrower's control, documented with proof, and the borrower must have re-established a pattern of responsible credit use since. For FHA and VA specifically, these files require [manual underwriting](/deep-dives/fha-manual-underwriting) — meaning an actual human underwriter reviews and approves rather than the automated system.",
       ],
       tip: "About 18 months past a Chapter 7 discharge with clean credit since? Don't assume you're locked out. **FHA or VA with a documented extenuating circumstances letter can cut the wait in half** — from 2 years down to 1. The bar is higher than most people expect though. Qualifying situations include extended medical crisis with documented hospital records, involuntary job loss from a company closure or layoff (not a voluntary quit), or death of a primary wage-earning spouse. What doesn't count: divorce, moving for a new job, general overspending, or a failed business due to normal market conditions. If you're not sure whether your situation meets the standard, it's worth a conversation with a loan officer before ruling yourself out.",
     },
@@ -119,13 +119,17 @@ export function DerogatoryCreditPage() {
   ];
 
   const renderBold = (text) => {
-    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+    const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
     return parts.map((part, i) => {
       if (part.startsWith("**") && part.endsWith("**")) {
         return <strong key={i} style={{ color: P.navy, fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
       }
       if (part.startsWith("*") && part.endsWith("*")) {
         return <em key={i}>{part.slice(1, -1)}</em>;
+      }
+      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (linkMatch) {
+        return <a key={i} href={linkMatch[2]} style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>{linkMatch[1]}</a>;
       }
       return part;
     });

@@ -11,6 +11,13 @@ export function DeepDivesHubPage() {
       summary: "How long you have to wait before qualifying for a mortgage after bankruptcy, foreclosure, short sale, deed-in-lieu, or late mortgage payments — compared across all five major loan programs.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "fha-manual-underwriting",
+      emoji: "📋",
+      title: "FHA Manual Underwriting",
+      summary: "What happens when FHA's automated system sends your file to a human underwriter. HUD 4000.1 credit rules, the DTI and compensating factors grid, required downgrade triggers, and how to actually get approved.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
