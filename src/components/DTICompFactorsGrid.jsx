@@ -103,65 +103,83 @@ export function DTICompFactorsGrid() {
 
   return (
     <div
-      style={{
-        background: P.white,
-        border: `1px solid ${P.creamDark}`,
-        borderRadius: 12,
-        overflow: "hidden",
-        margin: "28px 0",
-        boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-      }}
+      className="dti-container"
       role="region"
       aria-label="DTI and compensating factors grid"
     >
       <style>{`
+        .dti-container {
+          background: ${P.navyDark};
+          border: 2px solid ${P.gold};
+          border-radius: 14px;
+          overflow: hidden;
+          margin: 28px 0;
+          box-shadow: 0 8px 32px rgba(15, 37, 48, 0.22);
+        }
+        .dti-row-headers { display: none; }
         .dti-row-btn {
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr 1.6fr 36px;
-          gap: 16px;
-          align-items: center;
+          position: relative;
+          display: block;
           width: 100%;
-          min-height: 64px;
-          padding: 16px 20px;
-          background: ${P.white};
+          padding: 28px 28px;
+          background: transparent;
           border: none;
-          border-top: 1px solid ${P.creamDark};
+          border-top: 1px solid rgba(212, 168, 67, 0.18);
           border-left: 3px solid transparent;
           font-family: ${F.body};
-          font-size: 14px;
-          color: ${P.text};
-          text-align: left;
+          color: rgba(255, 255, 255, 0.75);
+          text-align: center;
           cursor: pointer;
           transition: background 0.15s, border-left-color 0.15s;
         }
         .dti-row-btn:first-of-type { border-top: none; }
-        .dti-row-btn:hover { background: ${P.cream}; }
-        .dti-row-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
+        .dti-row-btn:hover { background: rgba(255, 255, 255, 0.03); }
+        .dti-row-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
         .dti-row-btn-open {
-          background: ${P.cream} !important;
+          background: rgba(255, 255, 255, 0.04) !important;
           border-left-color: ${P.gold} !important;
         }
-        .dti-row-score { font-weight: 600; color: ${P.navy}; }
+        .dti-row-score {
+          display: block;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 2.2px;
+          text-transform: uppercase;
+          color: ${P.goldLight};
+          margin-bottom: 10px;
+        }
         .dti-row-ratios {
+          display: block;
           font-family: ${F.display};
-          font-size: 18px;
-          color: ${P.gold};
+          font-size: 48px;
+          color: ${P.goldLight};
+          line-height: 1.05;
+          margin-bottom: 12px;
         }
-        .dti-row-summary { color: ${P.warmGray}; font-size: 13px; line-height: 1.5; }
+        .dti-row-summary {
+          display: block;
+          color: rgba(255, 255, 255, 0.72);
+          font-size: 14px;
+          line-height: 1.55;
+          max-width: 560px;
+          margin: 0 auto;
+        }
         .dti-row-icon {
+          position: absolute;
+          top: 22px;
+          right: 24px;
           font-family: ${F.body};
-          font-size: 20px;
-          color: ${P.warmGrayLight};
-          justify-self: end;
-          transition: transform 0.2s;
+          font-size: 22px;
+          color: ${P.gold};
           line-height: 1;
+          transition: transform 0.2s;
         }
-        .dti-row-icon-open { transform: rotate(45deg); color: ${P.gold}; }
+        .dti-row-icon-open { transform: rotate(45deg); color: ${P.goldLight}; }
         .dti-row-detail {
           background: ${P.cream};
           border-left: 3px solid ${P.gold};
-          border-top: 1px solid ${P.creamDark};
-          padding: 20px 24px;
+          border-top: 1px solid rgba(212, 168, 67, 0.25);
+          padding: 22px 26px;
         }
         .dti-row-detail p {
           font-size: 14px;
@@ -189,52 +207,12 @@ export function DTICompFactorsGrid() {
           color: ${P.gold};
           font-weight: 700;
         }
-        .dti-row-headers {
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr 1.6fr 36px;
-          gap: 16px;
-          padding: 12px 20px;
-          background: ${P.navy};
-          color: ${P.white};
-          font-family: ${F.body};
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.8px;
-          text-transform: uppercase;
-        }
         @media (max-width: 600px) {
-          .dti-row-headers { display: none; }
-          .dti-row-btn {
-            grid-template-columns: 1fr 28px;
-            grid-template-rows: auto auto auto;
-            gap: 6px 12px;
-            padding: 14px 16px;
-            min-height: 64px;
-          }
-          .dti-row-score {
-            grid-column: 1;
-            grid-row: 1;
-            font-size: 12px;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-            color: ${P.warmGrayLight};
-            font-weight: 600;
-          }
-          .dti-row-ratios {
-            grid-column: 1;
-            grid-row: 2;
-            font-size: 22px;
-          }
-          .dti-row-summary {
-            grid-column: 1 / span 2;
-            grid-row: 3;
-          }
-          .dti-row-icon {
-            grid-column: 2;
-            grid-row: 1 / span 2;
-            align-self: center;
-          }
-          .dti-row-detail { padding: 16px 18px; }
+          .dti-row-btn { padding: 24px 22px; }
+          .dti-row-ratios { font-size: 40px; }
+          .dti-row-score { letter-spacing: 2px; }
+          .dti-row-icon { top: 20px; right: 22px; }
+          .dti-row-detail { padding: 18px 20px; }
         }
       `}</style>
 
