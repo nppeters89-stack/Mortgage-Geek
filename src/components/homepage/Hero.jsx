@@ -15,7 +15,7 @@ export function Hero({ onNavigate }) {
 
         {/* CTA row */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <a href="tel:+16156560737" style={{
+          <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "14px 24px", borderRadius: 10,
             background: P.gold, color: "#fff",
@@ -28,7 +28,7 @@ export function Hero({ onNavigate }) {
             </svg>
             <span className="btn-label-mobile-hide">Call</span>
           </a>
-          <a href="sms:+16156560737&body=Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages." style={{
+          <a href="sms:+16156560737&body=Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages." aria-label="Text Nick Peters at (615) 656-0737" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "14px 24px", borderRadius: 10,
             background: "rgba(255,255,255,0.12)", color: "#fff",
