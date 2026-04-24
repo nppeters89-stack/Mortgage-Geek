@@ -2,6 +2,7 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
+import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { articleSchema } from "../utils/schema";
 
 export function DerogatoryCreditPage() {
@@ -294,6 +295,8 @@ export function DerogatoryCreditPage() {
             Call me at <a href="tel:+16156560737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a>. Real-world guideline questions are my favorite kind of conversation.
           </p>
         </div>
+
+        <DeepDiveFooter />
 
       </div>
 

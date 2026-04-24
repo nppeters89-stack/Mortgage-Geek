@@ -1,6 +1,7 @@
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
+import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { articleSchema } from "../utils/schema";
 import { DTICompFactorsGrid } from "../components/DTICompFactorsGrid";
 
@@ -545,6 +546,8 @@ export function FHAManualUnderwritingPage() {
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
           Sources: HUD 4000.1 Single Family Housing Policy Handbook, Section II.A.5 (Manual Underwriting of the Borrower), updated 04/10/2025; HUD 4000.1 Section II.A.5.a (Credit Requirements, Manual); author's 12+ years of field experience as an FHA loan originator.
         </p>
+
+        <DeepDiveFooter />
 
       </article>
 
