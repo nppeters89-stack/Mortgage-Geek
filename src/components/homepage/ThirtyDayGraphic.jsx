@@ -2,9 +2,9 @@ import { P, F } from "../../theme";
 
 export function ThirtyDayGraphic({ activeStep }) {
   const phases = [
-    { label: "Processing", start: 0, end: 50, color: P.navy },
-    { label: "Underwriting", start: 50, end: 83, color: P.gold },
-    { label: "Closing", start: 83, end: 100, color: P.sage },
+    { label: "Processing", start: 0, end: 50, color: P.navy, labelColor: "#fff" },
+    { label: "Underwriting", start: 50, end: 83, color: P.gold, labelColor: P.navyDark },
+    { label: "Closing", start: 83, end: 100, color: P.sage, labelColor: "#fff" },
   ];
   return (
     <div className="content-card" style={{ padding: "24px", marginBottom: 28 }}>
@@ -36,7 +36,7 @@ export function ThirtyDayGraphic({ activeStep }) {
             display: "flex", alignItems: "center", justifyContent: "center",
             borderRight: i < 2 ? "2px solid rgba(255,255,255,0.5)" : "none",
           }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: 0.5, textTransform: "uppercase" }}>{p.label}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: p.labelColor, letterSpacing: 0.5, textTransform: "uppercase" }}>{p.label}</span>
           </div>
         ))}
       </div>
