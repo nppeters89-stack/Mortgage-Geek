@@ -8,6 +8,7 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
+import { webApplicationSchema } from "../utils/schema";
 
 export function PreQualPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -221,6 +222,11 @@ export function PreQualPage() {
         title="Pre-Qualification Calculator — See What Mortgage You Can Afford"
         description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, and VA. Free pre-qualification estimate, no credit check."
         path="/prequal"
+        schema={webApplicationSchema({
+          title: "Pre-Qualification Calculator — The Mortgage Geek",
+          description: "See what mortgage you can afford across Conventional, FHA, and VA based on your income and debts.",
+          url: "https://mortgagegeek.ai/prequal",
+        })}
       />
       <style>{globalCSS}{`
         .pq-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }

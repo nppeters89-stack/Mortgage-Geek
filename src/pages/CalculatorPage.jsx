@@ -8,6 +8,7 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
+import { webApplicationSchema } from "../utils/schema";
 
 export function CalculatorPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -199,6 +200,11 @@ export function CalculatorPage() {
         title="Mortgage Calculator — Compare Conventional, FHA, and VA Side by Side"
         description="Calculate monthly payments and see how Conventional, FHA, and VA loans compare for the same home. Includes PMI, MIP, and live rates."
         path="/calculator"
+        schema={webApplicationSchema({
+          title: "Mortgage Calculator — The Mortgage Geek",
+          description: "Calculate monthly payments and compare Conventional, FHA, and VA loans side by side.",
+          url: "https://mortgagegeek.ai/calculator",
+        })}
       />
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }

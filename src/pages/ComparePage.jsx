@@ -4,6 +4,7 @@ import { fmt } from "../utils/format";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
+import { webApplicationSchema } from "../utils/schema";
 
 export function ComparePage() {
   const STORAGE_KEY = "mg_compare_scenarios";
@@ -36,6 +37,11 @@ export function ComparePage() {
         title="Side-by-Side Loan Comparison Tool — Save and Compare Scenarios"
         description="Save up to 3 loan scenarios and compare them side by side. Different rates, terms, down payments — see the real difference in monthly payment and total cost."
         path="/compare"
+        schema={webApplicationSchema({
+          title: "Loan Comparison Tool — The Mortgage Geek",
+          description: "Save and compare up to 3 mortgage scenarios side by side.",
+          url: "https://mortgagegeek.ai/compare",
+        })}
       />
       <style>{globalCSS}{`
         .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }

@@ -8,6 +8,7 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
+import { webApplicationSchema } from "../utils/schema";
 
 export function CashToClosePage() {
   // Tax reserves prepaid schedule by state — # of months collected based on closing month
@@ -493,6 +494,11 @@ export function CashToClosePage() {
         title="Cash to Close Calculator — Estimate Your Closing Costs by State"
         description="See exactly how much cash you need at closing. Includes down payment, closing costs, prepaids, and escrows — calculated for your specific state and county."
         path="/cash-to-close"
+        schema={webApplicationSchema({
+          title: "Cash to Close Calculator — The Mortgage Geek",
+          description: "Estimate total cash needed at closing including down payment, closing costs, prepaids, and escrows.",
+          url: "https://mortgagegeek.ai/cash-to-close",
+        })}
       />
       <style>{globalCSS}{`
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }

@@ -9,7 +9,7 @@ import { Helmet } from "react-helmet-async";
 //   description — meta description (shown as snippet in Google results)
 //   path        — pathname only (e.g., "/calculator", "/deep-dives/derogatory-credit")
 //                 Leading slash required. Root homepage uses "/".
-export function SEOHead({ title, description, path }) {
+export function SEOHead({ title, description, path, schema }) {
   const baseUrl = "https://mortgagegeek.ai";
   const canonical = `${baseUrl}${path}`;
 
@@ -27,6 +27,15 @@ export function SEOHead({ title, description, path }) {
       {/* Twitter Card — mirrors Open Graph for Twitter/X shares */}
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+
+      {/* JSON-LD structured data (Schema.org). Schema object is optional;
+          when provided, serialized to a <script type="application/ld+json">
+          tag that Google and other semantic crawlers consume natively. */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
     </Helmet>
   );
 }

@@ -2,6 +2,7 @@ import { P, F, globalCSS } from "../theme";
 import { HEADSHOT } from "../data/headshot";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
+import { personSchema } from "../utils/schema";
 
 export function AboutPage() {
   return (
@@ -10,6 +11,7 @@ export function AboutPage() {
         title="About Nick Peters — Mortgage Loan Officer | NMLS# 1119524"
         description="12+ years helping first-time buyers through the mortgage process. Licensed in multiple states. Straight answers, no jargon — based in Tennessee."
         path="/about"
+        schema={personSchema()}
       />
       <style>{globalCSS}</style>
 
