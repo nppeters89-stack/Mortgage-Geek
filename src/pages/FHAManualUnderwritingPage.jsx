@@ -33,9 +33,14 @@ function Para({ children, noMargin }) {
 }
 
 function H2({ children }) {
+  const text = typeof children === "string" ? children : "";
+  const colonIdx = text.indexOf(":");
+  const before = colonIdx > -1 ? text.slice(0, colonIdx + 1) : text;
+  const after = colonIdx > -1 ? text.slice(colonIdx + 1) : "";
   return (
     <h2 style={{ fontFamily: F.display, fontSize: 28, color: P.navy, fontWeight: 400, lineHeight: 1.2, marginTop: 48, marginBottom: 18 }}>
-      {children}
+      {before}
+      {after && <em style={{ fontStyle: "italic", color: P.gold, fontWeight: 400 }}>{after}</em>}
     </h2>
   );
 }
@@ -145,7 +150,7 @@ export function FHAManualUnderwritingPage() {
           </div>
         </div>
 
-        <H2>First things first. What is manual underwriting?</H2>
+        <H2>First things first: what is manual underwriting?</H2>
         <Para>
           When you apply for an FHA loan, your lender runs your file through an Automated Underwriting System (AUS). For FHA loans, that's almost always FHA's TOTAL Mortgage Scorecard, accessed through either Fannie Mae's <strong style={{ color: P.navy, fontWeight: 600 }}>Desktop Underwriter (DU)</strong> or Freddie Mac's <strong style={{ color: P.navy, fontWeight: 600 }}>Loan Product Advisor (LPA, sometimes called LP)</strong>. The AUS looks at your credit, income, assets, and the property. It returns one of three decisions:
         </Para>
@@ -161,12 +166,12 @@ export function FHAManualUnderwritingPage() {
           That's it. That's the whole concept. No computer approval. A person reviewing your file line by line, looking at the same guidelines anyone can read in the HUD handbook.
         </Para>
 
-        <H2>Two paths to a manual. Which one are you on?</H2>
+        <H2>Two paths to a manual: which one are you on?</H2>
         <Para>
           There are two ways your file ends up being manually underwritten. Knowing which path you're on matters, because it tells you what's going on and what your LO should be doing.
         </Para>
 
-        <H3>Path 1. The AUS returned "Refer/Eligible" from the start</H3>
+        <H3>Path 1: the AUS returned "Refer/Eligible" from the start</H3>
         <Para>
           This happens when the AUS can't get comfortable with something in your profile, usually a combination of factors rather than one specific issue. Common triggers:
         </Para>
@@ -180,7 +185,7 @@ export function FHAManualUnderwritingPage() {
           In this case, the AUS isn't saying "no." It's saying "we can't automatically say yes. A human needs to look at this." Your LO should be treating it as a manual from day one.
         </Para>
 
-        <H3>Path 2. The AUS returned "Accept/Eligible" but a downgrade is required</H3>
+        <H3>Path 2: the AUS returned "Accept/Eligible" but a downgrade is required</H3>
         <Para>
           This is the one that trips people up. Your file can come back with a clean AUS approval, but the lender is <em>required</em> to downgrade it to manual if certain conditions exist. HUD 4000.1 lists specific downgrade triggers. The lender doesn't have discretion here.
         </Para>
@@ -238,7 +243,7 @@ export function FHAManualUnderwritingPage() {
           This is why borrowers sometimes get denied at one lender and approved at another with the exact same file. It's not that HUD's rules changed. It's that the lenders have different overlays.
         </Para>
 
-        <H2>Acceptable credit. The part that disqualifies most people</H2>
+        <H2>Acceptable credit: the part that disqualifies most people</H2>
         <Para>
           This is the section that doesn't get enough attention in most articles about FHA manual underwriting, and it's the one that kills the most files.
         </Para>
@@ -254,7 +259,7 @@ export function FHAManualUnderwritingPage() {
           Each tier has its own rules, and the standards get looser as you go down the list. Housing is scrutinized the hardest, revolving accounts the least. Here's what the handbook actually requires.
         </Para>
 
-        <H3>Housing payments. The strictest standard</H3>
+        <H3>Housing payments: the strictest standard</H3>
         <Para>
           HUD evaluates your housing history first and holds it to the tightest standard:
         </Para>
@@ -276,7 +281,7 @@ export function FHAManualUnderwritingPage() {
           <TipBody text="If you're paying rent in cash to a private landlord or family member, you don't have a documentable payment history for FHA's purposes. Start paying by check or bank transfer at least 12 months before you plan to buy, or find another way to establish the history. This single issue stalls more manual files than almost anything else." />
         </GeekTip>
 
-        <H3>Installment loans. Almost as strict as housing</H3>
+        <H3>Installment loans: almost as strict as housing</H3>
         <Para>
           Installment debts are loans with a fixed monthly payment: auto loans, student loans, personal loans, furniture financing. <strong style={{ color: P.navy, fontWeight: 600 }}>Timeshares are treated as installment loans</strong>, not mortgages, even though they involve real estate.
         </Para>
@@ -289,7 +294,7 @@ export function FHAManualUnderwritingPage() {
           This is where a lot of borrowers get tripped up. A single missed car payment in the last 12 months, even if it was caught up quickly, makes the file harder to approve on a manual. Two 30-day lates on an installment loan within the last 24 months is the absolute ceiling.
         </Para>
 
-        <H3>Revolving accounts. Actually more lenient than you'd expect</H3>
+        <H3>Revolving accounts: actually more lenient than you'd expect</H3>
         <Para>
           Here's where the rules surprise people. HUD 4000.1 is significantly more forgiving on revolving debt (credit cards, store cards, lines of credit) than most people assume.
         </Para>
@@ -307,7 +312,7 @@ export function FHAManualUnderwritingPage() {
           This is a legitimate good-news story for a lot of borrowers, and it's something most online content gets wrong or glosses over.
         </Para>
 
-        <H3>Collections. The $2,000 line</H3>
+        <H3>Collections: the $2,000 line</H3>
         <Para>
           Unpaid collections are evaluated separately from payment history, and the rules depend on the cumulative balance and the type of collection.
         </Para>
@@ -331,7 +336,7 @@ export function FHAManualUnderwritingPage() {
           This is one of the more borrower-friendly aspects of FHA underwriting, and it surprises a lot of people who expect all collections to be treated the same.
         </Para>
 
-        <H3>Charge-offs. Not required to be paid off</H3>
+        <H3>Charge-offs: not required to be paid off</H3>
         <Para>
           A charge-off is when a creditor has written off a debt as uncollectable (usually after 120 to 180 days of non-payment). A lot of borrowers assume they have to pay off charge-offs to get approved. <strong style={{ color: P.navy, fontWeight: 600 }}>Under HUD 4000.1, that's not true.</strong>
         </Para>
@@ -344,7 +349,7 @@ export function FHAManualUnderwritingPage() {
           Lender overlays may still require payoff of specific charge-offs (especially recent ones), but HUD's baseline rules don't.
         </Para>
 
-        <H3>Disputed derogatory accounts. The $1,000 trap</H3>
+        <H3>Disputed derogatory accounts: the $1,000 trap</H3>
         <Para>
           This one comes from the disputed-accounts rule that triggers a mandatory downgrade, and it catches borrowers off guard.
         </Para>
@@ -435,7 +440,7 @@ export function FHAManualUnderwritingPage() {
           <TipBody text="Every manual requires a minimum of 1 month of reserves from the borrower's own funds (no gifts). That's a baseline requirement, not a compensating factor. To use reserves AS a compensating factor, you need 3+ months (1-2 unit) or 6+ months (3-4 unit). The reserves question is the single most common late-stage disqualifier I see on manual files." />
         </GeekTip>
 
-        <H2>The 1-month reserves rule. The trap that catches files late</H2>
+        <H2>The 1-month reserves rule: the trap that catches files late</H2>
         <Para>
           I'm calling this out as its own section because it's the rule I see files die on more than any other, and it's the rule most other articles bury or skip entirely.
         </Para>
@@ -458,7 +463,7 @@ export function FHAManualUnderwritingPage() {
           That's my whole philosophy on manual underwrites in one story. The rules are the rules. Borrowers don't need to be perfect. They need to be honest about their situation early enough that their LO can build a real plan around it. It's all about communication.
         </Para>
 
-        <H2>Why manual underwrites fail. Patterns I've seen over 12+ years</H2>
+        <H2>Why manual underwrites fail: patterns I've seen over 12+ years</H2>
         <Para>
           In my experience, the answer is almost always the same: lack of due diligence up front.
         </Para>
@@ -520,7 +525,7 @@ export function FHAManualUnderwritingPage() {
           No. Compensating factors offset higher DTI ratios. They don't offset a history of late payments. HUD is explicit about this in the handbook: you need to clear the acceptable credit bar first, THEN comp factors let you qualify with higher DTI. A borrower with major derogatory credit in the last 12 months can't use "strong reserves" as a way around that.
         </Para>
 
-        <H2>A final note. What this page is and isn't</H2>
+        <H2>A final note: what this page is and isn't</H2>
         <Para>
           This page is a summary of what HUD 4000.1 says about manual underwriting, organized in a way that I wish had existed when I was starting out. It is not:
         </Para>
