@@ -9,6 +9,7 @@ const CalculatorPage = lazy(() => import("./pages/CalculatorPage").then(m => ({ 
 const InstallPage = lazy(() => import("./pages/InstallPage").then(m => ({ default: m.InstallPage })));
 const DeepDivesHubPage = lazy(() => import("./pages/DeepDivesHubPage").then(m => ({ default: m.DeepDivesHubPage })));
 const DerogatoryCreditPage = lazy(() => import("./pages/DerogatoryCreditPage").then(m => ({ default: m.DerogatoryCreditPage })));
+const FHAManualUnderwritingPage = lazy(() => import("./pages/FHAManualUnderwritingPage").then(m => ({ default: m.FHAManualUnderwritingPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -22,6 +23,7 @@ export default function MortgageLandingPage() {
     if (path === "install") return "install";
     if (path === "deep-dives") return "deepdives-hub";
     if (path === "deep-dives/derogatory-credit") return "deepdives-derogatory";
+    if (path === "deep-dives/fha-manual-underwriting") return "deepdives-fha-manual";
     return "main";
   });
 
@@ -34,6 +36,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "install") return <InstallPage />;
     if (currentPage === "deepdives-hub") return <DeepDivesHubPage />;
     if (currentPage === "deepdives-derogatory") return <DerogatoryCreditPage />;
+    if (currentPage === "deepdives-fha-manual") return <FHAManualUnderwritingPage />;
     return <MainSite />;
   };
 
