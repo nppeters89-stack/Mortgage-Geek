@@ -1,8 +1,0 @@
-# robots.txt for The Mortgage Geek
-# Allow all well-behaved crawlers to index all public pages.
-
-User-agent: *
-Allow: /
-
-# Sitemap location (absolute URL required per protocol)
-Sitemap: https://mortgagegeek.ai/sitemap.xml
