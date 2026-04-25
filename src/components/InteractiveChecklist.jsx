@@ -14,26 +14,65 @@ function loadInitial(id) {
   }
 }
 
-export function InteractiveChecklist({ id, sections, defaultCollapsed = false, title = "Checklist" }) {
+function collectItemIds(sections) {
+  const ids = [];
+  for (const sec of sections) {
+    for (const sub of sec.subsections) {
+      for (const item of sub.items) ids.push(item.id);
+    }
+  }
+  return ids;
+}
+
+export function InteractiveChecklist({
+  id,
+  sections,
+  workflows,
+  defaultCollapsed = false,
+  title = "Checklist",
+}) {
+  const flowList = useMemo(() => {
+    if (workflows && workflows.length > 0) return workflows;
+    return [{ id: "default", label: title, blurb: null, sections: sections || [] }];
+  }, [workflows, sections, title]);
+
+  const hasTabs = !!(workflows && workflows.length > 1);
+
   const [checked, setChecked] = useState(() => loadInitial(id));
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const [activeFlowId, setActiveFlowId] = useState(flowList[0].id);
 
   useEffect(() => {
     try { localStorage.setItem(`${STORAGE_PREFIX}${id}`, JSON.stringify(checked)); } catch {}
   }, [id, checked]);
 
+  const activeFlow = flowList.find((f) => f.id === activeFlowId) || flowList[0];
+  const activeSections = activeFlow.sections;
+
   const totalItems = useMemo(
-    () => sections.reduce((sum, sec) => sum + sec.subsections.reduce((s, sub) => s + sub.items.length, 0), 0),
-    [sections]
+    () => activeSections.reduce((sum, sec) => sum + sec.subsections.reduce((s, sub) => s + sub.items.length, 0), 0),
+    [activeSections]
   );
   const totalDone = useMemo(
-    () => sections.reduce(
+    () => activeSections.reduce(
       (sum, sec) => sum + sec.subsections.reduce(
         (s, sub) => s + sub.items.filter((it) => checked[it.id]).length, 0
       ), 0
     ),
-    [sections, checked]
+    [activeSections, checked]
   );
+
+  const flowCounts = useMemo(() => {
+    const out = {};
+    for (const flow of flowList) {
+      const ids = collectItemIds(flow.sections);
+      out[flow.id] = {
+        total: ids.length,
+        done: ids.filter((iid) => checked[iid]).length,
+      };
+    }
+    return out;
+  }, [flowList, checked]);
 
   const contentId = `ic-content-${id}`;
 
@@ -42,18 +81,27 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
   };
 
   const reset = () => {
-    setChecked({});
-    try { localStorage.removeItem(`${STORAGE_PREFIX}${id}`); } catch {}
+    if (hasTabs) {
+      const ids = new Set(collectItemIds(activeFlow.sections));
+      setChecked((prev) => {
+        const next = { ...prev };
+        for (const k of Object.keys(next)) if (ids.has(k)) delete next[k];
+        return next;
+      });
+    } else {
+      setChecked({});
+      try { localStorage.removeItem(`${STORAGE_PREFIX}${id}`); } catch {}
+    }
   };
 
   const sectionStats = useMemo(() => {
-    return sections.map((sec) => {
+    return activeSections.map((sec) => {
       const items = sec.subsections.flatMap((sub) => sub.items);
       const total = items.length;
       const done = items.filter((it) => checked[it.id]).length;
       return { total, done };
     });
-  }, [sections, checked]);
+  }, [activeSections, checked]);
 
   return (
     <div className="ic-root">
@@ -100,6 +148,57 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
           transition: transform 0.2s;
         }
         .ic-toggle-chevron-open { transform: rotate(180deg); }
+
+        .ic-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          margin-bottom: 14px;
+          border-bottom: 1px solid ${P.creamDark};
+          padding-bottom: 14px;
+        }
+        .ic-tab {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 44px;
+          padding: 10px 16px;
+          background: ${P.cream};
+          border: 1px solid ${P.creamDark};
+          border-radius: 999px;
+          color: ${P.warmGray};
+          font-family: ${F.body};
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          cursor: pointer;
+          transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .ic-tab:hover { border-color: ${P.gold}; color: ${P.navy}; }
+        .ic-tab:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
+        .ic-tab-active {
+          background: ${P.navy};
+          border-color: ${P.navy};
+          color: ${P.white};
+        }
+        .ic-tab-active:hover { background: ${P.navyDark}; border-color: ${P.navyDark}; color: ${P.white}; }
+        .ic-tab-count {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.6px;
+          color: ${P.warmGrayLight};
+        }
+        .ic-tab-active .ic-tab-count { color: ${P.goldLight}; }
+
+        .ic-flow-blurb {
+          font-family: ${F.body};
+          font-size: 14px;
+          line-height: 1.7;
+          color: ${P.warmGray};
+          margin: 0 0 18px;
+          font-style: italic;
+        }
+
         .ic-toolbar {
           display: flex;
           justify-content: space-between;
@@ -229,6 +328,7 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
           .ic-section-title { font-size: 22px; }
           .ic-item { padding: 12px 10px; font-size: 14px; }
           .ic-toggle { padding: 14px 16px; font-size: 12.5px; }
+          .ic-tab { font-size: 12.5px; padding: 10px 14px; }
         }
 
         .print-only { display: none; }
@@ -296,7 +396,10 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
         <div className="print-only" style={{ marginBottom: 18, paddingBottom: 12, borderBottom: `2px solid ${P.navy}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
             <div>
-              <div style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>🤓 The Mortgage Geek · FHA Manual Underwriting Checklist</div>
+              <div style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>
+                🤓 The Mortgage Geek · FHA Manual Underwriting Checklist
+                {hasTabs ? ` · ${activeFlow.label} workflow` : ""}
+              </div>
               <div style={{ fontSize: 10, color: P.warmGray }}>Nick Peters · NMLS# 1119524 · (615) 656-0737 · mortgagegeek.ai/deep-dives/fha-manual-underwriting</div>
             </div>
             <div style={{ fontSize: 9, color: P.warmGrayLight, textAlign: "right" }}>
@@ -304,6 +407,35 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
             </div>
           </div>
         </div>
+
+        {hasTabs && (
+          <div className="ic-tabs no-print" role="tablist" aria-label="Checklist workflow">
+            {flowList.map((flow) => {
+              const isActive = flow.id === activeFlowId;
+              const counts = flowCounts[flow.id] || { total: 0, done: 0 };
+              return (
+                <button
+                  key={flow.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={() => setActiveFlowId(flow.id)}
+                  className={`ic-tab${isActive ? " ic-tab-active" : ""}`}
+                >
+                  <span>{flow.label}</span>
+                  <span className="ic-tab-count">
+                    {counts.done > 0 ? `${counts.done}/${counts.total}` : `${counts.total}`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {activeFlow.blurb && (
+          <p className="ic-flow-blurb">{activeFlow.blurb}</p>
+        )}
 
         <div className="ic-toolbar no-print">
           <button
@@ -317,17 +449,17 @@ export function InteractiveChecklist({ id, sections, defaultCollapsed = false, t
             type="button"
             className="ic-reset-btn"
             onClick={reset}
-            aria-label="Reset all checklist progress"
+            aria-label={hasTabs ? `Reset ${activeFlow.label} checklist progress` : "Reset all checklist progress"}
           >
-            Reset checklist
+            {hasTabs ? `Reset ${activeFlow.label}` : "Reset checklist"}
           </button>
         </div>
 
-        {sections.map((section, sIdx) => {
+        {activeSections.map((section, sIdx) => {
         const stats = sectionStats[sIdx];
         return (
-          <section key={section.title} className="ic-section" aria-labelledby={`ic-sec-${sIdx}`}>
-            <h3 id={`ic-sec-${sIdx}`} className="ic-section-title">{section.title}</h3>
+          <section key={`${activeFlow.id}-${section.title}`} className="ic-section" aria-labelledby={`ic-sec-${activeFlow.id}-${sIdx}`}>
+            <h3 id={`ic-sec-${activeFlow.id}-${sIdx}`} className="ic-section-title">{section.title}</h3>
             <div className="ic-section-progress no-print">
               {stats.done} of {stats.total} items checked
             </div>

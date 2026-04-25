@@ -584,12 +584,12 @@ export function FHAManualUnderwritingPage() {
         <div className="no-print">
           <H2>The checklist: what to verify on every manual</H2>
           <Para>
-            The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
+            Two workflows below. Start with the one that matches your AUS finding: <strong>Refer/Eligible</strong> if the file came back manual from the start, or <strong>Manual Downgrade</strong> if AUS approved but a HUD-required trigger forces it to manual. Once a downgrade is confirmed, switch to the Refer/Eligible workflow for the full review. Print it, save it, share it. It's free.
           </Para>
         </div>
         <InteractiveChecklist
           id="fha-manual-underwriting"
-          sections={FHA_MANUAL_CHECKLIST}
+          workflows={FHA_MANUAL_CHECKLIST.workflows}
           title="the checklist"
           defaultCollapsed={true}
         />
