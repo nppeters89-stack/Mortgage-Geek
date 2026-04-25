@@ -195,14 +195,13 @@ export function DerogatoryCreditPage() {
                       ))}
                     </div>
 
-                    <div style={{ marginTop: 20, background: P.navy, borderRadius: 8, padding: "18px 22px", position: "relative", overflow: "hidden" }}>
-                      <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: "100%", background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.1) 0%, transparent 60%)", pointerEvents: "none" }} />
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, position: "relative", zIndex: 1 }}>
+                    <div style={{ marginTop: 20, background: P.navy, borderRadius: 8, padding: "18px 22px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
                         <span style={{ fontSize: 16 }}>🤓</span>
                         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Geek Tip — When This Matters</span>
                       </div>
                       {acc.tip.split("\n\n").map((para, i) => (
-                        <p key={i} style={{ fontSize: 13.5, color: P.cream, lineHeight: 1.7, marginBottom: i < acc.tip.split("\n\n").length - 1 ? 10 : 0, position: "relative", zIndex: 1 }}>
+                        <p key={i} style={{ fontSize: 13.5, color: P.cream, lineHeight: 1.7, marginBottom: i < acc.tip.split("\n\n").length - 1 ? 10 : 0 }}>
                           {renderBold(para).map((piece, j) =>
                             typeof piece === "string" ? piece :
                             piece.type === "strong" ? <strong key={j} style={{ color: P.goldLight, fontWeight: 600 }}>{piece.props.children}</strong> :
