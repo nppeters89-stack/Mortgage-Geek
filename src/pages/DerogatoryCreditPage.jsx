@@ -3,6 +3,8 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { WaitPeriodRows, Ch13Card } from "../components/WaitPeriodRows";
+import { EVENTS } from "../data/derogatoryCredit";
 import { articleSchema } from "../utils/schema";
 
 export function DerogatoryCreditPage() {
@@ -13,16 +15,6 @@ export function DerogatoryCreditPage() {
       id: "chapter7",
       title: "Chapter 7 Bankruptcy",
       summary: "Complete liquidation bankruptcy. Wait periods range from 12 months (FHA/VA with extenuating circumstances) to 4 years (Conventional standard).",
-      table: {
-        headers: ["Program", "Standard Wait", "With Extenuating Circumstances", "Source"],
-        rows: [
-          ["Fannie Mae", "4 years from discharge/dismissal", "2 years", "Selling Guide B3-5.3-07"],
-          ["Freddie Mac", "4 years from discharge/dismissal", "2 years", "Selling Guide 5202.5"],
-          ["FHA", "2 years from discharge", "1 year (manual underwriting)", "HUD 4000.1 II.A.5.b.iv"],
-          ["VA", "2 years from discharge", "1 year (manual underwriting)", "Lender's Handbook M26-7 Ch. 4"],
-          ["USDA", "3 years from discharge", "1 year (credit exception, manual UW)", "HB-1-3555 Chapter 10"],
-        ],
-      },
       explainer: [
         "Chapter 7 is \"liquidation\" bankruptcy: non-exempt assets sold off, unsecured debts discharged, fresh start. Because it's the more severe of the two personal bankruptcy types, every agency imposes a wait period before the borrower can qualify for a new mortgage.",
         "The clock starts on the **discharge date** (the date the court officially wiped the debts), *not* the filing date. This matters. If someone filed in January 2024 but wasn't discharged until October 2024, the wait period starts from October.",
@@ -34,16 +26,6 @@ export function DerogatoryCreditPage() {
       id: "chapter13",
       title: "Chapter 13 Bankruptcy",
       summary: "Repayment plan bankruptcy. Most lenient paths: FHA and VA can approve during the active plan with just 12 months of on-time payments + court permission.",
-      table: {
-        headers: ["Program", "Discharged", "Dismissed", "During Active Plan", "Source"],
-        rows: [
-          ["Fannie Mae", "2 years from discharge", "4 years from dismissal", "Not eligible during active plan", "Selling Guide B3-5.3-07"],
-          ["Freddie Mac", "2 years from discharge", "4 years from dismissal", "Not eligible during active plan", "Selling Guide 5202.5"],
-          ["FHA", "No wait (after discharge)", "Varies; manual UW", "12 months of on-time plan payments + court permission", "HUD 4000.1 II.A.5.b.iv"],
-          ["VA", "No wait (after discharge)", "Varies; manual UW", "12 months of on-time plan payments + court permission", "Lender's Handbook M26-7 Ch. 4"],
-          ["USDA", "12 months from discharge", "Credit exception required", "12 months into plan + court permission", "HB-1-3555 Chapter 10"],
-        ],
-      },
       explainer: [
         "Chapter 13 is the \"reorganization\" bankruptcy: no liquidation of assets, but a court-approved plan to repay some or all of the debt over 3-5 years. Because the borrower is actively demonstrating commitment to repaying obligations, every agency treats Chapter 13 more favorably than Chapter 7.",
         "**The big unlock is the \"during active plan\" path.** FHA, VA, and USDA all allow a borrower to qualify for a mortgage *while still in* their Chapter 13 repayment plan, provided they've made 12 months of on-time payments to the trustee and received written permission from the bankruptcy court to take on new debt. This is a huge lifeline for borrowers who'd otherwise face a 5+ year wait.",
@@ -56,16 +38,6 @@ export function DerogatoryCreditPage() {
       id: "foreclosure",
       title: "Foreclosure",
       summary: "Lender-forced property transfer. VA is most lenient (2 years); Fannie/Freddie strictest (7 years standard).",
-      table: {
-        headers: ["Program", "Standard Wait", "With Extenuating Circumstances", "Source"],
-        rows: [
-          ["Fannie Mae", "7 years from completion", "3 years (90% LTV cap, purchase of primary residence only)", "Selling Guide B3-5.3-07"],
-          ["Freddie Mac", "7 years from completion", "3 years (90% LTV cap, primary purchase or rate/term refi only)", "Selling Guide 5202.5"],
-          ["FHA", "3 years from completion", "1 year (manual underwriting)", "HUD 4000.1 II.A.5.a.iii"],
-          ["VA", "2 years from completion", "1 year (manual underwriting)", "Lender's Handbook M26-7 Ch. 4"],
-          ["USDA", "3 years from completion", "1 year (credit exception, manual UW)", "HB-1-3555 Chapter 10"],
-        ],
-      },
       explainer: [
         "Foreclosure is the most severe of the derogatory credit events: the lender took legal action, seized the property, and sold it to recover the debt. Every agency imposes the longest wait period for foreclosure of any credit event, with Fannie and Freddie the harshest at 7 years standard.",
         "**The clock starts on the foreclosure completion date**: the date title transferred to the lender (or to the new owner at the foreclosure sale), *not* the date proceedings began.",
@@ -78,16 +50,6 @@ export function DerogatoryCreditPage() {
       id: "shortsale",
       title: "Short Sale / Deed-in-Lieu",
       summary: "Borrower-negotiated alternatives to foreclosure. Wait periods shorter than foreclosure but longer than for routine credit events.",
-      table: {
-        headers: ["Program", "Short Sale Wait", "DIL Wait", "With Extenuating Circumstances", "Source"],
-        rows: [
-          ["Fannie Mae", "4 years", "4 years", "2 years", "Selling Guide B3-5.3-07"],
-          ["Freddie Mac", "4 years", "4 years", "2 years (90% LTV cap within 7 years)", "Selling Guide 5202.5"],
-          ["FHA", "3 years", "3 years", "1 year (manual UW)", "HUD 4000.1 II.A.5.a.iii"],
-          ["VA", "No wait if no late payments prior to sale", "2 years", "1 year with documented circumstances", "Lender's Handbook M26-7 Ch. 4"],
-          ["USDA", "3 years", "3 years", "1 year (credit exception, manual UW)", "HB-1-3555 Chapter 10"],
-        ],
-      },
       explainer: [
         "Short sale, pre-foreclosure sale, and deed-in-lieu of foreclosure are all borrower-initiated alternatives to full foreclosure. They're viewed more favorably than foreclosure across all agencies because the borrower worked *with* the lender rather than letting the property go to auction, so wait periods are shorter.",
         "**Short sale = selling the home for less than the mortgage balance**, with the lender's approval, and the deficiency typically forgiven. **Deed-in-lieu = voluntarily transferring title** to the lender to avoid the foreclosure process entirely.",
@@ -100,16 +62,6 @@ export function DerogatoryCreditPage() {
       id: "latepayments",
       title: "Late Mortgage Payments",
       summary: "Recent mortgage lates without a full credit event. Less severe than foreclosure but still creates underwriting friction.",
-      table: {
-        headers: ["Program", "Acceptable Recent Mortgage History", "Source"],
-        rows: [
-          ["Fannie Mae", "12 months from the last 60-, 90-, 120-, or 150-day delinquency", "Selling Guide B3-5.3-03"],
-          ["Freddie Mac", "With credit scores: 12 months with no 60+ day lates AND no more than one 30-day late in the last 24 months. Without credit scores: 12 months with no late payments.", "Selling Guide 5202.5"],
-          ["FHA", "Varies by loan type. Purchase/Rate-Term Refi (TOTAL Scorecard): 12 months with no more than three 30-day lates, no 60+ day lates, no 90+ day lates. Cash-Out Refi: 12 months with no late payments at all. Manual UW: 12 months with no lates.", "HUD 4000.1 II.A.4.b.K"],
-          ["VA", "12 months with no more than one 30-day late", "Lender's Handbook M26-7 Ch. 4"],
-          ["USDA", "12 months with no more than one 30-day late, unless documented extenuating circumstances have been resolved for at least 12 months OR the new loan reduces housing expense by 50%+", "HB-1-3555 Chapter 10"],
-        ],
-      },
       explainer: [
         "This category isn't about catastrophic events. It's about borrowers with an otherwise clean file who missed a mortgage payment or two in the last year. Every agency cares about this more than most borrowers realize, because mortgage payment history is treated as the single strongest predictor of future mortgage payment behavior.",
         "**The rules vary more than any other category on this page.** Not just between agencies but also within agencies based on loan purpose. FHA has different thresholds for purchase, rate-and-term refi, and cash-out refi. Fannie's rule is tied to the severity of the late (60-day vs 90-day vs 120-day), not just the count.",
@@ -151,18 +103,6 @@ export function DerogatoryCreditPage() {
         })}
       />
       <style>{globalCSS}</style>
-      <style>{`
-        .dd-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; }
-        .dd-table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 13px; }
-        .dd-table thead th { background: ${P.navy}; color: ${P.cream}; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid ${P.gold}; }
-        .dd-table tbody td { padding: 10px 12px; border-bottom: 1px solid ${P.creamDark}; color: ${P.warmGray}; line-height: 1.55; vertical-align: top; }
-        .dd-table tbody tr:nth-child(odd) { background: rgba(184, 134, 11, 0.02); }
-        .dd-table tbody td:first-child { font-weight: 600; color: ${P.navy}; }
-        @media (max-width: 700px) {
-          .dd-table { font-size: 12px; min-width: 520px; }
-          .dd-table thead th, .dd-table tbody td { padding: 8px 10px; }
-        }
-      `}</style>
 
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
@@ -241,21 +181,10 @@ export function DerogatoryCreditPage() {
 
                 {isOpen && (
                   <div style={{ padding: "4px 22px 24px", borderTop: `1px solid ${P.creamDark}` }}>
-                    <div className="dd-table-wrap">
-                      <table className="dd-table">
-                        <thead>
-                          <tr>
-                            {acc.table.headers.map((h, i) => <th key={i}>{h}</th>)}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {acc.table.rows.map((row, i) => (
-                            <tr key={i}>
-                              {row.map((cell, j) => <td key={j}>{cell}</td>)}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div style={{ margin: "16px 0" }}>
+                      {acc.id === "chapter13"
+                        ? <Ch13Card />
+                        : <WaitPeriodRows event={EVENTS[acc.id]} />}
                     </div>
 
                     <div style={{ marginTop: 20 }}>
