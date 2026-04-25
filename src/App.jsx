@@ -10,6 +10,7 @@ const InstallPage = lazy(() => import("./pages/InstallPage").then(m => ({ defaul
 const DeepDivesHubPage = lazy(() => import("./pages/DeepDivesHubPage").then(m => ({ default: m.DeepDivesHubPage })));
 const DerogatoryCreditPage = lazy(() => import("./pages/DerogatoryCreditPage").then(m => ({ default: m.DerogatoryCreditPage })));
 const FHAManualUnderwritingPage = lazy(() => import("./pages/FHAManualUnderwritingPage").then(m => ({ default: m.FHAManualUnderwritingPage })));
+const VAManualUnderwritingPage = lazy(() => import("./pages/VAManualUnderwritingPage").then(m => ({ default: m.VAManualUnderwritingPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -24,6 +25,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives") return "deepdives-hub";
     if (path === "deep-dives/derogatory-credit") return "deepdives-derogatory";
     if (path === "deep-dives/fha-manual-underwriting") return "deepdives-fha-manual";
+    if (path === "deep-dives/va-manual-underwriting") return "deepdives-va-manual";
     return "main";
   });
 
@@ -37,6 +39,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-hub") return <DeepDivesHubPage />;
     if (currentPage === "deepdives-derogatory") return <DerogatoryCreditPage />;
     if (currentPage === "deepdives-fha-manual") return <FHAManualUnderwritingPage />;
+    if (currentPage === "deepdives-va-manual") return <VAManualUnderwritingPage />;
     return <MainSite />;
   };
 
