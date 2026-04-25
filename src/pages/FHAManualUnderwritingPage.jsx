@@ -4,7 +4,7 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { articleSchema } from "../utils/schema";
-import { DTICompFactorsGrid } from "../components/DTICompFactorsGrid";
+import { StackedTierCardsBranded } from "../components/StackedTierCardsBranded";
 import { InteractiveChecklist } from "../components/InteractiveChecklist";
 import { FHA_MANUAL_CHECKLIST } from "../data/fhaManualUnderwritingChecklist";
 
@@ -433,7 +433,7 @@ export function FHAManualUnderwritingPage() {
             Click any row to expand the requirements.
           </Para>
 
-          <DTICompFactorsGrid />
+          <StackedTierCardsBranded />
 
           <H3>How to read this grid</H3>
           <Para>
