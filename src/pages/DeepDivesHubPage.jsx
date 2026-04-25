@@ -18,6 +18,13 @@ export function DeepDivesHubPage() {
       summary: "What happens when FHA's automated system sends your file to a human underwriter. HUD 4000.1 credit rules, the DTI and compensating factors grid, required downgrade triggers, and how to actually get approved.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "va-manual-underwriting",
+      emoji: "🎖️",
+      title: "VA Manual Underwriting",
+      summary: "When VA's automated system refers your file to a human underwriter. Residual income tables by region and family size, the DTI and compensating factors framework, the 13 VA comp factors, and what actually gets a manual file approved.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (

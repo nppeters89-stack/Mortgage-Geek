@@ -462,6 +462,9 @@ export function FHAManualUnderwritingPage() {
           "Calculation includes childcare, maintenance, and utilities (just like VA's own calculation)",
           "This is the most borrower-friendly comp factor for low-income borrowers who might not have large reserves",
         ]} />
+        <Para>
+          The residual income tables FHA borrows here come straight from VA's handbook. For the full table by region and family size, plus how the calculation actually works, see our <a href="/deep-dives/va-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>VA manual underwriting deep dive</a>.
+        </Para>
 
         <GeekTip title="Don't skip the reserves rule">
           <TipBody text="Every manual requires a minimum of 1 month of reserves from the borrower's own funds (no gifts). That's a baseline requirement, not a compensating factor. To use reserves AS a compensating factor, you need 3+ months (1-2 unit) or 6+ months (3-4 unit). The reserves question is the single most common late-stage disqualifier I see on manual files." />
