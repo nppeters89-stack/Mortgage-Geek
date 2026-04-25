@@ -4,6 +4,8 @@ import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { articleSchema } from "../utils/schema";
 import { DTICompFactorsGrid } from "../components/DTICompFactorsGrid";
+import { InteractiveChecklist } from "../components/InteractiveChecklist";
+import { FHA_MANUAL_CHECKLIST } from "../data/fhaManualUnderwritingChecklist";
 
 const TITLE = "FHA Manual Underwriting: HUD 4000.1 Rules, Compensating Factors, and How to Get Approved | The Mortgage Geek";
 const DESCRIPTION = "FHA manual underwriting explained: HUD 4000.1 credit rules, DTI and compensating factors grid, and how to actually get approved. From a real LO with 12+ years.";
@@ -504,6 +506,21 @@ export function FHAManualUnderwritingPage() {
         <Para>
           In my experience, at least 75% of the manual underwrites I work end up approved. The other 25% almost always fail because of something that could have been caught in the first conversation: an undisclosed late payment, a bankruptcy that's 20 months old instead of 25, reserves that aren't truly the borrower's own money. Those things don't get better during the process. They get dealt with up front, or they kill the file late.
         </Para>
+
+        <H2>The checklist: what to verify on every manual</H2>
+        <Para>
+          The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
+        </Para>
+        <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", marginTop: 18, marginBottom: 4 }}>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "none", background: P.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F.body }}
+          >
+            📄 Save as PDF
+          </button>
+        </div>
+        <InteractiveChecklist id="fha-manual-underwriting" sections={FHA_MANUAL_CHECKLIST} />
 
         <H2>Frequently asked questions</H2>
 
