@@ -510,27 +510,6 @@ export function FHAManualUnderwritingPage() {
           In my experience, at least 75% of the manual underwrites I work end up approved. The other 25% almost always fail because of something that could have been caught in the first conversation: an undisclosed late payment, a bankruptcy that's 20 months old instead of 25, reserves that aren't truly the borrower's own money. Those things don't get better during the process. They get dealt with up front, or they kill the file late.
         </Para>
 
-        </div>
-
-        <div className="no-print">
-          <H2>The checklist: what to verify on every manual</H2>
-          <Para>
-            The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
-          </Para>
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18, marginBottom: 4 }}>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "none", background: P.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F.body }}
-            >
-              📄 Save as PDF
-            </button>
-          </div>
-        </div>
-        <InteractiveChecklist id="fha-manual-underwriting" sections={FHA_MANUAL_CHECKLIST} />
-
-        <div className="no-print">
-
         <H2>Frequently asked questions</H2>
 
         <H3>I got a Refer/Eligible. Is my loan dead?</H3>
@@ -599,6 +578,23 @@ export function FHAManualUnderwritingPage() {
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
           Sources: HUD 4000.1 Single Family Housing Policy Handbook, Section II.A.5 (Manual Underwriting of the Borrower), updated 04/10/2025; HUD 4000.1 Section II.A.5.a (Credit Requirements, Manual); author's 12+ years of field experience as an FHA loan originator.
         </p>
+
+        </div>
+
+        <div className="no-print">
+          <H2>The checklist: what to verify on every manual</H2>
+          <Para>
+            The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
+          </Para>
+        </div>
+        <InteractiveChecklist
+          id="fha-manual-underwriting"
+          sections={FHA_MANUAL_CHECKLIST}
+          title="the checklist"
+          defaultCollapsed={true}
+        />
+
+        <div className="no-print">
 
         <DeepDiveFooter />
 
