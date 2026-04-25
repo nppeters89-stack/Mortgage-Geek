@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
@@ -57,14 +58,42 @@ function H3({ children }) {
 }
 
 function GeekTip({ title, children }) {
+  const [open, setOpen] = useState(false);
+  const slug = String(title).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const panelId = `geektip-panel-${slug}`;
   return (
-    <div style={{ background: P.navy, borderRadius: 8, padding: "18px 22px", margin: "24px 0", position: "relative", overflow: "hidden", borderLeft: `3px solid ${P.gold}` }}>
+    <div style={{ background: P.navy, borderRadius: 8, margin: "24px 0", position: "relative", overflow: "hidden", borderLeft: `3px solid ${P.gold}` }}>
       <div style={{ position: "absolute", top: 0, right: 0, width: 120, height: "100%", background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.1) 0%, transparent 60%)", pointerEvents: "none" }} />
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, position: "relative", zIndex: 1 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={panelId}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          width: "100%",
+          minHeight: 44,
+          padding: "14px 22px",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          textAlign: "left",
+          fontFamily: F.body,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         <span style={{ fontSize: 16 }}>🤓</span>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Geek Tip — {title}</span>
-      </div>
-      <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight, flex: 1 }}>Geek Tip — {title}</span>
+        <span aria-hidden="true" style={{ fontSize: 20, color: P.goldLight, lineHeight: 1, transform: open ? "rotate(45deg)" : "none", transition: "transform 0.2s" }}>+</span>
+      </button>
+      {open && (
+        <div id={panelId} style={{ position: "relative", zIndex: 1, padding: "0 22px 18px" }}>
+          {children}
+        </div>
+      )}
     </div>
   );
 }
