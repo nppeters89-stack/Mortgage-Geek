@@ -122,8 +122,6 @@ export function WaitPeriodRows({ event }) {
       borderRadius: 10,
       border: `1px solid ${P.creamDark}`,
       overflow: "hidden",
-      maxWidth: 600,
-      margin: "0 auto",
     }}>
       {showBars && (
         <div style={{
@@ -291,8 +289,6 @@ export function Ch13Card() {
       borderRadius: 10,
       border: `1px solid ${P.creamDark}`,
       overflow: "hidden",
-      maxWidth: 600,
-      margin: "0 auto",
     }}>
       <div style={{
         padding: "10px 16px 8px",
