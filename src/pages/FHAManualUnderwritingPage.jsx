@@ -111,7 +111,7 @@ export function FHAManualUnderwritingPage() {
       />
       <style>{globalCSS}</style>
 
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
+      <div className="pwa-safe-top no-print" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
@@ -122,6 +122,8 @@ export function FHAManualUnderwritingPage() {
       </div>
 
       <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 860, margin: "0 auto" }}>
+
+        <div className="no-print">
 
         <header style={{ marginBottom: 36 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
@@ -508,20 +510,26 @@ export function FHAManualUnderwritingPage() {
           In my experience, at least 75% of the manual underwrites I work end up approved. The other 25% almost always fail because of something that could have been caught in the first conversation: an undisclosed late payment, a bankruptcy that's 20 months old instead of 25, reserves that aren't truly the borrower's own money. Those things don't get better during the process. They get dealt with up front, or they kill the file late.
         </Para>
 
-        <H2>The checklist: what to verify on every manual</H2>
-        <Para>
-          The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
-        </Para>
-        <div className="no-print" style={{ display: "flex", justifyContent: "flex-end", marginTop: 18, marginBottom: 4 }}>
-          <button
-            type="button"
-            onClick={() => window.print()}
-            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "none", background: P.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F.body }}
-          >
-            📄 Save as PDF
-          </button>
+        </div>
+
+        <div className="no-print">
+          <H2>The checklist: what to verify on every manual</H2>
+          <Para>
+            The checklist below covers what I actually run through on every manual underwrite. It's organized in the order I work the file: borrower conversation first, then ratios and comp factors, then documentation. Print it, save it, share it. It's free.
+          </Para>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18, marginBottom: 4 }}>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 6, border: "none", background: P.navy, color: "#fff", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: F.body }}
+            >
+              📄 Save as PDF
+            </button>
+          </div>
         </div>
         <InteractiveChecklist id="fha-manual-underwriting" sections={FHA_MANUAL_CHECKLIST} />
+
+        <div className="no-print">
 
         <H2>Frequently asked questions</H2>
 
@@ -594,9 +602,13 @@ export function FHAManualUnderwritingPage() {
 
         <DeepDiveFooter />
 
+        </div>
+
       </article>
 
-      <MobileToolbar />
+      <div className="no-print">
+        <MobileToolbar />
+      </div>
     </main>
   );
 }
