@@ -8,10 +8,11 @@ import { InteractiveChecklist } from "../components/InteractiveChecklist";
 import { FHA_MANUAL_CHECKLIST } from "../data/fhaManualUnderwritingChecklist";
 
 const TITLE = "FHA Manual Underwriting: HUD 4000.1 Rules, Compensating Factors, and How to Get Approved | The Mortgage Geek";
-const DESCRIPTION = "FHA manual underwriting explained: HUD 4000.1 credit rules, DTI and compensating factors grid, and how to actually get approved. From a real LO with 12+ years.";
+const DESCRIPTION = "FHA manual underwriting: HUD 4000.1 rules, DTI compensating factors, full documentation checklist. Plain English, from a real LO with 12+ years.";
 const PATH = "/deep-dives/fha-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-24";
+const MODIFIED = "2026-04-25";
 
 function renderInline(text) {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
@@ -105,7 +106,7 @@ export function FHAManualUnderwritingPage() {
           description: DESCRIPTION,
           url: URL,
           datePublished: PUBLISHED,
-          dateModified: PUBLISHED,
+          dateModified: MODIFIED,
         })}
       />
       <style>{globalCSS}</style>
