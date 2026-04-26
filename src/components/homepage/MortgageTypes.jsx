@@ -66,11 +66,25 @@ export function MortgageTypes({ navTarget }) {
         </div>
         <div style={{ padding: "20px 32px 28px" }}>
           <h4 style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.navy, marginBottom: 14 }}>Key Facts</h4>
-          {t.keyFacts.map((f, i) => (
-            <div key={i} style={{ display: "flex", gap: 10, fontSize: 13, lineHeight: 1.6, color: P.warmGray, marginBottom: 8 }}>
-              <span style={{ color: P.gold, fontWeight: 700, flexShrink: 0 }}>→</span><span>{f}</span>
-            </div>
-          ))}
+          {t.keyFacts.map((f, i) => {
+            const isObj = typeof f === "object" && f !== null;
+            const text = isObj ? f.text : f;
+            const link = isObj ? f.link : null;
+            return (
+              <div key={i} style={{ display: "flex", gap: 10, fontSize: 13, lineHeight: 1.6, color: P.warmGray, marginBottom: 8 }}>
+                <span style={{ color: P.gold, fontWeight: 700, flexShrink: 0 }}>→</span>
+                <span>
+                  {text}
+                  {link && (
+                    <>
+                      {" "}
+                      <a href={link.href} style={{ color: P.gold, fontWeight: 600, textDecoration: "underline" }}>{link.label} →</a>
+                    </>
+                  )}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
