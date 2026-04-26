@@ -21,6 +21,19 @@ export function MortgageStructure({ navTarget }) {
           <div key={i} className="content-card" style={{ padding: "24px 28px" }}>
             <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 8 }}>{c.heading}</h4>
             <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{c.text}</p>
+            {c.bullets && (
+              <div style={{ marginTop: 10 }}>
+                {c.bullets.map((b, bi) => (
+                  <div key={bi} style={{ display: "flex", gap: 10, fontSize: 13, lineHeight: 1.6, color: P.warmGray, marginBottom: 6 }}>
+                    <span style={{ color: P.gold, fontWeight: 700, flexShrink: 0 }}>→</span>
+                    <span>{b}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {c.note && (
+              <p style={{ fontSize: 13, lineHeight: 1.65, color: P.text, marginTop: 12, paddingTop: 12, borderTop: `1px solid ${P.creamDark}`, fontStyle: "italic" }}>{c.note}</p>
+            )}
             {c.link && (
               <p style={{ fontSize: 12, marginTop: 10 }}>
                 <a href={c.link.href} style={{ color: P.gold, fontWeight: 600, textDecoration: "underline" }}>{c.link.label} →</a>

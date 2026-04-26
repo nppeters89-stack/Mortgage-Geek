@@ -131,7 +131,11 @@ export const MORTGAGE_STRUCTURE = [
   { title: "Fixed vs. ARM", content: [
     { heading: "Fixed Rate", text: "Your rate and payment never change for the life of the loan. Predictability is the advantage. In a rising-rate environment, you're locked in. The trade-off: fixed rates are typically higher than the initial rate on an ARM." },
     { heading: "Adjustable Rate (ARM)", text: "A lower initial rate for a fixed period (typically 5, 7, or 10 years), then the rate adjusts periodically based on a market index plus a margin. A 5/1 ARM is fixed for 5 years, then adjusts annually. ARMs have rate caps — limits on how much the rate can change per adjustment and over the life of the loan." },
-    { heading: "When ARMs Make Sense", text: "If you plan to sell or refinance within the fixed period. If you need the lower payment to qualify. If you believe rates will decrease. The risk: if rates rise and you're still in the loan when it adjusts, your payment increases — sometimes significantly.", link: { href: "/deep-dives/arms-demystified", label: "ARMs Demystified deep dive" } },
+    { heading: "When ARMs Make Sense", text: "ARMs are a good fit in narrow circumstances. Consider one if:", bullets: [
+      "You plan to sell or refinance before the fixed period ends.",
+      "You need the lower initial payment to qualify.",
+      "You believe rates will fall and you're willing to bet on it.",
+    ], note: "The risk cuts the other way too: if rates rise and you're still in the loan when it adjusts, your payment can jump significantly.", link: { href: "/deep-dives/arms-demystified", label: "ARMs Demystified deep dive" } },
   ]},
   { title: "Amortization", content: [
     { heading: "The Front-Loaded Interest Problem", text: "In the early years of your mortgage, the vast majority of your payment goes toward interest, not principal. On a 30-year $300,000 loan at 7%, your first payment of $1,996 breaks down to roughly $1,750 in interest and only $246 toward principal. This ratio gradually shifts over time." },
