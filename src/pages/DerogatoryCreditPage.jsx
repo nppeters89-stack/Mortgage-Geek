@@ -8,7 +8,7 @@ import { EVENTS } from "../data/derogatoryCredit";
 import { articleSchema } from "../utils/schema";
 
 export function DerogatoryCreditPage() {
-  const [openAccordion, setOpenAccordion] = useState("chapter7");
+  const [openAccordion, setOpenAccordion] = useState(null);
 
   const accordions = [
     {
