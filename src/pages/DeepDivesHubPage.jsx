@@ -32,6 +32,13 @@ export function DeepDivesHubPage() {
       summary: "How adjustable-rate mortgages actually work, with a custom anatomy graphic, a 12-term glossary, and a worked example of what 5/1/5 caps mean in real dollars. When ARMs genuinely make sense and when they put a borrower in a bind.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "residency-rules",
+      emoji: "🌐",
+      title: "Residency and Visa Rules",
+      summary: "Which residency status qualifies for which loan program, organized as a 5x5 grid of borrower status by program. Includes the May 25, 2025 FHA rule change that closed the door on H-1Bs, EADs, asylees, and refugees, plus the work visa and EAD codes that still qualify on Conventional and USDA.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
