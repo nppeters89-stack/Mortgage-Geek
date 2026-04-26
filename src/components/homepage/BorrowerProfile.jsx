@@ -45,6 +45,11 @@ export function BorrowerProfile({ navTarget }) {
             <div key={i} className="content-card" style={{ padding: "24px 28px" }}>
               <h4 style={{ fontFamily: F.display, fontSize: 19, color: P.navy, marginBottom: 8 }}>{s.heading}</h4>
               <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{s.content}</p>
+              {s.link && (
+                <p style={{ fontSize: 12, marginTop: 10 }}>
+                  <a href={s.link.href} style={{ color: P.gold, fontWeight: 600, textDecoration: "underline" }}>{s.link.label} →</a>
+                </p>
+              )}
             </div>
           );
         })}
