@@ -12,6 +12,7 @@ const DerogatoryCreditPage = lazy(() => import("./pages/DerogatoryCreditPage").t
 const FHAManualUnderwritingPage = lazy(() => import("./pages/FHAManualUnderwritingPage").then(m => ({ default: m.FHAManualUnderwritingPage })));
 const VAManualUnderwritingPage = lazy(() => import("./pages/VAManualUnderwritingPage").then(m => ({ default: m.VAManualUnderwritingPage })));
 const ARMsDemystifiedPage = lazy(() => import("./pages/ARMsDemystifiedPage").then(m => ({ default: m.ARMsDemystifiedPage })));
+const ResidencyRulesPage = lazy(() => import("./pages/ResidencyRulesPage").then(m => ({ default: m.ResidencyRulesPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -28,6 +29,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/fha-manual-underwriting") return "deepdives-fha-manual";
     if (path === "deep-dives/va-manual-underwriting") return "deepdives-va-manual";
     if (path === "deep-dives/arms-demystified") return "deepdives-arms";
+    if (path === "deep-dives/residency-rules") return "deepdives-residency";
     return "main";
   });
 
@@ -43,6 +45,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-fha-manual") return <FHAManualUnderwritingPage />;
     if (currentPage === "deepdives-va-manual") return <VAManualUnderwritingPage />;
     if (currentPage === "deepdives-arms") return <ARMsDemystifiedPage />;
+    if (currentPage === "deepdives-residency") return <ResidencyRulesPage />;
     return <MainSite />;
   };
 
