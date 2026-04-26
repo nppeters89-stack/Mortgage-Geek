@@ -340,7 +340,7 @@ function TierCard({ t, idx, expanded, onToggle, onKeyDown, plainMode, density })
 }
 
 export function StackedTierCardsBranded({ plainMode = true, density = "regular" }) {
-  const [openId, setOpenId] = useState("baseline");
+  const [openId, setOpenId] = useState(null);
   const toggle = (id) => setOpenId((p) => (p === id ? null : id));
   const gap = density === "compact" ? 10 : density === "comfy" ? 18 : 14;
 
