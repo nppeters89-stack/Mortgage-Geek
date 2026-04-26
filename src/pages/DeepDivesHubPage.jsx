@@ -39,6 +39,13 @@ export function DeepDivesHubPage() {
       summary: "Which residency status qualifies for which loan program, organized as a 5x5 grid of borrower status by program. Includes the May 25, 2025 FHA rule change that closed the door on H-1Bs, EADs, asylees, and refugees, plus the work visa and EAD codes that still qualify on Conventional and USDA.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "self-employed-documentation",
+      emoji: "📊",
+      title: "Self-Employed Mortgage Documentation",
+      summary: "What lenders actually want from self-employed borrowers, by business structure and loan program. The 25% ownership rule, two-year and one-year tax return options, the business returns waiver, and how qualifying income gets calculated (with a worked example showing why $200k revenue often becomes $65k qualifying income).",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (

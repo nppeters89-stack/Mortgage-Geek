@@ -245,7 +245,7 @@ export function FHAManualUnderwritingPage() {
           "Anything in the file that the AUS can't evaluate that affects insurability (e.g., excessive NSFs or buy-now-pay-later activity visible only on bank statements)",
         ]} />
         <Para>
-          For the wait-period math on bankruptcy, foreclosure, deed-in-lieu, and short sale, see our <a href="/deep-dives/derogatory-credit" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>derogatory credit wait periods guide</a>.
+          For the wait-period math on bankruptcy, foreclosure, deed-in-lieu, and short sale, see our <a href="/deep-dives/derogatory-credit" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>derogatory credit wait periods guide</a>. For the income-decline downgrade and how qualifying income is calculated for self-employed borrowers, see our <a href="/deep-dives/self-employed-documentation" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>self-employed documentation deep dive</a>.
         </Para>
 
         <GeekTip title='"Hiding in plain sight"'>

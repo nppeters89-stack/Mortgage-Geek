@@ -355,6 +355,9 @@ export function VAManualUnderwritingPage() {
         <Para>
           In this case, the AUS isn't saying "no." It's saying "we can't automatically say yes, a human needs to look at this." Your LO should be treating it as a manual from day one.
         </Para>
+        <Para>
+          For self-employed borrowers specifically, the year-over-year income decline trigger is one of the most common reasons VA files end up here. See our <a href="/deep-dives/self-employed-documentation" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>self-employed documentation deep dive</a> for how qualifying income gets calculated and what to bring to the file.
+        </Para>
 
         <H3>Path 2: the AUS returned "Accept/Eligible" but a downgrade is required</H3>
         <Para>
