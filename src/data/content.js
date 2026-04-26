@@ -116,6 +116,10 @@ export const BORROWER_PROFILE = [
     { heading: "If You Already Own Property", content: "Existing mortgages count toward your DTI. Rental income from investment properties can be used to offset those payments — typically 75% of rental income (to account for vacancies and expenses). You'll need leases and tax returns to document rental income." },
     { heading: "The Appraisal", content: "The property itself has to qualify too. The appraiser confirms the home's value supports the loan amount and checks for safety and livability issues. FHA and VA appraisals are stricter than conventional — they require the property to meet minimum standards." },
   ]},
+  { title: "Residency & Eligibility", sections: [
+    { heading: "Status Comes First", content: "Before credit, income, or assets even matter, your residency status determines which loan programs you can use at all. US citizens and lawful permanent residents (green card holders) qualify for every program. Beyond that, the rules diverge sharply by program — and changed significantly in 2025." },
+    { heading: "What Changed in 2025", content: "On May 25, 2025, FHA closed the door on most non-permanent residents — H-1B and other work-visa holders, EAD-only borrowers, asylees, and refugees no longer qualify for FHA financing on case numbers issued after that date. VA eligibility remains unchanged for service members and surviving spouses. Conventional (Fannie/Freddie) and USDA still allow many non-permanent residents with valid work authorization, including most H-1B, L-1, O-1, TN, and certain EAD categories.", link: { href: "/deep-dives/residency-rules", label: "Residency and Visa Rules deep dive" } },
+  ]},
 ];
 
 export const MORTGAGE_STRUCTURE = [

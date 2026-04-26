@@ -11,7 +11,7 @@ export function BorrowerProfile({ navTarget }) {
   useEffect(() => { setExpandedTips({}); }, [active]);
   return (
     <section id="profile" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to four pillars." />
+      <SectionHeader eyebrow="What Lenders Evaluate" title="Your Borrower Profile" subtitle="Every lending decision comes down to five pillars." />
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
         {BORROWER_PROFILE.map((b, i) => (
           <button key={b.title} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{b.title}</button>
