@@ -27,6 +27,7 @@ export const NAV_TOPICS = [
     { label: "Income & Employment", id: "profile", step: 1 },
     { label: "Assets & Reserves", id: "profile", step: 2 },
     { label: "Property & Real Estate", id: "profile", step: 3 },
+    { label: "Residency & Eligibility", id: "profile", step: 4 },
   ]},
   { id: "rates", label: "Interest Rates", icon: "📈", subs: [
     { label: "What Drives Rates", id: "rates", step: 0 },
