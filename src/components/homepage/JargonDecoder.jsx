@@ -15,7 +15,7 @@ export function JargonDecoder() {
     { term: "APR", def: "Annual Percentage Rate — your interest rate plus lender fees, expressed as a yearly rate. APR is always higher than your note rate because it includes costs like origination fees and discount points. Use APR to compare the true cost of loans from different lenders." },
     { term: "Amortization", def: "The process of paying off your loan over time through scheduled payments. Early payments are mostly interest; later payments are mostly principal. A 30-year amortization schedule shows exactly how this shifts month by month." },
     { term: "Appraisal", def: "An independent assessment of a property's market value, ordered by the lender through an Appraisal Management Company (AMC). The lender needs to confirm the home is worth what you're borrowing. Typically $400–$700." },
-    { term: "ARM", def: "Adjustable Rate Mortgage — a loan with an interest rate that changes after an initial fixed period. A 7/6 ARM is fixed for 7 years, then adjusts every 6 months based on a market index (usually SOFR). Lower initial rate, but risk of increases later." },
+    { term: "ARM", def: "Adjustable Rate Mortgage — a loan with an interest rate that changes after an initial fixed period. A 7/6 ARM is fixed for 7 years, then adjusts every 6 months based on a market index (usually SOFR). Lower initial rate, but risk of increases later.", link: { href: "/deep-dives/arms-demystified", label: "Read the ARMs Demystified deep dive" } },
     { term: "Cash to Close", def: "The total amount of money you need to bring to the closing table to complete your home purchase. It includes your down payment, closing costs, prepaid items (taxes and insurance collected upfront), and escrow reserves, minus any credits like earnest money, seller concessions, or lender credits. This is the real number buyers need to plan for — often significantly more than just the down payment alone." },
     { term: "Clear to Close", def: "The best phrase in the mortgage process. It means the underwriter has approved your loan with all conditions satisfied, and you're authorized to proceed to the closing table." },
     { term: "Closing Disclosure (CD)", def: "A 5-page document you receive at least 3 business days before closing. It details every cost, your loan terms, and your monthly payment. Compare it line-by-line against your Loan Estimate — discrepancies may require a fee cure." },
@@ -35,7 +35,7 @@ export function JargonDecoder() {
     { term: "Pre-Approval", def: "A conditional commitment from a lender stating how much you're approved to borrow, based on verified income, assets, and credit. Stronger than pre-qualification and often required by sellers before accepting an offer." },
     { term: "Pre-Qualification", def: "An initial estimate of what you can afford, based on self-reported financial information. Faster and less rigorous than pre-approval. Good starting point, but not a guarantee of approval." },
     { term: "Rate Lock", def: "An agreement with your lender to hold a specific interest rate for a set period (typically 30–60 days). Protects you from rate increases while your loan is being processed. Once locked, your rate won't change even if market rates rise." },
-    { term: "SOFR", def: "Secured Overnight Financing Rate — the benchmark index used for most adjustable-rate mortgages (ARMs). Replaced LIBOR in 2023. When your ARM adjusts, the new rate = SOFR + a fixed margin set at origination." },
+    { term: "SOFR", def: "Secured Overnight Financing Rate — the benchmark index used for most adjustable-rate mortgages (ARMs). Replaced LIBOR in 2023. When your ARM adjusts, the new rate = SOFR + a fixed margin set at origination.", link: { href: "/deep-dives/arms-demystified", label: "How ARMs use SOFR (deep dive)" } },
     { term: "Title Insurance", def: "A one-time premium that protects against title defects — things like undisclosed heirs, forged documents, or recording errors. Lender's title insurance is required; owner's title insurance is optional but strongly recommended." },
     { term: "TRID", def: "TILA-RESPA Integrated Disclosure — the \"Know Before You Owe\" rule that standardized mortgage disclosures. It governs your Loan Estimate and Closing Disclosure and sets fee tolerance limits protecting you from surprise cost increases." },
     { term: "Underwriting", def: "The process where your complete loan file is analyzed against lending guidelines. The underwriter reviews your credit, income, assets, and the property to make the approval decision. This is the gatekeeper step." },
@@ -85,6 +85,11 @@ export function JargonDecoder() {
               {openTerm === i && (
                 <div style={{ padding: "14px 20px", borderTop: `1px solid ${P.cream}` }}>
                   <p style={{ fontSize: 13, lineHeight: 1.75, color: P.warmGray }}>{t.def}</p>
+                  {t.link && (
+                    <p style={{ fontSize: 12, marginTop: 10 }}>
+                      <a href={t.link.href} style={{ color: P.gold, fontWeight: 600, textDecoration: "underline" }}>{t.link.label} →</a>
+                    </p>
+                  )}
                 </div>
               )}
             </div>

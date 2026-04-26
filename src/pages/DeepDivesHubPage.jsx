@@ -25,6 +25,13 @@ export function DeepDivesHubPage() {
       summary: "When VA's automated system refers your file to a human underwriter. Residual income tables by region and family size, the DTI and compensating factors framework, the 13 VA comp factors, and what actually gets a manual file approved.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "arms-demystified",
+      emoji: "📈",
+      title: "ARMs Demystified",
+      summary: "How adjustable-rate mortgages actually work, with a custom anatomy graphic, a 12-term glossary, and a worked example of what 5/1/5 caps mean in real dollars. When ARMs genuinely make sense and when they put a borrower in a bind.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
