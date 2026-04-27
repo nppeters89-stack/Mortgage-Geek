@@ -29,6 +29,7 @@ export function PreQualPage() {
   const [convRate15Api, setConvRate15Api] = useState(6.0);
   const [fhaRate, setFhaRate] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
+  const [usdaRate, setUsdaRate] = useState(6.25);
   const [vaUsage, setVaUsage] = useState("first");
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("Nashville/Davidson");
@@ -58,7 +59,7 @@ export function PreQualPage() {
         if (data.success && data.rates) {
           const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
           const conv30 = find("30-year fixed"); const conv15 = find("15-year fixed");
-          const fha = find("fha"); const va = find("va");
+          const fha = find("fha"); const va = find("va"); const usda = find("usda");
           const r30 = conv30 ? roundRate(parseFloat(conv30.rate)) : 6.75;
           const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
           setConvRate30Api(r30);
@@ -66,6 +67,7 @@ export function PreQualPage() {
           setConvRate(term === 15 ? r15 : r30);
           if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
           if (va) setVaRate(roundRate(parseFloat(va.rate)));
+          if (usda) setUsdaRate(roundRate(parseFloat(usda.rate)));
           setRateSource(data.date || "today"); setRatesLoaded(true);
         }
       } catch (e) { /* silent */ }
@@ -130,6 +132,24 @@ export function PreQualPage() {
     ? { title: "Min 3.5% Down Required", body: "FHA loans require a minimum 3.5% down payment. Increase your down payment to see FHA results." }
     : null;
 
+  // USDA: standard income cap for 1-4 person households in most areas (FY2026).
+  // High-cost MSAs are higher; we use the standard as the trigger.
+  const USDA_INCOME_CAP_ANNUAL = 119850;
+  const usdaIncomeOk = (grossIncome * 12) <= USDA_INCOME_CAP_ANNUAL;
+  const usdaTermOk = term === 30;
+  const usdaEligible = usdaIncomeOk && usdaTermOk;
+  const usdaIneligibleReason = !usdaIncomeOk
+    ? {
+        title: "Income Exceeds USDA Limit",
+        body: "USDA caps total household income at $119,850/year for 1-4 person households in most areas. USDA counts ALL adult household income, not just yours, so the actual cap may be reached even when individual income looks lower. Higher limits apply in some high-cost MSAs — verify your specific county limit with an MLO.",
+      }
+    : !usdaTermOk
+    ? {
+        title: "USDA 30-Year Only",
+        body: "USDA loans are only available as 30-year fixed-rate mortgages. Switch the loan term to 30 years to see USDA results.",
+      }
+    : null;
+
   const programs = [
     {
       name: "Conventional", color: PROGRAM_COLORS.Conventional, rate: convRate, setRate: setConvRate,
@@ -154,15 +174,24 @@ export function PreQualPage() {
       miLabel: "No monthly MI",
       notes: `Front-end 50%, back-end 55%. DTI thresholds assume 680+ FICO. Funding fee ${vaFeeRate}% financed. No monthly MI. Can exceed 55% with strong residual income.`,
     },
+    {
+      name: "USDA", color: PROGRAM_COLORS.USDA, rate: usdaRate, setRate: setUsdaRate,
+      frontMax: 0.34, backMax: 0.4499, miRate: 0.35, upfrontFee: 1.00,
+      minDown: 0, eligible: usdaEligible, loanLimit: Infinity,
+      miLabel: "Annual Fee (0.35%)",
+      notes: "Front-end 34%, back-end 44.99% (stretch maximums with compensating factors — standard GUS Accept is 29%/41%). 30-year fixed only. Annual fee for life of loan. Subject to property + household income eligibility.",
+      ineligibleReason: usdaIneligibleReason,
+    },
   ];
 
   // Calculate for each program
   const results = programs.map(prog => {
     const useFixedDown = isDollarMode;
 
-    // When using fixed dollar down, eligibility is determined by whether the dollar
-    // amount can meet the minimum down requirement at ANY price (it always can, we just cap the price)
-    const isEligible = useFixedDown ? true : prog.eligible;
+    // When using fixed dollar down, dp-based eligibility is bypassed because the
+    // price scales to meet minDown. Programs with non-dp eligibility (USDA's
+    // income/term checks) keep their actual prog.eligible value.
+    const isEligible = useFixedDown && prog.minDown > 0 ? true : prog.eligible;
     if (!isEligible) return { ...prog, maxPrice: 0, maxPayment: 0, comfPrice: 0, comfPayment: 0, frontMaxHousing: 0, backTotalMax: 0, backMaxHousing: 0, overLimit: false, actualDownAmt: 0, actualDownPctDisplay: 0 };
 
     // Front-end: max HOUSING payment (independent of debts)
@@ -214,7 +243,7 @@ export function PreQualPage() {
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
     // APR calculation for the max scenario
-    const aprLenderFees = 1500 + 750 + (prog.name === "VA" ? 650 : prog.name === "FHA" ? 550 : 600) + 300 + 15 + 80;
+    const aprLenderFees = 1500 + 750 + (prog.name === "VA" ? 650 : prog.name === "FHA" ? 550 : prog.name === "USDA" ? 625 : 600) + 300 + 15 + 80;
     const aprUpfront = maxLoan * (prog.upfrontFee / 100);
     const aprCharges = aprLenderFees + aprUpfront;
     let aprMI = 0, aprMiMonths = 0;
@@ -224,6 +253,9 @@ export function PreQualPage() {
     } else if (prog.name === "Conventional" && dpForCalc < 20) {
       aprMI = (maxLoan * (prog.miRate / 100)) / 12;
       aprMiMonths = 120;
+    } else if (prog.name === "USDA") {
+      aprMI = (maxLoan * (prog.miRate / 100)) / 12;
+      aprMiMonths = term * 12; // life of loan
     }
     const apr = maxTotalLoan > 0 ? calculateAPR(maxTotalLoan, aprCharges, prog.rate, term, aprMI, aprMiMonths) : 0;
 
@@ -438,6 +470,7 @@ export function PreQualPage() {
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
               { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
+              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
             ].map((p) => (
               <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
             ))}
@@ -475,6 +508,11 @@ export function PreQualPage() {
                     <span style={{ fontSize: 24, display: "block", marginBottom: 8 }}>⚠️</span>
                     <p style={{ fontSize: 13, fontWeight: 600, color: P.text, marginBottom: 6 }}>{prog.ineligibleReason.title}</p>
                     <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5 }}>{prog.ineligibleReason.body}</p>
+                    {prog.name === "USDA" && (
+                      <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 12, lineHeight: 1.5 }}>
+                        USDA measures total household income (all adults 18+, even non-borrowers). Consult an MLO to verify your household total before relying on this estimate.
+                      </p>
+                    )}
                   </div>
                 </div>
               );
@@ -513,6 +551,18 @@ export function PreQualPage() {
                 </div>
 
                 <div style={{ padding: "16px 20px" }}>
+                  {prog.name === "USDA" && (
+                    <div style={{
+                      background: "rgba(160, 82, 45, 0.08)",
+                      borderLeft: `3px solid ${PROGRAM_COLORS.USDA}`,
+                      padding: "10px 14px",
+                      marginBottom: 14,
+                    }}>
+                      <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
+                        <strong style={{ color: PROGRAM_COLORS.USDA }}>Household income, not just yours.</strong> USDA counts gross income from all adults (18+) in the household, even those not on the loan. Verify your total against the $119,850 limit (1-4 person, most areas) with an MLO before relying on this estimate.
+                      </p>
+                    </div>
+                  )}
                   {/* DTI breakdown — two stacked bars */}
                   <div style={{ marginBottom: 14 }}>
                     {/* Front-End bar */}
@@ -551,7 +601,9 @@ export function PreQualPage() {
                       { label: "Max Housing Payment", val: fmt(prog.maxPayment), bold: true },
                       ...(monthlyDebts > 0 ? [{ label: "Housing + Debts", val: fmt(prog.maxPayment + monthlyDebts), sub: `of ${fmt(prog.backTotalMax)} back-end max` }] : []),
                       { label: "Loan Amount", val: fmt(prog.maxLoan), warn: prog.overLimit },
-                      { label: "Loan Limit", val: fmt(prog.loanLimit), dim: !prog.overLimit },
+                      ...(prog.name === "USDA"
+                        ? [{ label: "Income Limit", val: "$119,850/yr", sub: "1-4 ppl, most areas" }]
+                        : [{ label: "Loan Limit", val: fmt(prog.loanLimit), dim: !prog.overLimit }]),
                       ...(prog.upfrontFee > 0 ? [{ label: `Financed Fee (${prog.upfrontFee}%)`, val: fmt(prog.maxLoan * (prog.upfrontFee / 100)) }] : []),
                       { label: "Down Payment", val: fmt(prog.actualDownAmt), sub: `${prog.actualDownPctDisplay}%` },
                       { label: prog.miLabel, val: prog.miRate > 0 ? fmt((prog.maxLoan * prog.miRate / 100) / 12) + "/mo" : "—" },
@@ -598,7 +650,7 @@ export function PreQualPage() {
                     <div style={{ marginTop: 10, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                       <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR at Max Purchase</span>
                       <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
-                      <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Note rate {Number(prog.rate).toFixed(3)}% · Includes lender fees{prog.upfrontFee > 0 ? `, ${prog.name === "FHA" ? "UFMIP" : "VA funding fee"}` : ""}{prog.miRate > 0 ? ", monthly MI" : ""}</p>
+                      <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Note rate {Number(prog.rate).toFixed(3)}% · Includes lender fees{prog.upfrontFee > 0 ? `, ${prog.name === "FHA" ? "UFMIP" : prog.name === "USDA" ? "USDA Guarantee Fee" : "VA funding fee"}` : ""}{prog.miRate > 0 ? ", monthly MI" : ""}</p>
                       <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                     </div>
                   )}
