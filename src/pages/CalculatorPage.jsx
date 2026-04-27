@@ -142,15 +142,18 @@ export function CalculatorPage() {
           const conv15 = find("15-year fixed");
           const fha = find("fha");
           const va = find("va");
-          const usda = find("usda");
           const r30 = conv30 ? roundRate(parseFloat(conv30.rate)) : 6.75;
           const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
           setConvRate30Api(r30);
           setConvRate15Api(r15);
           if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(term === 15 ? r15 : r30);
-          if (fha && !(paramProgram === "FHA" && paramRate > 0)) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (fha) {
+            const fhaParsed = roundRate(parseFloat(fha.rate));
+            if (!(paramProgram === "FHA" && paramRate > 0)) setFhaRate(fhaParsed);
+            // USDA tracks FHA from MND (MND doesn't publish a separate USDA rate)
+            if (!(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(fhaParsed);
+          }
           if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
-          if (usda && !(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(roundRate(parseFloat(usda.rate)));
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
