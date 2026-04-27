@@ -309,12 +309,19 @@ export function CalculatorPage() {
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
         .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
+        .calc-program-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto 24px; padding: 0 4px; }
+        .calc-toggle-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 4px; }
+        .calc-toggle-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; min-height: 36px; border-radius: 50px; border: 1.5px solid; font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s; }
+        .calc-toggle-pill:not(:disabled):hover { transform: translateY(-1px); }
+        .calc-toggle-pill:not(:disabled):active { transform: translateY(0); }
         @media (max-width: 1100px) {
           .calc-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
         }
         @media (max-width: 700px) {
           .calc-input-cols { grid-template-columns: 1fr; }
           .calc-cards-grid { grid-template-columns: 1fr; }
+          .calc-toggle-pill { min-height: 44px; padding: 10px 18px; font-size: 14px; }
+          .calc-program-toggle { justify-content: center; }
         }
       `}</style>
 
@@ -528,6 +535,35 @@ export function CalculatorPage() {
               <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to select it, then save to the Loan Comparison Tool</p>
             </div>
           </div>
+
+        {/* Program selection toggle — pick which 1–4 programs to compare */}
+        <div className="calc-program-toggle" role="group" aria-label="Select programs to compare">
+          <span className="calc-toggle-label" style={{ color: P.warmGrayLight }}>Compare:</span>
+          {programs.map((prog) => {
+            const isVisible = visiblePrograms.includes(prog.name);
+            const isLast = visiblePrograms.length === 1 && isVisible;
+            return (
+              <button
+                key={prog.name}
+                type="button"
+                onClick={() => toggleProgram(prog.name)}
+                disabled={isLast}
+                aria-pressed={isVisible}
+                aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                className="calc-toggle-pill"
+                style={{
+                  background: isVisible ? prog.color : "transparent",
+                  color: isVisible ? "#fff" : P.warmGray,
+                  borderColor: isVisible ? prog.color : P.warmGrayLight,
+                  cursor: isLast ? "not-allowed" : "pointer",
+                  opacity: isLast ? 0.7 : 1,
+                }}
+              >
+                {prog.name}
+              </button>
+            );
+          })}
+        </div>
 
         {/* Side-by-side cards */}
         <div className="calc-cards-grid">
