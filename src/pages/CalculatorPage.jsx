@@ -10,6 +10,8 @@ import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
 
+const ALL_PROGRAMS = ["Conventional", "FHA", "VA", "USDA"];
+
 export function CalculatorPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const paramRate = parseFloat(params.get("rate"));
@@ -26,6 +28,53 @@ export function CalculatorPage() {
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
+  const [visiblePrograms, setVisiblePrograms] = useState(() => {
+    try {
+      const saved = localStorage.getItem("mg_calc_visible_programs");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0
+            && parsed.every(n => ALL_PROGRAMS.includes(n))) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return ALL_PROGRAMS;
+  });
+
+  // Force URL-param program into the visible set (one-time, on mount)
+  useEffect(() => {
+    if (paramProgram && ALL_PROGRAMS.includes(paramProgram)
+        && !visiblePrograms.includes(paramProgram)) {
+      setVisiblePrograms(prev => ALL_PROGRAMS.filter(n => prev.includes(n) || n === paramProgram));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem("mg_calc_visible_programs", JSON.stringify(visiblePrograms));
+    } catch {}
+  }, [visiblePrograms]);
+
+  // Clear selectedProgram if it's been hidden
+  useEffect(() => {
+    if (selectedProgram && !visiblePrograms.includes(selectedProgram)) {
+      setSelectedProgram(null);
+    }
+  }, [visiblePrograms, selectedProgram]);
+
+  const toggleProgram = (name) => {
+    setVisiblePrograms(prev => {
+      if (prev.includes(name)) {
+        if (prev.length === 1) return prev; // never empty
+        return prev.filter(n => n !== name);
+      }
+      // preserve canonical order rather than append-order
+      return ALL_PROGRAMS.filter(n => prev.includes(n) || n === name);
+    });
+  };
   const [extraConfig, setExtraConfig] = useState({});
   const getExtraConfig = (programName) => extraConfig[programName] || { enabled: false, strategy: "monthly", amount: 0 };
   const updateExtraConfig = (programName, updates) => {
@@ -235,10 +284,11 @@ export function CalculatorPage() {
     },
   ];
 
+  const visibleProgramsList = programs.filter(p => visiblePrograms.includes(p.name));
   const overLimitPrograms = programs.filter(p => p.overLimit && p.eligible);
   const countyLabel = selectedMetro ? selectedMetro.name : (stateData ? `${stateData.name} default` : "county");
 
-  const eligibleTotals = programs.filter(p => p.eligible).map(p => p.total);
+  const eligibleTotals = visibleProgramsList.filter(p => p.eligible).map(p => p.total);
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
   return (
@@ -481,7 +531,7 @@ export function CalculatorPage() {
 
         {/* Side-by-side cards */}
         <div className="calc-cards-grid">
-          {programs.map((prog, i) => {
+          {visibleProgramsList.map((prog, i) => {
             const isBest = prog.eligible && prog.total === lowestTotal;
 
             if (!prog.eligible) {
