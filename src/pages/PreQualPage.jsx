@@ -266,17 +266,20 @@ export function PreQualPage() {
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
         title="Pre-Qualification Calculator — See What Mortgage You Can Afford"
-        description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, and VA. Free pre-qualification estimate, no credit check."
+        description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, VA, and USDA. Free pre-qualification estimate, no credit check."
         path="/prequal"
         schema={webApplicationSchema({
           title: "Pre-Qualification Calculator — The Mortgage Geek",
-          description: "See what mortgage you can afford across Conventional, FHA, and VA based on your income and debts.",
+          description: "See what mortgage you can afford across Conventional, FHA, VA, and USDA based on your income and debts.",
           url: "https://mortgagegeek.ai/prequal",
         })}
       />
       <style>{globalCSS}{`
         .pq-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .pq-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        .pq-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        @media (max-width: 1100px) {
+          .pq-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        }
         @media (max-width: 700px) {
           .pq-input-cols { grid-template-columns: 1fr; }
           .pq-cards-grid { grid-template-columns: 1fr; }
@@ -414,7 +417,7 @@ export function PreQualPage() {
                 </select>
               )}
             </div>
-            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}</p>
+            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Loan limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}. USDA uses an income cap (~$119,850 for 1-4 person households in most areas) instead of a loan limit.</p>
           </div>
         </div>
 
@@ -666,7 +669,7 @@ export function PreQualPage() {
             <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
               <p style={{ marginBottom: 8 }}>
-                <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers.
+                <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers. USDA caps tighter — 34% front-end, 44.99% back-end — and adds a $119,850/yr household income limit (1-4 person, most areas). Those DTI ceilings are stretch maximums; USDA's standard GUS-Accept threshold is 29%/41%, and going above requires compensating factors.
               </p>
               <p>
                 <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
