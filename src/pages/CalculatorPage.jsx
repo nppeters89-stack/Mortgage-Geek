@@ -244,21 +244,24 @@ export function CalculatorPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
-        title="Mortgage Calculator — Compare Conventional, FHA, and VA Side by Side"
-        description="Calculate monthly payments and see how Conventional, FHA, and VA loans compare for the same home. Includes PMI, MIP, and live rates."
+        title="Mortgage Calculator — Compare Conventional, FHA, VA, USDA | The Mortgage Geek"
+        description="Calculate monthly payments and see how Conventional, FHA, VA, and USDA loans compare for the same home. Includes PMI, MIP, USDA fees, and live rates."
         path="/calculator"
         schema={webApplicationSchema({
           title: "Mortgage Calculator — The Mortgage Geek",
-          description: "Calculate monthly payments and compare Conventional, FHA, and VA loans side by side.",
+          description: "Calculate monthly payments and compare Conventional, FHA, VA, and USDA loans side by side.",
           url: "https://mortgagegeek.ai/calculator",
         })}
       />
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .calc-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+        .calc-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
         .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
+        @media (max-width: 1100px) {
+          .calc-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        }
         @media (max-width: 700px) {
           .calc-input-cols { grid-template-columns: 1fr; }
           .calc-cards-grid { grid-template-columns: 1fr; }
@@ -306,7 +309,7 @@ export function CalculatorPage() {
             Mortgage Calculator
             <MortgageCalcIcon size={26} />
           </h1>
-          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 540, margin: "0 auto" }}>One set of inputs, three loan programs. See how Conventional, FHA, and VA stack up for the same home.</p>
+          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
         </div>
 
         {/* Input card - 2 column layout */}
@@ -887,26 +890,35 @@ export function CalculatorPage() {
                   <strong>Monthly difference:</strong> The spread between the lowest and highest eligible payment is{" "}
                   <strong style={{ color: P.navy }}>{fmt(Math.max(...eligibleTotals) - lowestTotal)}/month</strong>{" "}
                   ({fmt((Math.max(...eligibleTotals) - lowestTotal) * 12)}/year).
-                  {convRate !== fhaRate || convRate !== vaRate ? (
-                    <span> Rate spread: Conv {convRate}% vs FHA {fhaRate}% vs VA {vaRate}% — this difference alone accounts for a meaningful portion of the payment gap.</span>
+                  {new Set([convRate, fhaRate, vaRate, usdaRate]).size > 1 ? (
+                    <span> Rate spread: Conv {convRate}% vs FHA {fhaRate}% vs VA {vaRate}% vs USDA {usdaRate}% — this difference alone accounts for a meaningful portion of the payment gap.</span>
                   ) : null}
                 </p>
               )}
-              {programs.some(p => !p.eligible) && (
-                <p style={{ marginBottom: 8 }}>
-                  <strong>Note:</strong> {programs.filter(p => !p.eligible).map(p => p.name).join(" and ")} {programs.filter(p => !p.eligible).length === 1 ? "is" : "are"} ineligible at {downPct}% down. 
-                  {downPct < 3 ? " Minimum down payments: Conventional (3%), FHA (3.5%). Only VA allows 0% down." :
-                   downPct < 3.5 ? " FHA requires a minimum 3.5% down payment. Increase to 3.5% to compare all three programs." : ""}
-                </p>
-              )}
+              {programs.some(p => !p.eligible) && (() => {
+                const ineligibleNames = programs.filter(p => !p.eligible).map(p => p.name);
+                const list = ineligibleNames.length === 1 ? ineligibleNames[0] :
+                             ineligibleNames.length === 2 ? `${ineligibleNames[0]} and ${ineligibleNames[1]}` :
+                             `${ineligibleNames.slice(0, -1).join(", ")}, and ${ineligibleNames[ineligibleNames.length - 1]}`;
+                const verb = ineligibleNames.length === 1 ? "is" : "are";
+                return (
+                  <p style={{ marginBottom: 8 }}>
+                    <strong>Note:</strong> {list} {verb} ineligible at the current settings — see the card{ineligibleNames.length === 1 ? "" : "s"} above for details.
+                    {downPct < 3 ? " Minimum down payments: Conventional (3%), FHA (3.5%). VA and USDA both allow 0% down (USDA requires a 30-year term)." :
+                     downPct < 3.5 ? " FHA requires a minimum 3.5% down payment to qualify." : ""}
+                  </p>
+                );
+              })()}
               <p>
                 {downPct >= 20
-                  ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA and VA finance upfront fees, meaning you borrow more even with the same down payment."
+                  ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA, VA, and USDA finance upfront fees, meaning you borrow more even with the same down payment."
                   : downPct >= 5
-                    ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, and VA has no monthly MI at all (but the funding fee adds to your balance). Conv PMI estimates here assume 740+ FICO and DTI under 43% — lower scores or higher DTI will increase PMI."
+                    ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, VA has no monthly MI at all (but the funding fee adds to your balance), and USDA's annual fee stays for the life of the loan. Conv PMI estimates here assume 740+ FICO and DTI under 43% — lower scores or higher DTI will increase PMI."
                     : downPct >= 3.5
-                      ? "At less than 5% down, all three programs carry some form of mortgage insurance or upfront fee. Conv PMI estimates assume 740+ FICO and DTI under 43% — lower scores will increase PMI significantly. VA is often the best deal if you're eligible — no monthly MI at all."
-                      : "At this down payment level, VA is likely your only option if you're eligible. Consider increasing your down payment to unlock Conventional and FHA programs."}
+                      ? "At less than 5% down, all four programs carry some form of mortgage insurance or upfront fee. Conv PMI estimates assume 740+ FICO and DTI under 43% — lower scores will increase PMI significantly. VA is often the best deal if you're eligible — no monthly MI at all. USDA also allows 0% down with similar economics, but the property must be in an eligible rural area, household income has to be under program limits, and the annual fee stays for the life of the loan."
+                      : term === 30
+                        ? "At this down payment level, VA and USDA are likely your only options. VA requires a Certificate of Eligibility; USDA requires property + income eligibility (and is 30-year fixed only). Consider increasing your down payment to unlock Conventional and FHA programs."
+                        : "At this down payment level, VA is likely your only option — USDA requires a 30-year term. Consider increasing your down payment or switching to a 30-year term to widen your options."}
               </p>
               {vaUsage !== "exempt" && (
                 <p style={{ marginTop: 8 }}>
