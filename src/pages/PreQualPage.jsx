@@ -121,6 +121,15 @@ export function PreQualPage() {
   const convMiRate = dpForCalc < 5 ? 0.52 : dpForCalc < 10 ? 0.37 : dpForCalc < 20 ? 0.27 : 0;
   const fhaMiRate = dpForCalc < 5 ? 0.55 : 0.50;
 
+  // Per-program ineligibility messaging. Each program populates ineligibleReason
+  // with the {title, body} the result card renders when eligible === false.
+  const convIneligibleReason = dpForCalc < 3
+    ? { title: "Min 3% Down Required", body: "Conventional loans require a minimum 3% down payment. Increase your down payment to see Conventional results." }
+    : null;
+  const fhaIneligibleReason = dpForCalc < 3.5
+    ? { title: "Min 3.5% Down Required", body: "FHA loans require a minimum 3.5% down payment. Increase your down payment to see FHA results." }
+    : null;
+
   const programs = [
     {
       name: "Conventional", color: PROGRAM_COLORS.Conventional, rate: convRate, setRate: setConvRate,
@@ -128,6 +137,7 @@ export function PreQualPage() {
       minDown: 3, eligible: dpForCalc >= 3, loanLimit: loanLimits.conv,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : "No PMI",
       notes: "Front-end and back-end both 49.99%. DTI thresholds assume 740+ FICO — lower scores may reduce max DTI. PMI removable at 80% LTV.",
+      ineligibleReason: convIneligibleReason,
     },
     {
       name: "FHA", color: PROGRAM_COLORS.FHA, rate: fhaRate, setRate: setFhaRate,
@@ -135,6 +145,7 @@ export function PreQualPage() {
       minDown: 3.5, eligible: dpForCalc >= 3.5, loanLimit: loanLimits.fha,
       miLabel: `MIP (${fhaMiRate}%)`,
       notes: "Front-end 46.99%, back-end 56.99%. DTI thresholds assume 680+ FICO. UFMIP (1.75%) financed. MIP for life if <10% down.",
+      ineligibleReason: fhaIneligibleReason,
     },
     {
       name: "VA", color: PROGRAM_COLORS.VA, rate: vaRate, setRate: setVaRate,
@@ -453,7 +464,7 @@ export function PreQualPage() {
         {/* Program result cards */}
         <div className="pq-cards-grid">
           {results.map((prog, i) => {
-            if (!prog.eligible) {
+            if (!prog.eligible && prog.ineligibleReason) {
               return (
                 <div key={i} className="content-card" style={{ overflow: "hidden", opacity: 0.6 }}>
                   <div style={{ background: P.warmGrayLight, padding: "20px", textAlign: "center" }}>
@@ -462,8 +473,8 @@ export function PreQualPage() {
                   </div>
                   <div style={{ padding: "24px 20px", textAlign: "center" }}>
                     <span style={{ fontSize: 24, display: "block", marginBottom: 8 }}>⚠️</span>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: P.text, marginBottom: 4 }}>Min {prog.minDown}% Down Required</p>
-                    <p style={{ fontSize: 11, color: P.warmGray }}>Increase down payment to {prog.minDown}% to see {prog.name} results.</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: P.text, marginBottom: 6 }}>{prog.ineligibleReason.title}</p>
+                    <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5 }}>{prog.ineligibleReason.body}</p>
                   </div>
                 </div>
               );
