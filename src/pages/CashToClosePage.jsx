@@ -192,9 +192,18 @@ export function CashToClosePage() {
     })();
   }, []);
 
-  // Eligibility check: minimum down payment per program
+  // Eligibility check: per-program guardrails. Each rule populates ineligibleReason
+  // with the {title, body} the result panel renders when the user trips it.
   const minDown = program === "Conventional" ? 3 : program === "FHA" ? 3.5 : 0;
-  const isEligible = downPct >= minDown;
+  const downEligible = downPct >= minDown;
+  const isEligible = downEligible;
+
+  const ineligibleReason = !downEligible
+    ? {
+        title: `Minimum ${minDown}% Down Required`,
+        body: `${program} loans require a minimum down payment of ${minDown}% (${fmt(homePrice * (minDown / 100))} on a ${fmt(homePrice)} home). Increase your down payment or pick a different loan program above to see your cash to close estimate.`,
+      }
+    : null;
 
   // Auto-HOI from price × 0.35% (matches calculator)
   const insuranceAnnual = Math.round(homePrice * 0.0035);
@@ -679,9 +688,9 @@ export function CashToClosePage() {
             <div style={{ width: 56, height: 56, borderRadius: "50%", background: P.creamDark, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
               <span style={{ fontSize: 28 }}>⚠️</span>
             </div>
-            <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 8 }}>Minimum {minDown}% Down Required</h3>
+            <h3 style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 8 }}>{ineligibleReason.title}</h3>
             <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
-              {program} loans require a minimum down payment of <strong>{minDown}%</strong> ({fmt(homePrice * (minDown / 100))} on a {fmt(homePrice)} home). Increase your down payment or pick a different loan program above to see your cash to close estimate.
+              {ineligibleReason.body}
             </p>
           </div>
         ) : (
