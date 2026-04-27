@@ -6,7 +6,7 @@ export function ToolsCTA() {
   const tools = [
     {
       icon: "__CALC_ICON__", title: "Mortgage Calculator", href: "/calculator",
-      desc: "Same house, three programs. Compare Conventional, FHA, and VA payment breakdowns with live rates.",
+      desc: "Same house, four programs. Compare Conventional, FHA, VA, and USDA payment breakdowns with live rates.",
     },
     {
       icon: "__PREQUAL_ICON__", title: "Pre-Qual Simulator", href: "/prequal",
