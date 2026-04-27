@@ -117,12 +117,13 @@ export function CashToClosePage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
   const paramProgram = params.get("program");
   const paramRate = parseFloat(params.get("rate"));
-  const [program, setProgram] = useState(["Conventional", "FHA", "VA"].includes(paramProgram) ? paramProgram : "Conventional");
+  const [program, setProgram] = useState(["Conventional", "FHA", "VA", "USDA"].includes(paramProgram) ? paramProgram : "Conventional");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
   const [convRate, setConvRate] = useState(paramProgram === "Conventional" && paramRate > 0 ? paramRate : 6.75);
   const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
+  const [usdaRate, setUsdaRate] = useState(paramProgram === "USDA" && paramRate > 0 ? paramRate : 6.25);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
   const [rateLoading, setRateLoading] = useState(true);
@@ -148,7 +149,7 @@ export function CashToClosePage() {
   // Editable lender fees
   const [feeUnderwriting, setFeeUnderwriting] = useState(1500);
   const [feeProcessing, setFeeProcessing] = useState(750);
-  const [feeAppraisal, setFeeAppraisal] = useState(() => program === "VA" ? 650 : program === "FHA" ? 550 : 600);
+  const [feeAppraisal, setFeeAppraisal] = useState(() => program === "VA" ? 650 : program === "FHA" ? 550 : program === "USDA" ? 625 : 600);
   const [feeCreditReport, setFeeCreditReport] = useState(300);
   const [feeFloodCert, setFeeFloodCert] = useState(15);
   const [feeTaxService, setFeeTaxService] = useState(80);
@@ -156,14 +157,19 @@ export function CashToClosePage() {
   const [discountPointsPct, setDiscountPointsPct] = useState(0);
   const [discountPointsDollar, setDiscountPointsDollar] = useState(0);
   const [showPointsInfo, setShowPointsInfo] = useState(false);
-  useEffect(() => { setFeeAppraisal(program === "VA" ? 650 : program === "FHA" ? 550 : 600); }, [program]);
+  useEffect(() => { setFeeAppraisal(program === "VA" ? 650 : program === "FHA" ? 550 : program === "USDA" ? 625 : 600); }, [program]);
 
   // Active rate switches with selected program
-  const rate = program === "Conventional" ? convRate : program === "FHA" ? fhaRate : vaRate;
+  const rate =
+    program === "Conventional" ? convRate :
+    program === "FHA"          ? fhaRate  :
+    program === "USDA"         ? usdaRate :
+                                 vaRate;
   const setRate = (v) => {
-    if (program === "Conventional") setConvRate(v);
-    else if (program === "FHA") setFhaRate(v);
-    else setVaRate(v);
+    if      (program === "Conventional") setConvRate(v);
+    else if (program === "FHA")          setFhaRate(v);
+    else if (program === "USDA")         setUsdaRate(v);
+    else                                 setVaRate(v);
   };
 
   const roundRate = (r) => Math.round(r / 0.125) * 0.125;
@@ -182,7 +188,12 @@ export function CashToClosePage() {
           const fha = find("fha");
           const va = find("va");
           if (conv30 && !(paramProgram === "Conventional" && paramRate > 0)) setConvRate(roundRate(parseFloat(conv30.rate)));
-          if (fha && !(paramProgram === "FHA" && paramRate > 0)) setFhaRate(roundRate(parseFloat(fha.rate)));
+          if (fha) {
+            const fhaParsed = roundRate(parseFloat(fha.rate));
+            if (!(paramProgram === "FHA" && paramRate > 0)) setFhaRate(fhaParsed);
+            // USDA tracks FHA from MND (MND doesn't publish a separate USDA rate)
+            if (!(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(fhaParsed);
+          }
           if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
           setRateSource(data.date || "today");
           setRatesLoaded(true);
@@ -194,14 +205,23 @@ export function CashToClosePage() {
 
   // Eligibility check: per-program guardrails. Each rule populates ineligibleReason
   // with the {title, body} the result panel renders when the user trips it.
-  const minDown = program === "Conventional" ? 3 : program === "FHA" ? 3.5 : 0;
+  const minDown =
+    program === "Conventional" ? 3   :
+    program === "FHA"          ? 3.5 :
+                                 0;     // VA and USDA both 0
   const downEligible = downPct >= minDown;
-  const isEligible = downEligible;
+  const termEligible = program !== "USDA" || term === 30;
+  const isEligible = downEligible && termEligible;
 
   const ineligibleReason = !downEligible
     ? {
         title: `Minimum ${minDown}% Down Required`,
         body: `${program} loans require a minimum down payment of ${minDown}% (${fmt(homePrice * (minDown / 100))} on a ${fmt(homePrice)} home). Increase your down payment or pick a different loan program above to see your cash to close estimate.`,
+      }
+    : !termEligible
+    ? {
+        title: "USDA 30-Year Only",
+        body: "USDA loans are only available as 30-year fixed-rate mortgages. Switch the loan term to 30 years or pick a different loan program above to see your cash to close estimate.",
       }
     : null;
 
@@ -235,6 +255,7 @@ export function CashToClosePage() {
       upfrontLabel = `VA Funding Fee (${feeRate}%)`;
     }
   }
+  if (program === "USDA") { upfrontFee = baseLoan * 0.01; upfrontLabel = "USDA Guarantee Fee (1.00%)"; }
   const totalLoan = baseLoan + upfrontFee;
 
   // Lender fees (editable)
@@ -477,15 +498,24 @@ export function CashToClosePage() {
     const convPmiRate = downPct < 5 ? 0.0052 : downPct < 10 ? 0.0037 : 0.0027;
     aprMonthlyMI = (baseLoan * convPmiRate) / 12;
     aprMiMonths = 120; // ~10 years to 78% LTV at typical amortization
+  } else if (program === "USDA") {
+    // USDA annual fee: 0.35% of base loan, paid monthly for life of loan
+    aprMonthlyMI = (baseLoan * 0.0035) / 12;
+    aprMiMonths = term * 12; // life of loan, always
   }
   // VA: aprMonthlyMI stays 0
 
   const estimatedAPR = calculateAPR(totalLoan, aprFinanceCharges, rate, term, aprMonthlyMI, aprMiMonths);
 
-  const PROG_COLOR = { Conventional: PROGRAM_COLORS.Conventional, FHA: PROGRAM_COLORS.FHA, VA: PROGRAM_COLORS.VA }[program];
+  const PROG_COLOR = {
+    Conventional: PROGRAM_COLORS.Conventional,
+    FHA:          PROGRAM_COLORS.FHA,
+    VA:           PROGRAM_COLORS.VA,
+    USDA:         PROGRAM_COLORS.USDA,
+  }[program];
   // Section header color: gold for Conv/VA (adds contrast against navy/sage subtotal pills),
-  // navy for FHA (gold subtotal pills already contrast against the page, so navy headers stay clean)
-  const headerColor = program === "FHA" ? P.navy : P.gold;
+  // navy for FHA/USDA (gold/sienna subtotal pills are warm, so navy headers stay clean)
+  const headerColor = (program === "FHA" || program === "USDA") ? P.navy : P.gold;
 
   const Row = ({ label, val, sub, bold, color, italic, subtotal }) => (
     <div style={{
@@ -523,6 +553,12 @@ export function CashToClosePage() {
         .ctc-loc-grid > .ctc-date-cell input { flex: 1; }
         .ctc-loc-grid > .ctc-location-stack { display: flex; flex-direction: column; gap: 12px; }
         @media (max-width: 600px) { .ctc-loc-grid { grid-template-columns: 1fr; } }
+        .ctc-program-grid { display: flex; gap: 6px; }
+        .ctc-program-grid > button { flex: 1; }
+        @media (max-width: 480px) {
+          .ctc-program-grid { flex-wrap: wrap; }
+          .ctc-program-grid > button { flex: 1 1 calc(50% - 3px); }
+        }
       `}</style>
       <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
@@ -559,16 +595,21 @@ export function CashToClosePage() {
           {/* Program selector */}
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Loan Program</label>
-            <div style={{ display: "flex", gap: 6 }}>
-              {["Conventional", "FHA", "VA"].map(p => (
+            <div className="ctc-program-grid">
+              {["Conventional", "FHA", "VA", "USDA"].map(p => (
                 <button key={p} onClick={() => setProgram(p)} style={{
-                  flex: 1, padding: "11px 0", borderRadius: 8, border: "none",
+                  padding: "11px 4px", borderRadius: 8, border: "none",
                   background: program === p ? PROGRAM_COLORS[p] : P.creamDark,
                   color: program === p ? "#fff" : P.warmGray,
                   fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: F.body, transition: "all 0.15s",
                 }}>{p}</button>
               ))}
             </div>
+            {program === "USDA" && (
+              <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 6, fontStyle: "italic", lineHeight: 1.5 }}>
+                USDA loans require the property to be in a USDA-eligible rural area and household income to be within program limits. Verify both before relying on this estimate.
+              </p>
+            )}
           </div>
 
           {/* Tier 2 — Term + Home Price */}
@@ -884,7 +925,7 @@ export function CashToClosePage() {
                 <span style={{ fontSize: 10, color: P.warmGrayLight, display: "block", marginTop: 4 }}>Note rate {Number(rate).toFixed(3)}% · {term}-year term</span>
               </div>
               <p style={{ fontSize: 11, lineHeight: 1.6, color: P.warmGray, marginTop: 8, paddingTop: 10, borderTop: `1px solid ${P.creamDark}`, textAlign: "left" }}>
-                <strong style={{ color: P.navy }}>What is APR?</strong> The Annual Percentage Rate reflects your note rate plus lender fees, prepaid interest, upfront mortgage insurance, and monthly mortgage insurance premiums for the period required — expressed as an annual rate. APR is typically 0.10–0.75% higher than your note rate for Conventional loans and 0.40–1.00% higher for FHA/VA loans (due to upfront and monthly MI), and is the standard apples-to-apples comparison number across lenders. This estimate includes lender fees ({fmt(lenderTotal)}){upfrontFee > 0 ? `, upfront ${program === "FHA" ? "MIP" : "VA funding fee"} (${fmt(upfrontFee)})` : ""}, prepaid interest ({fmt(prepaidInterest)}){aprMonthlyMI > 0 ? `, and monthly MI of ${fmt(aprMonthlyMI)} for ${aprMiMonths} months` : ""}. Title fees, taxes, and insurance are excluded per Reg Z Appendix J. <strong>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</strong>
+                <strong style={{ color: P.navy }}>What is APR?</strong> The Annual Percentage Rate reflects your note rate plus lender fees, prepaid interest, upfront mortgage insurance, and monthly mortgage insurance premiums for the period required — expressed as an annual rate. APR is typically 0.10–0.75% higher than your note rate for Conventional loans and 0.40–1.00% higher for FHA/VA/USDA loans (due to upfront and monthly MI), and is the standard apples-to-apples comparison number across lenders. This estimate includes lender fees ({fmt(lenderTotal)}){upfrontFee > 0 ? `, upfront ${program === "FHA" ? "MIP" : program === "USDA" ? "USDA Guarantee Fee" : "VA funding fee"} (${fmt(upfrontFee)})` : ""}, prepaid interest ({fmt(prepaidInterest)}){aprMonthlyMI > 0 ? `, and monthly MI of ${fmt(aprMonthlyMI)} for ${aprMiMonths} months` : ""}. Title fees, taxes, and insurance are excluded per Reg Z Appendix J. <strong>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</strong>
               </p>
             </div>
           </div>
