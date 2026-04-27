@@ -15,6 +15,7 @@ export const PROGRAM_COLORS = {
   Conventional: "#1B3A4B", // navy
   FHA: "#8B6914",          // goldMuted (darker for better white text contrast)
   VA: "#5A7A6E",           // sage
+  USDA: "#A0522D",         // sienna — distinct from navy/gold/sage, evokes earth/rural
 };
 
 export const F = {
