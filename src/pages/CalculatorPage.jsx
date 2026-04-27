@@ -305,7 +305,11 @@ export function CalculatorPage() {
       />
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        .calc-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .calc-cards-grid { display: grid; gap: 16px; margin-bottom: 32px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+        .calc-cards-grid[data-count="1"] { grid-template-columns: minmax(280px, 380px); justify-content: center; }
+        .calc-cards-grid[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 380px)); justify-content: center; max-width: 800px; }
+        .calc-cards-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); max-width: 900px; }
+        .calc-cards-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
         .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
@@ -315,11 +319,24 @@ export function CalculatorPage() {
         .calc-toggle-pill:not(:disabled):hover { transform: translateY(-1px); }
         .calc-toggle-pill:not(:disabled):active { transform: translateY(0); }
         @media (max-width: 1100px) {
-          .calc-cards-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+          .calc-cards-grid[data-count="3"],
+          .calc-cards-grid[data-count="4"] {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 700px;
+          }
         }
         @media (max-width: 700px) {
           .calc-input-cols { grid-template-columns: 1fr; }
-          .calc-cards-grid { grid-template-columns: 1fr; }
+          .calc-cards-grid,
+          .calc-cards-grid[data-count="1"],
+          .calc-cards-grid[data-count="2"],
+          .calc-cards-grid[data-count="3"],
+          .calc-cards-grid[data-count="4"] {
+            grid-template-columns: 1fr;
+            max-width: none;
+          }
+          .calc-cards-grid[data-count="1"] { justify-content: stretch; }
           .calc-toggle-pill { min-height: 44px; padding: 10px 18px; font-size: 14px; }
           .calc-program-toggle { justify-content: center; }
         }
@@ -566,7 +583,7 @@ export function CalculatorPage() {
         </div>
 
         {/* Side-by-side cards */}
-        <div className="calc-cards-grid">
+        <div className="calc-cards-grid" data-count={visibleProgramsList.length}>
           {visibleProgramsList.map((prog, i) => {
             const isBest = prog.eligible && prog.total === lowestTotal;
 
@@ -976,13 +993,20 @@ export function CalculatorPage() {
                   <strong>Monthly difference:</strong> The spread between the lowest and highest eligible payment is{" "}
                   <strong style={{ color: P.navy }}>{fmt(Math.max(...eligibleTotals) - lowestTotal)}/month</strong>{" "}
                   ({fmt((Math.max(...eligibleTotals) - lowestTotal) * 12)}/year).
-                  {new Set([convRate, fhaRate, vaRate, usdaRate]).size > 1 ? (
-                    <span> Rate spread: Conv {convRate}% vs FHA {fhaRate}% vs VA {vaRate}% vs USDA {usdaRate}% — this difference alone accounts for a meaningful portion of the payment gap.</span>
-                  ) : null}
+                  {(() => {
+                    if (visibleProgramsList.length < 2) return null;
+                    const rates = visibleProgramsList.map(p => p.rate);
+                    if (new Set(rates).size < 2) return null;
+                    const shortLabel = (name) => name === "Conventional" ? "Conv" : name;
+                    const parts = visibleProgramsList.map(p => `${shortLabel(p.name)} ${p.rate}%`);
+                    return (
+                      <span> Rate spread: {parts.join(" vs ")} — this difference alone accounts for a meaningful portion of the payment gap.</span>
+                    );
+                  })()}
                 </p>
               )}
-              {programs.some(p => !p.eligible) && (() => {
-                const ineligibleNames = programs.filter(p => !p.eligible).map(p => p.name);
+              {visibleProgramsList.some(p => !p.eligible) && (() => {
+                const ineligibleNames = visibleProgramsList.filter(p => !p.eligible).map(p => p.name);
                 const list = ineligibleNames.length === 1 ? ineligibleNames[0] :
                              ineligibleNames.length === 2 ? `${ineligibleNames[0]} and ${ineligibleNames[1]}` :
                              `${ineligibleNames.slice(0, -1).join(", ")}, and ${ineligibleNames[ineligibleNames.length - 1]}`;
@@ -1006,7 +1030,7 @@ export function CalculatorPage() {
                         ? "At this down payment level, VA and USDA are likely your only options. VA requires a Certificate of Eligibility; USDA requires property + income eligibility (and is 30-year fixed only). Consider increasing your down payment to unlock Conventional and FHA programs."
                         : "At this down payment level, VA is likely your only option — USDA requires a 30-year term. Consider increasing your down payment or switching to a 30-year term to widen your options."}
               </p>
-              {vaUsage !== "exempt" && (
+              {visiblePrograms.includes("VA") && vaUsage !== "exempt" && (
                 <p style={{ marginTop: 8 }}>
                   <strong>VA funding fee:</strong> Currently set to {vaUsageLabels[vaUsage].toLowerCase()} at {vaFeeRate}%
                   {downPct < 5 && vaUsage === "subsequent" ? " — this is the highest tier. First-time users with the same down payment pay 2.15% instead." : ""}
@@ -1014,7 +1038,7 @@ export function CalculatorPage() {
                   {" "}Use the dropdown on the VA card to compare scenarios. Veterans with service-connected disabilities are exempt entirely.
                 </p>
               )}
-              {vaUsage === "exempt" && (
+              {visiblePrograms.includes("VA") && vaUsage === "exempt" && (
                 <p style={{ marginTop: 8 }}>
                   <strong>VA funding fee waived.</strong> Veterans with service-connected disabilities are exempt from the funding fee, making VA even more competitive — no upfront fee and no monthly MI.
                 </p>
