@@ -20,6 +20,7 @@ export function CalculatorPage() {
   const [convRate15Api, setConvRate15Api] = useState(6.0);
   const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
+  const [usdaRate, setUsdaRate] = useState(paramProgram === "USDA" && paramRate > 0 ? paramRate : 6.25);
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
@@ -92,6 +93,7 @@ export function CalculatorPage() {
           const conv15 = find("15-year fixed");
           const fha = find("fha");
           const va = find("va");
+          const usda = find("usda");
           const r30 = conv30 ? roundRate(parseFloat(conv30.rate)) : 6.75;
           const r15 = conv15 ? roundRate(parseFloat(conv15.rate)) : 6.0;
           setConvRate30Api(r30);
@@ -99,6 +101,7 @@ export function CalculatorPage() {
           if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(term === 15 ? r15 : r30);
           if (fha && !(paramProgram === "FHA" && paramRate > 0)) setFhaRate(roundRate(parseFloat(fha.rate)));
           if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
+          if (usda && !(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(roundRate(parseFloat(usda.rate)));
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
@@ -163,6 +166,24 @@ export function CalculatorPage() {
   const vaAprCharges = calcLenderFees + vaFee;
   const vaAPR = calculateAPR(vaLoan, vaAprCharges, vaRate, term, 0, 0);
 
+  // USDA — Rural Development guaranteed loan (FY2026 fees)
+  const usdaUpfront = baseLoan * 0.01;
+  const usdaLoan = baseLoan + usdaUpfront;
+  const usdaMiRate = 0.35;
+  const usdaMI = (baseLoan * (usdaMiRate / 100)) / 12;
+  const { monthly: usdaPI } = useMemo(
+    () => generateAmortData(usdaLoan, usdaRate, term),
+    [usdaLoan, usdaRate, term]
+  );
+  const usdaTotal = usdaPI + usdaMI + taxes + insurance + hoa;
+
+  const usdaAprCharges = calcLenderFees + usdaUpfront;
+  const usdaAprMI = (baseLoan * (usdaMiRate / 100)) / 12;
+  const usdaAprMiMonths = term * 12; // life of loan
+  const usdaAPR = calculateAPR(
+    usdaLoan, usdaAprCharges, usdaRate, term, usdaAprMI, usdaAprMiMonths
+  );
+
   const programs = [
     {
       name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI,
@@ -171,6 +192,10 @@ export function CalculatorPage() {
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
       eligible: downPct >= 3, minDown: 3,
       loanLimit: loanLimits.conv, overLimit: baseLoan > loanLimits.conv,
+      ineligibleReason: downPct < 3 ? {
+        title: "Minimum 3% Down Required",
+        body: `Conventional loans require a minimum down payment of 3% (${fmt(homePrice * 0.03)}). Increase your down payment to see Conventional payment details.`,
+      } : null,
     },
     {
       name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
@@ -179,6 +204,10 @@ export function CalculatorPage() {
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
       eligible: downPct >= 3.5, minDown: 3.5,
       loanLimit: loanLimits.fha, overLimit: baseLoan > loanLimits.fha,
+      ineligibleReason: downPct < 3.5 ? {
+        title: "Minimum 3.5% Down Required",
+        body: `FHA loans require a minimum down payment of 3.5% (${fmt(homePrice * 0.035)}). Increase your down payment to see FHA payment details.`,
+      } : null,
     },
     {
       name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
@@ -189,6 +218,20 @@ export function CalculatorPage() {
         : `No monthly MI — ${vaUsageLabels[vaUsage].toLowerCase()}, ${downPct >= 10 ? "10%+ down" : downPct >= 5 ? "5–9.99% down" : "<5% down"}`,
       isVA: true, eligible: true, minDown: 0,
       loanLimit: loanLimits.va, overLimit: baseLoan > loanLimits.va,
+      ineligibleReason: null,
+    },
+    {
+      name: "USDA", color: PROGRAM_COLORS.USDA, loan: usdaLoan, pi: usdaPI, mi: usdaMI,
+      miLabel: `Annual Fee (${usdaMiRate}%)`,
+      upfront: usdaUpfront, upfrontLabel: "Guarantee Fee (1.00%)",
+      total: usdaTotal, rate: usdaRate, apr: usdaAPR,
+      note: "Annual fee for life of loan · subject to property + income eligibility",
+      eligible: term === 30, minDown: 0,
+      loanLimit: null, overLimit: false,
+      ineligibleReason: term !== 30 ? {
+        title: "USDA 30-Year Only",
+        body: "USDA loans are only available as 30-year fixed-rate mortgages. Switch the loan term to 30 years to see USDA payment details.",
+      } : null,
     },
   ];
 
@@ -406,9 +449,10 @@ export function CalculatorPage() {
           {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {[
-              { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
-              { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
+              { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA },
+              { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA },
+              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
             ].map((p) => (
               <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
             ))}
@@ -438,6 +482,7 @@ export function CalculatorPage() {
             const isBest = prog.eligible && prog.total === lowestTotal;
 
             if (!prog.eligible) {
+              const reason = prog.ineligibleReason;
               return (
                 <div key={i} className="content-card" style={{ overflow: "hidden", position: "relative", opacity: 0.6 }}>
                   <div style={{ background: P.warmGrayLight, padding: "24px 20px", textAlign: "center" }}>
@@ -448,11 +493,8 @@ export function CalculatorPage() {
                     <div style={{ width: 48, height: 48, borderRadius: "50%", background: P.creamDark, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
                       <span style={{ fontSize: 24 }}>⚠️</span>
                     </div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>Minimum {prog.minDown}% Down Required</p>
-                    <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray }}>
-                      {prog.name} loans require a minimum down payment of {prog.minDown}% ({fmt(homePrice * (prog.minDown / 100))}).
-                      Increase your down payment to see {prog.name} payment details.
-                    </p>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>{reason.title}</p>
+                    <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray }}>{reason.body}</p>
                   </div>
                 </div>
               );
