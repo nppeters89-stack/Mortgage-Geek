@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useId } from "react";
+import { Fragment, useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
@@ -318,6 +318,7 @@ export function CalculatorPage() {
         .calc-toggle-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; min-height: 36px; border-radius: 50px; border: 1.5px solid; font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s; }
         .calc-toggle-pill:not(:disabled):hover { transform: translateY(-1px); }
         .calc-toggle-pill:not(:disabled):active { transform: translateY(0); }
+        .calc-toggle-break { display: none; }
         @media (max-width: 1100px) {
           .calc-cards-grid[data-count="3"],
           .calc-cards-grid[data-count="4"] {
@@ -339,6 +340,7 @@ export function CalculatorPage() {
           .calc-cards-grid[data-count="1"] { justify-content: stretch; }
           .calc-toggle-pill { min-height: 44px; padding: 10px 18px; font-size: 14px; }
           .calc-program-toggle { justify-content: center; }
+          .calc-toggle-break { display: block; flex-basis: 100%; height: 0; margin: 0; }
         }
       `}</style>
 
@@ -560,24 +562,26 @@ export function CalculatorPage() {
             const isVisible = visiblePrograms.includes(prog.name);
             const isLast = visiblePrograms.length === 1 && isVisible;
             return (
-              <button
-                key={prog.name}
-                type="button"
-                onClick={() => toggleProgram(prog.name)}
-                disabled={isLast}
-                aria-pressed={isVisible}
-                aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
-                className="calc-toggle-pill"
-                style={{
-                  background: isVisible ? prog.color : "transparent",
-                  color: isVisible ? "#fff" : P.warmGray,
-                  borderColor: isVisible ? prog.color : P.warmGrayLight,
-                  cursor: isLast ? "not-allowed" : "pointer",
-                  opacity: isLast ? 0.7 : 1,
-                }}
-              >
-                {prog.name}
-              </button>
+              <Fragment key={prog.name}>
+                {prog.name === "USDA" && <span className="calc-toggle-break" aria-hidden="true" />}
+                <button
+                  type="button"
+                  onClick={() => toggleProgram(prog.name)}
+                  disabled={isLast}
+                  aria-pressed={isVisible}
+                  aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                  className="calc-toggle-pill"
+                  style={{
+                    background: isVisible ? prog.color : "transparent",
+                    color: isVisible ? "#fff" : P.warmGray,
+                    borderColor: isVisible ? prog.color : P.warmGrayLight,
+                    cursor: isLast ? "not-allowed" : "pointer",
+                    opacity: isLast ? 0.7 : 1,
+                  }}
+                >
+                  {prog.name}
+                </button>
+              </Fragment>
             );
           })}
         </div>
