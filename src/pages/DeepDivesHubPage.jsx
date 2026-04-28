@@ -53,6 +53,13 @@ export function DeepDivesHubPage() {
       summary: "What lenders actually want from self-employed borrowers, by business structure and loan program. The 25% ownership rule, two-year and one-year tax return options, the business returns waiver, and how qualifying income gets calculated (with a worked example showing why $200k revenue often becomes $65k qualifying income).",
       lastVerified: "April 2026",
     },
+    {
+      slug: "expected-income",
+      emoji: "📅",
+      title: "Expected Income: Using a New Job Offer to Qualify",
+      summary: "How to qualify for a mortgage with an offer letter for a job you haven't started yet. The 60-day vs 90-day window split, Fannie's two options, Freddie's two options, the common professions exception (doctors, teachers, professors), and how reserves work. Includes an interactive matrix mapping three borrower scenarios across all five major loan programs.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
