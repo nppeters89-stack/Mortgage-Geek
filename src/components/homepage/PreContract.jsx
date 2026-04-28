@@ -35,7 +35,7 @@ export function PreContract({ navTarget }) {
   );
 
   return (
-    <section id="getting-started" style={{ padding: "64px 40px" }}>
+    <section id="getting-started" style={{ padding: "64px 0" }}>
       <SectionHeader
         eyebrow="Steps 1–3 · Before the Clock Starts"
         title="Getting Started"
