@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { P, F } from "../../theme";
+import { useIsMobile } from "../../utils/hooks";
 import { fmt } from "../../utils/format";
 import { calculateAPR } from "../../utils/math";
 import { SectionHeader } from "./SectionHeader";
+import { SectionShell } from "./SectionShell";
 import { CashToCloseIcon } from "../icons";
 
 export function InterestRates({ navTarget }) {
@@ -10,6 +12,7 @@ export function InterestRates({ navTarget }) {
   const [liveRates, setLiveRates] = useState(null);
   const [rateLoading, setRateLoading] = useState(false);
   const [rateError, setRateError] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (navTarget?.section === "rates" && typeof navTarget.step === "number") {
@@ -54,19 +57,8 @@ export function InterestRates({ navTarget }) {
     { rate: "6.750%", points: -0.750, cost: -2250, payment: 1948, savings: "Lender credit of $2,250 — higher rate, lower cash to close" },
   ];
 
-  return (
-    <section id="rates" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <SectionHeader
-        eyebrow="The Number Everyone Asks About"
-        title="Interest Rates"
-        subtitle="Your interest rate isn't one number — it's a spectrum of options. Understanding what drives it and how to read a rate sheet puts you in control."
-      />
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
-        {tabs.map((t, i) => (
-          <button key={t} onClick={() => handleTabClick(i)} className={`tab-btn ${activeTab === i ? "tab-btn-active" : ""}`}>{t}</button>
-        ))}
-      </div>
-
+  const tabContent = (
+    <>
       {activeTab === 0 && (
         <div style={{ maxWidth: 720, display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="content-card" style={{ padding: "24px 28px" }}>
@@ -387,6 +379,62 @@ export function InterestRates({ navTarget }) {
           </div>
         );
       })()}
+    </>
+  );
+
+  return (
+    <section id="rates" className="section-bleed" style={{ padding: "64px 0", background: P.creamDark }}>
+      <SectionHeader
+        eyebrow="The Number Everyone Asks About"
+        title="Interest Rates"
+        subtitle="Your interest rate isn't one number — it's a spectrum of options. Understanding what drives it and how to read a rate sheet puts you in control."
+      />
+      {isMobile ? (
+        <>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+            {tabs.map((t, i) => (
+              <button key={t} onClick={() => handleTabClick(i)} className={`tab-btn ${activeTab === i ? "tab-btn-active" : ""}`}>{t}</button>
+            ))}
+          </div>
+          {tabContent}
+        </>
+      ) : (
+        <SectionShell rail={<RailTabs tabs={tabs} active={activeTab} onSelect={handleTabClick} />}>
+          {tabContent}
+        </SectionShell>
+      )}
     </section>
+  );
+}
+
+function RailTabs({ tabs, active, onSelect }) {
+  return (
+    <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {tabs.map((t, i) => {
+        const isActive = i === active;
+        return (
+          <button
+            key={t}
+            type="button"
+            onClick={() => onSelect(i)}
+            style={{
+              textAlign: "left",
+              fontFamily: F.body,
+              fontSize: 14,
+              fontWeight: isActive ? 600 : 500,
+              color: isActive ? P.text : P.warmGray,
+              background: isActive ? P.white : "transparent",
+              border: "none",
+              borderLeft: `3px solid ${isActive ? P.gold : "transparent"}`,
+              padding: "10px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
+          >
+            {t}
+          </button>
+        );
+      })}
+    </nav>
   );
 }
