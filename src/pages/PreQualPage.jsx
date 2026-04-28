@@ -685,7 +685,8 @@ export function PreQualPage() {
           const target = selected || eligible.reduce((a, b) => (a && a.maxPrice > b.maxPrice ? a : b), null);
           const targetPrice = target ? target.maxPrice : 0;
           const targetName = target ? target.name : "";
-          const calcUrl = `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}`;
+          const programParam = target ? `&program=${encodeURIComponent(target.name)}` : "";
+          const calcUrl = `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}${programParam}`;
           return (
             <>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
