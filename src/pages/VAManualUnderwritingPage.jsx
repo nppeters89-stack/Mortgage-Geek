@@ -329,7 +329,7 @@ export function VAManualUnderwritingPage() {
           That's the whole concept. No computer approval. A person reviewing your file line by line, looking at the same guidelines anyone can read in the VA handbook.
         </Para>
         <Para>
-          Here's something specific to VA that's worth noting up front: <strong style={{ color: P.navy, fontWeight: 600 }}>VA loans are more forgiving than <a href="/deep-dives/fha-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>FHA</a>, conventional, or USDA when it comes to credit setbacks.</strong> The handbook explicitly tells underwriters to use "good judgment and flexibility" and reminds them that lenders are "encouraged to make VA loans to all qualified veterans who apply." That tone matters. Underwriters are trained to find ways to approve veterans, not deny them. But the file still has to clear the rules.
+          Here's something specific to VA that's worth noting up front: <strong style={{ color: P.navy, fontWeight: 600 }}>VA loans are more forgiving than <a href="/deep-dives/fha-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>FHA</a>, conventional, or <a href="/deep-dives/usda-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>USDA</a> when it comes to credit setbacks.</strong> The handbook explicitly tells underwriters to use "good judgment and flexibility" and reminds them that lenders are "encouraged to make VA loans to all qualified veterans who apply." That tone matters. Underwriters are trained to find ways to approve veterans, not deny them. But the file still has to clear the rules.
         </Para>
 
         <H2>Two paths to a manual: which one are you on?</H2>
@@ -590,7 +590,7 @@ export function VAManualUnderwritingPage() {
 
         <H3>My DTI is over 50%. Can I still get a VA loan?</H3>
         <Para>
-          Possibly, but it depends entirely on the lender's overlays and your residual income. VA itself doesn't have a hard DTI cap. Files at 55% or 60% are approvable with strong residual income and multiple comp factors. But many lenders cap their overlays at 50% DTI on manuals. If your file is in that range, you may need a broker who works with multiple wholesale investors.
+          Possibly, but it depends entirely on the lender's overlays and your residual income. VA itself doesn't have a hard DTI cap. Files at 55% or 60% are approvable with strong residual income and multiple comp factors. But many lenders cap their overlays at 50% DTI on manuals. If your file is in that range, you may need a broker who works with multiple wholesale investors. For comparison, FHA allows up to 50%/57% with comp factors, and <a href="/deep-dives/usda-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>USDA</a> caps Total Debt at 44% with no waiver above that on purchase transactions.
         </Para>
 
         <H3>Does VA require a minimum credit score?</H3>

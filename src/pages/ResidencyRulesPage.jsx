@@ -278,7 +278,7 @@ export function ResidencyRulesPage() {
 
         <H3>USDA Rural Development</H3>
         <Para>
-          USDA loans accept the same statuses as Conventional (citizens, permanent residents, asylees, refugees, and non-permanent residents with work authorization), with the additional requirement that the property be in a USDA-eligible rural area and the household meet USDA income limits. Residency rules are not the bottleneck on USDA loans; the location and income rules are.
+          USDA loans accept the same statuses as Conventional (citizens, permanent residents, asylees, refugees, and non-permanent residents with work authorization), with the additional requirement that the property be in a USDA-eligible rural area and the household meet USDA income limits. Residency rules are not the bottleneck on USDA loans; the location and income rules are. For how those rules play out on a manual file, see our <a href="/deep-dives/usda-manual-underwriting" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>USDA manual underwriting deep dive</a>.
         </Para>
 
         <H2>For non-permanent residents. What documents you actually need.</H2>

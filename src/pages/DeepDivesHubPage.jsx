@@ -26,6 +26,13 @@ export function DeepDivesHubPage() {
       lastVerified: "April 2026",
     },
     {
+      slug: "usda-manual-underwriting",
+      emoji: "🌾",
+      title: "USDA Manual Underwriting",
+      summary: "When USDA's GUS system returns Refer or Refer with Caution. The two eligibility gates (income limits and rural property), the 29/41 baseline and 34/44 waiver ceilings, the 680 credit score waiver gate, the five compensating factors (including PN 621's payment shock), and how to actually get approved.",
+      lastVerified: "April 2026",
+    },
+    {
       slug: "arms-demystified",
       emoji: "📈",
       title: "ARMs Demystified",
