@@ -19,7 +19,7 @@ export function MortgageTypes({ navTarget }) {
           {/* Two-row grouped tab layout: Standard programs (5) + Specialized programs (2) */}
           <div style={{ marginBottom: 28 }}>
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold, marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 8 }}>
                 Standard Programs
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -37,7 +37,7 @@ export function MortgageTypes({ navTarget }) {
             </div>
 
             <div>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: 1.5, textTransform: "uppercase", color: P.gold, marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 8 }}>
                 Specialized Programs
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -134,10 +134,9 @@ function RailGroup({ label, items, startIndex, active, setActive }) {
         style={{
           fontFamily: F.body,
           fontSize: 11,
-          fontWeight: 700,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          color: P.gold,
+          color: P.warmGrayLight,
           padding: "4px 14px",
           marginBottom: 4,
         }}
