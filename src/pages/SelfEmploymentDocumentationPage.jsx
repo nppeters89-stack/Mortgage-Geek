@@ -210,8 +210,11 @@ export function SelfEmploymentDocumentationPage() {
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             If you own 25% or more of a business and you want a mortgage, you're a "self-employed borrower" in the eyes of every major loan program. That triggers a different documentation playbook than W-2 employees: more tax returns, more business filings, sometimes a profit-and-loss statement, and an income calculation that often surprises borrowers who've never been through it.
           </p>
-          <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7 }}>
+          <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             This page walks through what lenders need from self-employed borrowers, why they need it, and how qualifying income gets calculated. If you're a self-employed borrower preparing to buy or refinance, a CPA fielding mortgage questions from clients, or an LO trying to get cleaner files from your self-employed pipeline, this is for you.
+          </p>
+          <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7 }}>
+            Using funds from your business for a down payment, closing costs, or reserves is a separate topic with its own documentation rules. For that side of the conversation, see the <a href="/deep-dives/business-assets" style={LINK_STYLE}>Business Assets Deep Dive</a>.
           </p>
         </header>
 

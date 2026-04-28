@@ -54,6 +54,13 @@ export function DeepDivesHubPage() {
       lastVerified: "April 2026",
     },
     {
+      slug: "business-assets",
+      emoji: "🏦",
+      title: "Business Assets for Down Payment",
+      summary: "How to use money from your company to buy a home. The \"won't hurt the business\" cash flow analysis, agency-specific documentation rules (Fannie, Freddie, FHA, VA, USDA), when a CPA letter saves the file, the large deposits rule, and the patterns that cause business asset files to fail. Companion to the Self-Employment Documentation deep dive.",
+      lastVerified: "April 2026",
+    },
+    {
       slug: "expected-income",
       emoji: "📅",
       title: "Expected Income: Using a New Job Offer to Qualify",
