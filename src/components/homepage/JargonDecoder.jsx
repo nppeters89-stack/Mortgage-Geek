@@ -49,7 +49,7 @@ export function JargonDecoder() {
   );
 
   return (
-    <section id="glossary" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="glossary" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
       <div onClick={() => setSectionOpen(!sectionOpen)} style={{ cursor: "pointer" }}>
         <SectionHeader eyebrow="Speak the Language" title={`Jargon Decoder ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." : `Click to reveal ${terms.length} mortgage terms explained in plain language.`} />
       </div>

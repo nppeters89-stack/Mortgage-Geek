@@ -22,7 +22,7 @@ export function ToolsCTA() {
     },
   ];
   return (
-    <section id="tools-cta" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="tools-cta" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
       <div style={{ maxWidth: 720 }}>
         <SectionHeader eyebrow="Your Toolkit" title="Run the Numbers" subtitle="Free tools built by a loan originator — not a marketing team. No login, no data collected, no strings attached." />
         <div className="tools-grid-cta" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}>

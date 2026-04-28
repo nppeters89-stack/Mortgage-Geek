@@ -30,7 +30,7 @@ export function ActiveLoanProcess({ navTarget }) {
   );
 
   return (
-    <section id="process" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="process" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
         eyebrow="Steps 4–6 · The Clock Is Ticking"
         title="The 30-Day Loan Process"

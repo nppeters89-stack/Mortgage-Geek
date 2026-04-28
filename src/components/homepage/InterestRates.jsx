@@ -55,7 +55,7 @@ export function InterestRates({ navTarget }) {
   ];
 
   return (
-    <section id="rates" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="rates" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader
         eyebrow="The Number Everyone Asks About"
         title="Interest Rates"

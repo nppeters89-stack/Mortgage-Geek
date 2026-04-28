@@ -54,7 +54,7 @@ export const globalCSS = `
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
-  .main-content { flex: 1; margin-left: 280px; min-width: 0; }
+  .main-content { flex: 1; margin-left: 280px; min-width: 0; --side-offset: 280px; }
   .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
@@ -128,7 +128,7 @@ export const globalCSS = `
        snap back on release. The header is position:fixed so iOS native
        gestures don't affect it — hence it was the only element that moved
        correctly before this fix. */
-    .main-content { margin-left: 0 !important; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
+    .main-content { margin-left: 0 !important; --side-offset: 0px; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
     .main-content::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
     .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
     .main-content-open::after { pointer-events: auto; }
@@ -151,6 +151,23 @@ export const globalCSS = `
     }
     .section-shell > aside {
       position: static !important;
+    }
+  }
+
+  /* Full-bleed section: extends background to .main-content edges (viewport edge
+     on mobile, just inside the sidebar on desktop) while keeping inner content
+     positioned exactly where it would be without the bleed. Uses --side-offset
+     set on .main-content so the math accounts for the 280px sidebar on desktop. */
+  .section-bleed {
+    margin-left: calc(var(--side-offset, 0px) / 2 + 50% - 50vw);
+    margin-right: calc(var(--side-offset, 0px) / 2 + 50% - 50vw);
+    padding-left: calc(50vw - 50% - var(--side-offset, 0px) / 2 + 40px) !important;
+    padding-right: calc(50vw - 50% - var(--side-offset, 0px) / 2 + 40px) !important;
+  }
+  @media (max-width: 600px) {
+    .section-bleed {
+      padding-left: calc(50vw - 50% - var(--side-offset, 0px) / 2 + 20px) !important;
+      padding-right: calc(50vw - 50% - var(--side-offset, 0px) / 2 + 20px) !important;
     }
   }
 

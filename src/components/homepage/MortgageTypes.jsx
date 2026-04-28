@@ -8,7 +8,7 @@ export function MortgageTypes({ navTarget }) {
   useEffect(() => { if (navTarget?.section === "types" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const t = MORTGAGE_TYPES[active];
   return (
-    <section id="types" style={{ padding: "64px 40px", background: P.creamDark }}>
+    <section id="types" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
       <SectionHeader eyebrow="Know Your Options" title="Selecting a Mortgage" subtitle="Each loan type exists for a reason. The right one depends on your credit, savings, military status, and where you're buying." />
       {/* Two-row grouped tab layout: Standard programs (5) + Specialized programs (2) */}
       <div style={{ marginBottom: 28 }}>
