@@ -11,6 +11,7 @@ const DeepDivesHubPage = lazy(() => import("./pages/DeepDivesHubPage").then(m =>
 const DerogatoryCreditPage = lazy(() => import("./pages/DerogatoryCreditPage").then(m => ({ default: m.DerogatoryCreditPage })));
 const FHAManualUnderwritingPage = lazy(() => import("./pages/FHAManualUnderwritingPage").then(m => ({ default: m.FHAManualUnderwritingPage })));
 const VAManualUnderwritingPage = lazy(() => import("./pages/VAManualUnderwritingPage").then(m => ({ default: m.VAManualUnderwritingPage })));
+const USDAManualUnderwritingPage = lazy(() => import("./pages/USDAManualUnderwritingPage").then(m => ({ default: m.USDAManualUnderwritingPage })));
 const ARMsDemystifiedPage = lazy(() => import("./pages/ARMsDemystifiedPage").then(m => ({ default: m.ARMsDemystifiedPage })));
 const ResidencyRulesPage = lazy(() => import("./pages/ResidencyRulesPage").then(m => ({ default: m.ResidencyRulesPage })));
 const SelfEmploymentDocumentationPage = lazy(() => import("./pages/SelfEmploymentDocumentationPage").then(m => ({ default: m.SelfEmploymentDocumentationPage })));
@@ -29,6 +30,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/derogatory-credit") return "deepdives-derogatory";
     if (path === "deep-dives/fha-manual-underwriting") return "deepdives-fha-manual";
     if (path === "deep-dives/va-manual-underwriting") return "deepdives-va-manual";
+    if (path === "deep-dives/usda-manual-underwriting") return "deepdives-usda-manual";
     if (path === "deep-dives/arms-demystified") return "deepdives-arms";
     if (path === "deep-dives/residency-rules") return "deepdives-residency";
     if (path === "deep-dives/self-employed-documentation") return "deepdives-selfemployed";
@@ -46,6 +48,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-derogatory") return <DerogatoryCreditPage />;
     if (currentPage === "deepdives-fha-manual") return <FHAManualUnderwritingPage />;
     if (currentPage === "deepdives-va-manual") return <VAManualUnderwritingPage />;
+    if (currentPage === "deepdives-usda-manual") return <USDAManualUnderwritingPage />;
     if (currentPage === "deepdives-arms") return <ARMsDemystifiedPage />;
     if (currentPage === "deepdives-residency") return <ResidencyRulesPage />;
     if (currentPage === "deepdives-selfemployed") return <SelfEmploymentDocumentationPage />;
