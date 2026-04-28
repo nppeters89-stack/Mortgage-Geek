@@ -31,9 +31,9 @@ const ELIGIBILITY = {
     FHLMC: { status: "option",   label: "Option 1 or 2", note: "Both Freddie options work in this window. Option 1: paystub will not be obtained before delivery. Option 2: paystub will be obtained before delivery." },
   },
   "Job starts 60-90+ days after closing": {
-    FHA:   { status: "management_review", label: "Mgmt review", note: "Senior underwriting management approval required. Common professions only (doctors, teachers, professors). Post-closing paystub follow-up required." },
-    VA:    { status: "management_review", label: "RUM review",  note: "Regional Underwriting Manager review required if start date >60 days. Common professions, case by case." },
-    USDA:  { status: "management_review", label: "RUM review",  note: "Regional Underwriting Manager review required if start date >60 days. Common professions, case by case." },
+    FHA:   { status: "management_review", label: "Lender discretion", note: "Past the standard 60-day FHA window, there's no automatic path. The lender has to make the call, which typically means a senior underwriter or underwriting manager has to sign off on the file. Common professions (doctors, teachers, professors) are where these get approved. Post-closing paystub follow-up required." },
+    VA:    { status: "management_review", label: "Lender discretion", note: "Past the standard 60-day VA window, there's no automatic path. The lender has to make the call, which typically means an underwriting manager (Regional Underwriting Manager at most shops) has to sign off. Common professions, case by case." },
+    USDA:  { status: "management_review", label: "Lender discretion", note: "Past the standard 60-day USDA window, there's no automatic path. The lender has to make the call, which typically means an underwriting manager has to sign off on the file. Common professions, case by case." },
     FNMA:  { status: "option",   label: "Option 1 or 2", note: "Option 1 (paystub before delivery) or Option 2 (offer letter only, with reserves). Start date must be within 90 days." },
     FHLMC: { status: "option",   label: "Option 1 or 2", note: "Option 1 (start before delivery, no paystub) or Option 2 (paystub before delivery). Start date within 90 days." },
   },
