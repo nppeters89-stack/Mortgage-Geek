@@ -144,6 +144,16 @@ export const globalCSS = `
     section { padding-left: 20px !important; padding-right: 20px !important; }
   }
 
+  @media (max-width: 900px) {
+    .section-shell {
+      grid-template-columns: 1fr !important;
+      gap: 24px !important;
+    }
+    .section-shell > aside {
+      position: static !important;
+    }
+  }
+
   @keyframes mg-toast-in {
     from { transform: translateY(40px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
