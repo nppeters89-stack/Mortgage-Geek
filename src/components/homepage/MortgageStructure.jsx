@@ -1,21 +1,19 @@
 import { useState, useEffect } from "react";
 import { P, F } from "../../theme";
+import { useIsMobile } from "../../utils/hooks";
 import { MORTGAGE_STRUCTURE } from "../../data/content";
 import { SectionHeader } from "./SectionHeader";
+import { SectionShell } from "./SectionShell";
 import { AmortizationChart } from "./AmortizationChart";
 
 export function MortgageStructure({ navTarget }) {
   const [active, setActive] = useState(0);
+  const isMobile = useIsMobile();
   useEffect(() => { if (navTarget?.section === "structure" && typeof navTarget.step === "number") setActive(navTarget.step); }, [navTarget]);
   const isAmort = MORTGAGE_STRUCTURE[active].title === "Amortization";
-  return (
-    <section id="structure" style={{ padding: "64px 40px" }}>
-      <SectionHeader eyebrow="Under the Hood" title="Mortgage Structure" subtitle="The mechanics of how your mortgage actually works." />
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
-        {MORTGAGE_STRUCTURE.map((s, i) => (
-          <button key={s.title} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{s.title}</button>
-        ))}
-      </div>
+
+  const content = (
+    <>
       <div style={{ maxWidth: 720, display: "flex", flexDirection: "column", gap: 16, marginBottom: isAmort ? 28 : 0 }}>
         {MORTGAGE_STRUCTURE[active].content.map((c, i) => (
           <div key={i} className="content-card" style={{ padding: "24px 28px" }}>
@@ -43,6 +41,58 @@ export function MortgageStructure({ navTarget }) {
         ))}
       </div>
       {isAmort && <AmortizationChart />}
+    </>
+  );
+
+  return (
+    <section id="structure" style={{ padding: "64px 0" }}>
+      <SectionHeader eyebrow="Under the Hood" title="Mortgage Structure" subtitle="The mechanics of how your mortgage actually works." />
+      {isMobile ? (
+        <>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+            {MORTGAGE_STRUCTURE.map((s, i) => (
+              <button key={s.title} onClick={() => setActive(i)} className={`tab-btn ${active === i ? "tab-btn-active" : ""}`}>{s.title}</button>
+            ))}
+          </div>
+          {content}
+        </>
+      ) : (
+        <SectionShell rail={<RailTabs tabs={MORTGAGE_STRUCTURE} active={active} setActive={setActive} />}>
+          {content}
+        </SectionShell>
+      )}
     </section>
+  );
+}
+
+function RailTabs({ tabs, active, setActive }) {
+  return (
+    <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {tabs.map((t, i) => {
+        const isActive = i === active;
+        return (
+          <button
+            key={t.title}
+            type="button"
+            onClick={() => setActive(i)}
+            style={{
+              textAlign: "left",
+              fontFamily: F.body,
+              fontSize: 14,
+              fontWeight: isActive ? 600 : 500,
+              color: isActive ? P.text : P.warmGray,
+              background: isActive ? P.creamDark : "transparent",
+              border: "none",
+              borderLeft: `3px solid ${isActive ? P.gold : "transparent"}`,
+              padding: "10px 14px",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
+          >
+            {t.title}
+          </button>
+        );
+      })}
+    </nav>
   );
 }
