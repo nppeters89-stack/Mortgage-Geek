@@ -1,4 +1,5 @@
 import { P, F } from "../../theme";
+import { HeroJourneyTrack } from "./HeroJourneyTrack";
 
 export function Hero({ onNavigate }) {
   return (
@@ -53,6 +54,10 @@ export function Hero({ onNavigate }) {
           </button>
         </div>
 
+      </div>
+
+      <div style={{ position: "relative", marginTop: 8 }}>
+        <HeroJourneyTrack />
       </div>
     </section>
   );

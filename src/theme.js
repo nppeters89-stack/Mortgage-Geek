@@ -47,6 +47,11 @@ export const globalCSS = `
     .btn-label-mobile-hide { display: none; }
   }
 
+  /* Hero swimlane is desktop-only; mobile uses the JourneyOverviewMobile card. */
+  @media (max-width: 820px) {
+    .hero-journey-track { display: none !important; }
+  }
+
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
