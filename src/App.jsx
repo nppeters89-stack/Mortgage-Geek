@@ -15,6 +15,7 @@ const USDAManualUnderwritingPage = lazy(() => import("./pages/USDAManualUnderwri
 const ARMsDemystifiedPage = lazy(() => import("./pages/ARMsDemystifiedPage").then(m => ({ default: m.ARMsDemystifiedPage })));
 const ResidencyRulesPage = lazy(() => import("./pages/ResidencyRulesPage").then(m => ({ default: m.ResidencyRulesPage })));
 const SelfEmploymentDocumentationPage = lazy(() => import("./pages/SelfEmploymentDocumentationPage").then(m => ({ default: m.SelfEmploymentDocumentationPage })));
+const ExpectedIncomePage = lazy(() => import("./pages/ExpectedIncomePage").then(m => ({ default: m.ExpectedIncomePage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -34,6 +35,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/arms-demystified") return "deepdives-arms";
     if (path === "deep-dives/residency-rules") return "deepdives-residency";
     if (path === "deep-dives/self-employed-documentation") return "deepdives-selfemployed";
+    if (path === "deep-dives/expected-income") return "deepdives-expected-income";
     return "main";
   });
 
@@ -52,6 +54,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-arms") return <ARMsDemystifiedPage />;
     if (currentPage === "deepdives-residency") return <ResidencyRulesPage />;
     if (currentPage === "deepdives-selfemployed") return <SelfEmploymentDocumentationPage />;
+    if (currentPage === "deepdives-expected-income") return <ExpectedIncomePage />;
     return <MainSite />;
   };
 
