@@ -1240,6 +1240,18 @@ export function CalculatorPage() {
 
       {isCockpit && (
       <>
+        {/* Page intro */}
+        <div className="tool-page-content" style={{ padding: "32px 24px 8px", maxWidth: 1320, margin: "0 auto" }}>
+          <div style={{ textAlign: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
+            <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+              Mortgage Calculator
+              <MortgageCalcIcon size={26} />
+            </h1>
+            <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
+          </div>
+        </div>
+
         <CockpitShell
           rail={
             <>
@@ -1426,18 +1438,6 @@ export function CalculatorPage() {
           }
           canvas={
             <>
-              {/* Page intro — centered above the results column. Moved out
-                  of the global page header so the rail can extend to the
-                  top of the cockpit area. */}
-              <div style={{ textAlign: "center" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
-                <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, margin: "0 0 8px", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-                  Mortgage Calculator
-                  <MortgageCalcIcon size={26} />
-                </h1>
-                <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
-              </div>
-
               {/* Compact program cards row */}
               <div className="calc-cockpit-cards" data-count={visibleProgramsList.length}>
                 {visibleProgramsList.map((prog) => (
