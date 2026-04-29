@@ -9,6 +9,10 @@ import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
+import { useIsCockpit, usePieDiameter } from "../utils/hooks";
+import { CockpitShell } from "../components/calculator/CockpitShell";
+import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
+import { DetailPanel } from "../components/calculator/DetailPanel";
 
 const ALL_PROGRAMS = ["Conventional", "FHA", "VA", "USDA"];
 
@@ -23,11 +27,20 @@ export function CalculatorPage() {
   const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [usdaRate, setUsdaRate] = useState(paramProgram === "USDA" && paramRate > 0 ? paramRate : 6.25);
+  // Per-program market baselines — fixed to the auto-populated rate from
+  // MND so the rate slider has a stable ±2.5% window that doesn't drift
+  // as the user adjusts. Updated only when fresh API data lands or
+  // (for Conv) when the term toggles between 15 and 30.
+  const [fhaRateApi, setFhaRateApi] = useState(6.25);
+  const [vaRateApi, setVaRateApi] = useState(6.25);
+  const [usdaRateApi, setUsdaRateApi] = useState(6.25);
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
+  const isCockpit = useIsCockpit();
+  const pieDiameter = usePieDiameter();
   const [visiblePrograms, setVisiblePrograms] = useState(() => {
     try {
       const saved = localStorage.getItem("mg_calc_visible_programs");
@@ -149,11 +162,17 @@ export function CalculatorPage() {
           if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(term === 15 ? r15 : r30);
           if (fha) {
             const fhaParsed = roundRate(parseFloat(fha.rate));
+            setFhaRateApi(fhaParsed);
+            setUsdaRateApi(fhaParsed);
             if (!(paramProgram === "FHA" && paramRate > 0)) setFhaRate(fhaParsed);
             // USDA tracks FHA from MND (MND doesn't publish a separate USDA rate)
             if (!(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(fhaParsed);
           }
-          if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
+          if (va) {
+            const vaParsed = roundRate(parseFloat(va.rate));
+            setVaRateApi(vaParsed);
+            if (!(paramProgram === "VA" && paramRate > 0)) setVaRate(vaParsed);
+          }
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
@@ -294,6 +313,45 @@ export function CalculatorPage() {
   const eligibleTotals = visibleProgramsList.filter(p => p.eligible).map(p => p.total);
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
+  // Cockpit-only: default-select the cheapest eligible program when nothing
+  // is selected (or the prior selection has been hidden). We never auto-follow
+  // lowestTotal recomputes — once the user has a pick, it stays put.
+  useEffect(() => {
+    if (!isCockpit) return;
+    if (selectedProgram && visiblePrograms.includes(selectedProgram)) return;
+    const cheapest = visibleProgramsList.find(p => p.eligible && !p.overLimit && p.total === lowestTotal);
+    if (cheapest) setSelectedProgram(cheapest.name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCockpit, lowestTotal, visiblePrograms, selectedProgram]);
+
+  const selectedProg = selectedProgram ? programs.find(p => p.name === selectedProgram && p.eligible) : null;
+  const saveScenario = () => {
+    if (!selectedProg) return;
+    const STORAGE_KEY = "mg_compare_scenarios";
+    let saved = [];
+    try { const raw = localStorage.getItem(STORAGE_KEY); saved = raw ? JSON.parse(raw) : []; } catch {}
+    if (saved.length >= 3) {
+      setSaveToast({ type: "error", msg: "Comparison is full (3 max). Remove one first." });
+      setTimeout(() => setSaveToast(null), 4000);
+      return;
+    }
+    const scenario = {
+      id: Date.now(),
+      program: selectedProg.name,
+      color: selectedProg.color,
+      homePrice, downPct, downAmt, term, rate: selectedProg.rate,
+      baseLoan, totalLoan: selectedProg.loan,
+      upfront: selectedProg.upfront || 0,
+      upfrontLabel: selectedProg.upfrontLabel || null,
+      loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
+      tax: taxes, insurance, hoa: hoa > 0 ? hoa : 0, total: selectedProg.total, apr: selectedProg.apr,
+    };
+    saved.push(scenario);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch {}
+    setSaveToast({ type: "success", msg: `${selectedProg.name} saved! ${saved.length} of 3 in comparison.` });
+    setTimeout(() => setSaveToast(null), 4000);
+  };
+
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
@@ -314,7 +372,7 @@ export function CalculatorPage() {
         .calc-cards-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); max-width: 900px; }
         .calc-cards-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .calc-tax-group { background: ${P.cream}; border: 1px solid rgba(184, 134, 11, 0.25); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
         .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
         .calc-program-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto 24px; padding: 0 4px; }
         .calc-toggle-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 4px; }
@@ -343,6 +401,34 @@ export function CalculatorPage() {
           .calc-toggle-pill { min-height: 44px; padding: 10px 18px; font-size: 14px; flex: 1 1 calc(50% - 4px); }
           .calc-program-toggle { justify-content: center; }
           .calc-toggle-label { flex-basis: 100%; text-align: center; margin-right: 0; margin-bottom: 4px; }
+        }
+
+        /* Cockpit additions — desktop ≥1100px only (gated by isCockpit hook). */
+        .calc-cockpit-cards { display: grid; gap: 12px; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 0; }
+        .calc-cockpit-cards[data-count="1"] { grid-template-columns: minmax(0, 1fr); }
+        .calc-cockpit-cards[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .calc-cockpit-cards[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .calc-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 24px 28px 28px; }
+        @media (min-width: 1100px) {
+          .calc-detail-panel-body {
+            grid-template-columns: minmax(240px, 300px) 1fr;
+            align-items: start;
+            gap: 28px;
+          }
+        }
+        .calc-detail-panel { animation: calc-detail-fade 120ms ease-out; }
+        @keyframes calc-detail-fade {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .calc-cockpit-cards > .calc-compact-card { animation: calc-card-enter 280ms ease-out; }
+        @keyframes calc-card-enter {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .calc-detail-panel,
+          .calc-cockpit-cards > .calc-compact-card { animation: none; }
         }
       `}</style>
 
@@ -380,6 +466,8 @@ export function CalculatorPage() {
         </div>
       </div>
 
+      {!isCockpit && (
+      <>
       <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
@@ -390,13 +478,68 @@ export function CalculatorPage() {
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
         </div>
 
-        {/* Input card - 2 column layout */}
-        <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
+        {/* Input card - 2 column layout. Navy gradient background mirrors
+            the rate strip below it for visual rhythm; gold top accent +
+            light labels keep the dark surface readable. */}
+        <div className="content-card" style={{
+          padding: "28px",
+          marginBottom: 12,
+          maxWidth: 800,
+          margin: "0 auto 12px",
+          background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+          borderTop: `3px solid ${P.gold}`,
+          border: 'none',
+          boxShadow: '0 4px 20px rgba(15, 37, 48, 0.18)',
+        }}>
+          {/* Compare-programs pill row — equal-width 4-column grid spanning
+              the full input card. Lives at the top of the inputs because
+              program selection is part of configuring the scenario, not
+              part of reading the results. Active pills use a uniform gold
+              border so the navy-on-navy Conv pill stays clearly readable. */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {programs.map((prog) => {
+                const isVisible = visiblePrograms.includes(prog.name);
+                const isLast = visiblePrograms.length === 1 && isVisible;
+                return (
+                  <button
+                    key={prog.name}
+                    type="button"
+                    onClick={() => toggleProgram(prog.name)}
+                    disabled={isLast}
+                    aria-pressed={isVisible}
+                    aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                    style={{
+                      background: isVisible ? prog.color : "#fff",
+                      color: isVisible ? "#fff" : P.warmGray,
+                      border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
+                      borderRadius: 50,
+                      padding: "10px 4px",
+                      minHeight: 40,
+                      fontFamily: F.body,
+                      fontSize: 13,
+                      fontWeight: isVisible ? 700 : 600,
+                      letterSpacing: 0.3,
+                      cursor: isLast ? "not-allowed" : "pointer",
+                      opacity: isLast ? 0.7 : 1,
+                      transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
+                      textAlign: "center",
+                      boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
+                    }}
+                  >
+                    {prog.name === "Conventional" ? "Conv" : prog.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="calc-input-cols">
             {/* LEFT COLUMN — Loan structure & amount */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+                <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Loan Term</label>
                 <select
                   id={termSelectId}
                   value={term}
@@ -408,14 +551,14 @@ export function CalculatorPage() {
                 </select>
               </div>
 
-              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
+              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
 
               <div className="calc-dp-row">
-                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
-                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
+                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
+                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma labelColor={P.goldLight} />
               </div>
 
-              <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+              <div style={{ padding: "10px 14px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy }}>{fmt(baseLoan)}</span>
               </div>
@@ -423,7 +566,7 @@ export function CalculatorPage() {
 
             {/* RIGHT COLUMN — Monthly escrow items */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+              <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
 
               <div className="calc-tax-group">
                 <div className="calc-tax-group-label">Property Tax</div>
@@ -470,11 +613,11 @@ export function CalculatorPage() {
               </div>
 
               {!showHoa ? (
-                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sageDark, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
+                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.goldLight, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(250, 247, 242, 0.55)" }}>(optional)</span></button>
               ) : (
                 <div>
-                  <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} />
-                  <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: P.warmGrayLight, cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
+                  <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} labelColor={P.goldLight} />
+                  <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: "rgba(250, 247, 242, 0.7)", cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
                 </div>
               )}
             </div>
@@ -530,12 +673,12 @@ export function CalculatorPage() {
           {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {[
-              { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA },
-              { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA },
-              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
+              { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+              { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
+              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
             ].map((p) => (
-              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
             ))}
           </div>
 
@@ -545,46 +688,22 @@ export function CalculatorPage() {
         </div>
       </div>
 
-      {/* RESULTS ZONE — deeper cream background extends from divider down to end of page */}
-      <div style={{ background: P.creamDark, paddingBottom: 64 }}>
+      {/* RESULTS ZONE — deeper cream background extends from top of zone to
+          end of page. paddingTop here (rather than margin-top on the inner
+          divider) prevents margin-collapse from leaking the spacing into
+          the lighter cream section above. */}
+      <div style={{ background: P.creamDark, paddingTop: 56, paddingBottom: 64 }}>
         <div style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
-          {/* Section divider — Your Results (background pill now matches the new deeper bg) */}
-          <div style={{ margin: "40px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+          {/* Section divider — Your Results (background pill matches the
+              creamDark zone). No top margin: spacing comes from the parent's
+              paddingTop so the band above stays creamDark, not page cream. */}
+          <div style={{ margin: "0 auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
             <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
             <div style={{ position: "relative", display: "inline-block", background: P.creamDark, padding: "0 20px" }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>↓ Your Results ↓</span>
               <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to select it, then save to the Loan Comparison Tool</p>
             </div>
           </div>
-
-        {/* Program selection toggle — pick which 1–4 programs to compare */}
-        <div className="calc-program-toggle" role="group" aria-label="Select programs to compare">
-          <span className="calc-toggle-label" style={{ color: P.warmGrayLight }}>Compare:</span>
-          {programs.map((prog) => {
-            const isVisible = visiblePrograms.includes(prog.name);
-            const isLast = visiblePrograms.length === 1 && isVisible;
-            return (
-              <button
-                key={prog.name}
-                type="button"
-                onClick={() => toggleProgram(prog.name)}
-                disabled={isLast}
-                aria-pressed={isVisible}
-                aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
-                className="calc-toggle-pill"
-                style={{
-                  background: isVisible ? prog.color : "transparent",
-                  color: isVisible ? "#fff" : P.warmGray,
-                  borderColor: isVisible ? prog.color : P.warmGrayLight,
-                  cursor: isLast ? "not-allowed" : "pointer",
-                  opacity: isLast ? 0.7 : 1,
-                }}
-              >
-                {prog.name}
-              </button>
-            );
-          })}
-        </div>
 
         {/* Side-by-side cards */}
         <div className="calc-cards-grid" data-count={visibleProgramsList.length}>
@@ -1116,6 +1235,329 @@ export function CalculatorPage() {
         </p>
         </div>
       </div>
+      </>
+      )}
+
+      {isCockpit && (
+      <>
+        {/* Page intro */}
+        <div className="tool-page-content" style={{ padding: "32px 24px 8px", maxWidth: 1320, margin: "0 auto" }}>
+          <div style={{ textAlign: "center" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Side-by-Side Comparison</span>
+            <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+              Mortgage Calculator
+              <MortgageCalcIcon size={26} />
+            </h1>
+            <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
+          </div>
+        </div>
+
+        <CockpitShell
+          rail={
+            <>
+              {/* Compact input card — single column for the 340px rail.
+                  Navy gradient background mirrors the rate strip below it
+                  for visual rhythm. Gold top accent + cream/gold labels
+                  keep the dark surface readable. */}
+              <div className="content-card" style={{
+                padding: "20px",
+                marginBottom: 16,
+                background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+                borderTop: `3px solid ${P.gold}`,
+                border: 'none',
+                boxShadow: '0 4px 20px rgba(15, 37, 48, 0.18)',
+              }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* Compare-programs pill row — equal-width 4-column grid.
+                      Sits at the top of the input card so program selection
+                      lives alongside the inputs, not in the results area.
+                      Active pills get a uniform gold border so the navy-on-
+                      navy Conv pill stays clearly readable. */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                      {programs.map((prog) => {
+                        const isVisible = visiblePrograms.includes(prog.name);
+                        const isLast = visiblePrograms.length === 1 && isVisible;
+                        const label = prog.name === "Conventional" ? "Conv" : prog.name;
+                        return (
+                          <button
+                            key={prog.name}
+                            type="button"
+                            onClick={() => toggleProgram(prog.name)}
+                            disabled={isLast}
+                            aria-pressed={isVisible}
+                            aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                            style={{
+                              background: isVisible ? prog.color : "#fff",
+                              color: isVisible ? "#fff" : P.warmGray,
+                              border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
+                              borderRadius: 50,
+                              padding: "8px 4px",
+                              minHeight: 36,
+                              fontFamily: F.body,
+                              fontSize: 12,
+                              fontWeight: isVisible ? 700 : 600,
+                              letterSpacing: 0.3,
+                              cursor: isLast ? "not-allowed" : "pointer",
+                              opacity: isLast ? 0.7 : 1,
+                              transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
+                              textAlign: "center",
+                              boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Loan Term</label>
+                    <select
+                      id={termSelectId}
+                      value={term}
+                      onChange={(e) => setTerm(parseInt(e.target.value))}
+                      style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                    >
+                      <option value={30}>30 years</option>
+                      <option value={15}>15 years</option>
+                    </select>
+                  </div>
+
+                  <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+
+                  <div className="calc-dp-row">
+                    <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
+                    <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma labelColor={P.goldLight} />
+                  </div>
+
+                  <div style={{ padding: "10px 14px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
+                    <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy }}>{fmt(baseLoan)}</span>
+                  </div>
+
+                  <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
+
+                  {/* Tax group — cream/gold treatment from the global
+                      .calc-tax-group class. Kept distinct from the
+                      surrounding navy card on purpose, per design. */}
+                  <div className="calc-tax-group">
+                    <div className="calc-tax-group-label">Property Tax</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
+                      <select
+                        id={taxStateSelectId}
+                        value={taxState}
+                        onChange={(e) => setTaxState(e.target.value)}
+                        style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                      >
+                        {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
+                          <option key={code} value={code}>{s.name}</option>
+                        ))}
+                      </select>
+                      {metroList.length > 0 && (
+                        <select
+                          aria-label="County or metro tax area"
+                          value={taxMetro}
+                          onChange={(e) => setTaxMetro(e.target.value)}
+                          style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 13, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", marginTop: 4, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                        >
+                          <option value="">State Avg ({stateData.rate}%)</option>
+                          {metroList.map((m) => (
+                            <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
+                      <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
+                        <input
+                          id={taxesInputId}
+                          type="text"
+                          inputMode="decimal"
+                          value={taxes.toLocaleString("en-US")}
+                          onChange={(e) => { const v = parseFloat(e.target.value.replace(/,/g, "")); if (!isNaN(v)) setTaxes(v); else if (e.target.value === "") setTaxes(0); }}
+                          style={{ flex: 1, border: "none", background: "transparent", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", minWidth: 0, width: "100%" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {!showHoa ? (
+                    <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.goldLight, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(250, 247, 242, 0.55)" }}>(optional)</span></button>
+                  ) : (
+                    <div>
+                      <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} labelColor={P.goldLight} />
+                      <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: "rgba(250, 247, 242, 0.7)", cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Compact rate strip — same navy treatment, tightened for rail width */}
+              <div style={{
+                background: P.navy,
+                borderRadius: 14,
+                padding: "16px 18px 18px",
+                boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
+                borderTop: `3px solid ${P.gold}`,
+                position: "relative",
+                overflow: "hidden",
+              }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Rates by Program</span>
+                  {ratesLoaded && (
+                    <span style={{ fontSize: 10, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.goldLight, display: "inline-block", boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)", animation: "rate-pulse 2s ease-in-out infinite" }} />
+                      Live · {rateSource}
+                    </span>
+                  )}
+                </div>
+                <p style={{ fontSize: 10, color: P.cream, opacity: 0.65, marginBottom: 10, lineHeight: 1.4 }}>
+                  National averages via Mortgage News Daily, rounded to 0.125%. Adjust to match your quote.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {[
+                    { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+                    { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+                    { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
+                    { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
+                  ].map((p) => (
+                    <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
+                  ))}
+                </div>
+                {!ratesLoaded && (
+                  <p style={{ fontSize: 10, color: P.cream, opacity: 0.6, marginTop: 8, fontStyle: "italic" }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
+                )}
+              </div>
+            </>
+          }
+          canvas={
+            <>
+              {/* Compact program cards row */}
+              <div className="calc-cockpit-cards" data-count={visibleProgramsList.length}>
+                {visibleProgramsList.map((prog) => (
+                  <ProgramCardCompact
+                    key={prog.name}
+                    prog={prog}
+                    isBest={prog.eligible && !prog.overLimit && prog.total === lowestTotal}
+                    isSelected={selectedProgram === prog.name}
+                    onSelect={() => setSelectedProgram(prog.name)}
+                    countyLabel={countyLabel}
+                    homePrice={homePrice}
+                    baseLoan={baseLoan}
+                  />
+                ))}
+              </div>
+
+              {/* Detail panel when a program is selected. When nothing is
+                  selected, show a 🤓 tip below the cards instead. */}
+              {selectedProg ? (
+                <DetailPanel
+                  prog={selectedProg}
+                  taxes={taxes}
+                  insurance={insurance}
+                  hoa={hoa}
+                  baseLoan={baseLoan}
+                  homePrice={homePrice}
+                  downPct={downPct}
+                  term={term}
+                  taxState={taxState}
+                  taxMetro={taxMetro}
+                  vaUsage={vaUsage}
+                  setVaUsage={setVaUsage}
+                  extraConfig={extraConfig}
+                  updateExtraConfig={updateExtraConfig}
+                  vaUsageSelectId={vaUsageSelectId}
+                  pieDiameter={pieDiameter}
+                  saveToast={saveToast}
+                  onSaveToComparison={saveScenario}
+                />
+              ) : (
+                <p style={{ fontSize: 13, color: P.warmGray, margin: 0, textAlign: "center" }}>
+                  <span style={{ marginRight: 6 }}>🤓</span>
+                  Tap a card to view its detailed breakdown.
+                </p>
+              )}
+
+              {/* Insight 🤓 — preserved verbatim from legacy */}
+              <div className="content-card" style={{ padding: "20px 24px" }}>
+                <div style={{ display: "flex", gap: 12 }}>
+                  <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+                  <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
+                    {eligibleTotals.length >= 2 && (
+                      <p style={{ marginBottom: 8 }}>
+                        <strong>Monthly difference:</strong> The spread between the lowest and highest eligible payment is{" "}
+                        <strong style={{ color: P.navy }}>{fmt(Math.max(...eligibleTotals) - lowestTotal)}/month</strong>{" "}
+                        ({fmt((Math.max(...eligibleTotals) - lowestTotal) * 12)}/year).
+                        {(() => {
+                          if (visibleProgramsList.length < 2) return null;
+                          const rates = visibleProgramsList.map(p => p.rate);
+                          if (new Set(rates).size < 2) return null;
+                          const shortLabel = (name) => name === "Conventional" ? "Conv" : name;
+                          const parts = visibleProgramsList.map(p => `${shortLabel(p.name)} ${p.rate}%`);
+                          return (
+                            <span> Rate spread: {parts.join(" vs ")} — this difference alone accounts for a meaningful portion of the payment gap.</span>
+                          );
+                        })()}
+                      </p>
+                    )}
+                    {visibleProgramsList.some(p => !p.eligible) && (() => {
+                      const ineligibleNames = visibleProgramsList.filter(p => !p.eligible).map(p => p.name);
+                      const list = ineligibleNames.length === 1 ? ineligibleNames[0] :
+                                   ineligibleNames.length === 2 ? `${ineligibleNames[0]} and ${ineligibleNames[1]}` :
+                                   `${ineligibleNames.slice(0, -1).join(", ")}, and ${ineligibleNames[ineligibleNames.length - 1]}`;
+                      const verb = ineligibleNames.length === 1 ? "is" : "are";
+                      return (
+                        <p style={{ marginBottom: 8 }}>
+                          <strong>Note:</strong> {list} {verb} ineligible at the current settings — see the card{ineligibleNames.length === 1 ? "" : "s"} above for details.
+                          {downPct < 3 ? " Minimum down payments: Conventional (3%), FHA (3.5%). VA and USDA both allow 0% down (USDA requires a 30-year term)." :
+                           downPct < 3.5 ? " FHA requires a minimum 3.5% down payment to qualify." : ""}
+                        </p>
+                      );
+                    })()}
+                    <p>
+                      {downPct >= 20
+                        ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA, VA, and USDA finance upfront fees, meaning you borrow more even with the same down payment."
+                        : downPct >= 5
+                          ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, VA has no monthly MI at all (but the funding fee adds to your balance), and USDA's annual fee stays for the life of the loan. Conv PMI estimates here assume 740+ FICO and DTI under 43% — lower scores or higher DTI will increase PMI."
+                          : downPct >= 3.5
+                            ? "At less than 5% down, all four programs carry some form of mortgage insurance or upfront fee. Conv PMI estimates assume 740+ FICO and DTI under 43% — lower scores will increase PMI significantly. VA is often the best deal if you're eligible — no monthly MI at all. USDA also allows 0% down with similar economics, but the property must be in an eligible rural area, household income has to be under program limits, and the annual fee stays for the life of the loan."
+                            : term === 30
+                              ? "At this down payment level, VA and USDA are likely your only options. VA requires a Certificate of Eligibility; USDA requires property + income eligibility (and is 30-year fixed only). Consider increasing your down payment to unlock Conventional and FHA programs."
+                              : "At this down payment level, VA is likely your only option — USDA requires a 30-year term. Consider increasing your down payment or switching to a 30-year term to widen your options."}
+                    </p>
+                    {visiblePrograms.includes("VA") && vaUsage !== "exempt" && (
+                      <p style={{ marginTop: 8 }}>
+                        <strong>VA funding fee:</strong> Currently set to {vaUsageLabels[vaUsage].toLowerCase()} at {vaFeeRate}%
+                        {downPct < 5 && vaUsage === "subsequent" ? " — this is the highest tier. First-time users with the same down payment pay 2.15% instead." : ""}
+                        {downPct >= 5 ? ` — at ${downPct >= 10 ? "10%+" : "5–9.99%"} down, the fee is the same for first-time and subsequent use.` : ""}
+                        {" "}Use the dropdown on the VA card to compare scenarios. Veterans with service-connected disabilities are exempt entirely.
+                      </p>
+                    )}
+                    {visiblePrograms.includes("VA") && vaUsage === "exempt" && (
+                      <p style={{ marginTop: 8 }}>
+                        <strong>VA funding fee waived.</strong> Veterans with service-connected disabilities are exempt from the funding fee, making VA even more competitive — no upfront fee and no monthly MI.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Disclaimer — preserved verbatim */}
+              <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+                {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily) and rounded to the nearest 0.125%. " : ""}
+                This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
+              </p>
+            </>
+          }
+        />
+      </>
+      )}
       <MobileToolbar hrefOverrides={{ "/prequal": `/prequal?down=${downPct}&term=${term}` }} />
     </main>
   );
