@@ -629,7 +629,7 @@ export function VAManualUnderwritingPage() {
 
         <H3>Can I use gift funds on a VA manual underwrite?</H3>
         <Para>
-          Yes, but with limits. Gift funds can be used for closing costs and to pay down the loan amount. They cannot be counted as reserves on a manual file. Reserves used as a comp factor must come from the borrower's own funds. Some lenders also restrict gift funds when they're being used to bring DTI under a specific threshold; check overlay rules. If you're sizing up your scenario before talking to a lender, our <a href="/prequal" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>pre-qualification tool</a> gives you a working estimate in under a minute.
+          Yes, but with limits. Gift funds can be used for closing costs and to pay down the loan amount. They cannot be counted as reserves on a manual file. Reserves used as a comp factor must come from the borrower's own funds. Some lenders also restrict gift funds when they're being used to bring DTI under a specific threshold; check overlay rules. For the full breakdown of who can give, what the gift letter has to say, and how the money has to move, see the <a href="/deep-dives/gift-funds" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>Gift Funds Deep Dive</a>. If you're sizing up your scenario before talking to a lender, our <a href="/prequal" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>pre-qualification tool</a> gives you a working estimate in under a minute.
         </Para>
 
         <H2>A final note: what this page is and isn't</H2>

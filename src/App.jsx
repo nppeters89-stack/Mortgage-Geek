@@ -18,6 +18,7 @@ const SelfEmploymentDocumentationPage = lazy(() => import("./pages/SelfEmploymen
 const BusinessAssetsPage = lazy(() => import("./pages/BusinessAssetsPage").then(m => ({ default: m.BusinessAssetsPage })));
 const ExpectedIncomePage = lazy(() => import("./pages/ExpectedIncomePage").then(m => ({ default: m.ExpectedIncomePage })));
 const DebtsPaidByOthersPage = lazy(() => import("./pages/DebtsPaidByOthersPage").then(m => ({ default: m.DebtsPaidByOthersPage })));
+const GiftFundsPage = lazy(() => import("./pages/GiftFundsPage").then(m => ({ default: m.GiftFundsPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -40,6 +41,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/business-assets") return "deepdives-business-assets";
     if (path === "deep-dives/expected-income") return "deepdives-expected-income";
     if (path === "deep-dives/debts-paid-by-others") return "deepdives-debts-paid-by-others";
+    if (path === "deep-dives/gift-funds") return "deepdives-gift-funds";
     return "main";
   });
 
@@ -61,6 +63,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-business-assets") return <BusinessAssetsPage />;
     if (currentPage === "deepdives-expected-income") return <ExpectedIncomePage />;
     if (currentPage === "deepdives-debts-paid-by-others") return <DebtsPaidByOthersPage />;
+    if (currentPage === "deepdives-gift-funds") return <GiftFundsPage />;
     return <MainSite />;
   };
 

@@ -744,7 +744,7 @@ export function USDAManualUnderwritingPage() {
 
         <H3>Does USDA allow gift funds?</H3>
         <Para>
-          Yes. Gift funds can be used for closing costs and prepaid items. Since USDA is a 0% down program, gift funds for down payment aren't typically needed. Gift funds for reserves used as a comp factor are not eligible (reserves must be from the borrower's own funds).
+          Yes. Gift funds can be used for closing costs and prepaid items. Since USDA is a 0% down program, gift funds for down payment aren't typically needed. Gift funds for reserves used as a comp factor are not eligible (reserves must be from the borrower's own funds). For the full breakdown of who can give, what the gift letter has to say, and how the money has to move from donor to closing, see the <a href="/deep-dives/gift-funds" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>Gift Funds Deep Dive</a>.
         </Para>
 
         <H2>A final note. What this page is and isn't.</H2>

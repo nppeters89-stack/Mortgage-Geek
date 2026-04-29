@@ -74,6 +74,13 @@ export function DeepDivesHubPage() {
       summary: "When a parent, spouse, or ex pays a debt that's in your name, can you exclude it from your DTI? The agency split is the most important fact: FNMA and FHLMC let anyone pay; FHA, VA, and USDA require the third party to be obligated on the debt. Includes a comparison grid, the 12-month documentation rule, the divorce decree exception, and the bank-account mechanics that catch borrowers off guard.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "gift-funds",
+      emoji: "🎁",
+      title: "Gift Funds for Down Payment",
+      summary: "Who can give you cash toward a down payment, by loan program. Family gives across the board; close friends qualify everywhere except FNMA; employers and charities only on FHA, VA, and USDA. Includes a 5x5 donor eligibility matrix, the donor-direct-to-title privacy path, the gift letter requirements, FHA's 8/19/2024 money order rule change, Freddie's wedding-and-graduation exception, and the seven patterns that cause gift fund files to fail.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
