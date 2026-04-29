@@ -436,11 +436,11 @@ function PayoffControl({
         onClick={() => updateExtraConfig(prog.name, { enabled: !cfg.enabled })}
         style={payoffToggleStyle(cfg.enabled, prog.color)}
       >
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 14 }}>⚡</span>
           <span>Pay it off faster</span>
         </span>
-        <span style={{ fontSize: 14, opacity: 0.7 }}>{cfg.enabled ? '▾' : '▸'}</span>
+        <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, opacity: 0.7 }}>{cfg.enabled ? '▾' : '▸'}</span>
       </button>
 
       {cfg.enabled && (
@@ -738,9 +738,10 @@ const payoffToggleStyle = (enabled, programColor) => ({
   fontWeight: 600,
   fontFamily: F.body,
   cursor: 'pointer',
+  position: 'relative',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   transition: 'background 0.15s, color 0.15s, border-color 0.15s',
 });
 
