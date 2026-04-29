@@ -283,7 +283,7 @@ export function DetailPanel({
           </div>
         </div>
 
-        {/* RIGHT — Pie chart, Pay-it-off-faster */}
+        {/* RIGHT — Pie chart, Save-to-Comparison block */}
         <div style={rightColumnStyle}>
           {/* Pie chart — or a same-size placeholder when total isn't ready yet
               (e.g. rate hasn't loaded). [NEW COPY — Nick to review] "Calculating…" */}
@@ -326,22 +326,55 @@ export function DetailPanel({
             )}
           </div>
 
-          {/* Pay-It-Off-Faster — preserved feature, full markup. */}
-          <PayoffControl
-            prog={prog}
-            cfg={cfg}
-            biweeklyEquivalent={biweeklyEquivalent}
-            updateExtraConfig={updateExtraConfig}
-            term={term}
-            downPct={downPct}
-            homePrice={homePrice}
-          />
+          {/* Save to Comparison — moved to right column under pie. The
+              "View saved scenarios" link sits directly below the button,
+              where it logically belongs. Handler lives in CalculatorPage. */}
+          <div style={saveBlockStyle}>
+            <button
+              type="button"
+              onClick={onSaveToComparison}
+              disabled={!saveEnabled}
+              style={saveButtonStyle(saveEnabled)}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                <CompareIcon size={18} variant="cream" />
+                {saveEnabled
+                  ? `Save ${prog.name} to Loan Comparison`
+                  : 'Select a card above to save'}
+              </span>
+            </button>
+            {saveToast && (
+              <p
+                style={{
+                  fontSize: 12,
+                  marginTop: 10,
+                  fontWeight: 600,
+                  color: saveToast.type === 'error' ? '#C0392B' : P.sageDark,
+                }}
+              >
+                {saveToast.msg}
+              </p>
+            )}
+            <div style={{ marginTop: 8 }}>
+              <a
+                href="/compare"
+                style={{
+                  fontSize: 12,
+                  color: P.warmGrayLight,
+                  textDecoration: 'underline',
+                  fontFamily: F.body,
+                }}
+              >
+                View saved scenarios →
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Note + Save button — full-width below the 2-col grid. */}
+      {/* Note + Pay-It-Off-Faster — full-width below the 2-col grid. The
+          payoff feature gets the extra horizontal room here when expanded. */}
       <div style={{ padding: '8px 28px 20px' }}>
-        {/* Note line — preserved verbatim from the live card. */}
         <p
           style={{
             fontSize: 12,
@@ -353,52 +386,15 @@ export function DetailPanel({
         >
           {prog.note}
         </p>
-
-        {/* Save to Comparison — preserved button. The handler
-            (`onSaveToComparison`) lives in CalculatorPage.jsx and writes
-            to `mg_compare_scenarios` localStorage. Schema unchanged.
-            Toast is rendered below the button; "View saved" link is
-            preserved. */}
-        <div style={saveBlockStyle}>
-          <button
-            type="button"
-            onClick={onSaveToComparison}
-            disabled={!saveEnabled}
-            style={saveButtonStyle(saveEnabled)}
-          >
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-              <CompareIcon size={18} variant="cream" />
-              {saveEnabled
-                ? `Save ${prog.name} to Loan Comparison`
-                : 'Select a card above to save'}
-            </span>
-          </button>
-          {saveToast && (
-            <p
-              style={{
-                fontSize: 12,
-                marginTop: 10,
-                fontWeight: 600,
-                color: saveToast.type === 'error' ? '#C0392B' : P.sageDark,
-              }}
-            >
-              {saveToast.msg}
-            </p>
-          )}
-          <div style={{ marginTop: 10 }}>
-            <a
-              href="/compare"
-              style={{
-                fontSize: 12,
-                color: P.warmGrayLight,
-                textDecoration: 'underline',
-                fontFamily: F.body,
-              }}
-            >
-              View saved scenarios →
-            </a>
-          </div>
-        </div>
+        <PayoffControl
+          prog={prog}
+          cfg={cfg}
+          biweeklyEquivalent={biweeklyEquivalent}
+          updateExtraConfig={updateExtraConfig}
+          term={term}
+          downPct={downPct}
+          homePrice={homePrice}
+        />
       </div>
     </section>
   );
@@ -964,8 +960,7 @@ const aprSmallPrintStyle = {
 
 const saveBlockStyle = {
   textAlign: 'center',
-  marginTop: 16,
-  paddingTop: 16,
+  paddingTop: 12,
   borderTop: `1px solid ${P.creamDark}`,
 };
 
