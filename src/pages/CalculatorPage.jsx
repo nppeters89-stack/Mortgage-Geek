@@ -1419,12 +1419,9 @@ export function CalculatorPage() {
           }
           canvas={
             <>
-              {/* Section heading — eyebrow + helper inline so the canvas
-                  doesn't burn vertical real estate before the cards. */}
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Your Results</span>
-                <p style={{ fontSize: 13, color: P.warmGray, margin: 0 }}>Tap a card to view its detailed breakdown.</p>
-              </div>
+              {/* Helper line above the cards — 'Your Results' eyebrow
+                  removed; the cards themselves communicate the section. */}
+              <p style={{ fontSize: 13, color: P.warmGray, margin: 0, textAlign: "center" }}>Tap a card to view its detailed breakdown.</p>
 
               {/* Compact program cards row */}
               <div className="calc-cockpit-cards" data-count={visibleProgramsList.length}>
