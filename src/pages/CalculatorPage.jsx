@@ -1419,10 +1419,6 @@ export function CalculatorPage() {
           }
           canvas={
             <>
-              {/* Helper line above the cards — 'Your Results' eyebrow
-                  removed; the cards themselves communicate the section. */}
-              <p style={{ fontSize: 13, color: P.warmGray, margin: 0, textAlign: "center" }}>Tap a card to view its detailed breakdown.</p>
-
               {/* Compact program cards row */}
               <div className="calc-cockpit-cards" data-count={visibleProgramsList.length}>
                 {visibleProgramsList.map((prog) => (
@@ -1439,7 +1435,8 @@ export function CalculatorPage() {
                 ))}
               </div>
 
-              {/* Detail panel — or empty hint when nothing selected */}
+              {/* Detail panel when a program is selected. When nothing is
+                  selected, show a 🤓 tip below the cards instead. */}
               {selectedProg ? (
                 <DetailPanel
                   prog={selectedProg}
@@ -1462,10 +1459,10 @@ export function CalculatorPage() {
                   onSaveToComparison={saveScenario}
                 />
               ) : (
-                <div className="content-card" style={{ padding: "40px 28px", textAlign: "center" }}>
-                  {/* NEW COPY — Nick to review */}
-                  <p style={{ fontSize: 14, color: P.warmGrayLight, fontStyle: "italic", margin: 0 }}>Tap a program above to see its breakdown.</p>
-                </div>
+                <p style={{ fontSize: 13, color: P.warmGray, margin: 0, textAlign: "center" }}>
+                  <span style={{ marginRight: 6 }}>🤓</span>
+                  Tap a card to view its detailed breakdown.
+                </p>
               )}
 
               {/* Insight 🤓 — preserved verbatim from legacy */}
