@@ -359,7 +359,7 @@ export function CalculatorPage() {
         .calc-cards-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); max-width: 900px; }
         .calc-cards-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .calc-tax-group { background: rgba(184, 134, 11, 0.04); border: 1px solid rgba(184, 134, 11, 0.18); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .calc-tax-group { background: ${P.cream}; border: 1px solid rgba(184, 134, 11, 0.25); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
         .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
         .calc-program-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto 24px; padding: 0 4px; }
         .calc-toggle-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 4px; }
