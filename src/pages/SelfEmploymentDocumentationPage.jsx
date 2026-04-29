@@ -3,6 +3,7 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SelfEmploymentDocumentationGrid } from "../components/SelfEmploymentDocumentationGrid";
 import { PLRequirementsGrid } from "../components/PLRequirementsGrid";
@@ -204,9 +205,14 @@ export function SelfEmploymentDocumentationPage() {
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified April 2026</span>
           </div>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
-            Self-Employed Mortgage Documentation: <em style={{ fontStyle: "italic", color: P.gold }}>What Lenders Actually Want to See</em>
-          </h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 0, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
+              Self-Employed Mortgage Documentation: <em style={{ fontStyle: "italic", color: P.gold }}>What Lenders Actually Want to See</em>
+            </h1>
+            <div style={{ flexShrink: 0, marginTop: 8, marginLeft: "auto" }}>
+              <ShareButton />
+            </div>
+          </div>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             If you own 25% or more of a business and you want a mortgage, you're a "self-employed borrower" in the eyes of every major loan program. That triggers a different documentation playbook than W-2 employees: more tax returns, more business filings, sometimes a profit-and-loss statement, and an income calculation that often surprises borrowers who've never been through it.
           </p>

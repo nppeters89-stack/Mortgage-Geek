@@ -3,6 +3,7 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { StackedTierCardsBranded } from "../components/StackedTierCardsBranded";
 import { InteractiveChecklist } from "../components/InteractiveChecklist";
@@ -157,9 +158,14 @@ export function FHAManualUnderwritingPage() {
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified April 2026</span>
           </div>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
-            FHA Manual Underwriting: What It Actually Means and <em style={{ fontStyle: "italic", color: P.gold }}>How to Get Approved</em>
-          </h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 0, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
+              FHA Manual Underwriting: What It Actually Means and <em style={{ fontStyle: "italic", color: P.gold }}>How to Get Approved</em>
+            </h1>
+            <div style={{ flexShrink: 0, marginTop: 8, marginLeft: "auto" }}>
+              <ShareButton />
+            </div>
+          </div>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             If your lender told you your FHA loan needs to go through "manual underwriting," you probably have questions. What does that mean? Is your loan in trouble? Can it still close?
           </p>

@@ -3,6 +3,7 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ResidencyEligibilityGrid } from "../components/ResidencyEligibilityGrid";
 
@@ -155,9 +156,14 @@ export function ResidencyRulesPage() {
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified April 2026</span>
           </div>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
-            Residency and Visa Rules for US Mortgages: <em style={{ fontStyle: "italic", color: P.gold }}>What Status Lets You Buy a Home</em>
-          </h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 0, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
+              Residency and Visa Rules for US Mortgages: <em style={{ fontStyle: "italic", color: P.gold }}>What Status Lets You Buy a Home</em>
+            </h1>
+            <div style={{ flexShrink: 0, marginTop: 8, marginLeft: "auto" }}>
+              <ShareButton />
+            </div>
+          </div>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             If you're not a US citizen, your immigration status determines which mortgage programs you can use, sometimes which lenders will work with you, and even which down payment requirements apply. The rules are clearer than they look, but they're spread across agency guidelines, lender overlays, and one big policy shift in May 2025 that closed the door on <a href="/deep-dives/fha-manual-underwriting" style={FHA_LINK_STYLE}>FHA loans</a> for most non-permanent residents.
           </p>

@@ -3,6 +3,7 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { BusinessAssetDocsGrid } from "../components/BusinessAssetDocsGrid";
 
@@ -155,9 +156,14 @@ export function BusinessAssetsPage() {
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified April 2026</span>
           </div>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
-            Business Assets for Down Payment: <em style={{ fontStyle: "italic", color: P.gold }}>How to Use Money From Your Company to Buy a Home</em>
-          </h1>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, marginBottom: 0, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.15, marginBottom: 16 }}>
+              Business Assets for Down Payment: <em style={{ fontStyle: "italic", color: P.gold }}>How to Use Money From Your Company to Buy a Home</em>
+            </h1>
+            <div style={{ flexShrink: 0, marginTop: 8, marginLeft: "auto" }}>
+              <ShareButton />
+            </div>
+          </div>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
             You own the business. The money in the business account is yours. But when you go to use it for a down payment on a house, the lender starts asking questions about your business, not just your bank account. Why?
           </p>
