@@ -181,20 +181,20 @@ export function DetailPanel({
         </div>
       </header>
 
-      {/* Body — 2-column at ≥1100px (cockpit). Left = monthly breakdown
-          (+ VA selector when applicable). Right = pie chart, then
-          Pay-it-off-faster, then Est. APR. Below the grid the loan
-          amount card, note, and Save button stretch full width.
+      {/* Body — 2-column at ≥1100px (cockpit). Left = monthly breakdown,
+          (VA selector when applicable), loan amount card, then Est APR.
+          Right = pie chart, then Pay-it-off-faster. Below the grid only
+          the note + Save button stretch full width.
           The class hooks responsive-rules.md's grid switch. */}
       <div className="calc-detail-panel-body">
-        {/* LEFT — Breakdown (and VA selector when VA is selected) */}
+        {/* LEFT — Breakdown, (VA selector,) Loan amount card, Est APR */}
         <div style={breakdownZoneStyle}>
           {/* [NEW COPY — Nick to review] "Monthly Breakdown" heading. The
               live card has no heading on the breakdown table; it's added
               here because the panel is wider and the table benefits from
               a label. Strip or rename freely. */}
-          <h3 style={breakdownHeadingStyle}>Monthly Breakdown</h3>
           <div>
+            <h3 style={breakdownHeadingStyle}>Monthly Breakdown</h3>
             {breakdownRows.map((r, i) => (
               <div key={i} style={breakdownRowStyle}>
                 <span style={{ color: P.warmGray }}>{r.label}</span>
@@ -205,7 +205,7 @@ export function DetailPanel({
 
           {/* VA usage selector — only when VA is the selected program. */}
           {prog.isVA && (
-            <div style={{ marginTop: 14 }}>
+            <div>
               <label
                 htmlFor={vaUsageSelectId}
                 style={vaUsageLabelStyle}
@@ -224,9 +224,66 @@ export function DetailPanel({
               </select>
             </div>
           )}
+
+          {/* Loan amount card — moved from below-grid to left column for
+              better visual balance. */}
+          <div style={loanInnerCardStyle}>
+            <div style={loanRowStyle}>
+              <span style={{ color: P.warmGray }}>Base Loan Amount</span>
+              <span style={{ fontWeight: 600, color: P.text }}>{fmt(baseLoan)}</span>
+            </div>
+            {prog.upfront > 0 && (
+              <div style={{ ...loanRowStyle, fontStyle: 'italic', fontSize: 11 }}>
+                <span style={{ color: P.warmGrayLight }}>+ {prog.upfrontLabel}</span>
+                <span style={{ fontWeight: 600, color: P.warmGrayLight }}>{fmt(prog.upfront)}</span>
+              </div>
+            )}
+            {prog.isVA && prog.upfront === 0 && (
+              <div style={{ ...loanRowStyle, fontStyle: 'italic', fontSize: 11 }}>
+                <span style={{ color: P.sage, fontWeight: 600 }}>Funding Fee Waived</span>
+                <span style={{ fontWeight: 600, color: P.sage }}>$0</span>
+              </div>
+            )}
+            <div
+              style={{
+                ...loanRowStyle,
+                paddingTop: 6,
+                borderTop:
+                  prog.upfront > 0 || prog.isVA ? `1px solid ${P.creamDark}` : 'none',
+              }}
+            >
+              <span style={{ color: P.warmGray }}>Total Loan Amount</span>
+              <span style={{ fontWeight: 700, color: prog.color }}>{fmt(prog.loan)}</span>
+            </div>
+          </div>
+
+          {/* APR readout — preserved verbatim from the live card, with
+              Cash-to-Close link and small-print note. Moved into the left
+              column under the loan card. */}
+          <div style={aprCardStyle}>
+            <span style={aprEyebrowStyle}>Est. APR</span>
+            <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>
+              {prog.apr.toFixed(3)}%
+            </span>
+            <p style={aprDetailLineStyle}>
+              Includes lender fees
+              {prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ''}
+              {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
+              <a
+                href={cashToCloseHref}
+                style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
+              >
+                Full APR detail →
+              </a>
+            </p>
+            <p style={aprSmallPrintStyle}>
+              Estimated APR is for educational purposes only — your actual APR
+              will be disclosed on your Loan Estimate.
+            </p>
+          </div>
         </div>
 
-        {/* RIGHT — Pie chart, Pay-it-off-faster, Est. APR */}
+        {/* RIGHT — Pie chart, Pay-it-off-faster */}
         <div style={rightColumnStyle}>
           {/* Pie chart — or a same-size placeholder when total isn't ready yet
               (e.g. rate hasn't loaded). [NEW COPY — Nick to review] "Calculating…" */}
@@ -279,66 +336,11 @@ export function DetailPanel({
             downPct={downPct}
             homePrice={homePrice}
           />
-
-          {/* APR readout — preserved verbatim from the live card, with
-              Cash-to-Close link and small-print note. */}
-          <div style={aprCardStyle}>
-            <span style={aprEyebrowStyle}>Est. APR</span>
-            <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>
-              {prog.apr.toFixed(3)}%
-            </span>
-            <p style={aprDetailLineStyle}>
-              Includes lender fees
-              {prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ''}
-              {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
-              <a
-                href={cashToCloseHref}
-                style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
-              >
-                Full APR detail →
-              </a>
-            </p>
-            <p style={aprSmallPrintStyle}>
-              Estimated APR is for educational purposes only — your actual APR
-              will be disclosed on your Loan Estimate.
-            </p>
-          </div>
         </div>
       </div>
 
-      {/* Loan amount inner card + note + Save button — full-width below
-          the 2-col grid. */}
-      <div style={{ padding: '24px 28px 20px' }}>
-        <div style={loanInnerCardStyle}>
-          <div style={loanRowStyle}>
-            <span style={{ color: P.warmGray }}>Base Loan Amount</span>
-            <span style={{ fontWeight: 600, color: P.text }}>{fmt(baseLoan)}</span>
-          </div>
-          {prog.upfront > 0 && (
-            <div style={{ ...loanRowStyle, fontStyle: 'italic', fontSize: 11 }}>
-              <span style={{ color: P.warmGrayLight }}>+ {prog.upfrontLabel}</span>
-              <span style={{ fontWeight: 600, color: P.warmGrayLight }}>{fmt(prog.upfront)}</span>
-            </div>
-          )}
-          {prog.isVA && prog.upfront === 0 && (
-            <div style={{ ...loanRowStyle, fontStyle: 'italic', fontSize: 11 }}>
-              <span style={{ color: P.sage, fontWeight: 600 }}>Funding Fee Waived</span>
-              <span style={{ fontWeight: 600, color: P.sage }}>$0</span>
-            </div>
-          )}
-          <div
-            style={{
-              ...loanRowStyle,
-              paddingTop: 6,
-              borderTop:
-                prog.upfront > 0 || prog.isVA ? `1px solid ${P.creamDark}` : 'none',
-            }}
-          >
-            <span style={{ color: P.warmGray }}>Total Loan Amount</span>
-            <span style={{ fontWeight: 700, color: prog.color }}>{fmt(prog.loan)}</span>
-          </div>
-        </div>
-
+      {/* Note + Save button — full-width below the 2-col grid. */}
+      <div style={{ padding: '8px 28px 20px' }}>
         {/* Note line — preserved verbatim from the live card. */}
         <p
           style={{
@@ -346,7 +348,7 @@ export function DetailPanel({
             color: P.warmGrayLight,
             textAlign: 'center',
             fontStyle: 'italic',
-            margin: '12px 0 16px',
+            margin: '0 0 16px',
           }}
         >
           {prog.note}
@@ -656,7 +658,11 @@ const pieZoneStyle = {
   minHeight: 280,
 };
 
-const breakdownZoneStyle = {};
+const breakdownZoneStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 18,
+};
 
 const rightColumnStyle = {
   display: 'flex',
@@ -923,7 +929,6 @@ const pmiNoteStyle = {
 /* ---------- APR styles ---------- */
 
 const aprCardStyle = {
-  marginTop: 12,
   padding: '10px 12px',
   background: P.cream,
   borderRadius: 8,
