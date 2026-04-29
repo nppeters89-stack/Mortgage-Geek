@@ -687,11 +687,16 @@ export function CalculatorPage() {
         </div>
       </div>
 
-      {/* RESULTS ZONE — deeper cream background extends from divider down to end of page */}
-      <div style={{ background: P.creamDark, paddingBottom: 64 }}>
+      {/* RESULTS ZONE — deeper cream background extends from top of zone to
+          end of page. paddingTop here (rather than margin-top on the inner
+          divider) prevents margin-collapse from leaking the spacing into
+          the lighter cream section above. */}
+      <div style={{ background: P.creamDark, paddingTop: 56, paddingBottom: 64 }}>
         <div style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
-          {/* Section divider — Your Results (background pill now matches the new deeper bg) */}
-          <div style={{ margin: "120px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+          {/* Section divider — Your Results (background pill matches the
+              creamDark zone). No top margin: spacing comes from the parent's
+              paddingTop so the band above stays creamDark, not page cream. */}
+          <div style={{ margin: "0 auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
             <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
             <div style={{ position: "relative", display: "inline-block", background: P.creamDark, padding: "0 20px" }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>↓ Your Results ↓</span>
