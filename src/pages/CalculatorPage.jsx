@@ -488,20 +488,21 @@ export function CalculatorPage() {
                     aria-pressed={isVisible}
                     aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                     style={{
-                      background: isVisible ? prog.color : "transparent",
-                      color: isVisible ? "#fff" : P.cream,
-                      border: `1.5px solid ${isVisible ? P.goldLight : "rgba(255, 255, 255, 0.3)"}`,
+                      background: "#fff",
+                      color: isVisible ? prog.color : P.warmGray,
+                      border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
                       borderRadius: 50,
                       padding: "10px 4px",
                       minHeight: 40,
                       fontFamily: F.body,
                       fontSize: 13,
-                      fontWeight: 600,
+                      fontWeight: isVisible ? 700 : 600,
                       letterSpacing: 0.3,
                       cursor: isLast ? "not-allowed" : "pointer",
                       opacity: isLast ? 0.7 : 1,
-                      transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                      transition: "color 0.15s, border-color 0.15s, font-weight 0.15s",
                       textAlign: "center",
+                      boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
                     }}
                   >
                     {prog.name === "Conventional" ? "Conv" : prog.name}
@@ -1260,20 +1261,21 @@ export function CalculatorPage() {
                             aria-pressed={isVisible}
                             aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                             style={{
-                              background: isVisible ? prog.color : "transparent",
-                              color: isVisible ? "#fff" : P.cream,
-                              border: `1.5px solid ${isVisible ? P.goldLight : "rgba(255, 255, 255, 0.3)"}`,
+                              background: "#fff",
+                              color: isVisible ? prog.color : P.warmGray,
+                              border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
                               borderRadius: 50,
                               padding: "8px 4px",
                               minHeight: 36,
                               fontFamily: F.body,
                               fontSize: 12,
-                              fontWeight: 600,
+                              fontWeight: isVisible ? 700 : 600,
                               letterSpacing: 0.3,
                               cursor: isLast ? "not-allowed" : "pointer",
                               opacity: isLast ? 0.7 : 1,
-                              transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                              transition: "color 0.15s, border-color 0.15s, font-weight 0.15s",
                               textAlign: "center",
+                              boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
                             }}
                           >
                             {label}
