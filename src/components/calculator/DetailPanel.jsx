@@ -186,7 +186,7 @@ export function DetailPanel({
           Pay-it-off-faster, then Est. APR. Below the grid the loan
           amount card, note, and Save button stretch full width.
           The class hooks responsive-rules.md's grid switch. */}
-      <div className="calc-detail-panel-body" style={detailBodyStyle}>
+      <div className="calc-detail-panel-body">
         {/* LEFT — Breakdown (and VA selector when VA is selected) */}
         <div style={breakdownZoneStyle}>
           {/* [NEW COPY — Nick to review] "Monthly Breakdown" heading. The
@@ -645,15 +645,9 @@ function PayoffResults({ prog, cfg, term, downPct, homePrice }) {
 
 /* ---------- styles ---------- */
 
-const detailBodyStyle = {
-  display: 'grid',
-  gridTemplateColumns: '1fr',
-  gap: 24,
-  padding: '24px 28px 0',
-};
-
-// At desktop-wide, the body becomes 2-column. Hooked via responsive-rules.md.
-// (CSS for the grid-template-columns switch lives in globalCSS.)
+// Body grid is fully driven by `.calc-detail-panel-body` in CalculatorPage's
+// globalCSS (single-column default; 2-column at >=1100px). Inline styles
+// would clobber the media query, so we keep it as a pure class.
 
 const pieZoneStyle = {
   display: 'flex',
