@@ -281,6 +281,20 @@ export function DetailPanel({
               will be disclosed on your Loan Estimate.
             </p>
           </div>
+
+          {/* Program note (e.g. "PMI est. based on 740+ FICO, <43% DTI").
+              Sits at the bottom of the left column, under Est. APR. */}
+          <p
+            style={{
+              fontSize: 12,
+              color: P.warmGrayLight,
+              textAlign: 'center',
+              fontStyle: 'italic',
+              margin: 0,
+            }}
+          >
+            {prog.note}
+          </p>
         </div>
 
         {/* RIGHT — Pie chart, Save-to-Comparison block */}
@@ -372,20 +386,9 @@ export function DetailPanel({
         </div>
       </div>
 
-      {/* Note + Pay-It-Off-Faster — full-width below the 2-col grid. The
-          payoff feature gets the extra horizontal room here when expanded. */}
+      {/* Pay-It-Off-Faster — full-width below the 2-col grid so its expanded
+          panel can use the extra horizontal room. */}
       <div style={{ padding: '8px 28px 20px' }}>
-        <p
-          style={{
-            fontSize: 12,
-            color: P.warmGrayLight,
-            textAlign: 'center',
-            fontStyle: 'italic',
-            margin: '0 0 16px',
-          }}
-        >
-          {prog.note}
-        </p>
         <PayoffControl
           prog={prog}
           cfg={cfg}
