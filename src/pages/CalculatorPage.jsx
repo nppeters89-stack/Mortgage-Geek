@@ -554,10 +554,10 @@ export function CalculatorPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
 
-              <div className="calc-tax-group" style={{ background: "rgba(212, 168, 67, 0.10)", border: "1px solid rgba(212, 168, 67, 0.32)" }}>
-                <div className="calc-tax-group-label" style={{ color: P.goldLight }}>Property Tax</div>
+              <div className="calc-tax-group">
+                <div className="calc-tax-group-label">Property Tax</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Location</label>
+                  <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
                   <select
                     id={taxStateSelectId}
                     value={taxState}
@@ -583,7 +583,7 @@ export function CalculatorPage() {
                   )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Monthly Amount</label>
+                  <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
                   <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                     <input
@@ -1321,13 +1321,13 @@ export function CalculatorPage() {
 
                   <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
 
-                  {/* Tax group — gold-tinted inset on the navy bg. Inline
-                      overrides win over the .calc-tax-group class so we
-                      don't have to fork the global CSS for one variant. */}
-                  <div className="calc-tax-group" style={{ background: "rgba(212, 168, 67, 0.10)", border: "1px solid rgba(212, 168, 67, 0.32)" }}>
-                    <div className="calc-tax-group-label" style={{ color: P.goldLight }}>Property Tax</div>
+                  {/* Tax group — cream/gold treatment from the global
+                      .calc-tax-group class. Kept distinct from the
+                      surrounding navy card on purpose, per design. */}
+                  <div className="calc-tax-group">
+                    <div className="calc-tax-group-label">Property Tax</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Location</label>
+                      <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
                       <select
                         id={taxStateSelectId}
                         value={taxState}
@@ -1353,7 +1353,7 @@ export function CalculatorPage() {
                       )}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Monthly Amount</label>
+                      <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
                       <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
                         <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                         <input
@@ -1441,46 +1441,6 @@ export function CalculatorPage() {
                   />
                 ))}
               </div>
-
-              {/* Head-to-head delta strip — surfaces when exactly two eligible
-                  programs are pinned. Lifetime figure is an approximation:
-                  monthlyDelta × 12 × term assumes the monthly gap holds for
-                  the full term (MI drop-off is not modeled here). */}
-              {(() => {
-                const eligibleVisible = visibleProgramsList.filter(p => p.eligible && !p.overLimit);
-                if (eligibleVisible.length !== 2) return null;
-                const sorted = [...eligibleVisible].sort((x, y) => x.total - y.total);
-                const cheaper = sorted[0];
-                const pricier = sorted[1];
-                const short = (n) => n === "Conventional" ? "Conv" : n;
-                const monthlyDelta = pricier.total - cheaper.total;
-                if (monthlyDelta < 1) {
-                  return (
-                    <div className="content-card" style={{ padding: "16px 24px", textAlign: "center" }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Head-to-head</span>
-                      <p style={{ fontSize: 14, color: P.warmGray, margin: "6px 0 0" }}>
-                        {cheaper.name} and {pricier.name} land within $1 of each other at <strong style={{ color: P.text }}>{fmt(cheaper.total)}/mo</strong>.
-                      </p>
-                    </div>
-                  );
-                }
-                const lifetimeDelta = monthlyDelta * 12 * term;
-                return (
-                  <div className="content-card" style={{ padding: "18px 24px", textAlign: "center" }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Head-to-head</span>
-                    <p style={{ fontFamily: F.body, fontSize: 14, color: P.warmGray, margin: "8px 0 4px", lineHeight: 1.45 }}>
-                      <strong style={{ color: cheaper.color, fontWeight: 700 }}>{short(cheaper.name)}</strong>
-                      {" saves "}
-                      <strong style={{ color: P.text, fontFamily: F.display, fontSize: 22, fontWeight: 400 }}>{fmt(monthlyDelta)}</strong>
-                      {"/mo vs "}
-                      <strong style={{ color: pricier.color, fontWeight: 700 }}>{short(pricier.name)}</strong>
-                    </p>
-                    <p style={{ fontSize: 12, color: P.warmGrayLight, margin: 0 }}>
-                      ≈ <strong style={{ color: P.text, fontWeight: 600 }}>{fmt(lifetimeDelta)}</strong> over {term} years
-                    </p>
-                  </div>
-                );
-              })()}
 
               {/* Detail panel — or empty hint when nothing selected */}
               {selectedProg ? (
