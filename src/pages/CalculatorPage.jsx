@@ -409,10 +409,11 @@ export function CalculatorPage() {
         .calc-cockpit-cards[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .calc-cockpit-cards[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .calc-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 24px 28px 28px; }
-        @media (min-width: 1280px) {
+        @media (min-width: 1100px) {
           .calc-detail-panel-body {
-            grid-template-columns: minmax(280px, 320px) 1fr;
+            grid-template-columns: minmax(240px, 300px) 1fr;
             align-items: start;
+            gap: 28px;
           }
         }
         .calc-detail-panel { animation: calc-detail-fade 120ms ease-out; }

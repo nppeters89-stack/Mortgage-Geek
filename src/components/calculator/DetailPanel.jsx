@@ -181,51 +181,13 @@ export function DetailPanel({
         </div>
       </header>
 
-      {/* Body — pie + breakdown side-by-side at desktop-wide; stacked otherwise.
+      {/* Body — 2-column at ≥1100px (cockpit). Left = monthly breakdown
+          (+ VA selector when applicable). Right = pie chart, then
+          Pay-it-off-faster, then Est. APR. Below the grid the loan
+          amount card, note, and Save button stretch full width.
           The class hooks responsive-rules.md's grid switch. */}
       <div className="calc-detail-panel-body" style={detailBodyStyle}>
-        {/* Pie chart — or a same-size placeholder when total isn't ready yet
-            (e.g. rate hasn't loaded). [NEW COPY — Nick to review] "Calculating…" */}
-        <div style={pieZoneStyle}>
-          {prog.total > 0 ? (
-            <PaymentPieChart
-              programName={prog.name}
-              pi={prog.pi}
-              mi={prog.mi}
-              miLabel={prog.miLabel}
-              taxes={taxes}
-              insurance={insurance}
-              hoa={hoa}
-              total={prog.total}
-              diameter={pieDiameter}
-            />
-          ) : (
-            <div
-              style={{
-                width: pieDiameter,
-                height: pieDiameter,
-                margin: '0 auto',
-                borderRadius: '50%',
-                background: withAlpha(prog.color, 0.06),
-                border: `1px dashed ${withAlpha(prog.color, 0.35)}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: F.body,
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: 1.2,
-                textTransform: 'uppercase',
-                color: P.warmGrayLight,
-              }}
-              aria-live="polite"
-            >
-              Calculating…
-            </div>
-          )}
-        </div>
-
-        {/* Breakdown */}
+        {/* LEFT — Breakdown (and VA selector when VA is selected) */}
         <div style={breakdownZoneStyle}>
           {/* [NEW COPY — Nick to review] "Monthly Breakdown" heading. The
               live card has no heading on the breakdown table; it's added
@@ -263,12 +225,89 @@ export function DetailPanel({
             </div>
           )}
         </div>
+
+        {/* RIGHT — Pie chart, Pay-it-off-faster, Est. APR */}
+        <div style={rightColumnStyle}>
+          {/* Pie chart — or a same-size placeholder when total isn't ready yet
+              (e.g. rate hasn't loaded). [NEW COPY — Nick to review] "Calculating…" */}
+          <div style={pieZoneStyle}>
+            {prog.total > 0 ? (
+              <PaymentPieChart
+                programName={prog.name}
+                pi={prog.pi}
+                mi={prog.mi}
+                miLabel={prog.miLabel}
+                taxes={taxes}
+                insurance={insurance}
+                hoa={hoa}
+                total={prog.total}
+                diameter={pieDiameter}
+              />
+            ) : (
+              <div
+                style={{
+                  width: pieDiameter,
+                  height: pieDiameter,
+                  margin: '0 auto',
+                  borderRadius: '50%',
+                  background: withAlpha(prog.color, 0.06),
+                  border: `1px dashed ${withAlpha(prog.color, 0.35)}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontFamily: F.body,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  letterSpacing: 1.2,
+                  textTransform: 'uppercase',
+                  color: P.warmGrayLight,
+                }}
+                aria-live="polite"
+              >
+                Calculating…
+              </div>
+            )}
+          </div>
+
+          {/* Pay-It-Off-Faster — preserved feature, full markup. */}
+          <PayoffControl
+            prog={prog}
+            cfg={cfg}
+            biweeklyEquivalent={biweeklyEquivalent}
+            updateExtraConfig={updateExtraConfig}
+            term={term}
+            downPct={downPct}
+            homePrice={homePrice}
+          />
+
+          {/* APR readout — preserved verbatim from the live card, with
+              Cash-to-Close link and small-print note. */}
+          <div style={aprCardStyle}>
+            <span style={aprEyebrowStyle}>Est. APR</span>
+            <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>
+              {prog.apr.toFixed(3)}%
+            </span>
+            <p style={aprDetailLineStyle}>
+              Includes lender fees
+              {prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ''}
+              {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
+              <a
+                href={cashToCloseHref}
+                style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
+              >
+                Full APR detail →
+              </a>
+            </p>
+            <p style={aprSmallPrintStyle}>
+              Estimated APR is for educational purposes only — your actual APR
+              will be disclosed on your Loan Estimate.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Loan amount inner card — preserved exactly. PaddingTop separates
-          it from the detail body's breakdown rows / VA-eligibility row
-          above so the cream block doesn't butt up against the previous
-          item. */}
+      {/* Loan amount inner card + note + Save button — full-width below
+          the 2-col grid. */}
       <div style={{ padding: '24px 28px 20px' }}>
         <div style={loanInnerCardStyle}>
           <div style={loanRowStyle}>
@@ -312,41 +351,6 @@ export function DetailPanel({
         >
           {prog.note}
         </p>
-
-        {/* Pay-It-Off-Faster — preserved feature, full markup. */}
-        <PayoffControl
-          prog={prog}
-          cfg={cfg}
-          biweeklyEquivalent={biweeklyEquivalent}
-          updateExtraConfig={updateExtraConfig}
-          term={term}
-          downPct={downPct}
-          homePrice={homePrice}
-        />
-
-        {/* APR readout — preserved verbatim from the live card, with
-            Cash-to-Close link and small-print note. */}
-        <div style={aprCardStyle}>
-          <span style={aprEyebrowStyle}>Est. APR</span>
-          <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>
-            {prog.apr.toFixed(3)}%
-          </span>
-          <p style={aprDetailLineStyle}>
-            Includes lender fees
-            {prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ''}
-            {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
-            <a
-              href={cashToCloseHref}
-              style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
-            >
-              Full APR detail →
-            </a>
-          </p>
-          <p style={aprSmallPrintStyle}>
-            Estimated APR is for educational purposes only — your actual APR
-            will be disclosed on your Loan Estimate.
-          </p>
-        </div>
 
         {/* Save to Comparison — preserved button. The handler
             (`onSaveToComparison`) lives in CalculatorPage.jsx and writes
@@ -659,6 +663,12 @@ const pieZoneStyle = {
 };
 
 const breakdownZoneStyle = {};
+
+const rightColumnStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+};
 
 const breakdownHeadingStyle = {
   fontFamily: F.body,
