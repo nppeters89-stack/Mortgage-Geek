@@ -32,6 +32,8 @@ export function CalculatorPage() {
   const [downDollarOverride, setDownDollarOverride] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
+  const isCockpit = useIsCockpit();
+  const pieDiameter = usePieDiameter();
   const [visiblePrograms, setVisiblePrograms] = useState(() => {
     try {
       const saved = localStorage.getItem("mg_calc_visible_programs");
@@ -298,8 +300,16 @@ export function CalculatorPage() {
   const eligibleTotals = visibleProgramsList.filter(p => p.eligible).map(p => p.total);
   const lowestTotal = eligibleTotals.length > 0 ? Math.min(...eligibleTotals) : 0;
 
-  const isCockpit = useIsCockpit();
-  const pieDiameter = usePieDiameter();
+  // Cockpit-only: default-select the cheapest eligible program when nothing
+  // is selected (or the prior selection has been hidden). We never auto-follow
+  // lowestTotal recomputes — once the user has a pick, it stays put.
+  useEffect(() => {
+    if (!isCockpit) return;
+    if (selectedProgram && visiblePrograms.includes(selectedProgram)) return;
+    const cheapest = visibleProgramsList.find(p => p.eligible && !p.overLimit && p.total === lowestTotal);
+    if (cheapest) setSelectedProgram(cheapest.name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCockpit, lowestTotal, visiblePrograms, selectedProgram]);
 
   const selectedProg = selectedProgram ? programs.find(p => p.name === selectedProgram && p.eligible) : null;
   const saveScenario = () => {
@@ -391,6 +401,11 @@ export function CalculatorPage() {
             grid-template-columns: minmax(280px, 320px) 1fr;
             align-items: start;
           }
+        }
+        .calc-detail-panel { animation: calc-detail-fade 120ms ease-out; }
+        @keyframes calc-detail-fade {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
 

@@ -124,6 +124,7 @@ export function DetailPanel({
 
   return (
     <section
+      key={prog.name}
       className="content-card calc-detail-panel"
       aria-label={`${prog.name} payment details`}
       style={{ padding: 0, overflow: 'hidden' }}
@@ -183,19 +184,45 @@ export function DetailPanel({
       {/* Body — pie + breakdown side-by-side at desktop-wide; stacked otherwise.
           The class hooks responsive-rules.md's grid switch. */}
       <div className="calc-detail-panel-body" style={detailBodyStyle}>
-        {/* Pie chart */}
+        {/* Pie chart — or a same-size placeholder when total isn't ready yet
+            (e.g. rate hasn't loaded). [NEW COPY — Nick to review] "Calculating…" */}
         <div style={pieZoneStyle}>
-          <PaymentPieChart
-            programName={prog.name}
-            pi={prog.pi}
-            mi={prog.mi}
-            miLabel={prog.miLabel}
-            taxes={taxes}
-            insurance={insurance}
-            hoa={hoa}
-            total={prog.total}
-            diameter={pieDiameter}
-          />
+          {prog.total > 0 ? (
+            <PaymentPieChart
+              programName={prog.name}
+              pi={prog.pi}
+              mi={prog.mi}
+              miLabel={prog.miLabel}
+              taxes={taxes}
+              insurance={insurance}
+              hoa={hoa}
+              total={prog.total}
+              diameter={pieDiameter}
+            />
+          ) : (
+            <div
+              style={{
+                width: pieDiameter,
+                height: pieDiameter,
+                margin: '0 auto',
+                borderRadius: '50%',
+                background: withAlpha(prog.color, 0.06),
+                border: `1px dashed ${withAlpha(prog.color, 0.35)}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: F.body,
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+                color: P.warmGrayLight,
+              }}
+              aria-live="polite"
+            >
+              Calculating…
+            </div>
+          )}
         </div>
 
         {/* Breakdown */}
