@@ -1204,6 +1204,48 @@ export function CalculatorPage() {
               {/* Compact input card — single column for the 340px rail */}
               <div className="content-card" style={{ padding: "20px", marginBottom: 16 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {/* Compare-programs pill row — equal-width 4-column grid.
+                      Sits at the top of the input card so program selection
+                      lives alongside the inputs, not in the results area. */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Compare</span>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+                      {programs.map((prog) => {
+                        const isVisible = visiblePrograms.includes(prog.name);
+                        const isLast = visiblePrograms.length === 1 && isVisible;
+                        const label = prog.name === "Conventional" ? "Conv" : prog.name;
+                        return (
+                          <button
+                            key={prog.name}
+                            type="button"
+                            onClick={() => toggleProgram(prog.name)}
+                            disabled={isLast}
+                            aria-pressed={isVisible}
+                            aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                            style={{
+                              background: isVisible ? prog.color : "transparent",
+                              color: isVisible ? "#fff" : P.warmGray,
+                              border: `1.5px solid ${isVisible ? prog.color : P.warmGrayLight}`,
+                              borderRadius: 50,
+                              padding: "8px 4px",
+                              minHeight: 36,
+                              fontFamily: F.body,
+                              fontSize: 12,
+                              fontWeight: 600,
+                              letterSpacing: 0.3,
+                              cursor: isLast ? "not-allowed" : "pointer",
+                              opacity: isLast ? 0.7 : 1,
+                              transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                              textAlign: "center",
+                            }}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                     <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
                     <select
@@ -1331,35 +1373,6 @@ export function CalculatorPage() {
                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Your Results</span>
                 {/* NEW COPY — Nick to review */}
                 <p style={{ fontSize: 13, color: P.warmGray, maxWidth: 520, margin: "6px auto 0" }}>Tap a card to view its detailed breakdown.</p>
-              </div>
-
-              {/* Compare toggle */}
-              <div className="calc-program-toggle" role="group" aria-label="Select programs to compare" style={{ margin: 0, maxWidth: "none", padding: 0 }}>
-                <span className="calc-toggle-label" style={{ color: P.warmGrayLight }}>Compare:</span>
-                {programs.map((prog) => {
-                  const isVisible = visiblePrograms.includes(prog.name);
-                  const isLast = visiblePrograms.length === 1 && isVisible;
-                  return (
-                    <button
-                      key={prog.name}
-                      type="button"
-                      onClick={() => toggleProgram(prog.name)}
-                      disabled={isLast}
-                      aria-pressed={isVisible}
-                      aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
-                      className="calc-toggle-pill"
-                      style={{
-                        background: isVisible ? prog.color : "transparent",
-                        color: isVisible ? "#fff" : P.warmGray,
-                        borderColor: isVisible ? prog.color : P.warmGrayLight,
-                        cursor: isLast ? "not-allowed" : "pointer",
-                        opacity: isLast ? 0.7 : 1,
-                      }}
-                    >
-                      {prog.name}
-                    </button>
-                  );
-                })}
               </div>
 
               {/* Compact program cards row */}

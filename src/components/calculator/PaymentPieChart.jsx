@@ -62,29 +62,37 @@ export function PaymentPieChart({
   }, [programName, pi, mi, miLabel, taxes, insurance, hoa]);
 
   // Donut geometry — outer radius drives the actual visual size; inner radius
-  // is the hole. We size based on `diameter` so the parent stays in control of
-  // breakpoint-aware sizing (see responsive-rules.md).
+  // is the hole. The PieChart's plotting area is sized to `diameter` so the
+  // donut stays a perfect circle even though the chart container reserves
+  // extra height below for the pinned tooltip.
   const outerRadius = diameter / 2;
   const innerRadius = outerRadius * 0.62; // 62% inner = comfortable label hole
+  // Reserve room below the donut for the pinned tooltip so it never has to
+  // overlap the center label or any slice. The chart's own coordinate space
+  // grows; the donut is anchored to the top half via cy.
+  const TOOLTIP_RESERVE = 64;
+  const totalHeight = diameter + TOOLTIP_RESERVE;
+  const donutCenterY = diameter / 2; // donut stays vertically centered in the
+                                     // top `diameter` slab of the chart
 
   return (
     <div
       style={{
         position: 'relative',
         width: diameter,
-        height: diameter,
+        height: totalHeight,
         // Center the chart in whatever container the parent provides.
         margin: '0 auto',
       }}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+        <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <Pie
             data={slices}
             dataKey="value"
             nameKey="label"
             cx="50%"
-            cy="50%"
+            cy={donutCenterY}
             innerRadius={innerRadius}
             outerRadius={outerRadius}
             paddingAngle={2}
@@ -96,15 +104,28 @@ export function PaymentPieChart({
               <Cell key={s.key} fill={s.color} />
             ))}
           </Pie>
-          <Tooltip content={<SliceTooltip total={total} />} />
+          {/* Tooltip is pinned to a fixed point just below the donut so it
+              can never overlap the center label. Using `position` overrides
+              Recharts' default cursor-tracking behavior; `wrapperStyle`
+              keeps it click-through and centered relative to the chart. */}
+          <Tooltip
+            content={<SliceTooltip total={total} />}
+            position={{ x: Math.max(0, (diameter - 200) / 2), y: diameter + 4 }}
+            wrapperStyle={{ pointerEvents: 'none', zIndex: 5 }}
+            isAnimationActive={false}
+          />
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Center label — overlay on the donut hole. */}
+      {/* Center label — overlay on the donut hole. Sized to the top `diameter`
+          slab only so the bottom tooltip reserve doesn't shift the labels. */}
       <div
         style={{
           position: 'absolute',
-          inset: 0,
+          left: 0,
+          right: 0,
+          top: 0,
+          height: diameter,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -166,7 +187,8 @@ function SliceTooltip({ active, payload, total }) {
         padding: '8px 12px',
         fontFamily: F.body,
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-        minWidth: 160,
+        width: 200,
+        boxSizing: 'border-box',
       }}
     >
       <div
