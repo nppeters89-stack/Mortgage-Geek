@@ -691,7 +691,7 @@ export function CalculatorPage() {
       <div style={{ background: P.creamDark, paddingBottom: 64 }}>
         <div style={{ padding: "0 24px", maxWidth: 1100, margin: "0 auto" }}>
           {/* Section divider — Your Results (background pill now matches the new deeper bg) */}
-          <div style={{ margin: "72px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
+          <div style={{ margin: "120px auto 24px", maxWidth: 800, position: "relative", textAlign: "center" }}>
             <div style={{ height: 1, background: `linear-gradient(to right, transparent, rgba(155, 148, 136, 0.3), transparent)`, position: "absolute", left: 0, right: 0, top: "50%" }} />
             <div style={{ position: "relative", display: "inline-block", background: P.creamDark, padding: "0 20px" }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>↓ Your Results ↓</span>
