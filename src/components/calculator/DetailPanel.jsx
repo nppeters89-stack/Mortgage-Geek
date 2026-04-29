@@ -265,8 +265,11 @@ export function DetailPanel({
         </div>
       </div>
 
-      {/* Loan amount inner card — preserved exactly. */}
-      <div style={{ padding: '0 28px 20px' }}>
+      {/* Loan amount inner card — preserved exactly. PaddingTop separates
+          it from the detail body's breakdown rows / VA-eligibility row
+          above so the cream block doesn't butt up against the previous
+          item. */}
+      <div style={{ padding: '24px 28px 20px' }}>
         <div style={loanInnerCardStyle}>
           <div style={loanRowStyle}>
             <span style={{ color: P.warmGray }}>Base Loan Amount</span>
