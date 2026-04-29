@@ -67,6 +67,13 @@ export function DeepDivesHubPage() {
       summary: "How to qualify for a mortgage with an offer letter for a job you haven't started yet. The 60-day vs 90-day window split, Fannie's two options, Freddie's two options, the common professions exception (doctors, teachers, professors), and how reserves work. Includes an interactive matrix mapping three borrower scenarios across all five major loan programs.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "debts-paid-by-others",
+      emoji: "🤝",
+      title: "Debts Paid by Others",
+      summary: "When a parent, spouse, or ex pays a debt that's in your name, can you exclude it from your DTI? The agency split is the most important fact: FNMA and FHLMC let anyone pay; FHA, VA, and USDA require the third party to be obligated on the debt. Includes a comparison grid, the 12-month documentation rule, the divorce decree exception, and the bank-account mechanics that catch borrowers off guard.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (

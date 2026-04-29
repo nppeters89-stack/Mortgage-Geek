@@ -629,6 +629,11 @@ export function SelfEmploymentDocumentationPage() {
           Bank statement loans are non-QM products that qualify borrowers using deposits to bank accounts rather than tax returns. They exist specifically for self-employed borrowers whose tax returns understate their actual income. The trade-off: higher rates, larger down payments, fewer loan options, and not eligible for sale to Fannie Mae or Freddie Mac. They're a legitimate option for the right borrower but they're not "as good as" agency loans. If you can qualify for an agency loan, you almost always should.
         </Para>
 
+        <H3>My business pays a vehicle loan that's in my personal name. Does it count against my DTI?</H3>
+        <Para>
+          Possibly not. Fannie Mae specifically allows the payment to be excluded from your DTI if you can show 12 months of canceled company checks proving the business has been making the payments AND the cash flow analysis on the business reflects the payment as a business expense. The same general logic applies on the other agencies, with their respective documentation rules. For the full agency-by-agency breakdown, see the <a href="/deep-dives/debts-paid-by-others" style={LINK_STYLE}>Debts Paid by Others Deep Dive</a>.
+        </Para>
+
         <H2>A final note. What this page is and isn't.</H2>
         <Para>
           This page summarizes self-employed mortgage documentation requirements as they exist in 2026, organized to help borrowers prepare for an application. It is not:
