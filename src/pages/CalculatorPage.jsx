@@ -1419,11 +1419,11 @@ export function CalculatorPage() {
           }
           canvas={
             <>
-              {/* Section heading */}
-              <div style={{ textAlign: "center" }}>
+              {/* Section heading — eyebrow + helper inline so the canvas
+                  doesn't burn vertical real estate before the cards. */}
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 14, flexWrap: "wrap" }}>
                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Your Results</span>
-                {/* NEW COPY — Nick to review */}
-                <p style={{ fontSize: 13, color: P.warmGray, maxWidth: 520, margin: "6px auto 0" }}>Tap a card to view its detailed breakdown.</p>
+                <p style={{ fontSize: 13, color: P.warmGray, margin: 0 }}>Tap a card to view its detailed breakdown.</p>
               </div>
 
               {/* Compact program cards row */}
