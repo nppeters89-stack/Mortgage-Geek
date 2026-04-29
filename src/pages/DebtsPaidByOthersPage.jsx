@@ -202,7 +202,7 @@ export function DebtsPaidByOthersPage() {
 
         <H2>The big chart. Debts paid by others by agency.</H2>
         <Para>
-          Below is the at-a-glance comparison. The first column on the right (Other Party Must Be Obligated?) is the most important fact on this page. It splits the agency programs into two camps.
+          Below is the at-a-glance comparison. <strong style={{ color: P.navy, fontWeight: 600 }}>Whether the third party paying the debt has to be obligated on it</strong> is the single fact that splits the agency programs into two camps. It's the first thing to look at on each row.
         </Para>
 
         <DebtsPaidByOthersGrid />

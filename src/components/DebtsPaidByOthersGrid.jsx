@@ -267,11 +267,26 @@ export function DebtsPaidByOthersGrid() {
             margin-top: 2px;
           }
           .dpo-mobile-status-row {
-            margin: 14px 0;
+            margin-top: 14px;
+            margin-bottom: 4px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid ${P.creamDark};
+          }
+          .dpo-mobile-status-row .dpo-status {
+            padding: 18px 12px;
+          }
+          .dpo-mobile-status-row .dpo-status-label {
+            font-size: 26px;
+          }
+          .dpo-mobile-status-row .dpo-status-sub {
+            font-size: 13px;
           }
           .dpo-mobile-row {
             padding: 12px 0;
             border-top: 1px solid ${P.creamDark};
+          }
+          .dpo-mobile-row:first-of-type {
+            border-top: none;
           }
           .dpo-mobile-label {
             display: block;
@@ -280,7 +295,7 @@ export function DebtsPaidByOthersGrid() {
             text-transform: uppercase;
             letter-spacing: 1.2px;
             color: ${P.warmGray};
-            margin-bottom: 6px;
+            margin-bottom: 8px;
           }
           .dpo-mobile-content {
             font-size: 14px;
@@ -329,6 +344,7 @@ export function DebtsPaidByOthersGrid() {
             <span className="dpo-mobile-title">{row.loanProgram}</span>
             {row.loanSub && <span className="dpo-mobile-sub">{row.loanSub}</span>}
             <div className="dpo-mobile-status-row">
+              <span className="dpo-mobile-label">Other Party Must Be Obligated?</span>
               <StatusCell obligated={row.obligated} />
             </div>
             <div className="dpo-mobile-row">
