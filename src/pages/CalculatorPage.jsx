@@ -27,6 +27,13 @@ export function CalculatorPage() {
   const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [usdaRate, setUsdaRate] = useState(paramProgram === "USDA" && paramRate > 0 ? paramRate : 6.25);
+  // Per-program market baselines — fixed to the auto-populated rate from
+  // MND so the rate slider has a stable ±2.5% window that doesn't drift
+  // as the user adjusts. Updated only when fresh API data lands or
+  // (for Conv) when the term toggles between 15 and 30.
+  const [fhaRateApi, setFhaRateApi] = useState(6.25);
+  const [vaRateApi, setVaRateApi] = useState(6.25);
+  const [usdaRateApi, setUsdaRateApi] = useState(6.25);
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
@@ -155,11 +162,17 @@ export function CalculatorPage() {
           if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(term === 15 ? r15 : r30);
           if (fha) {
             const fhaParsed = roundRate(parseFloat(fha.rate));
+            setFhaRateApi(fhaParsed);
+            setUsdaRateApi(fhaParsed);
             if (!(paramProgram === "FHA" && paramRate > 0)) setFhaRate(fhaParsed);
             // USDA tracks FHA from MND (MND doesn't publish a separate USDA rate)
             if (!(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(fhaParsed);
           }
-          if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
+          if (va) {
+            const vaParsed = roundRate(parseFloat(va.rate));
+            setVaRateApi(vaParsed);
+            if (!(paramProgram === "VA" && paramRate > 0)) setVaRate(vaParsed);
+          }
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
@@ -659,12 +672,12 @@ export function CalculatorPage() {
           {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {[
-              { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA },
-              { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA },
-              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
+              { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+              { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
+              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
             ].map((p) => (
-              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
             ))}
           </div>
 
@@ -1403,12 +1416,12 @@ export function CalculatorPage() {
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
-                    { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional },
-                    { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA },
-                    { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA },
-                    { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
+                    { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+                    { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+                    { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
+                    { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
                   ].map((p) => (
-                    <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+                    <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
                   ))}
                 </div>
                 {!ratesLoaded && (
