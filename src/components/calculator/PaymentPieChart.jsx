@@ -45,10 +45,15 @@ export function PaymentPieChart({
   // Build the slice array. Order is fixed (P&I always first, HOA always last
   // when present) so the chart reads consistently across programs.
   const slices = useMemo(() => {
+    const piColor = PROGRAM_COLORS[programName];
+    // Insurance defaults to sage, but swaps to gold when the program color is
+    // also sage (VA) so the slice doesn't collide with P&I. VA has no monthly
+    // MI slice, so gold is free on that program.
+    const insuranceColor = piColor === P.sage ? P.gold : P.sage;
     const arr = [
-      { key: 'pi', label: 'Principal & Interest', value: pi, color: PROGRAM_COLORS[programName] },
+      { key: 'pi', label: 'Principal & Interest', value: pi, color: piColor },
       { key: 'taxes', label: 'Taxes', value: taxes, color: P.warmGray },
-      { key: 'insurance', label: 'Insurance', value: insurance, color: P.sage },
+      { key: 'insurance', label: 'Insurance', value: insurance, color: insuranceColor },
     ];
     if (mi > 0 && miLabel) {
       // MI sits between insurance and HOA so the visual order is:
