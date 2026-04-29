@@ -3,6 +3,7 @@ import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
 import { DeepDiveFooter } from "../components/DeepDiveFooter";
+import { ShareButton } from "../components/ShareButton";
 import { WaitPeriodRows, Ch13Card } from "../components/WaitPeriodRows";
 import { EVENTS } from "../data/derogatoryCredit";
 import { articleSchema } from "../utils/schema";
@@ -110,7 +111,10 @@ export function DerogatoryCreditPage() {
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
             <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
           </a>
-          <a href="/deep-dives" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <ShareButton variant="header" />
+            <a href="/deep-dives" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
+          </div>
         </div>
       </div>
 

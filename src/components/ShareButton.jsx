@@ -84,46 +84,79 @@ export function ShareButton({ title, url, variant = "default" }) {
   };
 
   const isMinimal = variant === "minimal";
+  const isHeader = variant === "header";
   const isCopied = status === "copied";
   const isError = status === "error";
   const showLabel = !isMinimal;
 
-  const baseBg = P.navy;
-  const hoverBg = P.navyLight;
-  const errorBg = "#8B2D2D";
-  const background = isError ? errorBg : baseBg;
-
   const labelText = isCopied ? "Link copied!" : isError ? "Couldn't copy link" : "Share";
   const liveText = isCopied ? "Link copied" : isError ? "Couldn't copy link" : "";
 
-  const buttonStyle = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: showLabel ? 8 : 0,
-    minHeight: 44,
-    minWidth: isMinimal ? 44 : "auto",
-    padding: isMinimal ? "0 12px" : "8px 14px",
-    background,
-    color: P.cream,
-    border: "none",
-    borderRadius: 8,
-    fontFamily: F.body,
-    fontSize: 13,
-    fontWeight: 600,
-    letterSpacing: 0.2,
-    cursor: status === "idle" ? "pointer" : "default",
-    transition: "background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
-    WebkitTapHighlightColor: "transparent",
-  };
+  const headerIdleColor = "rgba(255,255,255,0.55)";
+  const headerHoverColor = "rgba(255,255,255,0.95)";
+  const headerActiveColor = isError ? "#F1B5B5" : "#E8C875";
+
+  const baseBg = isHeader ? "transparent" : P.navy;
+  const hoverBg = isHeader ? "transparent" : P.navyLight;
+  const errorBg = isHeader ? "transparent" : "#8B2D2D";
+  const background = isError ? errorBg : baseBg;
+
+  const buttonStyle = isHeader
+    ? {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+        minHeight: 44,
+        padding: "0 8px",
+        background: "transparent",
+        color: isCopied || isError ? headerActiveColor : headerIdleColor,
+        border: "none",
+        borderRadius: 6,
+        fontFamily: F.body,
+        fontSize: 13,
+        fontWeight: 500,
+        letterSpacing: 0.1,
+        cursor: status === "idle" ? "pointer" : "default",
+        transition: "color 0.15s ease",
+        WebkitTapHighlightColor: "transparent",
+      }
+    : {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: showLabel ? 8 : 0,
+        minHeight: 44,
+        minWidth: isMinimal ? 44 : "auto",
+        padding: isMinimal ? "0 12px" : "8px 14px",
+        background,
+        color: P.cream,
+        border: "none",
+        borderRadius: 8,
+        fontFamily: F.body,
+        fontSize: 13,
+        fontWeight: 600,
+        letterSpacing: 0.2,
+        cursor: status === "idle" ? "pointer" : "default",
+        transition: "background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
+        WebkitTapHighlightColor: "transparent",
+      };
 
   const onMouseEnter = (e) => {
     if (status !== "idle" || isError) return;
+    if (isHeader) {
+      e.currentTarget.style.color = headerHoverColor;
+      return;
+    }
     e.currentTarget.style.background = hoverBg;
     e.currentTarget.style.boxShadow = "0 4px 12px rgba(15, 37, 48, 0.18)";
   };
   const onMouseLeave = (e) => {
     if (isError) return;
+    if (isHeader) {
+      e.currentTarget.style.color = isCopied ? headerActiveColor : headerIdleColor;
+      return;
+    }
     e.currentTarget.style.background = background;
     e.currentTarget.style.boxShadow = "none";
   };
