@@ -488,8 +488,8 @@ export function CalculatorPage() {
                     aria-pressed={isVisible}
                     aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                     style={{
-                      background: "#fff",
-                      color: isVisible ? prog.color : P.warmGray,
+                      background: isVisible ? prog.color : "#fff",
+                      color: isVisible ? "#fff" : P.warmGray,
                       border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
                       borderRadius: 50,
                       padding: "10px 4px",
@@ -500,7 +500,7 @@ export function CalculatorPage() {
                       letterSpacing: 0.3,
                       cursor: isLast ? "not-allowed" : "pointer",
                       opacity: isLast ? 0.7 : 1,
-                      transition: "color 0.15s, border-color 0.15s, font-weight 0.15s",
+                      transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
                       textAlign: "center",
                       boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
                     }}
@@ -1261,8 +1261,8 @@ export function CalculatorPage() {
                             aria-pressed={isVisible}
                             aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                             style={{
-                              background: "#fff",
-                              color: isVisible ? prog.color : P.warmGray,
+                              background: isVisible ? prog.color : "#fff",
+                              color: isVisible ? "#fff" : P.warmGray,
                               border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
                               borderRadius: 50,
                               padding: "8px 4px",
@@ -1273,7 +1273,7 @@ export function CalculatorPage() {
                               letterSpacing: 0.3,
                               cursor: isLast ? "not-allowed" : "pointer",
                               opacity: isLast ? 0.7 : 1,
-                              transition: "color 0.15s, border-color 0.15s, font-weight 0.15s",
+                              transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
                               textAlign: "center",
                               boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
                             }}
