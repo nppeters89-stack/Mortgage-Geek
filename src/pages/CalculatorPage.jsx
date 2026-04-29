@@ -455,14 +455,26 @@ export function CalculatorPage() {
           <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
         </div>
 
-        {/* Input card - 2 column layout */}
-        <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
+        {/* Input card - 2 column layout. Navy gradient background mirrors
+            the rate strip below it for visual rhythm; gold top accent +
+            light labels keep the dark surface readable. */}
+        <div className="content-card" style={{
+          padding: "28px",
+          marginBottom: 12,
+          maxWidth: 800,
+          margin: "0 auto 12px",
+          background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+          borderTop: `3px solid ${P.gold}`,
+          border: 'none',
+          boxShadow: '0 4px 20px rgba(15, 37, 48, 0.18)',
+        }}>
           {/* Compare-programs pill row — equal-width 4-column grid spanning
               the full input card. Lives at the top of the inputs because
               program selection is part of configuring the scenario, not
-              part of reading the results. */}
+              part of reading the results. Active pills use a uniform gold
+              border so the navy-on-navy Conv pill stays clearly readable. */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Compare</span>
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
               {programs.map((prog) => {
                 const isVisible = visiblePrograms.includes(prog.name);
@@ -477,8 +489,8 @@ export function CalculatorPage() {
                     aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                     style={{
                       background: isVisible ? prog.color : "transparent",
-                      color: isVisible ? "#fff" : P.warmGray,
-                      border: `1.5px solid ${isVisible ? prog.color : P.warmGrayLight}`,
+                      color: isVisible ? "#fff" : P.cream,
+                      border: `1.5px solid ${isVisible ? P.goldLight : "rgba(255, 255, 255, 0.3)"}`,
                       borderRadius: 50,
                       padding: "10px 4px",
                       minHeight: 40,
@@ -503,7 +515,7 @@ export function CalculatorPage() {
             {/* LEFT COLUMN — Loan structure & amount */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+                <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Loan Term</label>
                 <select
                   id={termSelectId}
                   value={term}
@@ -515,14 +527,14 @@ export function CalculatorPage() {
                 </select>
               </div>
 
-              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
+              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
 
               <div className="calc-dp-row">
-                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
-                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
+                <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
+                <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma labelColor={P.goldLight} />
               </div>
 
-              <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+              <div style={{ padding: "10px 14px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                 <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy }}>{fmt(baseLoan)}</span>
               </div>
@@ -530,12 +542,12 @@ export function CalculatorPage() {
 
             {/* RIGHT COLUMN — Monthly escrow items */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+              <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
 
-              <div className="calc-tax-group">
-                <div className="calc-tax-group-label">Property Tax</div>
+              <div className="calc-tax-group" style={{ background: "rgba(212, 168, 67, 0.10)", border: "1px solid rgba(212, 168, 67, 0.32)" }}>
+                <div className="calc-tax-group-label" style={{ color: P.goldLight }}>Property Tax</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
+                  <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Location</label>
                   <select
                     id={taxStateSelectId}
                     value={taxState}
@@ -561,7 +573,7 @@ export function CalculatorPage() {
                   )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                  <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
+                  <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Monthly Amount</label>
                   <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                     <input
@@ -577,11 +589,11 @@ export function CalculatorPage() {
               </div>
 
               {!showHoa ? (
-                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sageDark, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
+                <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.goldLight, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(250, 247, 242, 0.55)" }}>(optional)</span></button>
               ) : (
                 <div>
-                  <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} />
-                  <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: P.warmGrayLight, cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
+                  <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} labelColor={P.goldLight} />
+                  <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: "rgba(250, 247, 242, 0.7)", cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
                 </div>
               )}
             </div>
@@ -1214,14 +1226,26 @@ export function CalculatorPage() {
         <CockpitShell
           rail={
             <>
-              {/* Compact input card — single column for the 340px rail */}
-              <div className="content-card" style={{ padding: "20px", marginBottom: 16 }}>
+              {/* Compact input card — single column for the 340px rail.
+                  Navy gradient background mirrors the rate strip below it
+                  for visual rhythm. Gold top accent + cream/gold labels
+                  keep the dark surface readable. */}
+              <div className="content-card" style={{
+                padding: "20px",
+                marginBottom: 16,
+                background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+                borderTop: `3px solid ${P.gold}`,
+                border: 'none',
+                boxShadow: '0 4px 20px rgba(15, 37, 48, 0.18)',
+              }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {/* Compare-programs pill row — equal-width 4-column grid.
                       Sits at the top of the input card so program selection
-                      lives alongside the inputs, not in the results area. */}
+                      lives alongside the inputs, not in the results area.
+                      Active pills get a uniform gold border so the navy-on-
+                      navy Conv pill stays clearly readable. */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
-                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Compare</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
                       {programs.map((prog) => {
                         const isVisible = visiblePrograms.includes(prog.name);
@@ -1237,8 +1261,8 @@ export function CalculatorPage() {
                             aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
                             style={{
                               background: isVisible ? prog.color : "transparent",
-                              color: isVisible ? "#fff" : P.warmGray,
-                              border: `1.5px solid ${isVisible ? prog.color : P.warmGrayLight}`,
+                              color: isVisible ? "#fff" : P.cream,
+                              border: `1.5px solid ${isVisible ? P.goldLight : "rgba(255, 255, 255, 0.3)"}`,
                               borderRadius: 50,
                               padding: "8px 4px",
                               minHeight: 36,
@@ -1260,7 +1284,7 @@ export function CalculatorPage() {
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                    <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+                    <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Loan Term</label>
                     <select
                       id={termSelectId}
                       value={term}
@@ -1272,24 +1296,27 @@ export function CalculatorPage() {
                     </select>
                   </div>
 
-                  <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma />
+                  <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
 
                   <div className="calc-dp-row">
-                    <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} />
-                    <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma />
+                    <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
+                    <CalcInput label="Down Payment $" value={Math.round(downAmt)} onChange={handleDownDollarChange} prefix="$" step={1000} min={0} max={homePrice} comma labelColor={P.goldLight} />
                   </div>
 
-                  <div style={{ padding: "10px 14px", background: P.creamDark, borderRadius: 8, textAlign: "center" }}>
+                  <div style={{ padding: "10px 14px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                     <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Base Loan Amount</span>
                     <span style={{ fontFamily: F.display, fontSize: 20, color: P.navy }}>{fmt(baseLoan)}</span>
                   </div>
 
-                  <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} />
+                  <CalcInput label="Homeowners Ins. (est.)" value={insurance} onChange={setInsurance} prefix="$" step={25} labelColor={P.goldLight} />
 
-                  <div className="calc-tax-group">
-                    <div className="calc-tax-group-label">Property Tax</div>
+                  {/* Tax group — gold-tinted inset on the navy bg. Inline
+                      overrides win over the .calc-tax-group class so we
+                      don't have to fork the global CSS for one variant. */}
+                  <div className="calc-tax-group" style={{ background: "rgba(212, 168, 67, 0.10)", border: "1px solid rgba(212, 168, 67, 0.32)" }}>
+                    <div className="calc-tax-group-label" style={{ color: P.goldLight }}>Property Tax</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Location</label>
+                      <label htmlFor={taxStateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Location</label>
                       <select
                         id={taxStateSelectId}
                         value={taxState}
@@ -1315,7 +1342,7 @@ export function CalculatorPage() {
                       )}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Monthly Amount</label>
+                      <label htmlFor={taxesInputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Monthly Amount</label>
                       <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px" }}>
                         <span style={{ fontSize: 14, fontWeight: 600, color: P.warmGray, marginRight: 4 }}>$</span>
                         <input
@@ -1331,11 +1358,11 @@ export function CalculatorPage() {
                   </div>
 
                   {!showHoa ? (
-                    <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.sageDark, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: P.warmGrayLight }}>(optional)</span></button>
+                    <button onClick={() => setShowHoa(true)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 12, color: P.goldLight, fontWeight: 600, cursor: "pointer" }}>+ Add HOA Dues <span style={{ fontSize: 10, fontWeight: 400, color: "rgba(250, 247, 242, 0.55)" }}>(optional)</span></button>
                   ) : (
                     <div>
-                      <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} />
-                      <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: P.warmGrayLight, cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
+                      <CalcInput label="Monthly HOA Dues (optional)" value={hoa} onChange={setHoa} prefix="$" step={25} labelColor={P.goldLight} />
+                      <button onClick={() => { setShowHoa(false); setHoa(0); }} style={{ display: "flex", alignItems: "center", gap: 4, padding: "4px 0", border: "none", background: "transparent", fontFamily: F.body, fontSize: 11, color: "rgba(250, 247, 242, 0.7)", cursor: "pointer", marginTop: 2 }}>✕ Remove HOA</button>
                     </div>
                   )}
                 </div>
