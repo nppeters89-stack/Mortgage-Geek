@@ -98,7 +98,9 @@ export function PaymentPieChart({
             paddingAngle={2}
             stroke={P.cream}
             strokeWidth={2}
-            isAnimationActive={false}
+            isAnimationActive={true}
+            animationDuration={420}
+            animationEasing="ease-out"
           >
             {slices.map((s) => (
               <Cell key={s.key} fill={s.color} />

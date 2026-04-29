@@ -407,6 +407,15 @@ export function CalculatorPage() {
           from { opacity: 0; transform: translateY(4px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        .calc-cockpit-cards > .calc-compact-card { animation: calc-card-enter 280ms ease-out; }
+        @keyframes calc-card-enter {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .calc-detail-panel,
+          .calc-cockpit-cards > .calc-compact-card { animation: none; }
+        }
       `}</style>
 
       {/* Calculator header */}
