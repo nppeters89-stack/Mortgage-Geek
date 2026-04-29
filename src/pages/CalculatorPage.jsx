@@ -1442,6 +1442,46 @@ export function CalculatorPage() {
                 ))}
               </div>
 
+              {/* Head-to-head delta strip — surfaces when exactly two eligible
+                  programs are pinned. Lifetime figure is an approximation:
+                  monthlyDelta × 12 × term assumes the monthly gap holds for
+                  the full term (MI drop-off is not modeled here). */}
+              {(() => {
+                const eligibleVisible = visibleProgramsList.filter(p => p.eligible && !p.overLimit);
+                if (eligibleVisible.length !== 2) return null;
+                const sorted = [...eligibleVisible].sort((x, y) => x.total - y.total);
+                const cheaper = sorted[0];
+                const pricier = sorted[1];
+                const short = (n) => n === "Conventional" ? "Conv" : n;
+                const monthlyDelta = pricier.total - cheaper.total;
+                if (monthlyDelta < 1) {
+                  return (
+                    <div className="content-card" style={{ padding: "16px 24px", textAlign: "center" }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Head-to-head</span>
+                      <p style={{ fontSize: 14, color: P.warmGray, margin: "6px 0 0" }}>
+                        {cheaper.name} and {pricier.name} land within $1 of each other at <strong style={{ color: P.text }}>{fmt(cheaper.total)}/mo</strong>.
+                      </p>
+                    </div>
+                  );
+                }
+                const lifetimeDelta = monthlyDelta * 12 * term;
+                return (
+                  <div className="content-card" style={{ padding: "18px 24px", textAlign: "center" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted }}>Head-to-head</span>
+                    <p style={{ fontFamily: F.body, fontSize: 14, color: P.warmGray, margin: "8px 0 4px", lineHeight: 1.45 }}>
+                      <strong style={{ color: cheaper.color, fontWeight: 700 }}>{short(cheaper.name)}</strong>
+                      {" saves "}
+                      <strong style={{ color: P.text, fontFamily: F.display, fontSize: 22, fontWeight: 400 }}>{fmt(monthlyDelta)}</strong>
+                      {"/mo vs "}
+                      <strong style={{ color: pricier.color, fontWeight: 700 }}>{short(pricier.name)}</strong>
+                    </p>
+                    <p style={{ fontSize: 12, color: P.warmGrayLight, margin: 0 }}>
+                      ≈ <strong style={{ color: P.text, fontWeight: 600 }}>{fmt(lifetimeDelta)}</strong> over {term} years
+                    </p>
+                  </div>
+                );
+              })()}
+
               {/* Detail panel — or empty hint when nothing selected */}
               {selectedProg ? (
                 <DetailPanel
