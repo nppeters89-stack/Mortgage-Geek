@@ -4,8 +4,6 @@ import { useIsMobile } from "../../utils/hooks";
 import { BORROWER_PROFILE } from "../../data/content";
 import { SectionHeader } from "./SectionHeader";
 import { SectionShell } from "./SectionShell";
-import { GiftFundsGrid } from "./GiftFundsGrid";
-
 export function BorrowerProfile({ navTarget }) {
   const [active, setActive] = useState(0);
   const [expandedTips, setExpandedTips] = useState({});
@@ -31,9 +29,7 @@ export function BorrowerProfile({ navTarget }) {
                 <span style={{ fontSize: 11, color: P.gold, transition: "transform 0.2s", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", marginLeft: 12 }}>▼</span>
               </button>
               {isExpanded && (
-                s.render === "giftFundsGrid" ? <GiftFundsGrid /> : (
-                  <p style={{ fontSize: 13, lineHeight: 1.65, color: P.text, fontWeight: 500, marginTop: 12 }}>{s.content}</p>
-                )
+                <p style={{ fontSize: 13, lineHeight: 1.65, color: P.text, fontWeight: 500, marginTop: 12 }}>{s.content}</p>
               )}
             </div>
           );
