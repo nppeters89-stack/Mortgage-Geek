@@ -457,6 +457,48 @@ export function CalculatorPage() {
 
         {/* Input card - 2 column layout */}
         <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
+          {/* Compare-programs pill row — equal-width 4-column grid spanning
+              the full input card. Lives at the top of the inputs because
+              program selection is part of configuring the scenario, not
+              part of reading the results. */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Compare</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              {programs.map((prog) => {
+                const isVisible = visiblePrograms.includes(prog.name);
+                const isLast = visiblePrograms.length === 1 && isVisible;
+                return (
+                  <button
+                    key={prog.name}
+                    type="button"
+                    onClick={() => toggleProgram(prog.name)}
+                    disabled={isLast}
+                    aria-pressed={isVisible}
+                    aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
+                    style={{
+                      background: isVisible ? prog.color : "transparent",
+                      color: isVisible ? "#fff" : P.warmGray,
+                      border: `1.5px solid ${isVisible ? prog.color : P.warmGrayLight}`,
+                      borderRadius: 50,
+                      padding: "10px 4px",
+                      minHeight: 40,
+                      fontFamily: F.body,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      letterSpacing: 0.3,
+                      cursor: isLast ? "not-allowed" : "pointer",
+                      opacity: isLast ? 0.7 : 1,
+                      transition: "background 0.15s, color 0.15s, border-color 0.15s",
+                      textAlign: "center",
+                    }}
+                  >
+                    {prog.name === "Conventional" ? "Conv" : prog.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="calc-input-cols">
             {/* LEFT COLUMN — Loan structure & amount */}
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -621,35 +663,6 @@ export function CalculatorPage() {
               <p style={{ fontSize: 13, color: P.warmGray, marginTop: 6, maxWidth: 480 }}>Tap any card to select it, then save to the Loan Comparison Tool</p>
             </div>
           </div>
-
-        {/* Program selection toggle — pick which 1–4 programs to compare */}
-        <div className="calc-program-toggle" role="group" aria-label="Select programs to compare">
-          <span className="calc-toggle-label" style={{ color: P.warmGrayLight }}>Compare:</span>
-          {programs.map((prog) => {
-            const isVisible = visiblePrograms.includes(prog.name);
-            const isLast = visiblePrograms.length === 1 && isVisible;
-            return (
-              <button
-                key={prog.name}
-                type="button"
-                onClick={() => toggleProgram(prog.name)}
-                disabled={isLast}
-                aria-pressed={isVisible}
-                aria-label={`${prog.name} — ${isVisible ? "visible, click to hide" : "hidden, click to show"}`}
-                className="calc-toggle-pill"
-                style={{
-                  background: isVisible ? prog.color : "transparent",
-                  color: isVisible ? "#fff" : P.warmGray,
-                  borderColor: isVisible ? prog.color : P.warmGrayLight,
-                  cursor: isLast ? "not-allowed" : "pointer",
-                  opacity: isLast ? 0.7 : 1,
-                }}
-              >
-                {prog.name}
-              </button>
-            );
-          })}
-        </div>
 
         {/* Side-by-side cards */}
         <div className="calc-cards-grid" data-count={visibleProgramsList.length}>
