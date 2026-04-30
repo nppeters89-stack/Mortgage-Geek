@@ -112,6 +112,16 @@ export function AboutPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Text me
             </a>
+            <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "12px 22px", borderRadius: 8,
+              background: "rgba(255,255,255,0.1)", color: "#fff",
+              border: "1px solid rgba(255,255,255,0.2)",
+              fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email me
+            </a>
             <a href="https://www.linkedin.com/in/nickpeters2/" target="_blank" rel="noopener noreferrer" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "12px 22px", borderRadius: 8,
