@@ -450,7 +450,7 @@ export function TNLoanLimitsMap() {
           value={selectedFips ?? ""}
           onChange={(e) => handleSelect(e.target.value)}
         >
-          <option value="">— Select a county —</option>
+          <option value="">Select a county</option>
           {COUNTIES_ALPHA.map((c) => (
             <option key={c.fips} value={c.fips}>
               {c.name} County{c.is_high_cost ? " (high-cost)" : ""}
