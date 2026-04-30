@@ -19,6 +19,8 @@ const BusinessAssetsPage = lazy(() => import("./pages/BusinessAssetsPage").then(
 const ExpectedIncomePage = lazy(() => import("./pages/ExpectedIncomePage").then(m => ({ default: m.ExpectedIncomePage })));
 const DebtsPaidByOthersPage = lazy(() => import("./pages/DebtsPaidByOthersPage").then(m => ({ default: m.DebtsPaidByOthersPage })));
 const GiftFundsPage = lazy(() => import("./pages/GiftFundsPage").then(m => ({ default: m.GiftFundsPage })));
+const GeekMapsHubPage = lazy(() => import("./pages/GeekMapsHubPage").then(m => ({ default: m.GeekMapsHubPage })));
+const TNLoanLimitsPage = lazy(() => import("./pages/TNLoanLimitsPage").then(m => ({ default: m.TNLoanLimitsPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
 
 export default function MortgageLandingPage() {
@@ -42,6 +44,8 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/expected-income") return "deepdives-expected-income";
     if (path === "deep-dives/debts-paid-by-others") return "deepdives-debts-paid-by-others";
     if (path === "deep-dives/gift-funds") return "deepdives-gift-funds";
+    if (path === "geek-maps") return "geek-maps-hub";
+    if (path === "geek-maps/tennessee-loan-limits") return "geek-maps-tn-loan-limits";
     return "main";
   });
 
@@ -64,6 +68,8 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-expected-income") return <ExpectedIncomePage />;
     if (currentPage === "deepdives-debts-paid-by-others") return <DebtsPaidByOthersPage />;
     if (currentPage === "deepdives-gift-funds") return <GiftFundsPage />;
+    if (currentPage === "geek-maps-hub") return <GeekMapsHubPage />;
+    if (currentPage === "geek-maps-tn-loan-limits") return <TNLoanLimitsPage />;
     return <MainSite />;
   };
 
