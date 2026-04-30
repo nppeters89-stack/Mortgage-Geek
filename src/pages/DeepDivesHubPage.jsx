@@ -81,6 +81,13 @@ export function DeepDivesHubPage() {
       summary: "Who can give you cash toward a down payment, by loan program. Family gives across the board; close friends qualify everywhere except FNMA; employers and charities only on FHA, VA, and USDA. Includes a 5x5 donor eligibility matrix, the donor-direct-to-title privacy path, the gift letter requirements, FHA's 8/19/2024 money order rule change, Freddie's wedding-and-graduation exception, and the seven patterns that cause gift fund files to fail.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "hourly-and-part-time-income",
+      emoji: "⏱️",
+      title: "Hourly, Part-Time & Seasonal Income",
+      summary: "Mortgage qualifying with non-salary W-2 income across all five major loan programs. The hourly consistency test, FHA's 12-month-at-current-rate exception, the 2-year history standard for part-time and secondary income, the rehire-confirmation requirement for seasonal workers, and the off-season unemployment rule. Includes two interactive comparison grids and worked examples showing how qualifying income shifts by hundreds per month depending on methodology.",
+      lastVerified: "April 2026",
+    },
   ];
 
   return (
