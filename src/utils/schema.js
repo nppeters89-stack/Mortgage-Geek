@@ -38,7 +38,7 @@ export function personSchema() {
       "First-time homebuyer guidance",
     ],
     telephone: "+1-615-656-0737",
-    email: "nick@mortgagegeek.ai",
+    email: "npeters@annie-mac.com",
   };
 }
 
