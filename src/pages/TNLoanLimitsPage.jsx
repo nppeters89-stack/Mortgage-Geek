@@ -124,6 +124,139 @@ export function TNLoanLimitsPage() {
 
         <TNLoanLimitsMap />
 
+        <style>{`
+          .tnpage-cta {
+            margin: 32px 0 8px;
+            padding: 28px 32px;
+            background: linear-gradient(135deg, ${P.navy} 0%, ${P.navyDark} 100%);
+            color: ${P.cream};
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+          }
+          .tnpage-cta::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 100%;
+            background: ${P.gold};
+            opacity: 0.08;
+            clip-path: polygon(50% 0, 100% 0, 100% 100%, 0 100%);
+          }
+          .tnpage-cta-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+          }
+          .tnpage-cta-text { flex: 1; min-width: 280px; }
+          .tnpage-cta-eyebrow {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: ${P.goldLight};
+            margin-bottom: 8px;
+          }
+          .tnpage-cta-headline {
+            font-family: ${F.display};
+            font-size: 26px;
+            font-weight: 400;
+            color: ${P.cream};
+            line-height: 1.2;
+            margin-bottom: 8px;
+          }
+          .tnpage-cta-headline em {
+            font-style: italic;
+            color: ${P.goldLight};
+          }
+          .tnpage-cta-sub {
+            font-size: 14px;
+            color: ${P.cream};
+            opacity: 0.85;
+            line-height: 1.5;
+            max-width: 520px;
+          }
+          .tnpage-cta-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+          }
+          .tnpage-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: ${P.gold};
+            color: ${P.navyDark};
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: background 0.15s ease, transform 0.15s ease;
+            white-space: nowrap;
+            justify-content: center;
+            min-height: 44px;
+          }
+          .tnpage-cta-btn:hover {
+            background: ${P.goldLight};
+            transform: translateY(-1px);
+          }
+          .tnpage-cta-btn.secondary {
+            background: transparent;
+            color: ${P.cream};
+            border: 1.5px solid ${P.cream};
+          }
+          .tnpage-cta-btn.secondary:hover {
+            background: rgba(250, 247, 242, 0.1);
+          }
+          @media (max-width: 768px) {
+            .tnpage-cta { padding: 22px 20px; }
+            .tnpage-cta-inner { flex-direction: column; align-items: flex-start; }
+            .tnpage-cta-buttons { width: 100%; flex-direction: row; }
+            .tnpage-cta-btn { flex: 1; }
+            .tnpage-cta-headline { font-size: 22px; }
+          }
+          @media print {
+            .tnpage-cta { display: none !important; }
+          }
+        `}</style>
+        <div className="tnpage-cta">
+          <div className="tnpage-cta-inner">
+            <div className="tnpage-cta-text">
+              <div className="tnpage-cta-eyebrow">Buying near a limit?</div>
+              <div className="tnpage-cta-headline">
+                Let's run <em>your</em> numbers.
+              </div>
+              <div className="tnpage-cta-sub">
+                If you're shopping near the conforming limit (especially in the Nashville MSA), the choice between conventional, FHA, jumbo, or VA can shift your cash to close by tens of thousands. I work files like this every week.
+              </div>
+            </div>
+            <div className="tnpage-cta-buttons">
+              <a
+                className="tnpage-cta-btn"
+                href="tel:+16156560737"
+                aria-label="Call Nick Peters at 615-656-0737"
+              >
+                📞 Call (615) 656-0737
+              </a>
+              <a
+                className="tnpage-cta-btn secondary"
+                href="mailto:npeters@annie-mac.com"
+                aria-label="Email Nick Peters at npeters@annie-mac.com"
+              >
+                ✉ Email Nick
+              </a>
+            </div>
+          </div>
+        </div>
+
         <H2>What loan limits actually are</H2>
         <Para>
           A loan limit is the largest mortgage a particular program will fund as a "standard" loan. Below the limit, you're in conventional or FHA territory with normal rates and terms. Above the limit, you're in jumbo territory, which means stricter qualifying, larger down payments, and sometimes different rate behavior.
@@ -271,11 +404,18 @@ export function TNLoanLimitsPage() {
 
         <H2>Final thought</H2>
         <Para>
-          If you're house-hunting and you've identified a target neighborhood or county, knowing your loan limits early shapes which programs make sense, what your down payment range looks like, and whether you should be having a "jumbo conversation" or a "conforming conversation" with your lender. The map above answers the first part. The rest of the conversation is where I come in. If you'd like to walk through how the limits interact with your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={LINK_STYLE}>npeters@annie-mac.com</a>.
+          If you're house-hunting and you've identified a target neighborhood or county, knowing your loan limits early shapes which programs make sense, what your down payment range looks like, and whether you should be having a "jumbo conversation" or a "conforming conversation" with your lender. The map above answers the first part. The rest of the conversation is where I come in.
         </Para>
-        <Para>
-          Nick Peters, NMLS #1119524
-        </Para>
+
+        <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
+          <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Want to walk through how the limits hit your specific situation?</p>
+          <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or email <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={LINK_STYLE}>npeters@annie-mac.com</a>.
+          </p>
+          <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
+            Bring a target county, a price range, and which programs you're weighing. We'll figure out the rest before you go under contract.
+          </p>
+        </div>
 
         <DeepDiveFooter />
 

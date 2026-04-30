@@ -271,98 +271,6 @@ const MAP_CSS = `
     line-height: 1.4;
   }
 
-  .tnmap-cta {
-    margin-top: 28px;
-    padding: 28px 32px;
-    background: linear-gradient(135deg, ${P.navy} 0%, ${P.navyDark} 100%);
-    color: ${P.cream};
-    border-radius: 12px;
-    position: relative;
-    overflow: hidden;
-  }
-  .tnmap-cta::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 200px;
-    height: 100%;
-    background: ${P.gold};
-    opacity: 0.08;
-    clip-path: polygon(50% 0, 100% 0, 100% 100%, 0 100%);
-  }
-  .tnmap-cta-inner {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-  .tnmap-cta-text { flex: 1; min-width: 280px; }
-  .tnmap-cta-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: ${P.goldLight};
-    margin-bottom: 8px;
-  }
-  .tnmap-cta-headline {
-    font-family: ${F.display};
-    font-size: 26px;
-    font-weight: 400;
-    color: ${P.cream};
-    line-height: 1.2;
-    margin-bottom: 8px;
-  }
-  .tnmap-cta-headline em {
-    font-style: italic;
-    color: ${P.goldLight};
-  }
-  .tnmap-cta-sub {
-    font-size: 14px;
-    color: ${P.cream};
-    opacity: 0.85;
-    line-height: 1.5;
-    max-width: 520px;
-  }
-  .tnmap-cta-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    flex-shrink: 0;
-  }
-  .tnmap-cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: ${P.gold};
-    color: ${P.navyDark};
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    transition: background 0.15s ease, transform 0.15s ease;
-    white-space: nowrap;
-    justify-content: center;
-    min-height: 44px;
-  }
-  .tnmap-cta-btn:hover {
-    background: ${P.goldLight};
-    transform: translateY(-1px);
-  }
-  .tnmap-cta-btn.secondary {
-    background: transparent;
-    color: ${P.cream};
-    border: 1.5px solid ${P.cream};
-  }
-  .tnmap-cta-btn.secondary:hover {
-    background: rgba(250, 247, 242, 0.1);
-  }
-
   @media (max-width: 768px) {
     .tnmap-shell { padding: 16px; }
     .tnmap-mobile-search { display: block; }
@@ -374,15 +282,10 @@ const MAP_CSS = `
     .tnmap-info-name { font-size: 19px; }
     .tnmap-info-cell { padding: 10px 12px; }
     .tnmap-info-cell-value { font-size: 18px; }
-    .tnmap-cta { padding: 22px 20px; }
-    .tnmap-cta-inner { flex-direction: column; align-items: flex-start; }
-    .tnmap-cta-buttons { width: 100%; flex-direction: row; }
-    .tnmap-cta-btn { flex: 1; }
-    .tnmap-cta-headline { font-size: 22px; }
   }
 
   @media print {
-    .tnmap-tooltip, .tnmap-mobile-search, .tnmap-cta { display: none !important; }
+    .tnmap-tooltip, .tnmap-mobile-search { display: none !important; }
     .tnmap-county {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
@@ -588,35 +491,6 @@ export function TNLoanLimitsMap() {
         )}
       </div>
 
-      <div className="tnmap-cta">
-        <div className="tnmap-cta-inner">
-          <div className="tnmap-cta-text">
-            <div className="tnmap-cta-eyebrow">Buying near a limit?</div>
-            <div className="tnmap-cta-headline">
-              Let's run <em>your</em> numbers.
-            </div>
-            <div className="tnmap-cta-sub">
-              If you're shopping near the conforming limit (especially in the Nashville MSA), the choice between conventional, FHA, jumbo, or VA can shift your cash to close by tens of thousands. I work files like this every week.
-            </div>
-          </div>
-          <div className="tnmap-cta-buttons">
-            <a
-              className="tnmap-cta-btn"
-              href="tel:+16156560737"
-              aria-label="Call Nick Peters at 615-656-0737"
-            >
-              📞 Call (615) 656-0737
-            </a>
-            <a
-              className="tnmap-cta-btn secondary"
-              href="mailto:npeters@annie-mac.com"
-              aria-label="Email Nick Peters at npeters@annie-mac.com"
-            >
-              ✉ Email Nick
-            </a>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }
