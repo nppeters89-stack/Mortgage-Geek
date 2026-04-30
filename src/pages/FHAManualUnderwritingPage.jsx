@@ -17,13 +17,17 @@ const PUBLISHED = "2026-04-24";
 const MODIFIED = "2026-04-25";
 
 function renderInline(text) {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
   return parts.map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return <strong key={i} style={{ color: P.navy, fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
     }
     if (part.startsWith("*") && part.endsWith("*")) {
       return <em key={i}>{part.slice(1, -1)}</em>;
+    }
+    const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (linkMatch) {
+      return <a key={i} href={linkMatch[2]} style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>{linkMatch[1]}</a>;
     }
     return part;
   });
@@ -479,7 +483,7 @@ export function FHAManualUnderwritingPage() {
 
         <Para noMargin><strong style={{ color: P.navy, fontWeight: 600 }}>4. Significant Additional Income Not Reflected in Effective Income</strong></Para>
         <Bullets items={[
-          "Overtime, bonus, part-time, or seasonal income",
+          "Overtime, bonus, [part-time, or seasonal income](/deep-dives/hourly-and-part-time-income)",
           "Must have been received for at least 12 months",
           "Must be documented as likely to continue",
           "Must be enough to reduce DTI to 37/47 if included",
