@@ -819,9 +819,12 @@ export function CalculatorPage() {
                     {(() => {
                       const piColor = prog.color;
                       const insuranceColor = piColor === P.sage ? P.gold : P.sage;
+                      // FHA's prog.color is goldMuted, so a gold MI dot would
+                      // clash; swap to navy. Mirrors PaymentPieChart's slice rule.
+                      const miColor = prog.name === "FHA" ? P.navy : P.gold;
                       return [
                         { label: "Principal & Interest", val: prog.pi, color: piColor },
-                        ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi, color: P.gold }] : []),
+                        ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi, color: miColor }] : []),
                         { label: "Taxes", val: taxes, color: P.warmGray },
                         { label: "Insurance", val: insurance, color: insuranceColor },
                         ...(hoa > 0 ? [{ label: "HOA Dues", val: hoa, color: P.warmGrayLight }] : []),

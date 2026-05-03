@@ -58,8 +58,11 @@ export function PaymentPieChart({
     ];
     if (mi > 0 && miLabel) {
       // MI sits between insurance and HOA so the visual order is:
-      // [program color] → [neutrals] → [gold accent] → [optional HOA]
-      arr.push({ key: 'mi', label: miLabel, value: mi, color: P.gold });
+      // [program color] → [neutrals] → [accent] → [optional HOA].
+      // FHA's prog.color is goldMuted, so a gold MI slice would clash;
+      // swap to navy on FHA. Other programs keep gold.
+      const miColor = programName === 'FHA' ? P.navy : P.gold;
+      arr.push({ key: 'mi', label: miLabel, value: mi, color: miColor });
     }
     if (hoa > 0) {
       arr.push({ key: 'hoa', label: 'HOA Dues', value: hoa, color: P.warmGrayLight });
