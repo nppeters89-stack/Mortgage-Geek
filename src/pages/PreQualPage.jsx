@@ -929,34 +929,26 @@ export function PreQualPage() {
                       <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                     </div>
                   )}
+
+                  {/* Per-card CTA — appears only on the selected card so the
+                      footer no longer needs a global "run scenario" button.
+                      stopPropagation prevents the card's onClick from
+                      deselecting when the link itself is tapped. */}
+                  {isSelected && (
+                    <a
+                      href={calculatorHref}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, padding: "12px 16px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}
+                    >
+                      <MortgageCalcIcon size={16} variant="navy" />
+                      <span>Run this scenario in Calculator →</span>
+                    </a>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
-
-        {/* Cross-link to calculator */}
-        {(() => {
-          const eligible = results.filter(r => r.eligible && r.maxPrice > 0);
-          const selected = selectedProgram ? eligible.find(r => r.name === selectedProgram) : null;
-          const target = selected || eligible.reduce((a, b) => (a && a.maxPrice > b.maxPrice ? a : b), null);
-          const targetPrice = target ? target.maxPrice : 0;
-          const targetName = target ? target.name : "";
-          const programParam = target ? `&program=${encodeURIComponent(target.name)}` : "";
-          const calcUrl = `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}${programParam}`;
-          return (
-            <>
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <a href={calcUrl} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 8, border: `1px solid ${P.navy}`, color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
-                <MortgageCalcIcon size={16} variant="navy" /> {targetPrice > 0 ? `Run ${targetName} ${fmt(targetPrice)}` : "Open the Calculator"} →
-              </a>
-              {!selectedProgram && eligible.length > 1 && (
-                <p style={{ fontSize: 11, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic" }}>Tap a card above to choose a different scenario</p>
-              )}
-            </div>
-            </>
-          );
-        })()}
 
         {disclaimerJsx}
         </div>
