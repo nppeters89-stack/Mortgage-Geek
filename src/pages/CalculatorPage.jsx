@@ -842,7 +842,7 @@ export function CalculatorPage() {
 
                   {/* VA Usage selector */}
                   {prog.isVA && (
-                    <div style={{ marginBottom: 12 }}>
+                    <div style={{ marginBottom: 12 }} onClick={(e) => e.stopPropagation()}>
                       <label htmlFor={vaUsageSelectId} style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
                       <select
                         id={vaUsageSelectId}
@@ -1168,75 +1168,24 @@ export function CalculatorPage() {
           })}
         </div>
 
-        {/* Summary insight */}
-        <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24 }}>
-          <div style={{ display: "flex", gap: 12 }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
-            <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
-              {eligibleTotals.length >= 2 && (
-                <p style={{ marginBottom: 8 }}>
-                  <strong>Monthly difference:</strong> The spread between the lowest and highest eligible payment is{" "}
-                  <strong style={{ color: P.navy }}>{fmt(Math.max(...eligibleTotals) - lowestTotal)}/month</strong>{" "}
-                  ({fmt((Math.max(...eligibleTotals) - lowestTotal) * 12)}/year).
-                  {(() => {
-                    if (visibleProgramsList.length < 2) return null;
-                    const rates = visibleProgramsList.map(p => p.rate);
-                    if (new Set(rates).size < 2) return null;
-                    const shortLabel = (name) => name === "Conventional" ? "Conv" : name;
-                    const parts = visibleProgramsList.map(p => `${shortLabel(p.name)} ${p.rate}%`);
-                    return (
-                      <span> Rate spread: {parts.join(" vs ")} — this difference alone accounts for a meaningful portion of the payment gap.</span>
-                    );
-                  })()}
-                </p>
-              )}
-              {visibleProgramsList.some(p => !p.eligible) && (() => {
-                const ineligibleNames = visibleProgramsList.filter(p => !p.eligible).map(p => p.name);
-                const list = ineligibleNames.length === 1 ? ineligibleNames[0] :
-                             ineligibleNames.length === 2 ? `${ineligibleNames[0]} and ${ineligibleNames[1]}` :
-                             `${ineligibleNames.slice(0, -1).join(", ")}, and ${ineligibleNames[ineligibleNames.length - 1]}`;
-                const verb = ineligibleNames.length === 1 ? "is" : "are";
-                return (
-                  <p style={{ marginBottom: 8 }}>
-                    <strong>Note:</strong> {list} {verb} ineligible at the current settings — see the card{ineligibleNames.length === 1 ? "" : "s"} above for details.
-                    {downPct < 3 ? " Minimum down payments: Conventional (3%), FHA (3.5%). VA and USDA both allow 0% down (USDA requires a 30-year term)." :
-                     downPct < 3.5 ? " FHA requires a minimum 3.5% down payment to qualify." : ""}
-                  </p>
-                );
-              })()}
-              <p>
-                {downPct >= 20
-                  ? "With 20%+ down, Conventional has no PMI — often the clear winner. But compare the total loan amounts: FHA, VA, and USDA finance upfront fees, meaning you borrow more even with the same down payment."
-                  : downPct >= 5
-                    ? "At this down payment, pay attention to mortgage insurance. Conventional PMI is removable at 80% LTV, FHA MIP may stay for the life of the loan, VA has no monthly MI at all (but the funding fee adds to your balance), and USDA's annual fee stays for the life of the loan. Conv PMI estimates here assume 740+ FICO and DTI under 43% — lower scores or higher DTI will increase PMI."
-                    : downPct >= 3.5
-                      ? "At less than 5% down, all four programs carry some form of mortgage insurance or upfront fee. Conv PMI estimates assume 740+ FICO and DTI under 43% — lower scores will increase PMI significantly. VA is often the best deal if you're eligible — no monthly MI at all. USDA also allows 0% down with similar economics, but the property must be in an eligible rural area, household income has to be under program limits, and the annual fee stays for the life of the loan."
-                      : term === 30
-                        ? "At this down payment level, VA and USDA are likely your only options. VA requires a Certificate of Eligibility; USDA requires property + income eligibility (and is 30-year fixed only). Consider increasing your down payment to unlock Conventional and FHA programs."
-                        : "At this down payment level, VA is likely your only option — USDA requires a 30-year term. Consider increasing your down payment or switching to a 30-year term to widen your options."}
-              </p>
-              {visiblePrograms.includes("VA") && vaUsage !== "exempt" && (
-                <p style={{ marginTop: 8 }}>
-                  <strong>VA funding fee:</strong> Currently set to {vaUsageLabels[vaUsage].toLowerCase()} at {vaFeeRate}%
-                  {downPct < 5 && vaUsage === "subsequent" ? " — this is the highest tier. First-time users with the same down payment pay 2.15% instead." : ""}
-                  {downPct >= 5 ? ` — at ${downPct >= 10 ? "10%+" : "5–9.99%"} down, the fee is the same for first-time and subsequent use.` : ""}
-                  {" "}Use the dropdown on the VA card to compare scenarios. Veterans with service-connected disabilities are exempt entirely.
-                </p>
-              )}
-              {visiblePrograms.includes("VA") && vaUsage === "exempt" && (
-                <p style={{ marginTop: 8 }}>
-                  <strong>VA funding fee waived.</strong> Veterans with service-connected disabilities are exempt from the funding fee, making VA even more competitive — no upfront fee and no monthly MI.
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* View-saved link — the save CTA itself now lives inside the
-            selected card, but keep this small helper visible at all
-            times so users can jump to /compare without first selecting. */}
+        {/* View-saved CTA — the save CTA itself lives inside the selected
+            card, but a permanent button-styled entry point at the bottom
+            lets users jump to /compare without first selecting. */}
         <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <a href="/compare" style={{ fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>View saved scenarios →</a>
+          <a
+            href="/compare"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "12px 20px", borderRadius: 8,
+              border: `1px solid ${P.navy}`, background: P.cream,
+              color: P.navy, fontFamily: F.body, fontSize: 13, fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            <CompareIcon size={16} variant="navy" />
+            View Saved Scenarios →
+          </a>
         </div>
 
         {/* Cross-link to prequal */}
