@@ -162,7 +162,10 @@ function DTISection({ variant, prog, ratio, cap, binding, grossMonthlyIncome, mo
     label: 'Gross Monthly Income',
   };
 
-  const ratioLabel = pct(ratio);
+  // pctCap (not pct) so the borrower DTI tops out at the cap visually.
+  // Without it, a back-end DTI of 0.4998 rounds up to "50.0%" via
+  // toFixed(1) and visually exceeds the displayed cap of "49.99%".
+  const ratioLabel = pctCap(ratio);
 
   return (
     <section
@@ -260,9 +263,10 @@ function DTIBar({ ratio, cap, color, height }) {
   // huge swath of bar at the right with nothing in it. Cap-relative
   // scale uses the full bar width meaningfully.
   const fillPct = Math.min(1, ratio / cap) * 100;
-  const ratioLabel = pct(ratio);
-  // Caps use pctCap() so 0.4999 renders as "49.99%" rather than rounding
-  // up to "50.0%". Borrower DTI keeps 1-decimal precision via pct().
+  // Both the borrower DTI label and the cap use pctCap() so a borrower
+  // sitting at the cap never visually exceeds it (toFixed(1) on
+  // 0.4998 rounds to "50.0%", which would overshoot a "49.99%" cap).
+  const ratioLabel = pctCap(ratio);
   const capLabel = pctCap(cap);
 
   // Battery-cell layout + animation timing. Hoisted above the effects
@@ -478,16 +482,6 @@ function DTIBar({ ratio, cap, color, height }) {
       </div>
     </div>
   );
-}
-
-/* ----------------- formatting helper ----------------- */
-
-function pct(x) {
-  if (typeof x !== 'number' || Number.isNaN(x)) return '—';
-  // Match the live page's display style. PreQualPage formats DTI as
-  // "X.X%" (one decimal) — confirm during C2 and adjust if the live
-  // page uses a different precision.
-  return `${(x * 100).toFixed(1)}%`;
 }
 
 /* ----------------- styles ----------------- */
