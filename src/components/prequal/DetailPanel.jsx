@@ -25,6 +25,7 @@ import React from 'react';
 import { P, F } from '../../theme';
 import { fmt, withAlpha } from '../../utils/format';
 import { DTIDeepDive } from './DTIDeepDive';
+import { MortgageCalcIcon } from '../icons';
 
 /**
  * Props
@@ -234,6 +235,9 @@ export function DetailPanel({
               full panel. */}
           {calculatorHref && (
             <a href={calculatorHref} style={crossLinkButtonStyle(prog.color)}>
+              {/* Cream variant — the button bg is the program color (dark),
+                  so the icon body needs to be cream to read clearly. */}
+              <MortgageCalcIcon size={16} variant="cream" style={{ marginRight: 10 }} />
               Run this scenario in Calculator
               <span style={{ marginLeft: 8 }} aria-hidden="true">→</span>
             </a>
