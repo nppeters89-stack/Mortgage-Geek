@@ -13,6 +13,7 @@ import { useIsCockpit, usePieDiameter } from "../utils/hooks";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
 import { DetailPanel } from "../components/calculator/DetailPanel";
+import { PaymentPieChart } from "../components/calculator/PaymentPieChart";
 
 const ALL_PROGRAMS = ["Conventional", "FHA", "VA", "USDA"];
 
@@ -786,6 +787,25 @@ export function CalculatorPage() {
                 </div>
 
                 <div style={{ padding: "20px" }}>
+                  {/* Pie chart — mounts when this card is selected so the
+                      recharts entry animation plays each time the user
+                      picks the card. Sits above the monthly breakdown. */}
+                  {isSelected && prog.total > 0 && (
+                    <div style={{ marginBottom: 12 }}>
+                      <PaymentPieChart
+                        programName={prog.name}
+                        pi={prog.pi}
+                        mi={prog.mi}
+                        miLabel={prog.miLabel}
+                        taxes={taxes}
+                        insurance={insurance}
+                        hoa={hoa}
+                        total={prog.total}
+                        diameter={pieDiameter}
+                      />
+                    </div>
+                  )}
+
                   {/* Breakdown */}
                   <div style={{ marginBottom: 16 }}>
                     {[
