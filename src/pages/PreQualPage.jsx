@@ -449,21 +449,29 @@ export function PreQualPage() {
   // The inputs card. `variant === 'rail'` drops the centered max-width and
   // tightens padding so it fits the 340px cockpit rail; legacy uses the
   // wider centered treatment that sits inside the tool-page-content wrapper.
+  // Both variants share the navy gradient + gold top accent, mirroring the
+  // calculator refresh's diagnostics-rail treatment.
   const renderInputsCard = (variant) => {
+    const sharedCardStyle = {
+      background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+      borderTop: `3px solid ${P.gold}`,
+      border: 'none',
+      boxShadow: '0 4px 20px rgba(15, 37, 48, 0.18)',
+    };
     const cardStyle = variant === "rail"
-      ? { padding: "20px", margin: 0 }
-      : { padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" };
+      ? { ...sharedCardStyle, padding: "20px", margin: 0 }
+      : { ...sharedCardStyle, padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" };
     return (
       <div className="content-card" style={cardStyle}>
         <div className="pq-input-cols">
           {/* Left column — Income, Debts & DTI */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma />
-            <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma />
-            <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5, marginTop: -4 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
+            <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma labelColor={P.goldLight} />
+            <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma labelColor={P.goldLight} />
+            <p style={{ fontSize: 11, color: "rgba(250, 247, 242, 0.7)", lineHeight: 1.5, marginTop: -4 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
             <button onClick={() => setShowStudentCalc(!showStudentCalc)} style={{
               display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
-              fontSize: 11, fontWeight: 600, color: P.gold, cursor: "pointer", fontFamily: F.body, padding: "0",
+              fontSize: 11, fontWeight: 600, color: P.goldLight, cursor: "pointer", fontFamily: F.body, padding: "0",
             }}>
               <span style={{ fontSize: 12 }}>🎓</span>
               {showStudentCalc ? "Hide Student Loan Calculator" : "Student Loan Payment Calculator"}
@@ -499,7 +507,7 @@ export function PreQualPage() {
           {/* Right column — Loan Details */}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-              <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+              <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Loan Term</label>
               <select
                 id={termSelectId}
                 value={term}
@@ -534,8 +542,8 @@ export function PreQualPage() {
         </div>
 
         {/* Property location row */}
-        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
-          <label htmlFor={stateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location</label>
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid rgba(250, 247, 242, 0.15)` }}>
+          <label htmlFor={stateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight, display: "block", marginBottom: 6 }}>Property Location</label>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <select id={stateSelectId} value={taxState} onChange={(e) => setTaxState(e.target.value)}
               style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 32px 10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
@@ -553,7 +561,7 @@ export function PreQualPage() {
               </select>
             )}
           </div>
-          <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Loan limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}. USDA uses an income cap (~$119,850 for 1-4 person households in most areas) instead of a loan limit.</p>
+          <p style={{ fontSize: 10, color: "rgba(250, 247, 242, 0.6)", marginTop: 6 }}>Loan limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}. USDA uses an income cap (~$119,850 for 1-4 person households in most areas) instead of a loan limit.</p>
         </div>
       </div>
     );
