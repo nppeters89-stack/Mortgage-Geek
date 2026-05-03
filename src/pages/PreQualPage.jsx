@@ -891,19 +891,6 @@ export function PreQualPage() {
                     ))}
                   </div>
 
-                  {/* Comfortable range */}
-                  <div style={{ background: P.creamDark, borderRadius: 8, padding: "10px 14px", marginBottom: 10 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>Comfortable Range</span>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                      <span style={{ color: P.warmGray }}>Purchase Price</span>
-                      <span style={{ fontWeight: 700, color: P.sage }}>{fmt(prog.comfPrice)}</span>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-                      <span style={{ color: P.warmGray }}>Housing Payment</span>
-                      <span style={{ fontWeight: 600, color: P.text }}>{fmt(prog.comfPayment)}/mo</span>
-                    </div>
-                  </div>
-
                   {prog.name === "VA" && (
                     <div onClick={(e) => e.stopPropagation()} style={{ marginBottom: 12, padding: "10px 12px", background: P.creamDark, borderRadius: 8 }}>
                       <label htmlFor={vaUsageSelectId} style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 4 }}>VA Eligibility</label>
@@ -932,8 +919,6 @@ export function PreQualPage() {
             );
           })}
         </div>
-
-        {geekTipJsx}
 
         {/* Cross-link to calculator */}
         {(() => {
