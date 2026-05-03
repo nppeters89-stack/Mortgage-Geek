@@ -1100,6 +1100,30 @@ export function CalculatorPage() {
                     <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
                     <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                   </div>
+
+                  {/* Per-card Save-to-Compare CTA — shown only on the selected
+                      eligible card so the bottom-of-page button is no longer
+                      needed. stopPropagation prevents tapping the button from
+                      toggling deselection. */}
+                  {isSelected && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); saveScenario(); }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                        marginTop: 12, padding: "12px 16px", borderRadius: 8, border: "none",
+                        background: P.navy, color: "#fff",
+                        fontFamily: F.body, fontSize: 13, fontWeight: 600, cursor: "pointer",
+                        width: "100%",
+                        boxShadow: "0 4px 16px rgba(27,58,75,0.20)",
+                      }}
+                    >
+                      <CompareIcon size={16} variant="cream" />
+                      Save to Loan Comparison
+                    </button>
+                  )}
+                  {isSelected && saveToast && (
+                    <p style={{ fontSize: 12, marginTop: 8, fontWeight: 600, textAlign: "center", color: saveToast.type === "error" ? "#C0392B" : P.sageDark }}>{saveToast.msg}</p>
+                  )}
                 </div>
               </div>
             );
@@ -1170,61 +1194,12 @@ export function CalculatorPage() {
           </div>
         </div>
 
-        {/* Save to Comparison */}
-        {(() => {
-          const selectedProg = selectedProgram ? programs.find(p => p.name === selectedProgram && p.eligible) : null;
-          const saveScenario = () => {
-            if (!selectedProg) return;
-            const STORAGE_KEY = "mg_compare_scenarios";
-            let saved = [];
-            try { const raw = localStorage.getItem(STORAGE_KEY); saved = raw ? JSON.parse(raw) : []; } catch {}
-            if (saved.length >= 3) {
-              setSaveToast({ type: "error", msg: "Comparison is full (3 max). Remove one first." });
-              setTimeout(() => setSaveToast(null), 4000);
-              return;
-            }
-            const scenario = {
-              id: Date.now(),
-              program: selectedProg.name,
-              color: selectedProg.color,
-              homePrice, downPct, downAmt, term, rate: selectedProg.rate,
-              baseLoan, totalLoan: selectedProg.loan,
-              upfront: selectedProg.upfront || 0,
-              upfrontLabel: selectedProg.upfrontLabel || null,
-              loan: selectedProg.loan, pi: selectedProg.pi, mi: selectedProg.mi,
-              tax: taxes, insurance, hoa: hoa > 0 ? hoa : 0, total: selectedProg.total, apr: selectedProg.apr,
-            };
-            saved.push(scenario);
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(saved)); } catch {}
-            setSaveToast({ type: "success", msg: `${selectedProg.name} saved! ${saved.length} of 3 in comparison.` });
-            setTimeout(() => setSaveToast(null), 4000);
-          };
-          return (
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
-              <button onClick={saveScenario} disabled={!selectedProg} style={{
-                display: "inline-flex", alignItems: "center", gap: 8,
-                padding: "14px 28px", borderRadius: 10, border: "none",
-                background: selectedProg ? P.navy : P.creamDark,
-                color: selectedProg ? "#fff" : P.warmGrayLight,
-                fontFamily: F.body, fontSize: 14, fontWeight: 600,
-                cursor: selectedProg ? "pointer" : "not-allowed",
-                boxShadow: selectedProg ? "0 4px 16px rgba(27,58,75,0.25)" : "none",
-                transition: "all 0.2s",
-              }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-                  <CompareIcon size={18} variant="cream" />
-                  {selectedProg ? `Save ${selectedProg.name} to Loan Comparison` : "Select a card above to save"}
-                </span>
-              </button>
-              {saveToast && (
-                <p style={{ fontSize: 12, marginTop: 10, fontWeight: 600, color: saveToast.type === "error" ? "#C0392B" : P.sageDark }}>{saveToast.msg}</p>
-              )}
-              <div style={{ marginTop: 10 }}>
-                <a href="/compare" style={{ fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>View saved scenarios →</a>
-              </div>
-            </div>
-          );
-        })()}
+        {/* View-saved link — the save CTA itself now lives inside the
+            selected card, but keep this small helper visible at all
+            times so users can jump to /compare without first selecting. */}
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <a href="/compare" style={{ fontSize: 12, color: P.warmGrayLight, textDecoration: "underline", fontFamily: F.body }}>View saved scenarios →</a>
+        </div>
 
         {/* Cross-link to prequal */}
 
