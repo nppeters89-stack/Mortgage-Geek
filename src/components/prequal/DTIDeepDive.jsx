@@ -303,7 +303,13 @@ function DTIBar({ ratio, cap, color, binding, height }) {
           ...ringStyles,
         }}
       >
-        {/* Fill */}
+        {/* Fill — horizontal gradient runs LIGHT (color mixed with 75%
+            white) on the left of the bar to FULL color on the right.
+            backgroundSize is scaled so the gradient always spans the
+            parent bar's full width, not the fill's own width — so the
+            leading edge of the fill always sits at the darkest shade
+            reached so far. The bar gets visually heavier as it fills,
+            which is the "power bar" read. */}
         <div
           aria-hidden="true"
           style={{
@@ -312,9 +318,11 @@ function DTIBar({ ratio, cap, color, binding, height }) {
             left: 0,
             bottom: 0,
             width: `${fillPct}%`,
-            background: color,
+            background: `linear-gradient(to right, color-mix(in srgb, white 75%, ${color}) 0%, ${color} 100%)`,
+            backgroundSize: fillPct > 0 ? `${(10000 / fillPct).toFixed(2)}% 100%` : '100% 100%',
+            backgroundRepeat: 'no-repeat',
             borderRadius: 4,
-            transition: 'width 220ms ease',
+            transition: 'width 220ms ease, background-size 220ms ease',
           }}
         />
 
