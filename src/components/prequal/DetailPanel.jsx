@@ -228,6 +228,16 @@ export function DetailPanel({
               </p>
             )}
           </div>
+
+          {/* Cross-link CTA — anchored to the bottom of the left column
+              so its width matches the column rather than spanning the
+              full panel. */}
+          {calculatorHref && (
+            <a href={calculatorHref} style={crossLinkButtonStyle(prog.color)}>
+              Run this scenario in Calculator
+              <span style={{ marginLeft: 8 }} aria-hidden="true">→</span>
+            </a>
+          )}
         </div>
 
         {/* RIGHT — DTI power bars (focal visualization). The DTI caveat
@@ -247,16 +257,6 @@ export function DetailPanel({
           )}
         </div>
       </div>
-
-      {/* Cross-link CTA — full-width below the 2-col grid. */}
-      {calculatorHref && (
-        <div style={{ padding: '0 28px 24px' }}>
-          <a href={calculatorHref} style={crossLinkButtonStyle(prog.color)}>
-            Run this scenario in Calculator
-            <span style={{ marginLeft: 8 }} aria-hidden="true">→</span>
-          </a>
-        </div>
-      )}
     </section>
   );
 }
@@ -354,7 +354,10 @@ const overLimitBannerStyle = (color) => ({
 // breakpoint can switch to 2 columns at >=1100px. Inline styles would
 // beat the class rule, so we only set padding here.
 const panelBodyStyle = {
-  padding: '24px 28px 16px',
+  // Bottom padding bumped from 16 → 24 since the cross-link CTA now
+  // lives inside the left column and there's no longer a separate
+  // padded wrapper below the grid.
+  padding: '24px 28px 24px',
 };
 
 const leftColumnStyle = {
@@ -491,10 +494,8 @@ const crossLinkButtonStyle = (color) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // Constrain width and auto-center horizontally so the navy CTA doesn't
-  // bottom-weight the panel as a full-bleed block.
-  maxWidth: 520,
-  margin: '16px auto 0',
+  // Lives at the bottom of the left column. The column's gap: 16
+  // handles top spacing; column-flex stretches it to the column width.
   padding: '14px 20px',
   background: color,
   color: '#fff',
