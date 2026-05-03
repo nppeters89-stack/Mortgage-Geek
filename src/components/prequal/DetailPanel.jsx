@@ -111,6 +111,19 @@ export function DetailPanel({
         </div>
       </header>
 
+      {/* OVER-LIMIT BANNER — when the program's max is capped by the loan
+          limit (not DTI), surface a clear warning so the user understands
+          the binding constraint isn't their income/debts. */}
+      {prog.overLimit && (
+        <aside style={overLimitBannerStyle(prog.color)}>
+          <span aria-hidden="true" style={{ fontSize: 16, marginRight: 8 }}>⚠️</span>
+          <span>
+            <strong>Capped by {prog.name} loan limit ({fmt(prog.loanLimit)}) — not DTI.</strong>{' '}
+            Your income and debts could support more, but the {prog.name} program limit caps your loan amount in this county.
+          </span>
+        </aside>
+      )}
+
       {/* USDA household-income callout — relocated from current card top.
           Only renders for USDA, where the live page already shows it.
           The callout JSX (including its colored "Household income…" lead)
@@ -320,6 +333,18 @@ const usdaCalloutStyle = (color) => ({
   fontSize: 13,
   color: P.text,
   lineHeight: 1.5,
+});
+
+const overLimitBannerStyle = (color) => ({
+  background: withAlpha(color, 0.1),
+  borderLeft: `3px solid ${color}`,
+  padding: '12px 16px',
+  fontFamily: F.body,
+  fontSize: 13,
+  color: P.text,
+  lineHeight: 1.5,
+  display: 'flex',
+  alignItems: 'flex-start',
 });
 
 // NOTE: grid-template-columns and gap are intentionally driven by the

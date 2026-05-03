@@ -63,10 +63,14 @@ import { fmt, withAlpha } from '../../utils/format';
  */
 export function ProgramResultCardCompact({ prog, selected, onSelect }) {
   if (!prog) return null;
-  const eligible = !!prog.eligible && !prog.overLimit;
+  // Over-limit programs are still eligible — they just have their max price
+  // capped at the loan limit. Keep them clickable, keep their DTI bars, and
+  // surface a warning instead of greying out the whole card.
+  const eligible = !!prog.eligible;
+  const overLimit = !!prog.overLimit;
 
-  // Header treatment matches the live card's header. Gray for ineligible
-  // and over-limit states; full program color for eligible.
+  // Header treatment matches the live card's header. Gray for ineligible only;
+  // over-limit keeps the program color so the card still reads as a real result.
   const headerBg = eligible ? prog.color : P.warmGrayLight;
 
   return (
@@ -107,10 +111,21 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <span style={cardProgramNameStyle}>{prog.name}</span>
           {eligible ? (
-            <span style={cardMaxPriceStyle}>{fmt(prog.maxPrice)}</span>
+            <span style={cardMaxPriceStyle}>
+              {fmt(prog.maxPrice)}
+              {overLimit && (
+                <span
+                  aria-label="capped at loan limit"
+                  title="Capped at loan limit"
+                  style={{ fontSize: 16, marginLeft: 6, verticalAlign: 'middle' }}
+                >
+                  ⚠️
+                </span>
+              )}
+            </span>
           ) : (
             <span style={cardIneligibleTitleStyle}>
-              ⚠️ {prog.ineligibleReason || (prog.overLimit ? `Loan limit: ${fmt(prog.loanLimit)}` : 'Not eligible')}
+              ⚠️ {prog.ineligibleReason || 'Not eligible'}
             </span>
           )}
         </div>
@@ -138,22 +153,20 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
               binding={prog.bindingConstraint === 'back'}
             />
 
-            {prog.bindingLabel && (
-              <p style={bindingLabelStyle(prog.color)}>{prog.bindingLabel}</p>
+            {overLimit ? (
+              <p style={overLimitWarningStyle(prog.color)}>
+                <span aria-hidden="true" style={{ marginRight: 4 }}>⚠️</span>
+                Capped by loan limit — not DTI
+              </p>
+            ) : (
+              prog.bindingLabel && (
+                <p style={bindingLabelStyle(prog.color)}>{prog.bindingLabel}</p>
+              )
             )}
           </>
         ) : (
           <p style={ineligibleBodyStyle}>
-            {/* Ineligible/over-limit copy — lifted from the live card body.
-                Phase C2: replace this fallback with whatever the live page
-                renders for the matching state. The live page has distinct
-                copy for ineligible vs over-limit; both should be passed in
-                via prog (e.g. prog.ineligibleBody / prog.overLimitBody) so
-                this file holds zero hand-written copy. */}
-            {prog.ineligibleBody ||
-              (prog.overLimit
-                ? `Maximum loan capped at ${fmt(prog.loanLimit)} for this county.`
-                : prog.ineligibleReason || 'Not eligible.')}
+            {prog.ineligibleBody || prog.ineligibleReason || 'Not eligible.'}
           </p>
         )}
       </div>
@@ -340,6 +353,22 @@ const bindingLabelStyle = (color) => ({
   color: color,
   margin: '4px 0 0',
   lineHeight: 1.3,
+});
+
+const overLimitWarningStyle = (color) => ({
+  fontFamily: F.body,
+  fontSize: 10.5,
+  fontWeight: 700,
+  letterSpacing: 0.4,
+  color: color,
+  background: withAlpha(color, 0.1),
+  border: `1px solid ${withAlpha(color, 0.25)}`,
+  borderRadius: 6,
+  padding: '6px 8px',
+  margin: '4px 0 0',
+  lineHeight: 1.3,
+  display: 'flex',
+  alignItems: 'center',
 });
 
 const ineligibleBodyStyle = {
