@@ -32,8 +32,11 @@ export function PreQualPage() {
   const [convRate30Api, setConvRate30Api] = useState(6.75);
   const [convRate15Api, setConvRate15Api] = useState(6.0);
   const [fhaRate, setFhaRate] = useState(6.25);
+  const [fhaRateApi, setFhaRateApi] = useState(6.25);
   const [vaRate, setVaRate] = useState(6.25);
+  const [vaRateApi, setVaRateApi] = useState(6.25);
   const [usdaRate, setUsdaRate] = useState(6.25);
+  const [usdaRateApi, setUsdaRateApi] = useState(6.25);
   const [vaUsage, setVaUsage] = useState("first");
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("Nashville/Davidson");
@@ -72,9 +75,21 @@ export function PreQualPage() {
           setConvRate30Api(r30);
           setConvRate15Api(r15);
           setConvRate(term === 15 ? r15 : r30);
-          if (fha) setFhaRate(roundRate(parseFloat(fha.rate)));
-          if (va) setVaRate(roundRate(parseFloat(va.rate)));
-          if (usda) setUsdaRate(roundRate(parseFloat(usda.rate)));
+          if (fha) {
+            const fhaParsed = roundRate(parseFloat(fha.rate));
+            setFhaRate(fhaParsed);
+            setFhaRateApi(fhaParsed);
+          }
+          if (va) {
+            const vaParsed = roundRate(parseFloat(va.rate));
+            setVaRate(vaParsed);
+            setVaRateApi(vaParsed);
+          }
+          if (usda) {
+            const usdaParsed = roundRate(parseFloat(usda.rate));
+            setUsdaRate(usdaParsed);
+            setUsdaRateApi(usdaParsed);
+          }
           setRateSource(data.date || "today"); setRatesLoaded(true);
         }
       } catch (e) { /* silent */ }
@@ -644,12 +659,12 @@ export function PreQualPage() {
         {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
         <div style={{ display: "flex", flexDirection: "column", gap: pillGap, position: "relative", zIndex: 1 }}>
           {[
-            { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
-            { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
-            { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
+            { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy, market: term === 15 ? convRate15Api : convRate30Api },
+            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914", market: fhaRateApi },
+            { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage, market: vaRateApi },
+            { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
           ].map((p) => (
-            <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+            <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
           ))}
         </div>
 
