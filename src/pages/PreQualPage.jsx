@@ -208,7 +208,7 @@ export function PreQualPage() {
     const backTotalMax = Math.floor(grossIncome * prog.backMax);
     const backMaxHousing = backTotalMax - monthlyDebts;
 
-    const maxPayment = Math.max(0, Math.min(frontMaxHousing, backMaxHousing));
+    let maxPayment = Math.max(0, Math.min(frontMaxHousing, backMaxHousing));
     const bindingConstraint = frontMaxHousing <= backMaxHousing ? "front-end" : "back-end";
 
     // Comfortable range (75% of limits)
@@ -240,6 +240,20 @@ export function PreQualPage() {
       maxLoan = prog.loanLimit;
       maxPrice = useFixedDown ? maxLoan + downDollarOverride : Math.floor(prog.loanLimit / (1 - dpForCalc / 100));
       overLimit = true;
+      // When the loan limit is binding (not DTI), recompute maxPayment for
+      // the clamped loan so DTI bars and currentBackDTI reflect the actual
+      // scenario instead of pinning to the DTI cap. Same PI+MI+tax+ins
+      // formula solvePrice uses internally.
+      const mr = (prog.rate / 100) / 12;
+      const n = term * 12;
+      const totalLoan = maxLoan * (1 + prog.upfrontFee / 100);
+      const pi = totalLoan > 0
+        ? totalLoan * (mr * Math.pow(1 + mr, n)) / (Math.pow(1 + mr, n) - 1)
+        : 0;
+      const mi = (maxLoan * (prog.miRate / 100)) / 12;
+      const tax = (maxPrice * (taxRate / 100)) / 12;
+      const ins = (maxPrice * (insRate / 100)) / 12;
+      maxPayment = Math.round(pi + mi + tax + ins);
     }
 
     const maxTotalLoan = maxLoan * (1 + prog.upfrontFee / 100);
