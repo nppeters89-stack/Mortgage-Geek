@@ -179,7 +179,11 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
 function DTIRow({ label, ratio, cap, color, binding }) {
   const fillPct = Math.min(1, (ratio || 0) / (cap || 1)) * 100;
   const CELL_COUNT = 5;
-  const OUTER_RADIUS = 2;
+  const CELL_RADIUS = 2;
+  // Per-cell shade: leftmost lit cell is the lightest (60% white-mix);
+  // rightmost is full prog.color. Mirrors the deep-dive treatment.
+  const cellShade = (i) =>
+    `color-mix(in srgb, white ${60 - i * 15}%, ${color})`;
 
   return (
     <div style={dtiRowOuterStyle}>
@@ -187,13 +191,6 @@ function DTIRow({ label, ratio, cap, color, binding }) {
       <div style={dtiRowBarOuterStyle(color, binding)}>
         {Array.from({ length: CELL_COUNT }, (_, i) => {
           const cellFill = Math.max(0, Math.min(1, (fillPct / 100) * CELL_COUNT - i));
-          const isFirst = i === 0;
-          const isLast = i === CELL_COUNT - 1;
-          const cellRadius = isFirst
-            ? `${OUTER_RADIUS}px 0 0 ${OUTER_RADIUS}px`
-            : isLast
-            ? `0 ${OUTER_RADIUS}px ${OUTER_RADIUS}px 0`
-            : 0;
           return (
             <div
               key={i}
@@ -201,7 +198,7 @@ function DTIRow({ label, ratio, cap, color, binding }) {
                 position: 'relative',
                 flex: 1,
                 background: withAlpha(color, 0.12),
-                borderRadius: cellRadius,
+                borderRadius: CELL_RADIUS,
                 overflow: 'hidden',
               }}
             >
@@ -213,7 +210,7 @@ function DTIRow({ label, ratio, cap, color, binding }) {
                     left: 0,
                     bottom: 0,
                     width: `${cellFill * 100}%`,
-                    background: color,
+                    background: cellShade(i),
                   }}
                 />
               )}

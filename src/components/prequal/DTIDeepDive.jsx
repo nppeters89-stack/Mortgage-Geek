@@ -209,13 +209,22 @@ function DTIBar({ ratio, cap, color, height }) {
   // both the compact (14px) and the doubled (28px) treatments.
   const labelFontSize = Math.max(13, Math.round(height * 0.55));
 
-  // Battery-cell render: 5 equal cells, 2px gap, outer corners rounded.
-  // Each cell shows a left-anchored partial fill in `color` against a
-  // tint background, where the partial width within cell `i` is
+  // Battery-cell render: 5 equal cells, 2px gap, each cell rounded on
+  // all four corners (reads as five stacked pills, like a battery).
+  // Each cell shows a left-anchored partial fill against a tint
+  // background, where the partial width within cell `i` is
   // clamp((fillPct/100 * 5) - i, 0, 1). Fully-past cells fill solid;
   // the in-progress cell partials; remaining cells stay tint.
+  //
+  // Shade progression: leftmost lit cell is the LIGHTEST shade
+  // (60% white mixed into prog.color); rightmost is full prog.color.
+  // As the bar fills higher, darker cells become visible — gives the
+  // "fuller = visually heavier" power-bar read while keeping the
+  // discrete cell aesthetic.
   const CELL_COUNT = 5;
-  const OUTER_RADIUS = 4;
+  const CELL_RADIUS = 3;
+  const cellShade = (i) =>
+    `color-mix(in srgb, white ${60 - i * 15}%, ${color})`;
 
   return (
     <div className="pq-dti-bar-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -246,13 +255,6 @@ function DTIBar({ ratio, cap, color, height }) {
       >
         {Array.from({ length: CELL_COUNT }, (_, i) => {
           const cellFill = Math.max(0, Math.min(1, (fillPct / 100) * CELL_COUNT - i));
-          const isFirst = i === 0;
-          const isLast = i === CELL_COUNT - 1;
-          const cellRadius = isFirst
-            ? `${OUTER_RADIUS}px 0 0 ${OUTER_RADIUS}px`
-            : isLast
-            ? `0 ${OUTER_RADIUS}px ${OUTER_RADIUS}px 0`
-            : 0;
           return (
             <div
               key={i}
@@ -261,7 +263,7 @@ function DTIBar({ ratio, cap, color, height }) {
                 position: 'relative',
                 flex: 1,
                 background: withAlpha(color, 0.12),
-                borderRadius: cellRadius,
+                borderRadius: CELL_RADIUS,
                 overflow: 'hidden',
               }}
             >
@@ -273,7 +275,7 @@ function DTIBar({ ratio, cap, color, height }) {
                     left: 0,
                     bottom: 0,
                     width: `${cellFill * 100}%`,
-                    background: color,
+                    background: cellShade(i),
                     transition: 'width 220ms ease',
                   }}
                 />
@@ -301,6 +303,10 @@ function DTIBar({ ratio, cap, color, height }) {
               fontVariantNumeric: 'tabular-nums',
               letterSpacing: 0.2,
               whiteSpace: 'nowrap',
+              // Cream chip masks any cell tint or gap beneath the digits
+              background: P.cream,
+              padding: '0 4px',
+              borderRadius: 3,
             }}
           >
             {ratioLabel}
@@ -319,6 +325,10 @@ function DTIBar({ ratio, cap, color, height }) {
               fontVariantNumeric: 'tabular-nums',
               letterSpacing: 0.2,
               whiteSpace: 'nowrap',
+              // prog.color chip masks any 2px inter-cell gap behind digits
+              background: color,
+              padding: '0 4px',
+              borderRadius: 3,
             }}
           >
             {ratioLabel}
