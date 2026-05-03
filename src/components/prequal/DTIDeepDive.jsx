@@ -41,7 +41,7 @@
 // from utils/format (added in C0). No new hex values. Inline styles.
 
 import React, { useState, useEffect } from 'react';
-import { P, F } from '../../theme';
+import { P, F, PROGRAM_COLORS } from '../../theme';
 import { fmt, withAlpha } from '../../utils/format';
 
 /**
@@ -94,21 +94,8 @@ export function DTIDeepDive({
         ratio={prog.frontDTI}
         cap={prog.frontCap}
         binding={prog.bindingConstraint === 'front'}
-        breakdown={[
-          { kind: 'input', label: 'Max Housing Payment', value: fmt(prog.maxHousing) },
-          { kind: 'op', label: '÷' },
-          { kind: 'input', label: 'Gross Monthly Income', value: fmt(grossMonthlyIncome) },
-          { kind: 'op', label: '=' },
-          {
-            kind: 'result',
-            label: 'Front-End DTI',
-            value: pct(prog.frontDTI),
-          },
-          {
-            kind: 'capref',
-            label: `Cap: ${pct(prog.frontCap)}`,
-          },
-        ]}
+        grossMonthlyIncome={grossMonthlyIncome}
+        monthlyDebts={monthlyDebts}
         barHeight={barHeight}
       />
 
@@ -119,23 +106,8 @@ export function DTIDeepDive({
         ratio={prog.backDTI}
         cap={prog.backCap}
         binding={prog.bindingConstraint === 'back'}
-        breakdown={[
-          { kind: 'input', label: 'Max Housing Payment', value: fmt(prog.maxHousing) },
-          { kind: 'op', label: '+' },
-          { kind: 'input', label: 'Monthly Debts', value: fmt(monthlyDebts) },
-          { kind: 'op', label: '÷' },
-          { kind: 'input', label: 'Gross Monthly Income', value: fmt(grossMonthlyIncome) },
-          { kind: 'op', label: '=' },
-          {
-            kind: 'result',
-            label: 'Back-End DTI',
-            value: pct(prog.backDTI),
-          },
-          {
-            kind: 'capref',
-            label: `Cap: ${pct(prog.backCap)}`,
-          },
-        ]}
+        grossMonthlyIncome={grossMonthlyIncome}
+        monthlyDebts={monthlyDebts}
         barHeight={barHeight}
       />
     </div>
@@ -144,8 +116,53 @@ export function DTIDeepDive({
 
 /* ----------------- one bar + breakdown ----------------- */
 
-function DTISection({ variant, prog, ratio, cap, binding, breakdown, barHeight }) {
+function DTISection({ variant, prog, ratio, cap, binding, grossMonthlyIncome, monthlyDebts, barHeight }) {
   const heading = variant === 'front' ? 'Front-End DTI' : 'Back-End DTI';
+
+  // Housing pill text uses a darker variant of prog.color so it stays
+  // legible against the soft tint background.
+  const housingPillText = housingPillTextColor(prog.color);
+  // Sage tints noticeably lighter than the others at 0.10 alpha, so its
+  // pill background gets a slightly stronger 0.12 tint.
+  const housingPillAlpha = prog.color === P.sage ? 0.12 : 0.10;
+
+  // Equation data. numeratorTerms drives both the fraction's numerator
+  // row and the key-pill row (alongside the denominator term). Front-end
+  // is single-term; back-end has the housing + debts addition.
+  const numeratorTerms = variant === 'front'
+    ? [{
+        value: fmt(prog.maxHousing),
+        color: prog.color,
+        pillText: housingPillText,
+        pillBgAlpha: housingPillAlpha,
+        label: 'Max Housing Payment',
+      }]
+    : [
+        {
+          value: fmt(prog.maxHousing),
+          color: prog.color,
+          pillText: housingPillText,
+          pillBgAlpha: housingPillAlpha,
+          label: 'Max Housing Payment',
+        },
+        {
+          value: fmt(monthlyDebts),
+          color: P.equationDebts,
+          pillText: P.equationDebts,
+          pillBgAlpha: 0.10,
+          label: 'Monthly Debts',
+        },
+      ];
+
+  const denominator = {
+    value: fmt(grossMonthlyIncome),
+    color: P.equationIncome,
+    pillText: P.equationIncome,
+    pillBgAlpha: 0.10,
+    label: 'Gross Monthly Income',
+  };
+
+  const ratioLabel = pct(ratio);
 
   return (
     <section
@@ -168,10 +185,60 @@ function DTISection({ variant, prog, ratio, cap, binding, breakdown, barHeight }
         height={barHeight}
       />
 
-      {/* Calculation breakdown */}
-      <BreakdownTable rows={breakdown} progColor={prog.color} />
+      {/* Stacked-fraction equation + color key */}
+      <div style={equationWrapStyle}>
+        <div style={equationRowStyle}>
+          {/* Fraction stack: numerator over denominator with a horizontal
+              division bar that auto-stretches to the wider of the two. */}
+          <div style={fractionColStyle}>
+            <div style={numDenomRowStyle}>
+              {numeratorTerms.map((t, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span style={opPlusStyle}>+</span>}
+                  <span style={equationTermStyle(t.color)}>{t.value}</span>
+                </React.Fragment>
+              ))}
+            </div>
+            <div style={divisionBarStyle} />
+            <div style={numDenomRowStyle}>
+              <span style={equationTermStyle(denominator.color)}>{denominator.value}</span>
+            </div>
+          </div>
+
+          <span style={equalsStyle}>=</span>
+
+          {/* Result block: percentage in prog.color, label below */}
+          <div style={resultColStyle}>
+            <span style={resultPctStyle(prog.color)}>{ratioLabel}</span>
+            <span style={resultLabelStyle}>{heading}</span>
+          </div>
+        </div>
+
+        {/* Color key — one tinted pill per variable in the equation */}
+        <div style={keyRowStyle}>
+          {[...numeratorTerms, denominator].map((t) => (
+            <span key={t.label} style={pillStyle(t.color, t.pillBgAlpha)}>
+              <span style={pillValueStyle(t.pillText)}>{t.value}</span>
+              <span style={pillLabelStyle(t.pillText)}>{t.label}</span>
+            </span>
+          ))}
+        </div>
+      </div>
     </section>
   );
+}
+
+// Map prog.color → text color for the housing key-pill so the pill text
+// stays legible against the withAlpha-tinted background. Falls back to
+// P.text for any unknown color.
+function housingPillTextColor(progColor) {
+  switch (progColor) {
+    case PROGRAM_COLORS.Conventional: return P.navy;
+    case PROGRAM_COLORS.FHA: return P.goldMuted;
+    case PROGRAM_COLORS.VA: return P.sage;
+    case PROGRAM_COLORS.USDA: return P.siennaDark;
+    default: return P.text;
+  }
 }
 
 /* ----------------- the bar component ----------------- */
@@ -411,58 +478,6 @@ function DTIBar({ ratio, cap, color, height }) {
   );
 }
 
-/* ----------------- breakdown rows ----------------- */
-
-function BreakdownTable({ rows, progColor }) {
-  return (
-    <div className="pq-dti-breakdown" style={breakdownTableStyle}>
-      {rows.map((r, i) => {
-        if (r.kind === 'op') {
-          return (
-            <div key={i} style={breakdownOpRowStyle}>
-              <span>{r.label}</span>
-            </div>
-          );
-        }
-        if (r.kind === 'result') {
-          return (
-            <div key={i} style={breakdownResultRowStyle(progColor)}>
-              <span style={{ color: P.text, fontWeight: 700 }}>{r.label}</span>
-              <span
-                style={{
-                  color: progColor,
-                  fontWeight: 700,
-                  fontFamily: F.display,
-                  fontSize: 22,
-                  fontVariantNumeric: 'tabular-nums',
-                }}
-              >
-                {r.value}
-              </span>
-            </div>
-          );
-        }
-        if (r.kind === 'capref') {
-          return (
-            <div key={i} style={breakdownCapRefRowStyle}>
-              <span>{r.label}</span>
-            </div>
-          );
-        }
-        // 'input'
-        return (
-          <div key={i} style={breakdownInputRowStyle}>
-            <span style={{ color: P.warmGray }}>{r.label}</span>
-            <span style={{ color: P.text, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-              {r.value}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 /* ----------------- formatting helper ----------------- */
 
 function pct(x) {
@@ -498,46 +513,123 @@ const bindingPillStyle = (color) => ({
   padding: '2px 8px 3px',
 });
 
-const breakdownTableStyle = {
-  fontFamily: F.body,
-  fontSize: 13,
+/* ----------------- equation + key styles ----------------- */
+
+const equationWrapStyle = {
   display: 'flex',
   flexDirection: 'column',
-  gap: 0,
 };
 
-const breakdownInputRowStyle = {
+const equationRowStyle = {
   display: 'flex',
-  justifyContent: 'space-between',
+  justifyContent: 'center',
   alignItems: 'center',
-  padding: '6px 0',
-  borderBottom: `1px solid ${P.creamDark}`,
+  gap: 28,
+  padding: '8px 0 4px',
 };
 
-const breakdownOpRowStyle = {
-  fontFamily: F.body,
-  fontSize: 12,
-  fontStyle: 'italic',
-  color: P.warmGrayLight,
-  textAlign: 'right',
-  paddingRight: 4,
+const fractionColStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 4,
+};
+
+const numDenomRowStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  padding: '0 6px',
+};
+
+const equationTermStyle = (color) => ({
+  fontFamily: F.display,
+  fontSize: 28,
+  fontWeight: 600,
+  color,
+  fontVariantNumeric: 'tabular-nums',
+  letterSpacing: 0.2,
+  whiteSpace: 'nowrap',
+});
+
+const opPlusStyle = {
+  fontFamily: F.display,
+  fontSize: 24,
+  fontWeight: 400,
+  color: P.warmGray,
+};
+
+// alignSelf: 'stretch' makes the bar match the wider of numerator /
+// denominator. The fraction column itself is align-items: center, so
+// the bar remains centered without an explicit width.
+const divisionBarStyle = {
+  alignSelf: 'stretch',
+  height: 0,
+  borderTop: `1.5px solid ${P.text}`,
   margin: '2px 0',
 };
 
-const breakdownResultRowStyle = (color) => ({
+const equalsStyle = {
+  fontFamily: F.display,
+  fontSize: 26,
+  fontWeight: 400,
+  color: P.warmGray,
+};
+
+const resultColStyle = {
   display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'baseline',
-  padding: '8px 0 2px',
-  borderTop: `2px solid ${color}`,
-  marginTop: 4,
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 2,
+};
+
+const resultPctStyle = (color) => ({
+  fontFamily: F.display,
+  fontSize: 38,
+  fontWeight: 600,
+  color,
+  fontVariantNumeric: 'tabular-nums',
+  lineHeight: 1.05,
 });
 
-const breakdownCapRefRowStyle = {
-  display: 'flex',
-  justifyContent: 'flex-end',
-  fontSize: 11,
-  fontStyle: 'italic',
+const resultLabelStyle = {
+  fontFamily: F.body,
+  fontSize: 10,
+  fontWeight: 400,
+  letterSpacing: 1,
+  textTransform: 'uppercase',
   color: P.warmGrayLight,
-  paddingTop: 4,
 };
+
+const keyRowStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 8,
+  padding: '18px 0 0',
+  marginTop: 18,
+  borderTop: `1px solid ${P.creamDark}`,
+};
+
+const pillStyle = (color, alpha) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '7px 13px',
+  background: withAlpha(color, alpha),
+  borderRadius: 999,
+});
+
+const pillValueStyle = (textColor) => ({
+  fontFamily: F.display,
+  fontSize: 14,
+  fontWeight: 600,
+  color: textColor,
+  fontVariantNumeric: 'tabular-nums',
+});
+
+const pillLabelStyle = (textColor) => ({
+  fontFamily: F.body,
+  fontSize: 11,
+  fontWeight: 500,
+  color: textColor,
+});
