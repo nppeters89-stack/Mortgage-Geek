@@ -83,6 +83,7 @@ export function DetailPanel({
 
   return (
     <section
+      key={prog.name}
       className="content-card pq-detail-panel"
       aria-label={`${prog.name} pre-qualification details`}
       style={{ padding: 0, overflow: 'hidden' }}

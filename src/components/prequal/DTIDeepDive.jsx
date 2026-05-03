@@ -40,7 +40,7 @@
 // Engineering standards: named export only, P/F from theme, withAlpha
 // from utils/format (added in C0). No new hex values. Inline styles.
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { P, F } from '../../theme';
 import { fmt, withAlpha } from '../../utils/format';
 
@@ -196,14 +196,32 @@ function DTIBar({ ratio, cap, color, height }) {
   const ratioLabel = pct(ratio);
   const capLabel = pct(cap);
 
+  // Mount-sweep animation. animFill drives the visual width and label
+  // position. Initialized to 0 so first paint shows empty cells; the
+  // post-paint effect then sets it to fillPct, letting the cell-fill
+  // CSS transition sweep left-to-right (battery-charging effect).
+  // On subsequent fillPct changes (e.g., user types new income) the
+  // panel does NOT remount, so animFill goes from old to new fillPct —
+  // a small incremental tween, not a 0-reset. The full 0→fillPct
+  // sweep only fires when DetailPanel remounts on program switch
+  // (via key={prog.name}).
+  const [animFill, setAnimFill] = useState(0);
+  useEffect(() => {
+    // requestAnimationFrame ensures the browser paints the initial 0%
+    // width before we set it to fillPct, so the transition actually runs.
+    const id = requestAnimationFrame(() => setAnimFill(fillPct));
+    return () => cancelAnimationFrame(id);
+  }, [fillPct]);
+
   // Power-bar label rule: ALWAYS tether the percentage to the leading
   // edge of the fill (the spot the bar is "maxing out" toward). Default
   // sits in the empty portion just past the leading edge (dark text on
   // cream). When the fill is so wide the label would overrun the cap
   // tick, flip it inside the fill anchored to the leading edge from the
   // right (white text on color). Either way the label stays glued to
-  // the bar's leading edge — that's the "power bar" read.
-  const labelEscapesRight = fillPct > 78;
+  // the bar's leading edge — that's the "power bar" read. Use animFill
+  // (not fillPct) so the label slides with the animation.
+  const labelEscapesRight = animFill > 78;
 
   // Label font scales with bar height so the digits feel balanced on
   // both the compact (14px) and the doubled (28px) treatments.
@@ -254,7 +272,7 @@ function DTIBar({ ratio, cap, color, height }) {
         }}
       >
         {Array.from({ length: CELL_COUNT }, (_, i) => {
-          const cellFill = Math.max(0, Math.min(1, (fillPct / 100) * CELL_COUNT - i));
+          const cellFill = Math.max(0, Math.min(1, (animFill / 100) * CELL_COUNT - i));
           return (
             <div
               key={i}
@@ -267,19 +285,20 @@ function DTIBar({ ratio, cap, color, height }) {
                 overflow: 'hidden',
               }}
             >
-              {cellFill > 0 && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    width: `${cellFill * 100}%`,
-                    background: cellShade(i),
-                    transition: 'width 220ms ease',
-                  }}
-                />
-              )}
+              {/* Partial-fill div is always rendered (even at 0% width)
+                  so the CSS width transition can run from 0 → target on
+                  mount and panel-switch. */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  width: `${cellFill * 100}%`,
+                  background: cellShade(i),
+                  transition: 'width 600ms cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              />
             </div>
           );
         })}
@@ -294,7 +313,7 @@ function DTIBar({ ratio, cap, color, height }) {
             style={{
               position: 'absolute',
               top: '50%',
-              left: `calc(${fillPct}% + 8px)`,
+              left: `calc(${animFill}% + 8px)`,
               transform: 'translateY(-50%)',
               fontFamily: F.body,
               fontSize: labelFontSize,
@@ -307,6 +326,7 @@ function DTIBar({ ratio, cap, color, height }) {
               background: P.cream,
               padding: '0 4px',
               borderRadius: 3,
+              transition: 'left 600ms cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {ratioLabel}
@@ -316,7 +336,7 @@ function DTIBar({ ratio, cap, color, height }) {
             style={{
               position: 'absolute',
               top: '50%',
-              right: `calc(100% - ${fillPct}% + 8px)`,
+              right: `calc(100% - ${animFill}% + 8px)`,
               transform: 'translateY(-50%)',
               fontFamily: F.body,
               fontSize: labelFontSize,
@@ -329,6 +349,7 @@ function DTIBar({ ratio, cap, color, height }) {
               background: color,
               padding: '0 4px',
               borderRadius: 3,
+              transition: 'right 600ms cubic-bezier(0.4, 0, 0.2, 1)',
             }}
           >
             {ratioLabel}
