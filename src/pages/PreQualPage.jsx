@@ -559,22 +559,29 @@ export function PreQualPage() {
     );
   };
 
-  // The navy per-program rate strip. `variant === 'cockpit'` drops the
-  // centered max-width so it stretches the cockpit canvas; legacy keeps
-  // the centered 800px treatment.
+  // The navy per-program rate strip. Three variants:
+  //   - 'rail'   → compact single-column treatment for the 340px cockpit rail
+  //   - 'legacy' → centered 800px treatment used in the legacy stacked layout
+  // Both share the navy gradient + gold top accent, mirroring the calculator
+  // refresh's diagnostics-rail treatment.
   const renderRateStrip = (variant) => {
-    const stripStyle = variant === "cockpit"
-      ? {
-          background: P.navy, borderRadius: 14, padding: "18px 28px 22px",
-          marginBottom: 0, boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
-          borderTop: `3px solid ${P.gold}`, position: "relative", overflow: "hidden",
-        }
-      : {
-          background: P.navy, borderRadius: 14, padding: "18px 28px 22px",
-          marginBottom: 32, maxWidth: 800, margin: "0 auto 32px",
-          boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
-          borderTop: `3px solid ${P.gold}`, position: "relative", overflow: "hidden",
-        };
+    const sharedStripStyle = {
+      background: `linear-gradient(160deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`,
+      borderRadius: 14,
+      boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
+      borderTop: `3px solid ${P.gold}`,
+      position: "relative",
+      overflow: "hidden",
+    };
+    const stripStyle = variant === "rail"
+      ? { ...sharedStripStyle, padding: "16px 18px 18px", margin: 0 }
+      : { ...sharedStripStyle, padding: "18px 28px 22px", maxWidth: 800, margin: "0 auto 32px" };
+
+    const isRail = variant === "rail";
+    const eyebrowSize = isRail ? 10 : 11;
+    const disclaimerSize = isRail ? 10 : 11;
+    const pillGap = isRail ? 6 : 8;
+
     return (
       <div style={stripStyle}>
         {/* Subtle gold radial glow in top-right corner for warmth */}
@@ -590,9 +597,9 @@ export function PreQualPage() {
 
         {/* Header row */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8, position: "relative", zIndex: 1 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Interest Rates by Program</span>
+          <span style={{ fontSize: eyebrowSize, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>{isRail ? "Rates by Program" : "Interest Rates by Program"}</span>
           {ratesLoaded && (
-            <span style={{ fontSize: 11, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
+            <span style={{ fontSize: eyebrowSize, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
               <span style={{
                 width: 6, height: 6, borderRadius: "50%",
                 background: P.goldLight,
@@ -600,18 +607,20 @@ export function PreQualPage() {
                 boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
                 animation: "rate-pulse 2s ease-in-out infinite",
               }} />
-              Live rates loaded · {rateSource}
+              {isRail ? `Live · ${rateSource}` : `Live rates loaded · ${rateSource}`}
             </span>
           )}
         </div>
 
         {/* Disclaimer */}
-        <p style={{ fontSize: 11, color: P.cream, opacity: 0.65, marginBottom: 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
-          National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
+        <p style={{ fontSize: disclaimerSize, color: P.cream, opacity: 0.65, marginBottom: isRail ? 10 : 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
+          {isRail
+            ? "National averages via Mortgage News Daily, rounded to 0.125%. Adjust to match your quote."
+            : "National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote."}
         </p>
 
         {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: pillGap, position: "relative", zIndex: 1 }}>
           {[
             { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
             { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
@@ -623,7 +632,7 @@ export function PreQualPage() {
         </div>
 
         {!ratesLoaded && (
-          <p style={{ fontSize: 11, color: P.cream, opacity: 0.6, marginTop: 10, fontStyle: "italic", position: "relative", zIndex: 1 }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
+          <p style={{ fontSize: disclaimerSize, color: P.cream, opacity: 0.6, marginTop: isRail ? 8 : 10, fontStyle: "italic", position: "relative", zIndex: 1 }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
         )}
       </div>
     );
@@ -656,10 +665,14 @@ export function PreQualPage() {
   // The legacy stacked layout below is used at <1100px (tablets/mobile).
   // ===================================================================
   if (isCockpit) {
-    const railJsx = renderInputsCard("rail");
+    const railJsx = (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {renderInputsCard("rail")}
+        {renderRateStrip("rail")}
+      </div>
+    );
     const canvasJsx = (
       <>
-        {renderRateStrip("cockpit")}
         <div className="pq-cards-grid pq-cards-grid--compact">
           {cockpitResults.map((p, i) => (
             <ProgramResultCardCompact
