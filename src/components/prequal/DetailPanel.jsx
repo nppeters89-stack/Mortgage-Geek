@@ -31,20 +31,20 @@ import { DTIDeepDive } from './DTIDeepDive';
  *  - prog: full program object from PreQualPage.jsx. Required for the
  *      panel to render anything; pass null to render the empty state.
  *      Adds these on top of the ProgramResultCardCompact required set:
- *        prog.apr               : number
- *        prog.maxHousing        : number
- *        prog.maxHousingPlusDebts : number
- *        prog.loanAmount        : number
- *        prog.financedFee       : number — UFMIP / VA funding fee / USDA guarantee
- *        prog.financedFeeLabel  : string — e.g. "Financed UFMIP"
- *        prog.downPayment       : number
- *        prog.mi                : number
- *        prog.miLabel           : string — e.g. "MI (MIP 0.55%)"
- *        prog.comfortableLow    : number
- *        prog.comfortableHigh   : number
- *        prog.note              : string — the italic note paragraph
- *        prog.aprSmallPrint     : string — verbatim from live page
- *        prog.usdaIncomeCallout : string | null — the "household income, not just yours" copy
+ *        prog.apr                 : number
+ *        prog.maxHousing          : number — max monthly housing payment (PITI+MI)
+ *        prog.maxHousingPlusDebts : number — housing + debts
+ *        prog.loanAmount          : number — base loan amount (after limit cap)
+ *        prog.financedFee         : number — UFMIP / VA funding fee / USDA guarantee
+ *        prog.financedFeeLabel    : string — e.g. "Financed UFMIP"
+ *        prog.downPayment         : number — actual down payment dollars
+ *        prog.mi                  : number — monthly MI dollars
+ *        prog.miLabel             : string — e.g. "PMI (0.27%)"
+ *        prog.comfortablePrice    : number — comfortable purchase price (75% of cap)
+ *        prog.comfortablePayment  : number — comfortable monthly housing payment
+ *        prog.note                : string — the italic note paragraph
+ *        prog.aprSmallPrint       : ReactNode — verbatim small-print JSX from live page
+ *        prog.usdaIncomeCallout   : ReactNode | null — the "household income" callout JSX (USDA only)
  *  - grossMonthlyIncome: number — passed through to DTIDeepDive
  *  - monthlyDebts: number — passed through to DTIDeepDive
  *  - vaUsage, setVaUsage: existing state + setter from PreQualPage (preserved)
@@ -112,10 +112,11 @@ export function DetailPanel({
       </header>
 
       {/* USDA household-income callout — relocated from current card top.
-          Only renders for USDA, where the live page already shows it. */}
+          Only renders for USDA, where the live page already shows it.
+          The callout JSX (including its colored "Household income…" lead)
+          is lifted verbatim from the live page via prog.usdaIncomeCallout. */}
       {prog.name === 'USDA' && prog.usdaIncomeCallout && (
-        <aside style={usdaCalloutStyle}>
-          <span style={{ fontWeight: 700, marginRight: 6 }} aria-hidden="true">ⓘ</span>
+        <aside style={usdaCalloutStyle(prog.color)}>
           {prog.usdaIncomeCallout}
         </aside>
       )}
@@ -169,17 +170,23 @@ export function DetailPanel({
           )}
         </div>
 
-        {/* Comfortable Range card */}
-        {prog.comfortableLow && prog.comfortableHigh && (
+        {/* Comfortable Range card — two-row layout mirrors the live
+            page's "Purchase Price" + "Housing Payment" treatment. */}
+        {prog.comfortablePrice > 0 && (
           <div style={comfortableCardStyle}>
             <span style={comfortableEyebrowStyle}>Comfortable Range</span>
-            <span style={comfortableRangeStyle(prog.color)}>
-              {fmt(prog.comfortableLow)} – {fmt(prog.comfortableHigh)}
-            </span>
-            {/* [NEW COPY — Nick to review] If the live page has a
-                helper line under the range (e.g. "Stay below this for
-                breathing room"), lift it verbatim. Otherwise leave
-                this block out. */}
+            <div style={comfortableRowStyle}>
+              <span style={{ color: P.warmGray }}>Purchase Price</span>
+              <span style={{ fontWeight: 700, color: P.sage, fontVariantNumeric: 'tabular-nums' }}>
+                {fmt(prog.comfortablePrice)}
+              </span>
+            </div>
+            <div style={comfortableRowStyle}>
+              <span style={{ color: P.warmGray }}>Housing Payment</span>
+              <span style={{ fontWeight: 600, color: P.text, fontVariantNumeric: 'tabular-nums' }}>
+                {fmt(prog.comfortablePayment)}/mo
+              </span>
+            </div>
           </div>
         )}
 
@@ -213,13 +220,16 @@ export function DetailPanel({
           <span style={aprValueStyle(prog.color)}>
             {Number(prog.apr).toFixed(3)}%
           </span>
-          <p style={aprDetailLineStyle}>
-            {prog.aprSmallPrint ||
-              /* [NEW COPY — Nick to review] If prog.aprSmallPrint is
-                 not threaded through from the live page, lift the
-                 page's APR small-print verbatim. */
-              'Includes lender fees and any financed upfront cost. Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.'}
-          </p>
+          {/* APR small-print — the live page renders TWO paragraphs
+              (notes line + estimated-APR italic line), so we accept a
+              ReactNode and wrap it in a <div> to avoid <p>-in-<p>. */}
+          {prog.aprSmallPrint ? (
+            <div style={aprDetailWrapStyle}>{prog.aprSmallPrint}</div>
+          ) : (
+            <p style={aprDetailLineStyle}>
+              Includes lender fees and any financed upfront cost. Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.
+            </p>
+          )}
         </div>
 
         {/* Cross-link CTA — preserved behavior from the live page's
@@ -302,15 +312,15 @@ const panelRateStyle = {
   fontVariantNumeric: 'tabular-nums',
 };
 
-const usdaCalloutStyle = {
-  background: withAlpha('#B8860B', 0.12),
-  borderLeft: `3px solid ${P.gold}`,
+const usdaCalloutStyle = (color) => ({
+  background: withAlpha(color, 0.08),
+  borderLeft: `3px solid ${color}`,
   padding: '10px 16px',
   fontFamily: F.body,
   fontSize: 13,
   color: P.text,
   lineHeight: 1.5,
-};
+});
 
 const panelBodyStyle = {
   display: 'grid',
@@ -354,12 +364,12 @@ const comfortableEyebrowStyle = {
   color: P.warmGrayLight,
 };
 
-const comfortableRangeStyle = (color) => ({
-  fontFamily: F.display,
-  fontSize: 22,
-  color: color,
-  fontVariantNumeric: 'tabular-nums',
-});
+const comfortableRowStyle = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  fontFamily: F.body,
+  fontSize: 12,
+};
 
 const vaUsageLabelStyle = {
   fontFamily: F.body,
@@ -429,6 +439,10 @@ const aprDetailLineStyle = {
   color: P.warmGrayLight,
   marginTop: 6,
   lineHeight: 1.5,
+};
+
+const aprDetailWrapStyle = {
+  marginTop: 6,
 };
 
 const crossLinkButtonStyle = (color) => ({

@@ -3,12 +3,16 @@ import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
 import { calculateAPR } from "../utils/math";
+import { useIsCockpit } from "../utils/hooks";
 import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
+import { CockpitShell } from "../components/cockpit/CockpitShell";
+import { ProgramResultCardCompact } from "../components/prequal/ProgramResultCardCompact";
+import { DetailPanel as PreQualDetailPanel } from "../components/prequal/DetailPanel";
 
 export function PreQualPage() {
   const params = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -37,6 +41,9 @@ export function PreQualPage() {
   const [rateSource, setRateSource] = useState(null);
   const insRate = 0.35;
 
+  // Cockpit gate — at ≥1100px we render the rail+canvas cockpit layout;
+  // below that we render the legacy stacked layout untouched.
+  const isCockpit = useIsCockpit();
 
   const stateData = SHARED_STATE_TAX_RATES[taxState];
   const metroList = stateData?.metros || [];
@@ -262,8 +269,116 @@ export function PreQualPage() {
     return { ...prog, eligible: isEligible, maxPrice, maxPayment, comfPrice, comfPayment, maxLoan, maxTotalLoan, comfLoan, currentBackDTI, bindingConstraint, frontMaxHousing, backTotalMax, backMaxHousing, overLimit, actualDownAmt, actualDownPctDisplay, cappedByMinDown, apr };
   });
 
-  return (
-    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+  // ===================================================================
+  // Cockpit-shape program list. Translates the legacy `results` into
+  // the field names the new ProgramResultCardCompact + DetailPanel
+  // expect, plus computes JSX payloads (USDA callout, APR small-print)
+  // that the page lifts verbatim — keeping all copy inside the page,
+  // not in the shared components. Legacy renderer still uses `results`.
+  // ===================================================================
+  const eligibleResults = results.filter(r => r.eligible && r.maxPrice > 0);
+  const bestPriceForPower = eligibleResults.length > 0
+    ? Math.max(...eligibleResults.map(r => r.maxPrice))
+    : 0;
+
+  const cockpitResults = results.map(r => {
+    const bindingForCockpit = !r.eligible
+      ? null
+      : r.overLimit
+      ? "limit"
+      : r.cappedByMinDown
+      ? "minDown"
+      : r.bindingConstraint === "front-end"
+      ? "front"
+      : r.bindingConstraint === "back-end"
+      ? "back"
+      : null;
+
+    const bindingLabel = !r.eligible
+      ? ""
+      : r.overLimit
+      ? "capped at loan limit"
+      : r.cappedByMinDown
+      ? `capped at ${r.minDown}% min down`
+      : `${r.bindingConstraint} DTI binding`;
+
+    const financedFee = r.upfrontFee > 0 ? r.maxLoan * (r.upfrontFee / 100) : 0;
+    const monthlyMI = r.miRate > 0 ? (r.maxLoan * r.miRate / 100) / 12 : 0;
+
+    // USDA-only household-income callout — lifted verbatim from the live card.
+    const usdaIncomeCallout = r.name === "USDA" ? (
+      <p style={{ fontSize: 11, color: P.warmGray, lineHeight: 1.5, margin: 0 }}>
+        <strong style={{ color: PROGRAM_COLORS.USDA }}>Household income, not just yours.</strong> USDA counts gross income from all adults (18+) in the household, even those not on the loan. Verify your total against the $119,850 limit (1-4 person, most areas) with an MLO before relying on this estimate.
+      </p>
+    ) : null;
+
+    // APR small-print — two-paragraph block lifted verbatim from the live card.
+    const aprSmallPrint = (
+      <>
+        <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Note rate {Number(r.rate).toFixed(3)}% · Includes lender fees{r.upfrontFee > 0 ? `, ${r.name === "FHA" ? "UFMIP" : r.name === "USDA" ? "USDA Guarantee Fee" : "VA funding fee"}` : ""}{r.miRate > 0 ? ", monthly MI" : ""}</p>
+        <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
+      </>
+    );
+
+    return {
+      ...r,
+      // Override bindingConstraint with the cockpit-component vocabulary.
+      // The legacy renderer reads `results` (untouched), not this object.
+      bindingConstraint: bindingForCockpit,
+      bindingLabel,
+      frontDTI: r.frontMax && grossIncome > 0 ? r.maxPayment / grossIncome : 0,
+      backDTI: grossIncome > 0 ? (monthlyDebts + r.maxPayment) / grossIncome : 0,
+      frontCap: r.frontMax || 0,
+      backCap: r.backMax || 0,
+      maxHousing: r.maxPayment,
+      maxHousingPlusDebts: r.maxPayment + monthlyDebts,
+      loanAmount: r.maxLoan,
+      financedFee,
+      financedFeeLabel: r.upfrontFee > 0 ? `Financed Fee (${r.upfrontFee}%)` : "",
+      downPayment: r.actualDownAmt,
+      mi: monthlyMI,
+      comfortablePrice: r.comfPrice,
+      comfortablePayment: r.comfPayment,
+      note: r.notes,
+      aprSmallPrint,
+      usdaIncomeCallout,
+      isVA: r.name === "VA",
+      ineligibleReason: r.ineligibleReason?.title || null,
+      ineligibleBody: r.ineligibleReason?.body || null,
+      isMostPower: r.eligible && r.maxPrice > 0 && r.maxPrice === bestPriceForPower,
+    };
+  });
+
+  // The cockpit's detail panel always shows something. Pick the user's
+  // selection if any, otherwise fall back to the Most-Power program, then
+  // to the first eligible result. Returns null only if zero programs qualify.
+  const cockpitEligible = cockpitResults.filter(r => r.eligible && r.maxPrice > 0);
+  const selectedProg = (() => {
+    if (cockpitEligible.length === 0) return null;
+    if (selectedProgram) {
+      const found = cockpitEligible.find(r => r.name === selectedProgram);
+      if (found) return found;
+    }
+    return cockpitEligible.find(r => r.isMostPower) || cockpitEligible[0];
+  })();
+
+  // Cross-link target — same logic as the legacy footer button: selected
+  // program if set, else the highest max-price eligible program.
+  const calculatorHref = (() => {
+    const target = selectedProg;
+    const targetPrice = target?.maxPrice || 0;
+    const programParam = target ? `&program=${encodeURIComponent(target.name)}` : "";
+    return `/calculator?price=${targetPrice > 0 ? targetPrice : 350000}&down=${downPct}&term=${term}${programParam}`;
+  })();
+
+  // ===================================================================
+  // SHARED JSX — defined once and used by both the legacy stacked layout
+  // and the cockpit layout below. Lifting these prevents drift between
+  // the two branches and keeps each branch focused on layout (not copy).
+  // ===================================================================
+
+  const sharedHead = (
+    <>
       <SEOHead
         title="Pre-Qualification Calculator — See What Mortgage You Can Afford"
         description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, VA, and USDA. Free pre-qualification estimate, no credit check."
@@ -284,205 +399,325 @@ export function PreQualPage() {
           .pq-input-cols { grid-template-columns: 1fr; }
           .pq-cards-grid { grid-template-columns: 1fr; }
         }
+        /* ----- Cockpit-only rules (≥1100px viewports). ----- */
+        .pq-cards-grid--compact { gap: 12px; margin-bottom: 0; }
+        .pq-cards-grid--compact + .pq-detail-panel { margin-top: 0; }
+        .pq-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 24px; }
+        @media (min-width: 1280px) { .pq-detail-panel-body { grid-template-columns: 1fr 1fr; } }
+        .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(184, 134, 11, 0.4); }
+        .pq-card-compact:focus-visible { outline: 2px solid #B8860B; outline-offset: 2px; }
+        /* In the cockpit rail the inputs card collapses to a single column
+           and drops its centered max-width so it fits the 340px sticky rail. */
+        .cockpit-rail .pq-input-cols { grid-template-columns: 1fr; }
       `}</style>
+    </>
+  );
 
-      {/* Header */}
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+  const headerJsx = (
+    <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
+        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
+          <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+        </a>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span className="btn-label-mobile-hide">Call</span>
           </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              <span className="btn-label-mobile-hide">Call</span>
-            </a>
-            <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20pre-qual%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              <span className="btn-label-mobile-hide">Text</span>
-            </a>
-            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
-          </div>
+          <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20pre-qual%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span className="btn-label-mobile-hide">Text</span>
+          </a>
+          <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
         </div>
       </div>
+    </div>
+  );
 
-      <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-            Pre-Qual Simulator
-            <PreQualIcon size={32} variant="navy" />
-          </h1>
-          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Enter your income and debts. See what you qualify for under each loan program — with their real DTI limits and mortgage insurance rules.</p>
-        </div>
+  const introJsx = (
+    <div style={{ textAlign: "center", marginBottom: 36 }}>
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
+      <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
+        Pre-Qual Simulator
+        <PreQualIcon size={32} variant="navy" />
+      </h1>
+      <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Enter your income and debts. See what you qualify for under each loan program — with their real DTI limits and mortgage insurance rules.</p>
+    </div>
+  );
 
-        {/* Inputs */}
-        <div className="content-card" style={{ padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" }}>
-          <div className="pq-input-cols">
-            {/* Left column — Income, Debts & DTI */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma />
-              <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma />
-              <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5, marginTop: -4 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
-              <button onClick={() => setShowStudentCalc(!showStudentCalc)} style={{
-                display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
-                fontSize: 11, fontWeight: 600, color: P.gold, cursor: "pointer", fontFamily: F.body, padding: "0",
-              }}>
-                <span style={{ fontSize: 12 }}>🎓</span>
-                {showStudentCalc ? "Hide Student Loan Calculator" : "Student Loan Payment Calculator"}
-                <span style={{ fontSize: 10, transition: "transform 0.2s", transform: showStudentCalc ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
-              </button>
-              {showStudentCalc && (
-                <div style={{ background: P.creamDark, borderRadius: 8, padding: "14px 16px" }}>
-                  <p style={{ fontSize: 11, color: P.warmGray, marginBottom: 10, lineHeight: 1.5 }}>
-                    For student loans currently at <strong>$0/mo</strong> due to deferment, forbearance, or income-driven repayment — lenders still count a payment.
-                  </p>
-                  <CalcInput label="Total Student Loan Balance" value={studentBalance} onChange={setStudentBalance} prefix="$" step={1000} comma />
-                  {studentBalance > 0 && (
-                    <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: P.white, borderRadius: 8, padding: "10px 14px" }}>
-                      <div>
-                        <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Qualifying Payment (0.5%)</span>
-                        <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(Math.round(studentBalance * 0.005))}/mo</span>
-                      </div>
-                      <button onClick={() => setMonthlyDebts(prev => prev + Math.round(studentBalance * 0.005))} style={{
-                        padding: "8px 14px", borderRadius: 6, border: "none",
-                        background: P.navy, color: "#fff", fontSize: 11, fontWeight: 600,
-                        cursor: "pointer", fontFamily: F.body, whiteSpace: "nowrap",
-                      }}>
-                        + Add to Debts
-                      </button>
+  // The inputs card. `variant === 'rail'` drops the centered max-width and
+  // tightens padding so it fits the 340px cockpit rail; legacy uses the
+  // wider centered treatment that sits inside the tool-page-content wrapper.
+  const renderInputsCard = (variant) => {
+    const cardStyle = variant === "rail"
+      ? { padding: "20px", margin: 0 }
+      : { padding: "28px", marginBottom: 12, maxWidth: 800, margin: "0 auto 12px" };
+    return (
+      <div className="content-card" style={cardStyle}>
+        <div className="pq-input-cols">
+          {/* Left column — Income, Debts & DTI */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <CalcInput label="Gross Monthly Income" value={grossIncome} onChange={setGrossIncome} prefix="$" step={250} comma />
+            <CalcInput label="Monthly Debt Payments" value={monthlyDebts} onChange={setMonthlyDebts} prefix="$" step={50} comma />
+            <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.5, marginTop: -4 }}>Include: car, student loans, credit cards (min payments), personal loans, child support.</p>
+            <button onClick={() => setShowStudentCalc(!showStudentCalc)} style={{
+              display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
+              fontSize: 11, fontWeight: 600, color: P.gold, cursor: "pointer", fontFamily: F.body, padding: "0",
+            }}>
+              <span style={{ fontSize: 12 }}>🎓</span>
+              {showStudentCalc ? "Hide Student Loan Calculator" : "Student Loan Payment Calculator"}
+              <span style={{ fontSize: 10, transition: "transform 0.2s", transform: showStudentCalc ? "rotate(180deg)" : "rotate(0)" }}>▼</span>
+            </button>
+            {showStudentCalc && (
+              <div style={{ background: P.creamDark, borderRadius: 8, padding: "14px 16px" }}>
+                <p style={{ fontSize: 11, color: P.warmGray, marginBottom: 10, lineHeight: 1.5 }}>
+                  For student loans currently at <strong>$0/mo</strong> due to deferment, forbearance, or income-driven repayment — lenders still count a payment.
+                </p>
+                <CalcInput label="Total Student Loan Balance" value={studentBalance} onChange={setStudentBalance} prefix="$" step={1000} comma />
+                {studentBalance > 0 && (
+                  <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: P.white, borderRadius: 8, padding: "10px 14px" }}>
+                    <div>
+                      <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Qualifying Payment (0.5%)</span>
+                      <span style={{ fontFamily: F.display, fontSize: 22, color: P.navy }}>{fmt(Math.round(studentBalance * 0.005))}/mo</span>
                     </div>
-                  )}
-                  <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic", lineHeight: 1.5 }}>
-                    0.5% is the standard qualifying calc for deferred student loans. Use your actual payment if on an active repayment plan.
-                  </p>
-                </div>
-              )}
-            </div>
-            {/* Right column — Loan Details */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
-                <select
-                  id={termSelectId}
-                  value={term}
-                  onChange={(e) => setTerm(parseInt(e.target.value))}
-                  style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
-                >
-                  <option value={30}>30 years</option>
-                  <option value={15}>15 years</option>
-                </select>
+                    <button onClick={() => setMonthlyDebts(prev => prev + Math.round(studentBalance * 0.005))} style={{
+                      padding: "8px 14px", borderRadius: 6, border: "none",
+                      background: P.navy, color: "#fff", fontSize: 11, fontWeight: 600,
+                      cursor: "pointer", fontFamily: F.body, whiteSpace: "nowrap",
+                    }}>
+                      + Add to Debts
+                    </button>
+                  </div>
+                )}
+                <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 8, fontStyle: "italic", lineHeight: 1.5 }}>
+                  0.5% is the standard qualifying calc for deferred student loans. Use your actual payment if on an active repayment plan.
+                </p>
               </div>
-              <div style={{ border: `1px solid ${P.creamDark}`, borderRadius: 10, padding: "14px 14px 10px", background: P.white }}>
-                <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.navy, display: "block", marginBottom: 10 }}>Down Payment</label>
-                <div style={{ opacity: downMode === "pct" ? 1 : 0.3, pointerEvents: downMode === "pct" ? "auto" : "none", transition: "opacity 0.2s" }}>
-                  <CalcInput label="Percentage" value={downMode === "pct" ? downPct : ""} onChange={(v) => { setDownPct(v); }} suffix="%" step={1} min={0} max={100} />
-                </div>
-                <button onClick={() => {
-                  if (downMode === "pct") { setDownMode("dollar"); setDownDollarOverride(null); }
-                  else { setDownMode("pct"); setDownDollarOverride(null); }
-                }} style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%",
-                  padding: "7px 0", margin: "8px 0", borderRadius: 6, border: "none",
-                  background: P.gold, color: "#fff",
-                  fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F.body,
-                }}>
-                  Switch to {downMode === "pct" ? "Dollar Amount" : "Percentage"}
-                </button>
-                <div style={{ opacity: downMode === "dollar" ? 1 : 0.3, pointerEvents: downMode === "dollar" ? "auto" : "none", transition: "opacity 0.2s" }}>
-                  <CalcInput label="Dollar Amount" value={downMode === "dollar" && downDollarOverride ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Property location row */}
-          <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
-            <label htmlFor={stateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location</label>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <select id={stateSelectId} value={taxState} onChange={(e) => setTaxState(e.target.value)}
-                style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 32px 10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
-                {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
-                  <option key={code} value={code}>{s.name}</option>
-                ))}
-              </select>
-              {metroList.length > 0 && (
-                <select aria-label="County or metro tax area" value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)}
-                  style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 32px 10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
-                  <option value="">State Avg ({stateData.rate}%)</option>
-                  {metroList.map((m) => (
-                    <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
-                  ))}
-                </select>
-              )}
-            </div>
-            <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Loan limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}. USDA uses an income cap (~$119,850 for 1-4 person households in most areas) instead of a loan limit.</p>
-          </div>
-        </div>
-
-        {/* Per-program rate inputs — NAVY TREATMENT for visual prominence */}
-        <div style={{
-          background: P.navy,
-          borderRadius: 14,
-          padding: "18px 28px 22px",
-          marginBottom: 32,
-          maxWidth: 800,
-          margin: "0 auto 32px",
-          boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
-          borderTop: `3px solid ${P.gold}`,
-          position: "relative",
-          overflow: "hidden",
-        }}>
-          {/* Subtle gold radial glow in top-right corner for warmth */}
-          <div style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            width: 180,
-            height: "100%",
-            background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
-            pointerEvents: "none",
-          }} />
-
-          {/* Header row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8, position: "relative", zIndex: 1 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Interest Rates by Program</span>
-            {ratesLoaded && (
-              <span style={{ fontSize: 11, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
-                <span style={{
-                  width: 6, height: 6, borderRadius: "50%",
-                  background: P.goldLight,
-                  display: "inline-block",
-                  boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
-                  animation: "rate-pulse 2s ease-in-out infinite",
-                }} />
-                Live rates loaded · {rateSource}
-              </span>
             )}
           </div>
-
-          {/* Disclaimer */}
-          <p style={{ fontSize: 11, color: P.cream, opacity: 0.65, marginBottom: 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
-            National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
-          </p>
-
-          {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
-            {[
-              { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
-              { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
-              { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
-              { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
-            ].map((p) => (
-              <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
-            ))}
+          {/* Right column — Loan Details */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <label htmlFor={termSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight }}>Loan Term</label>
+              <select
+                id={termSelectId}
+                value={term}
+                onChange={(e) => setTerm(parseInt(e.target.value))}
+                style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "11px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+              >
+                <option value={30}>30 years</option>
+                <option value={15}>15 years</option>
+              </select>
+            </div>
+            <div style={{ border: `1px solid ${P.creamDark}`, borderRadius: 10, padding: "14px 14px 10px", background: P.white }}>
+              <label style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.navy, display: "block", marginBottom: 10 }}>Down Payment</label>
+              <div style={{ opacity: downMode === "pct" ? 1 : 0.3, pointerEvents: downMode === "pct" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                <CalcInput label="Percentage" value={downMode === "pct" ? downPct : ""} onChange={(v) => { setDownPct(v); }} suffix="%" step={1} min={0} max={100} />
+              </div>
+              <button onClick={() => {
+                if (downMode === "pct") { setDownMode("dollar"); setDownDollarOverride(null); }
+                else { setDownMode("pct"); setDownDollarOverride(null); }
+              }} style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%",
+                padding: "7px 0", margin: "8px 0", borderRadius: 6, border: "none",
+                background: P.gold, color: "#fff",
+                fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: F.body,
+              }}>
+                Switch to {downMode === "pct" ? "Dollar Amount" : "Percentage"}
+              </button>
+              <div style={{ opacity: downMode === "dollar" ? 1 : 0.3, pointerEvents: downMode === "dollar" ? "auto" : "none", transition: "opacity 0.2s" }}>
+                <CalcInput label="Dollar Amount" value={downMode === "dollar" && downDollarOverride ? downDollarOverride : ""} onChange={(v) => { setDownDollarOverride(v > 0 ? v : null); }} prefix="$" step={1000} comma />
+              </div>
+            </div>
           </div>
+        </div>
 
-          {!ratesLoaded && (
-            <p style={{ fontSize: 11, color: P.cream, opacity: 0.6, marginTop: 10, fontStyle: "italic", position: "relative", zIndex: 1 }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
+        {/* Property location row */}
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.creamDark}` }}>
+          <label htmlFor={stateSelectId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 6 }}>Property Location</label>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <select id={stateSelectId} value={taxState} onChange={(e) => setTaxState(e.target.value)}
+              style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 32px 10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
+              {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
+                <option key={code} value={code}>{s.name}</option>
+              ))}
+            </select>
+            {metroList.length > 0 && (
+              <select aria-label="County or metro tax area" value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)}
+                style={{ width: "100%", boxSizing: "border-box", border: `1px solid ${P.creamDark}`, borderRadius: 8, background: P.cream, padding: "10px 32px 10px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}>
+                <option value="">State Avg ({stateData.rate}%)</option>
+                {metroList.map((m) => (
+                  <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>
+                ))}
+              </select>
+            )}
+          </div>
+          <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6 }}>Loan limits: FHA {fmt(loanLimits.fha)} · Conv {fmt(loanLimits.conv)} · VA {fmt(loanLimits.va)}. USDA uses an income cap (~$119,850 for 1-4 person households in most areas) instead of a loan limit.</p>
+        </div>
+      </div>
+    );
+  };
+
+  // The navy per-program rate strip. `variant === 'cockpit'` drops the
+  // centered max-width so it stretches the cockpit canvas; legacy keeps
+  // the centered 800px treatment.
+  const renderRateStrip = (variant) => {
+    const stripStyle = variant === "cockpit"
+      ? {
+          background: P.navy, borderRadius: 14, padding: "18px 28px 22px",
+          marginBottom: 0, boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
+          borderTop: `3px solid ${P.gold}`, position: "relative", overflow: "hidden",
+        }
+      : {
+          background: P.navy, borderRadius: 14, padding: "18px 28px 22px",
+          marginBottom: 32, maxWidth: 800, margin: "0 auto 32px",
+          boxShadow: "0 4px 20px rgba(15, 37, 48, 0.18)",
+          borderTop: `3px solid ${P.gold}`, position: "relative", overflow: "hidden",
+        };
+    return (
+      <div style={stripStyle}>
+        {/* Subtle gold radial glow in top-right corner for warmth */}
+        <div style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 180,
+          height: "100%",
+          background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }} />
+
+        {/* Header row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4, flexWrap: "wrap", gap: 8, position: "relative", zIndex: 1 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Interest Rates by Program</span>
+          {ratesLoaded && (
+            <span style={{ fontSize: 11, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
+              <span style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: P.goldLight,
+                display: "inline-block",
+                boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
+                animation: "rate-pulse 2s ease-in-out infinite",
+              }} />
+              Live rates loaded · {rateSource}
+            </span>
           )}
         </div>
+
+        {/* Disclaimer */}
+        <p style={{ fontSize: 11, color: P.cream, opacity: 0.65, marginBottom: 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
+          National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
+        </p>
+
+        {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
+          {[
+            { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy },
+            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914" },
+            { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage },
+            { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA },
+          ].map((p) => (
+            <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} />
+          ))}
+        </div>
+
+        {!ratesLoaded && (
+          <p style={{ fontSize: 11, color: P.cream, opacity: 0.6, marginTop: 10, fontStyle: "italic", position: "relative", zIndex: 1 }}>Adjust rates manually or they'll auto-populate when live data loads.</p>
+        )}
+      </div>
+    );
+  };
+
+  const geekTipJsx = (
+    <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24, maxWidth: 800, margin: "0 auto 24px" }}>
+      <div style={{ display: "flex", gap: 12 }}>
+        <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
+        <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
+          <p style={{ marginBottom: 8 }}>
+            <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers. USDA caps tighter — 34% front-end, 44.99% back-end — and adds a $119,850/yr household income limit (1-4 person, most areas). Those DTI ceilings are stretch maximums; USDA's standard GUS-Accept threshold is 29%/41%, and going above requires compensating factors.
+          </p>
+          <p>
+            <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const disclaimerJsx = (
+    <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
+      This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
+    </p>
+  );
+
+  // ===================================================================
+  // COCKPIT BRANCH — desktop ≥1100px renders the rail+canvas layout.
+  // The legacy stacked layout below is used at <1100px (tablets/mobile).
+  // ===================================================================
+  if (isCockpit) {
+    const railJsx = renderInputsCard("rail");
+    const canvasJsx = (
+      <>
+        {renderRateStrip("cockpit")}
+        <div className="pq-cards-grid pq-cards-grid--compact">
+          {cockpitResults.map((p, i) => (
+            <ProgramResultCardCompact
+              key={i}
+              prog={p}
+              selected={selectedProg && selectedProg.name === p.name}
+              onSelect={() => setSelectedProgram(p.name)}
+            />
+          ))}
+        </div>
+        <PreQualDetailPanel
+          prog={selectedProg}
+          grossMonthlyIncome={grossIncome}
+          monthlyDebts={monthlyDebts}
+          vaUsage={vaUsage}
+          setVaUsage={setVaUsage}
+          vaUsageSelectId={vaUsageSelectId}
+          dtiBarHeight={14}
+          dtiLayout="stacked"
+          calculatorHref={calculatorHref}
+        />
+        {geekTipJsx}
+      </>
+    );
+
+    return (
+      <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+        {sharedHead}
+        {headerJsx}
+        <div style={{ maxWidth: 1320, margin: "0 auto", padding: "32px 24px 0" }}>
+          {introJsx}
+        </div>
+        <CockpitShell rail={railJsx} canvas={canvasJsx} />
+        <div style={{ background: P.creamDark, padding: "24px 24px 64px" }}>
+          <div style={{ maxWidth: 1320, margin: "0 auto" }}>
+            {disclaimerJsx}
+          </div>
+        </div>
+        <MobileToolbar />
+      </main>
+    );
+  }
+
+  // ===================================================================
+  // LEGACY STACKED LAYOUT (<1100px) — preserved unchanged in behavior;
+  // inline JSX has been lifted into the consts above. The cards grid
+  // and per-program cross-link IIFE remain inline since they're
+  // legacy-only and not reused.
+  // ===================================================================
+  return (
+    <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
+      {sharedHead}
+      {headerJsx}
+
+      <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
+        {introJsx}
+        {renderInputsCard("legacy")}
+        {renderRateStrip("legacy")}
       </div>
 
       {/* RESULTS ZONE — deeper cream background extends from divider down to end of page */}
@@ -663,20 +898,7 @@ export function PreQualPage() {
           })}
         </div>
 
-        {/* Geek tip */}
-        <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24, maxWidth: 800, margin: "0 auto 24px" }}>
-          <div style={{ display: "flex", gap: 12 }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
-            <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
-              <p style={{ marginBottom: 8 }}>
-                <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers. USDA caps tighter — 34% front-end, 44.99% back-end — and adds a $119,850/yr household income limit (1-4 person, most areas). Those DTI ceilings are stretch maximums; USDA's standard GUS-Accept threshold is 29%/41%, and going above requires compensating factors.
-              </p>
-              <p>
-                <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
-              </p>
-            </div>
-          </div>
-        </div>
+        {geekTipJsx}
 
         {/* Cross-link to calculator */}
         {(() => {
@@ -701,9 +923,7 @@ export function PreQualPage() {
           );
         })()}
 
-        <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-          This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
-        </p>
+        {disclaimerJsx}
         </div>
       </div>
       <MobileToolbar />
