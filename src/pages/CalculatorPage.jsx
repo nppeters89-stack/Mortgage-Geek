@@ -789,9 +789,11 @@ export function CalculatorPage() {
                 <div style={{ padding: "20px" }}>
                   {/* Pie chart — mounts when this card is selected so the
                       recharts entry animation plays each time the user
-                      picks the card. Sits above the monthly breakdown. */}
+                      picks the card. Sits above the monthly breakdown.
+                      stopPropagation so tapping a slice (to pin the
+                      tooltip) doesn't bubble up and deselect the card. */}
                   {isSelected && prog.total > 0 && (
-                    <div style={{ marginBottom: 12 }}>
+                    <div style={{ marginBottom: 12 }} onClick={(e) => e.stopPropagation()}>
                       <PaymentPieChart
                         programName={prog.name}
                         pi={prog.pi}
