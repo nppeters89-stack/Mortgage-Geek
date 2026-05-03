@@ -403,7 +403,7 @@ export function PreQualPage() {
         .pq-cards-grid--compact { gap: 12px; margin-bottom: 0; }
         .pq-cards-grid--compact + .pq-detail-panel { margin-top: 0; }
         .pq-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 24px; }
-        @media (min-width: 1280px) { .pq-detail-panel-body { grid-template-columns: 1fr 1fr; } }
+        @media (min-width: 1100px) { .pq-detail-panel-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; } }
         .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(184, 134, 11, 0.4); }
         .pq-card-compact:focus-visible { outline: 2px solid #B8860B; outline-offset: 2px; }
         /* In the cockpit rail the inputs card collapses to a single column

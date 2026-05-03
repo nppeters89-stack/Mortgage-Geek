@@ -121,11 +121,108 @@ export function DetailPanel({
         </aside>
       )}
 
-      {/* BODY — DTI deep-dive lives at the top. Stacked at desktop,
-          side-by-side at desktop-wide via the .pq-detail-panel-body
-          grid hook (responsive-rules.md). */}
+      {/* BODY — 2-column at >=1100px (cockpit). LEFT: Math, Comfortable
+          Range, VA selector, Note, Est APR. RIGHT: DTI deep-dive. The
+          cross-link CTA sits full-width below the grid. The class hooks
+          .pq-detail-panel-body in PreQualPage's CSS for the responsive
+          grid switch. */}
       <div className="pq-detail-panel-body" style={panelBodyStyle}>
-        <div style={{ gridColumn: '1 / -1' }}>
+        {/* LEFT — The Math, Comfortable Range, VA selector, Note, APR */}
+        <div style={leftColumnStyle}>
+          <div>
+            <h3 style={sectionHeadingStyle}>The Math</h3>
+            <div style={breakdownInnerCardStyle}>
+              <BreakdownRow label="Max Housing Payment" value={fmt(prog.maxHousing)} />
+              <BreakdownRow label="Housing + Debts" value={fmt(prog.maxHousingPlusDebts)} />
+              <BreakdownRow label="Loan Amount" value={fmt(prog.loanAmount)} />
+              <BreakdownRow
+                label={`Loan Limit (${prog.name})`}
+                value={fmt(prog.loanLimit)}
+                muted={!prog.loanLimit}
+              />
+              {prog.financedFee > 0 && (
+                <BreakdownRow
+                  label={prog.financedFeeLabel}
+                  value={fmt(prog.financedFee)}
+                  italic
+                />
+              )}
+              {prog.isVA && prog.financedFee === 0 && (
+                <BreakdownRow
+                  label="Funding Fee Waived"
+                  value="$0"
+                  accent={P.sage}
+                  italic
+                />
+              )}
+              <BreakdownRow label="Down Payment" value={fmt(prog.downPayment)} />
+              {prog.mi > 0 && (
+                <BreakdownRow label={prog.miLabel} value={`${fmt(prog.mi)}/mo`} />
+              )}
+            </div>
+          </div>
+
+          {/* Comfortable Range — two-row layout. */}
+          {prog.comfortablePrice > 0 && (
+            <div style={comfortableCardStyle}>
+              <span style={comfortableEyebrowStyle}>Comfortable Range</span>
+              <div style={comfortableRowStyle}>
+                <span style={{ color: P.warmGray }}>Purchase Price</span>
+                <span style={{ fontWeight: 700, color: P.sage, fontVariantNumeric: 'tabular-nums' }}>
+                  {fmt(prog.comfortablePrice)}
+                </span>
+              </div>
+              <div style={comfortableRowStyle}>
+                <span style={{ color: P.warmGray }}>Housing Payment</span>
+                <span style={{ fontWeight: 600, color: P.text, fontVariantNumeric: 'tabular-nums' }}>
+                  {fmt(prog.comfortablePayment)}/mo
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* VA usage selector (VA only) */}
+          {prog.isVA && (
+            <div>
+              <label htmlFor={vaUsageSelectId} style={vaUsageLabelStyle}>
+                VA Eligibility
+              </label>
+              <select
+                id={vaUsageSelectId}
+                value={vaUsage}
+                onChange={(e) => setVaUsage(e.target.value)}
+                style={vaUsageSelectStyle}
+              >
+                <option value="first">First-Time Use</option>
+                <option value="subsequent">Subsequent Use</option>
+                <option value="exempt">Exempt (Disability)</option>
+              </select>
+            </div>
+          )}
+
+          {/* Notes paragraph */}
+          {prog.note && (
+            <p style={notesStyle}>{prog.note}</p>
+          )}
+
+          {/* APR readout */}
+          <div style={aprCardStyle}>
+            <span style={aprEyebrowStyle}>Est. APR</span>
+            <span style={aprValueStyle(prog.color)}>
+              {Number(prog.apr).toFixed(3)}%
+            </span>
+            {prog.aprSmallPrint ? (
+              <div style={aprDetailWrapStyle}>{prog.aprSmallPrint}</div>
+            ) : (
+              <p style={aprDetailLineStyle}>
+                Includes lender fees and any financed upfront cost. Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT — DTI power bars (focal visualization) */}
+        <div style={rightColumnStyle}>
           <DTIDeepDive
             prog={prog}
             grossMonthlyIncome={grossMonthlyIncome}
@@ -136,112 +233,15 @@ export function DetailPanel({
         </div>
       </div>
 
-      {/* RELOCATED CONTENT — everything below the deep-dive. */}
-      <div style={{ padding: '0 28px 24px' }}>
-        {/* Max breakdown table */}
-        <h3 style={sectionHeadingStyle}>The Math</h3>
-        <div style={breakdownInnerCardStyle}>
-          <BreakdownRow label="Max Housing Payment" value={fmt(prog.maxHousing)} />
-          <BreakdownRow label="Housing + Debts" value={fmt(prog.maxHousingPlusDebts)} />
-          <BreakdownRow label="Loan Amount" value={fmt(prog.loanAmount)} />
-          <BreakdownRow
-            label={`Loan Limit (${prog.name})`}
-            value={fmt(prog.loanLimit)}
-            muted={!prog.loanLimit}
-          />
-          {prog.financedFee > 0 && (
-            <BreakdownRow
-              label={prog.financedFeeLabel}
-              value={fmt(prog.financedFee)}
-              italic
-            />
-          )}
-          {prog.isVA && prog.financedFee === 0 && (
-            <BreakdownRow
-              label="Funding Fee Waived"
-              value="$0"
-              accent={P.sage}
-              italic
-            />
-          )}
-          <BreakdownRow label="Down Payment" value={fmt(prog.downPayment)} />
-          {prog.mi > 0 && (
-            <BreakdownRow label={prog.miLabel} value={`${fmt(prog.mi)}/mo`} />
-          )}
-        </div>
-
-        {/* Comfortable Range card — two-row layout mirrors the live
-            page's "Purchase Price" + "Housing Payment" treatment. */}
-        {prog.comfortablePrice > 0 && (
-          <div style={comfortableCardStyle}>
-            <span style={comfortableEyebrowStyle}>Comfortable Range</span>
-            <div style={comfortableRowStyle}>
-              <span style={{ color: P.warmGray }}>Purchase Price</span>
-              <span style={{ fontWeight: 700, color: P.sage, fontVariantNumeric: 'tabular-nums' }}>
-                {fmt(prog.comfortablePrice)}
-              </span>
-            </div>
-            <div style={comfortableRowStyle}>
-              <span style={{ color: P.warmGray }}>Housing Payment</span>
-              <span style={{ fontWeight: 600, color: P.text, fontVariantNumeric: 'tabular-nums' }}>
-                {fmt(prog.comfortablePayment)}/mo
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* VA usage selector (VA only) */}
-        {prog.isVA && (
-          <div style={{ marginTop: 16 }}>
-            <label htmlFor={vaUsageSelectId} style={vaUsageLabelStyle}>
-              VA Eligibility
-            </label>
-            <select
-              id={vaUsageSelectId}
-              value={vaUsage}
-              onChange={(e) => setVaUsage(e.target.value)}
-              style={vaUsageSelectStyle}
-            >
-              <option value="first">First-Time Use</option>
-              <option value="subsequent">Subsequent Use</option>
-              <option value="exempt">Exempt (Disability)</option>
-            </select>
-          </div>
-        )}
-
-        {/* Notes paragraph */}
-        {prog.note && (
-          <p style={notesStyle}>{prog.note}</p>
-        )}
-
-        {/* APR readout */}
-        <div style={aprCardStyle}>
-          <span style={aprEyebrowStyle}>Est. APR</span>
-          <span style={aprValueStyle(prog.color)}>
-            {Number(prog.apr).toFixed(3)}%
-          </span>
-          {/* APR small-print — the live page renders TWO paragraphs
-              (notes line + estimated-APR italic line), so we accept a
-              ReactNode and wrap it in a <div> to avoid <p>-in-<p>. */}
-          {prog.aprSmallPrint ? (
-            <div style={aprDetailWrapStyle}>{prog.aprSmallPrint}</div>
-          ) : (
-            <p style={aprDetailLineStyle}>
-              Includes lender fees and any financed upfront cost. Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.
-            </p>
-          )}
-        </div>
-
-        {/* Cross-link CTA — preserved behavior from the live page's
-            per-program "Run X $Y →" button. Uses calculatorHref built
-            by the page so URL params stay correct. */}
-        {calculatorHref && (
+      {/* Cross-link CTA — full-width below the 2-col grid. */}
+      {calculatorHref && (
+        <div style={{ padding: '0 28px 24px' }}>
           <a href={calculatorHref} style={crossLinkButtonStyle(prog.color)}>
             Run {prog.name} {fmt(prog.maxPrice)} in Calculator
             <span style={{ marginLeft: 8 }} aria-hidden="true">→</span>
           </a>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -327,6 +327,20 @@ const panelBodyStyle = {
   gridTemplateColumns: '1fr',
   gap: 24,
   padding: '24px 28px 16px',
+};
+
+const leftColumnStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  minWidth: 0,
+};
+
+const rightColumnStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 16,
+  minWidth: 0,
 };
 
 const sectionHeadingStyle = {
