@@ -1,18 +1,20 @@
-// src/components/calculator/CockpitShell.jsx
+// src/components/cockpit/CockpitShell.jsx
 //
 // Desktop-only frame: 340px sticky inputs rail on the left, flex canvas on
-// the right. Mobile/tablet renders nothing — `CalculatorPage` only mounts
-// this when `useIsCockpit()` returns true.
+// the right. Mobile/tablet renders nothing — consumer pages only mount
+// this when `useIsCockpit()` returns true. Shared by CalculatorPage and
+// PreQualPage; neither tool owns the shell, hence `cockpit-*` classes
+// (not `calc-cockpit-*`).
 //
 // This is layout primitive only — it doesn't know anything about
-// calculator state. The page passes pre-rendered `rail` and `canvas`
-// elements as children, and Cockpit positions them.
+// calculator or pre-qual state. The page passes pre-rendered `rail` and
+// `canvas` elements as children, and Cockpit positions them.
 //
 // Engineering standards: named export only, P from theme for the divider
 // color, no other theme dependencies.
 //
 // Note on root element: this component is intentionally a `<div>`, not a
-// `<main>`. CalculatorPage.jsx already renders an outer `<main>` — only
+// `<main>`. The consumer page already renders an outer `<main>` — only
 // one `<main>` per document is the spec. The inner `aside` and inner
 // `section` (formerly `<main>`) become semantic landmarks for the rail
 // and canvas.
@@ -31,7 +33,7 @@ const COCKPIT_GAP = 32;
 export function CockpitShell({ rail, canvas }) {
   return (
     <div
-      className="calc-cockpit-shell"
+      className="cockpit-shell"
       style={{
         display: 'flex',
         gap: COCKPIT_GAP,
@@ -42,7 +44,7 @@ export function CockpitShell({ rail, canvas }) {
       }}
     >
       <aside
-        className="calc-cockpit-rail"
+        className="cockpit-rail"
         aria-label="Loan inputs"
         style={{
           width: RAIL_WIDTH,
@@ -68,7 +70,7 @@ export function CockpitShell({ rail, canvas }) {
       </aside>
 
       <section
-        className="calc-cockpit-canvas"
+        className="cockpit-canvas"
         aria-label="Loan results"
         style={{
           flex: 1,

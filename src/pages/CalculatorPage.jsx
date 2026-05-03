@@ -10,7 +10,7 @@ import { RateInput } from "../components/RateInput";
 import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
 import { useIsCockpit, usePieDiameter } from "../utils/hooks";
-import { CockpitShell } from "../components/calculator/CockpitShell";
+import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
 import { DetailPanel } from "../components/calculator/DetailPanel";
 

@@ -22,29 +22,13 @@
 
 import React from 'react';
 import { P, F } from '../../theme';
-import { fmt } from '../../utils/format';
+import { fmt, withAlpha } from '../../utils/format';
 // `formatPayoff` is already imported by CalculatorPage from utils/math; pull
 // it directly here so DetailPanel is self-contained when it formats the
 // "pay it off X earlier" copy.
 import { generateAmortData, formatPayoff } from '../../utils/math';
 import { CompareIcon } from '../icons';
 import { PaymentPieChart } from './PaymentPieChart';
-
-/**
- * Tiny helper: convert a hex color (#RRGGBB) to rgba(r,g,b,a). Lets us
- * tint brand colors without hardcoding rgb triplets. If the input is not a
- * 6-digit hex (e.g. it's already rgba, a CSS keyword, or a 3-digit hex),
- * we return it unchanged — caller is responsible for picking sensible
- * inputs.
- */
-function withAlpha(hex, alpha) {
-  if (typeof hex !== 'string' || hex.length !== 7 || hex[0] !== '#') return hex;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return hex;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 /**
  * Props
