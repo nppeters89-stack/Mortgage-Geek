@@ -214,11 +214,6 @@ export function DetailPanel({
             </div>
           )}
 
-          {/* Notes paragraph */}
-          {prog.note && (
-            <p style={notesStyle}>{prog.note}</p>
-          )}
-
           {/* APR readout */}
           <div style={aprCardStyle}>
             <span style={aprEyebrowStyle}>Est. APR</span>
@@ -235,7 +230,10 @@ export function DetailPanel({
           </div>
         </div>
 
-        {/* RIGHT — DTI power bars (focal visualization) */}
+        {/* RIGHT — DTI power bars (focal visualization). The DTI caveat
+            note (`prog.note`) lives here too so it sits adjacent to the
+            calculations it qualifies, rather than floating in the left
+            column between Comfortable Range and APR. */}
         <div style={rightColumnStyle}>
           <DTIDeepDive
             prog={prog}
@@ -244,6 +242,9 @@ export function DetailPanel({
             barHeight={dtiBarHeight}
             layout={dtiLayout}
           />
+          {prog.note && (
+            <p style={notesStyle}>{prog.note}</p>
+          )}
         </div>
       </div>
 
