@@ -151,7 +151,7 @@ export function PaymentPieChart({
             color: P.warmGrayLight,
           }}
         >
-          {programName} Total
+          PITI
         </span>
         <span
           style={{
