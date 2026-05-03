@@ -196,22 +196,50 @@ function DTIBar({ ratio, cap, color, height }) {
   const ratioLabel = pct(ratio);
   const capLabel = pct(cap);
 
+  // Battery-cell layout + animation timing. Hoisted above the effects
+  // so the mount-sweep timeout can compute its total duration.
+  const CELL_COUNT = 5;
+  const CELL_RADIUS = 3;
+  const CELL_FILL_MS = 130; // per-cell fill duration
+  const CELL_STAGGER_MS = 110; // delay between successive cells
+  const POST_MOUNT_MS = 220; // un-staggered transition after mount sweep
+
   // Mount-sweep animation. animFill drives the visual width and label
   // position. Initialized to 0 so first paint shows empty cells; the
   // post-paint effect then sets it to fillPct, letting the cell-fill
   // CSS transition sweep left-to-right (battery-charging effect).
-  // On subsequent fillPct changes (e.g., user types new income) the
-  // panel does NOT remount, so animFill goes from old to new fillPct —
-  // a small incremental tween, not a 0-reset. The full 0→fillPct
-  // sweep only fires when DetailPanel remounts on program switch
-  // (via key={prog.name}).
+  //
+  // Per-cell transition-delay (CELL_STAGGER_MS * i) makes the cells
+  // light up sequentially — cell 0 first, then cell 1, etc. — so the
+  // bar reads as "powering up" rather than all cells filling at once.
+  //
+  // After the staggered sweep completes we flip `mounted` to true,
+  // which switches the cells to a snappier un-staggered transition.
+  // This way typing income/debts (which fires the second effect below)
+  // doesn't re-trigger the stagger — bars respond immediately.
   const [animFill, setAnimFill] = useState(0);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     // requestAnimationFrame ensures the browser paints the initial 0%
     // width before we set it to fillPct, so the transition actually runs.
-    const id = requestAnimationFrame(() => setAnimFill(fillPct));
-    return () => cancelAnimationFrame(id);
-  }, [fillPct]);
+    const raf = requestAnimationFrame(() => setAnimFill(fillPct));
+    // Flip `mounted` once the longest staggered transition would have
+    // finished (last cell's delay + its own duration).
+    const sweepMs = (CELL_COUNT - 1) * CELL_STAGGER_MS + CELL_FILL_MS;
+    const t = setTimeout(() => setMounted(true), sweepMs);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally mount-only — sweep runs once per (re)mount
+
+  useEffect(() => {
+    // Post-mount fillPct updates (typing income/debts). Skip during the
+    // mount sweep so it isn't interrupted.
+    if (mounted) setAnimFill(fillPct);
+  }, [fillPct, mounted]);
 
   // Power-bar label rule: ALWAYS tether the percentage to the leading
   // edge of the fill (the spot the bar is "maxing out" toward). Default
@@ -239,8 +267,6 @@ function DTIBar({ ratio, cap, color, height }) {
   // As the bar fills higher, darker cells become visible — gives the
   // "fuller = visually heavier" power-bar read while keeping the
   // discrete cell aesthetic.
-  const CELL_COUNT = 5;
-  const CELL_RADIUS = 3;
   const cellShade = (i) =>
     `color-mix(in srgb, white ${60 - i * 15}%, ${color})`;
 
@@ -287,7 +313,11 @@ function DTIBar({ ratio, cap, color, height }) {
             >
               {/* Partial-fill div is always rendered (even at 0% width)
                   so the CSS width transition can run from 0 → target on
-                  mount and panel-switch. */}
+                  mount and panel-switch. During the mount sweep each
+                  cell uses transition-delay = i * CELL_STAGGER_MS so
+                  cells light up sequentially. After the sweep completes
+                  (mounted === true) we drop the stagger so typing-driven
+                  updates respond immediately. */}
               <div
                 style={{
                   position: 'absolute',
@@ -296,7 +326,9 @@ function DTIBar({ ratio, cap, color, height }) {
                   bottom: 0,
                   width: `${cellFill * 100}%`,
                   background: cellShade(i),
-                  transition: 'width 600ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  transition: mounted
+                    ? `width ${POST_MOUNT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
+                    : `width ${CELL_FILL_MS}ms cubic-bezier(0.4, 0, 0.2, 1) ${i * CELL_STAGGER_MS}ms`,
                 }}
               />
             </div>
@@ -326,7 +358,11 @@ function DTIBar({ ratio, cap, color, height }) {
               background: P.cream,
               padding: '0 4px',
               borderRadius: 3,
-              transition: 'left 600ms cubic-bezier(0.4, 0, 0.2, 1)',
+              // Match the cells' overall pace: full sweep duration during
+              // mount, snappier post-mount.
+              transition: mounted
+                ? `left ${POST_MOUNT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
+                : `left ${(CELL_COUNT - 1) * CELL_STAGGER_MS + CELL_FILL_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             }}
           >
             {ratioLabel}
@@ -349,7 +385,9 @@ function DTIBar({ ratio, cap, color, height }) {
               background: color,
               padding: '0 4px',
               borderRadius: 3,
-              transition: 'right 600ms cubic-bezier(0.4, 0, 0.2, 1)',
+              transition: mounted
+                ? `right ${POST_MOUNT_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`
+                : `right ${(CELL_COUNT - 1) * CELL_STAGGER_MS + CELL_FILL_MS}ms cubic-bezier(0.4, 0, 0.2, 1)`,
             }}
           >
             {ratioLabel}
