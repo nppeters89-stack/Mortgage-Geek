@@ -178,25 +178,48 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
 
 function DTIRow({ label, ratio, cap, color, binding }) {
   const fillPct = Math.min(1, (ratio || 0) / (cap || 1)) * 100;
+  const CELL_COUNT = 5;
+  const OUTER_RADIUS = 2;
 
   return (
     <div style={dtiRowOuterStyle}>
       <span style={dtiRowLabelStyle}>{label}</span>
-      <div style={dtiRowBarOuterStyle(color)}>
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: `${fillPct}%`,
-            background: color,
-            borderRadius: 2,
-            boxShadow: binding
-              ? `0 0 0 2px ${withAlpha(color, 0.3)}`
-              : 'none',
-          }}
-        />
+      <div style={dtiRowBarOuterStyle(color, binding)}>
+        {Array.from({ length: CELL_COUNT }, (_, i) => {
+          const cellFill = Math.max(0, Math.min(1, (fillPct / 100) * CELL_COUNT - i));
+          const isFirst = i === 0;
+          const isLast = i === CELL_COUNT - 1;
+          const cellRadius = isFirst
+            ? `${OUTER_RADIUS}px 0 0 ${OUTER_RADIUS}px`
+            : isLast
+            ? `0 ${OUTER_RADIUS}px ${OUTER_RADIUS}px 0`
+            : 0;
+          return (
+            <div
+              key={i}
+              style={{
+                position: 'relative',
+                flex: 1,
+                background: withAlpha(color, 0.12),
+                borderRadius: cellRadius,
+                overflow: 'hidden',
+              }}
+            >
+              {cellFill > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: `${cellFill * 100}%`,
+                    background: color,
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
       <span style={dtiRowValueStyle}>{pct(ratio)}</span>
     </div>
@@ -329,11 +352,13 @@ const dtiRowLabelStyle = {
   color: P.warmGrayLight,
 };
 
-const dtiRowBarOuterStyle = (color) => ({
+const dtiRowBarOuterStyle = (color, binding) => ({
   position: 'relative',
   height: 6,
-  background: withAlpha(color, 0.12),
+  display: 'flex',
+  gap: 2,
   borderRadius: 2,
+  boxShadow: binding ? `0 0 0 2px ${withAlpha(color, 0.3)}` : 'none',
 });
 
 const dtiRowValueStyle = {

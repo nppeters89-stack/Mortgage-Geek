@@ -209,6 +209,14 @@ function DTIBar({ ratio, cap, color, height }) {
   // both the compact (14px) and the doubled (28px) treatments.
   const labelFontSize = Math.max(13, Math.round(height * 0.55));
 
+  // Battery-cell render: 5 equal cells, 2px gap, outer corners rounded.
+  // Each cell shows a left-anchored partial fill in `color` against a
+  // tint background, where the partial width within cell `i` is
+  // clamp((fillPct/100 * 5) - i, 0, 1). Fully-past cells fill solid;
+  // the in-progress cell partials; remaining cells stay tint.
+  const CELL_COUNT = 5;
+  const OUTER_RADIUS = 4;
+
   return (
     <div className="pq-dti-bar-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {/* Cap label row: lives above the bar, right-aligned to the cap tick (which is the bar's right edge). */}
@@ -225,40 +233,54 @@ function DTIBar({ ratio, cap, color, height }) {
         Cap: {capLabel}
       </div>
 
-      {/* Bar container — track + fill + cap tick + percentage label.
-          Both binding and non-binding bars use the same track styling;
+      {/* Bar container — cell row + cap tick + percentage label.
+          Both binding and non-binding bars use the same cell styling;
           the ← BINDING pill in the section header is the visual cue. */}
       <div
         style={{
           position: 'relative',
           height,
-          borderRadius: 4,
-          // Track: program color at 12% — gives a subtle band, not a hard track.
-          background: withAlpha(color, 0.12),
+          display: 'flex',
+          gap: 2,
         }}
       >
-        {/* Fill — horizontal gradient runs LIGHT (color mixed with 75%
-            white) on the left of the bar to FULL color on the right.
-            backgroundSize is scaled so the gradient always spans the
-            parent bar's full width, not the fill's own width — so the
-            leading edge of the fill always sits at the darkest shade
-            reached so far. The bar gets visually heavier as it fills,
-            which is the "power bar" read. */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            width: `${fillPct}%`,
-            background: `linear-gradient(to right, color-mix(in srgb, white 75%, ${color}) 0%, ${color} 100%)`,
-            backgroundSize: fillPct > 0 ? `${(10000 / fillPct).toFixed(2)}% 100%` : '100% 100%',
-            backgroundRepeat: 'no-repeat',
-            borderRadius: 4,
-            transition: 'width 220ms ease, background-size 220ms ease',
-          }}
-        />
+        {Array.from({ length: CELL_COUNT }, (_, i) => {
+          const cellFill = Math.max(0, Math.min(1, (fillPct / 100) * CELL_COUNT - i));
+          const isFirst = i === 0;
+          const isLast = i === CELL_COUNT - 1;
+          const cellRadius = isFirst
+            ? `${OUTER_RADIUS}px 0 0 ${OUTER_RADIUS}px`
+            : isLast
+            ? `0 ${OUTER_RADIUS}px ${OUTER_RADIUS}px 0`
+            : 0;
+          return (
+            <div
+              key={i}
+              aria-hidden="true"
+              style={{
+                position: 'relative',
+                flex: 1,
+                background: withAlpha(color, 0.12),
+                borderRadius: cellRadius,
+                overflow: 'hidden',
+              }}
+            >
+              {cellFill > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    width: `${cellFill * 100}%`,
+                    background: color,
+                    transition: 'width 220ms ease',
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
 
         {/* Percentage label — tethered to the leading edge of the fill.
             Sits in the empty portion just past the fill (dark on cream)
