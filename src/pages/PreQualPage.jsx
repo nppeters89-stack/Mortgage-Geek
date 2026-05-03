@@ -698,7 +698,7 @@ export function PreQualPage() {
           vaUsage={vaUsage}
           setVaUsage={setVaUsage}
           vaUsageSelectId={vaUsageSelectId}
-          dtiBarHeight={14}
+          dtiBarHeight={28}
           dtiLayout="stacked"
           calculatorHref={calculatorHref}
         />

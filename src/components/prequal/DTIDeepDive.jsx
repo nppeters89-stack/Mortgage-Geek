@@ -253,9 +253,14 @@ function DTIBar({ ratio, cap, color, binding, height }) {
   const ratioLabel = pct(ratio);
   const capLabel = pct(cap);
 
-  // Whether the percentage label fits inside the fill (≥30% of bar
-  // width). If it doesn't, the label floats to the right of the fill.
-  const labelInside = fillPct >= 30;
+  // Power-bar label rule: ALWAYS tether the percentage to the leading
+  // edge of the fill (the spot the bar is "maxing out" toward). Default
+  // sits in the empty portion just past the leading edge (dark text on
+  // cream). When the fill is so wide the label would overrun the cap
+  // tick, flip it inside the fill anchored to the leading edge from the
+  // right (white text on color). Either way the label stays glued to
+  // the bar's leading edge — that's the "power bar" read.
+  const labelEscapesRight = fillPct > 78;
 
   // Ring + halo on the binding bar. The halo is implemented as a 4px
   // outer outline with offset so it sits outside the bar's border.
@@ -266,6 +271,10 @@ function DTIBar({ ratio, cap, color, binding, height }) {
         boxShadow: `0 0 0 4px ${withAlpha(color, 0.18)}`,
       }
     : null;
+
+  // Label font scales with bar height so the digits feel balanced on
+  // both the compact (14px) and the doubled (28px) treatments.
+  const labelFontSize = Math.max(13, Math.round(height * 0.55));
 
   return (
     <div className="pq-dti-bar-wrap" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -309,20 +318,25 @@ function DTIBar({ ratio, cap, color, binding, height }) {
           }}
         />
 
-        {/* Percentage label — inside the fill if it fits, otherwise to the right */}
-        {labelInside ? (
+        {/* Percentage label — tethered to the leading edge of the fill.
+            Sits in the empty portion just past the fill (dark on cream)
+            until the fill is wide enough that it would overrun the cap
+            tick; then flips inside the fill, still anchored to the
+            leading edge (white on color). */}
+        {!labelEscapesRight ? (
           <span
             style={{
               position: 'absolute',
               top: '50%',
-              left: 8,
+              left: `calc(${fillPct}% + 8px)`,
               transform: 'translateY(-50%)',
               fontFamily: F.body,
-              fontSize: Math.max(10, height - 4),
+              fontSize: labelFontSize,
               fontWeight: 700,
-              color: '#fff',
+              color: P.text,
               fontVariantNumeric: 'tabular-nums',
               letterSpacing: 0.2,
+              whiteSpace: 'nowrap',
             }}
           >
             {ratioLabel}
@@ -332,14 +346,15 @@ function DTIBar({ ratio, cap, color, binding, height }) {
             style={{
               position: 'absolute',
               top: '50%',
-              left: `calc(${fillPct}% + 8px)`,
+              right: `calc(100% - ${fillPct}% + 8px)`,
               transform: 'translateY(-50%)',
               fontFamily: F.body,
-              fontSize: Math.max(10, height - 4),
+              fontSize: labelFontSize,
               fontWeight: 700,
-              color: P.text,
+              color: '#fff',
               fontVariantNumeric: 'tabular-nums',
               letterSpacing: 0.2,
+              whiteSpace: 'nowrap',
             }}
           >
             {ratioLabel}
