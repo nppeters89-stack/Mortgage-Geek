@@ -322,10 +322,11 @@ const usdaCalloutStyle = (color) => ({
   lineHeight: 1.5,
 });
 
+// NOTE: grid-template-columns and gap are intentionally driven by the
+// .pq-detail-panel-body CSS rule in PreQualPage.jsx so the @media
+// breakpoint can switch to 2 columns at >=1100px. Inline styles would
+// beat the class rule, so we only set padding here.
 const panelBodyStyle = {
-  display: 'grid',
-  gridTemplateColumns: '1fr',
-  gap: 24,
   padding: '24px 28px 16px',
 };
 
