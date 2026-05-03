@@ -129,7 +129,6 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
               cap={prog.frontCap}
               color={prog.color}
               binding={prog.bindingConstraint === 'front'}
-              striped={prog.isVA}
             />
             <DTIRow
               label="Back"
@@ -164,50 +163,29 @@ export function ProgramResultCardCompact({ prog, selected, onSelect }) {
 
 /* ----------------- thin DTI row (quick-glance) ----------------- */
 
-function DTIRow({ label, ratio, cap, color, binding, striped }) {
-  const fillPct = striped
-    ? 0
-    : Math.min(1, (ratio || 0) / (cap || 1)) * 100;
+function DTIRow({ label, ratio, cap, color, binding }) {
+  const fillPct = Math.min(1, (ratio || 0) / (cap || 1)) * 100;
 
   return (
     <div style={dtiRowOuterStyle}>
       <span style={dtiRowLabelStyle}>{label}</span>
       <div style={dtiRowBarOuterStyle(color)}>
-        {striped ? (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: 2,
-              background: `repeating-linear-gradient(
-                -45deg,
-                ${P.creamDark} 0,
-                ${P.creamDark} 4px,
-                ${withAlpha(color, 0.18)} 4px,
-                ${withAlpha(color, 0.18)} 8px
-              )`,
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              width: `${fillPct}%`,
-              background: color,
-              borderRadius: 2,
-              boxShadow: binding
-                ? `0 0 0 2px ${withAlpha(color, 0.3)}`
-                : 'none',
-            }}
-          />
-        )}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            width: `${fillPct}%`,
+            background: color,
+            borderRadius: 2,
+            boxShadow: binding
+              ? `0 0 0 2px ${withAlpha(color, 0.3)}`
+              : 'none',
+          }}
+        />
       </div>
-      <span style={dtiRowValueStyle}>
-        {striped ? 'N/A' : pct(ratio)}
-      </span>
+      <span style={dtiRowValueStyle}>{pct(ratio)}</span>
     </div>
   );
 }

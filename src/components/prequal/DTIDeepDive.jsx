@@ -84,34 +84,33 @@ export function DTIDeepDive({
 
   return (
     <div className="pq-dti-deepdive" style={containerStyle}>
-      {/* Front-End */}
-      {prog.isVA ? (
-        <DTISectionVANoFront prog={prog} barHeight={barHeight} />
-      ) : (
-        <DTISection
-          variant="front"
-          prog={prog}
-          ratio={prog.frontDTI}
-          cap={prog.frontCap}
-          binding={prog.bindingConstraint === 'front'}
-          breakdown={[
-            { kind: 'input', label: 'Max Housing Payment', value: fmt(prog.maxHousing) },
-            { kind: 'op', label: '÷' },
-            { kind: 'input', label: 'Gross Monthly Income', value: fmt(grossMonthlyIncome) },
-            { kind: 'op', label: '=' },
-            {
-              kind: 'result',
-              label: 'Front-End DTI',
-              value: pct(prog.frontDTI),
-            },
-            {
-              kind: 'capref',
-              label: `Cap: ${pct(prog.frontCap)}`,
-            },
-          ]}
-          barHeight={barHeight}
-        />
-      )}
+      {/* Front-End — VA's 50% front-end cap is treated like every other
+          program. (The earlier "VA has no front-end cap" branch reflected
+          a different policy stance; PreQualPage now uses 0.50 for VA so
+          we always render a normal bar.) */}
+      <DTISection
+        variant="front"
+        prog={prog}
+        ratio={prog.frontDTI}
+        cap={prog.frontCap}
+        binding={prog.bindingConstraint === 'front'}
+        breakdown={[
+          { kind: 'input', label: 'Max Housing Payment', value: fmt(prog.maxHousing) },
+          { kind: 'op', label: '÷' },
+          { kind: 'input', label: 'Gross Monthly Income', value: fmt(grossMonthlyIncome) },
+          { kind: 'op', label: '=' },
+          {
+            kind: 'result',
+            label: 'Front-End DTI',
+            value: pct(prog.frontDTI),
+          },
+          {
+            kind: 'capref',
+            label: `Cap: ${pct(prog.frontCap)}`,
+          },
+        ]}
+        barHeight={barHeight}
+      />
 
       {/* Back-End */}
       <DTISection
@@ -166,7 +165,6 @@ function DTISection({ variant, prog, ratio, cap, binding, breakdown, barHeight }
         ratio={ratio}
         cap={cap}
         color={prog.color}
-        binding={binding}
         height={barHeight}
       />
 
@@ -176,64 +174,9 @@ function DTISection({ variant, prog, ratio, cap, binding, breakdown, barHeight }
   );
 }
 
-/* ----------------- VA front-end (no cap) ----------------- */
-
-function DTISectionVANoFront({ prog, barHeight }) {
-  // [NEW COPY — Nick to review] Replace this string with the live
-  // page's exact phrasing for VA's no-front-cap state. Look in the
-  // current PreQualPage.jsx for the VA card body — there's already
-  // copy explaining VA only enforces back-end DTI. Lift it verbatim.
-  const vaNoFrontCopy =
-    'VA does not enforce a front-end DTI cap — back-end is the only binding constraint. [NEW COPY — Nick to review]';
-
-  // Diagonal stripe pattern in the program color tint.
-  const stripeColor = withAlpha(prog.color, 0.18);
-
-  return (
-    <section
-      className="pq-dti-section pq-dti-section--va-nofront"
-      style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-    >
-      <header style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-        <h4 style={sectionHeadingStyle}>Front-End DTI</h4>
-        <span style={vaNAPillStyle}>N/A</span>
-      </header>
-
-      <div
-        role="img"
-        aria-label="VA does not enforce a front-end DTI cap"
-        style={{
-          height: barHeight,
-          borderRadius: 4,
-          background: `repeating-linear-gradient(
-            -45deg,
-            ${P.creamDark} 0,
-            ${P.creamDark} 6px,
-            ${stripeColor} 6px,
-            ${stripeColor} 12px
-          )`,
-        }}
-      />
-
-      <p
-        style={{
-          fontFamily: F.body,
-          fontSize: 12,
-          fontStyle: 'italic',
-          color: P.warmGrayLight,
-          lineHeight: 1.5,
-          margin: 0,
-        }}
-      >
-        {vaNoFrontCopy}
-      </p>
-    </section>
-  );
-}
-
 /* ----------------- the bar component ----------------- */
 
-function DTIBar({ ratio, cap, color, binding, height }) {
+function DTIBar({ ratio, cap, color, height }) {
   // Display ratio as % of the total visible scale. We'd usually show a
   // 0..cap scale, but consumers asked specifically: "show me how close
   // I am to the cap." So:
@@ -262,16 +205,6 @@ function DTIBar({ ratio, cap, color, binding, height }) {
   // the bar's leading edge — that's the "power bar" read.
   const labelEscapesRight = fillPct > 78;
 
-  // Ring + halo on the binding bar. The halo is implemented as a 4px
-  // outer outline with offset so it sits outside the bar's border.
-  const ringStyles = binding
-    ? {
-        outline: `2px solid ${color}`,
-        outlineOffset: 0,
-        boxShadow: `0 0 0 4px ${withAlpha(color, 0.18)}`,
-      }
-    : null;
-
   // Label font scales with bar height so the digits feel balanced on
   // both the compact (14px) and the doubled (28px) treatments.
   const labelFontSize = Math.max(13, Math.round(height * 0.55));
@@ -292,7 +225,9 @@ function DTIBar({ ratio, cap, color, binding, height }) {
         Cap: {capLabel}
       </div>
 
-      {/* Bar container — track + fill + cap tick + percentage label. */}
+      {/* Bar container — track + fill + cap tick + percentage label.
+          Both binding and non-binding bars use the same track styling;
+          the ← BINDING pill in the section header is the visual cue. */}
       <div
         style={{
           position: 'relative',
@@ -300,7 +235,6 @@ function DTIBar({ ratio, cap, color, binding, height }) {
           borderRadius: 4,
           // Track: program color at 12% — gives a subtle band, not a hard track.
           background: withAlpha(color, 0.12),
-          ...ringStyles,
         }}
       >
         {/* Fill — horizontal gradient runs LIGHT (color mixed with 75%
@@ -472,19 +406,6 @@ const bindingPillStyle = (color) => ({
   borderRadius: 999,
   padding: '2px 8px 3px',
 });
-
-const vaNAPillStyle = {
-  display: 'inline-block',
-  fontFamily: F.body,
-  fontSize: 9.5,
-  fontWeight: 700,
-  letterSpacing: 1,
-  textTransform: 'uppercase',
-  color: P.warmGrayLight,
-  background: P.creamDark,
-  borderRadius: 999,
-  padding: '2px 8px 3px',
-};
 
 const breakdownTableStyle = {
   fontFamily: F.body,
