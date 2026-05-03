@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
-import { fmt } from "../utils/format";
+import { fmt, pctCap } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { useIsCockpit } from "../utils/hooks";
 import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
@@ -858,7 +858,7 @@ export function PreQualPage() {
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
                         <span>Front-End DTI {prog.bindingConstraint === "front-end" && prog.frontMax ? "← binding" : ""}</span>
                         <span style={{ fontWeight: 700, color: prog.frontMax && prog.bindingConstraint === "front-end" ? prog.color : P.warmGrayLight }}>
-                          {prog.frontMax ? `${((prog.maxPayment / grossIncome) * 100).toFixed(1)}% / ${(prog.frontMax * 100).toFixed(1)}%` : "N/A (VA)"}
+                          {prog.frontMax ? `${((prog.maxPayment / grossIncome) * 100).toFixed(1)}% / ${pctCap(prog.frontMax)}` : "N/A (VA)"}
                         </span>
                       </div>
                       <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>
@@ -874,7 +874,7 @@ export function PreQualPage() {
                       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: P.warmGrayLight, marginBottom: 4 }}>
                         <span>Back-End DTI {prog.bindingConstraint === "back-end" ? "← binding" : ""}</span>
                         <span style={{ fontWeight: 700, color: prog.bindingConstraint === "back-end" ? prog.color : P.warmGrayLight }}>
-                          {prog.currentBackDTI.toFixed(1)}% / {(prog.backMax * 100).toFixed(1)}%
+                          {prog.currentBackDTI.toFixed(1)}% / {pctCap(prog.backMax)}
                         </span>
                       </div>
                       <div style={{ height: 6, background: P.creamDark, borderRadius: 3, overflow: "hidden" }}>

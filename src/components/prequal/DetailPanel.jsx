@@ -150,7 +150,7 @@ export function DetailPanel({
               <BreakdownRow label="Housing + Debts" value={fmt(prog.maxHousingPlusDebts)} />
               <BreakdownRow label="Loan Amount" value={fmt(prog.loanAmount)} />
               <BreakdownRow
-                label={`Loan Limit (${prog.name})`}
+                label="Loan Limit"
                 value={fmt(prog.loanLimit)}
                 muted={!prog.loanLimit}
               />

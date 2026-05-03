@@ -42,7 +42,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { P, F, PROGRAM_COLORS } from '../../theme';
-import { fmt, withAlpha } from '../../utils/format';
+import { fmt, pctCap, withAlpha } from '../../utils/format';
 
 /**
  * Props
@@ -261,7 +261,9 @@ function DTIBar({ ratio, cap, color, height }) {
   // scale uses the full bar width meaningfully.
   const fillPct = Math.min(1, ratio / cap) * 100;
   const ratioLabel = pct(ratio);
-  const capLabel = pct(cap);
+  // Caps use pctCap() so 0.4999 renders as "49.99%" rather than rounding
+  // up to "50.0%". Borrower DTI keeps 1-decimal precision via pct().
+  const capLabel = pctCap(cap);
 
   // Battery-cell layout + animation timing. Hoisted above the effects
   // so the mount-sweep timeout can compute its total duration.
