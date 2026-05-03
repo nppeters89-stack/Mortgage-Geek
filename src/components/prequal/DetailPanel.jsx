@@ -11,7 +11,7 @@
 //   - USDA household-income callout (when USDA is selected)
 //   - Notes paragraph (verbatim)
 //   - APR readout + small print (verbatim)
-//   - Footer: "Run [Program] [$Price] in Calculator →"
+//   - Footer: "Run this scenario in Calculator →"
 //
 // All copy strings except the [NEW COPY — Nick to review] eyebrows are
 // lifted from PreQualPage.jsx via props on `prog`. If a string in this
@@ -106,7 +106,7 @@ export function DetailPanel({
           <span style={panelRateStyle}>
             {Number(prog.rate).toFixed(3)}%
             <span style={{ opacity: 0.65, fontSize: 14, marginLeft: 6 }}>
-              · {Number(prog.apr).toFixed(3)}% APR
+              · {Number(prog.apr).toFixed(3)}%
             </span>
           </span>
         </div>
@@ -251,7 +251,7 @@ export function DetailPanel({
       {calculatorHref && (
         <div style={{ padding: '0 28px 24px' }}>
           <a href={calculatorHref} style={crossLinkButtonStyle(prog.color)}>
-            Run {prog.name} {fmt(prog.maxPrice)} in Calculator
+            Run this scenario in Calculator
             <span style={{ marginLeft: 8 }} aria-hidden="true">→</span>
           </a>
         </div>
@@ -490,7 +490,10 @@ const crossLinkButtonStyle = (color) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  marginTop: 16,
+  // Constrain width and auto-center horizontally so the navy CTA doesn't
+  // bottom-weight the panel as a full-bleed block.
+  maxWidth: 520,
+  margin: '16px auto 0',
   padding: '14px 20px',
   background: color,
   color: '#fff',
