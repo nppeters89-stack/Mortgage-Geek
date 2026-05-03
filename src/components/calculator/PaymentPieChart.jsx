@@ -41,6 +41,7 @@ export function PaymentPieChart({
   hoa,
   total,
   diameter = 280,
+  showTooltip = true,
 }) {
   // Build the slice array. Order is fixed (P&I always first, HOA always last
   // when present) so the chart reads consistently across programs.
@@ -73,9 +74,10 @@ export function PaymentPieChart({
   const outerRadius = diameter / 2;
   const innerRadius = outerRadius * 0.62; // 62% inner = comfortable label hole
   // Reserve room below the donut for the pinned tooltip so it never has to
-  // overlap the center label or any slice. The chart's own coordinate space
-  // grows; the donut is anchored to the top half via cy.
-  const TOOLTIP_RESERVE = 64;
+  // overlap the center label or any slice. When showTooltip is off (mobile
+  // card path, where colored badges on the breakdown rows replace the
+  // tooltip role), drop the reserve so the chart's bottom hugs the donut.
+  const TOOLTIP_RESERVE = showTooltip ? 64 : 0;
   const totalHeight = diameter + TOOLTIP_RESERVE;
   const donutCenterY = diameter / 2; // donut stays vertically centered in the
                                      // top `diameter` slab of the chart
@@ -115,12 +117,14 @@ export function PaymentPieChart({
               can never overlap the center label. Using `position` overrides
               Recharts' default cursor-tracking behavior; `wrapperStyle`
               keeps it click-through and centered relative to the chart. */}
-          <Tooltip
-            content={<SliceTooltip total={total} />}
-            position={{ x: Math.max(0, (diameter - 200) / 2), y: diameter + 4 }}
-            wrapperStyle={{ pointerEvents: 'none', zIndex: 5 }}
-            isAnimationActive={false}
-          />
+          {showTooltip && (
+            <Tooltip
+              content={<SliceTooltip total={total} />}
+              position={{ x: Math.max(0, (diameter - 200) / 2), y: diameter + 4 }}
+              wrapperStyle={{ pointerEvents: 'none', zIndex: 5 }}
+              isAnimationActive={false}
+            />
+          )}
         </PieChart>
       </ResponsiveContainer>
 

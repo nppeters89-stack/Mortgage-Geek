@@ -790,10 +790,11 @@ export function CalculatorPage() {
                   {/* Pie chart — mounts when this card is selected so the
                       recharts entry animation plays each time the user
                       picks the card. Sits above the monthly breakdown.
-                      stopPropagation so tapping a slice (to pin the
-                      tooltip) doesn't bubble up and deselect the card. */}
+                      Tooltip is disabled here; the breakdown rows below
+                      carry color dots that match each slice, so tapping
+                      slices is no longer needed. */}
                   {isSelected && prog.total > 0 && (
-                    <div style={{ marginBottom: 12 }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ marginBottom: 8 }}>
                       <PaymentPieChart
                         programName={prog.name}
                         pi={prog.pi}
@@ -804,21 +805,33 @@ export function CalculatorPage() {
                         hoa={hoa}
                         total={prog.total}
                         diameter={pieDiameter}
+                        showTooltip={false}
                       />
                     </div>
                   )}
 
-                  {/* Breakdown */}
+                  {/* Breakdown — each row leads with a color dot that
+                      matches the corresponding pie slice. Slice colors
+                      mirror PaymentPieChart's logic (P&I = prog.color;
+                      insurance flips to gold for VA where prog.color is
+                      sage; MI = gold; HOA = warmGrayLight). */}
                   <div style={{ marginBottom: 16 }}>
-                    {[
-                      { label: "Principal & Interest", val: prog.pi },
-                      ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi }] : []),
-                      { label: "Taxes", val: taxes },
-                      { label: "Insurance", val: insurance },
-                      ...(hoa > 0 ? [{ label: "HOA Dues", val: hoa }] : []),
-                    ].map((r, ri) => (
-                      <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", fontSize: 12, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
-                        <span>{r.label}</span>
+                    {(() => {
+                      const piColor = prog.color;
+                      const insuranceColor = piColor === P.sage ? P.gold : P.sage;
+                      return [
+                        { label: "Principal & Interest", val: prog.pi, color: piColor },
+                        ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi, color: P.gold }] : []),
+                        { label: "Taxes", val: taxes, color: P.warmGray },
+                        { label: "Insurance", val: insurance, color: insuranceColor },
+                        ...(hoa > 0 ? [{ label: "HOA Dues", val: hoa, color: P.warmGrayLight }] : []),
+                      ];
+                    })().map((r, ri) => (
+                      <div key={ri} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", fontSize: 12, color: P.warmGray, borderBottom: `1px solid ${P.cream}` }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+                          <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: r.color, flexShrink: 0 }} aria-hidden="true" />
+                          {r.label}
+                        </span>
                         <span style={{ fontWeight: 600, color: P.text }}>{fmt(r.val)}</span>
                       </div>
                     ))}
