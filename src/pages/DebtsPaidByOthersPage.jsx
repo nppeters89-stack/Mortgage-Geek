@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { DebtsPaidByOthersGrid } from "../components/DebtsPaidByOthersGrid";
@@ -336,7 +335,6 @@ export function DebtsPaidByOthersPage() {
           Sources: Fannie Mae Selling Guide B3-6-05 (Monthly Debt Obligations); Freddie Mac Single-Family Seller/Servicer Guide Section 5401.2 (Monthly debt payment-to-income ratio); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.b.iv.(L) and II.A.5.a.iv.(N) (Contingent Liabilities); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 11 (Ratio Analysis); VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Topic 5 (Debts and Obligations); author's 12+ years of field experience originating mortgages with co-signed and third-party-paid debts.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

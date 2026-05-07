@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { WaitPeriodRows, Ch13Card } from "../components/WaitPeriodRows";
 import { EVENTS } from "../data/derogatoryCredit";
@@ -228,7 +227,6 @@ export function DerogatoryCreditPage() {
           </p>
         </div>
 
-        <DeepDiveFooter />
 
       </div>
 

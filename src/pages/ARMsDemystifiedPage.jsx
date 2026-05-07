@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ARMRateAnatomyGraphic } from "../components/ARMRateAnatomyGraphic";
@@ -696,7 +695,6 @@ export function ARMsDemystifiedPage() {
           Sources: Federal Reserve Bank of New York data on Secured Overnight Financing Rate (SOFR), 2026; Mortgage Bankers Association weekly mortgage applications survey, 2026 data on ARM share of originations; 12 CFR Part 1026 (Regulation Z) Adjustable-Rate Mortgage disclosure requirements; author's 12+ years of field experience originating ARM and fixed-rate mortgages.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

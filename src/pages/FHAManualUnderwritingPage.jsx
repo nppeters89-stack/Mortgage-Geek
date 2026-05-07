@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { StackedTierCardsBranded } from "../components/StackedTierCardsBranded";
@@ -633,7 +632,6 @@ export function FHAManualUnderwritingPage() {
           Sources: HUD 4000.1 Single Family Housing Policy Handbook, Section II.A.5 (Manual Underwriting of the Borrower), updated 04/10/2025; HUD 4000.1 Section II.A.5.a (Credit Requirements, Manual); author's 12+ years of field experience as an FHA loan originator.
         </p>
 
-        <DeepDiveFooter />
 
         </div>
 

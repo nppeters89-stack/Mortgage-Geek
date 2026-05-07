@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { USDARatioThresholdGrid } from "../components/USDARatioThresholdGrid";
@@ -774,7 +773,6 @@ export function USDAManualUnderwritingPage() {
           Sources: USDA Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 10 (Credit Analysis) and Chapter 11 (Ratio Analysis), current as of 2026; USDA HB-1-3555, Attachment 10-A (Credit Matrix); USDA Procedure Notice 621 (August 5, 2024) revising PITI ratio waiver ceiling to 34%; 7 CFR Part 3555 (Single Family Housing Guaranteed Loan Program regulations); author's 12+ years of field experience originating USDA Guaranteed loans.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

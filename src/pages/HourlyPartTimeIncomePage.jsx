@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { HourlyIncomeGrid } from "../components/HourlyIncomeGrid";
@@ -505,7 +504,6 @@ export function HourlyPartTimeIncomePage() {
           Sources: Fannie Mae Selling Guide B3-3.3-01 (Base Income, including variable base for hourly), B3-3.3-08 (Seasonal Income), B3-3.4-01 (General Requirements for Other Sources of Income), restructured March 4, 2026; Freddie Mac Single-Family Seller/Servicer Guide Sections 5303.2-5303.5, 5901.1-5901.3; HUD Handbook 4000.1, Section II.A.4.c.iii (hourly), II.A.4.c.iv & vi (part-time, secondary, seasonal), II.A.5.b.iv & vi; VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Section 2-h; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Attachment 9-A; author's 12+ years of field experience originating mortgages with hourly, part-time, and seasonal borrowers.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

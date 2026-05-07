@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { VAResidualIncomeGrid } from "../components/VAResidualIncomeGrid";
@@ -659,7 +658,6 @@ export function VAManualUnderwritingPage() {
           Sources: VA Pamphlet 26-7, Lender's Handbook, Chapter 4 (Credit Underwriting), current as of 2026; VA Pamphlet 26-7, Chapter 4, Topic 10d (Compensating Factors); VA Circular 26-25-7 (Energy Efficient Mortgages); 38 CFR 36.4340 (Underwriting Standards, Residual Income Tables); author's 12+ years of field experience as a VA loan originator.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { GiftFundDonorMatrix } from "../components/GiftFundDonorMatrix";
@@ -450,7 +449,6 @@ export function GiftFundsPage() {
           Sources: Fannie Mae Selling Guide B3-4.3-04 (Personal Gifts); Freddie Mac Single-Family Seller/Servicer Guide Section 5501.4 (Other sources of funds); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.d.iii(F) and II.A.5.c.iii(F) (Gifts); FHA policy update effective for case numbers assigned on or after 8/19/2024 (gift fund documentation methods); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating mortgages with gift fund components.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

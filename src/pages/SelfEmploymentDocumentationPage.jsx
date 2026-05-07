@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SelfEmploymentDocumentationGrid } from "../components/SelfEmploymentDocumentationGrid";
@@ -661,7 +660,6 @@ export function SelfEmploymentDocumentationPage() {
           Sources: Fannie Mae Selling Guide B3-3.2 (Self-Employment Income); Fannie Mae Selling Guide B3-3.4 (Profit and Loss Analysis); Freddie Mac Single-Family Seller/Servicer Guide 5304.1 (Self-Employed Income); FHA Single Family Housing Policy Handbook 4000.1, Section II.A.4 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook 3555-1, Chapter 9; IRS Schedule C, Form 1120-S, Form 1065, Form 1120, K-1 instructions; author's 12+ years of field experience originating loans for self-employed borrowers.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

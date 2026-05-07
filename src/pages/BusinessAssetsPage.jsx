@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { BusinessAssetDocsGrid } from "../components/BusinessAssetDocsGrid";
@@ -426,7 +425,6 @@ export function BusinessAssetsPage() {
           Sources: Fannie Mae Selling Guide B3-3.5-01 (Underwriting Factors and Documentation for a Self-Employed Borrower); Fannie Mae Selling Guide B3-4.2-02 (Depository Accounts); Freddie Mac Single-Family Seller/Servicer Guide, Asset documentation sections; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Asset Verification); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating self-employed mortgage files using business assets.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

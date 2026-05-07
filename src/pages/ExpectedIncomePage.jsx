@@ -2,7 +2,6 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ExpectedIncomeMatrix } from "../components/ExpectedIncomeMatrix";
@@ -519,7 +518,6 @@ export function ExpectedIncomePage() {
           Sources: Fannie Mae Selling Guide B3-3.3-03 (Employment Offers or Contracts), updated March 4, 2026; Fannie Mae Selling Guide B3-3.1-04 (Verbal Verification of Employment); Freddie Mac Single-Family Seller/Servicer Guide Section 5303.2; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating expected income loans for relocating professionals.
         </p>
 
-        <DeepDiveFooter />
 
       </article>
 

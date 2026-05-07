@@ -1,7 +1,6 @@
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { DeepDiveFooter } from "../components/DeepDiveFooter";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { TNLoanLimitsMap } from "../components/TNLoanLimitsMap";
@@ -417,7 +416,6 @@ export function TNLoanLimitsPage() {
           </p>
         </div>
 
-        <DeepDiveFooter />
 
       </article>
 
