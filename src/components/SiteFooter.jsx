@@ -194,7 +194,11 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             display: "flex",
             flexWrap: "wrap",
             gap: 100,
-            justifyContent: L.centerColumns ? "center" : "flex-start",
+            // Tool layouts center the columns on desktop to balance the
+            // wider canvas, but on mobile (where columns wrap to a
+            // single stacked row) left-align reads cleaner alongside
+            // the left-aligned disclaimers below.
+            justifyContent: L.centerColumns && !isMobile ? "center" : "flex-start",
           }}
         >
           {/* LEFT — Brand voice + LO + contact + EHL */}
