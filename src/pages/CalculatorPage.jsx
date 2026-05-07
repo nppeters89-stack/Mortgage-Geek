@@ -671,14 +671,16 @@ export function CalculatorPage() {
             National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
           </p>
 
-          {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
+          {/* Rate pills — RateInput component unchanged, cream pills sit on navy.
+              Filtered by visiblePrograms so only the programs the user is
+              actually comparing show their rate slider. */}
           <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative", zIndex: 1 }}>
             {[
               { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
               { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
               { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
               { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
-            ].map((p) => (
+            ].filter((p) => visiblePrograms.includes(p.label)).map((p) => (
               <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
             ))}
           </div>
@@ -1388,7 +1390,7 @@ export function CalculatorPage() {
                     { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
                     { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
                     { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
-                  ].map((p) => (
+                  ].filter((p) => visiblePrograms.includes(p.label)).map((p) => (
                     <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
                   ))}
                 </div>
