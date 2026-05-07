@@ -169,18 +169,6 @@ export function SiteFooter({ hasSidebar = false }) {
           >
             Mortgages Demystified.
           </p>
-          <p
-            style={{
-              fontFamily: F.body,
-              fontSize: 12,
-              lineHeight: 1.65,
-              color: P.warmGray,
-              maxWidth: 560,
-              margin: "14px 0 0",
-            }}
-          >
-            This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
-          </p>
         </div>
 
         <hr style={dividerStyle} />
@@ -369,7 +357,22 @@ export function SiteFooter({ hasSidebar = false }) {
 
         <hr style={dividerStyle} />
 
-        {/* ----------------- ZONE 3 — Corporate fine print ----------------- */}
+        {/* ----------------- ZONE 3 — Fine print -----------------
+            Educational disclaimer sits immediately above the verbatim
+            corporate disclosure. Both span the full inner-container
+            width and use the same fine-print typography so they read
+            as a single block of legal text; a 24px gap separates them. */}
+        <p
+          style={{
+            fontFamily: F.body,
+            fontSize: 11,
+            lineHeight: 1.65,
+            color: P.warmGrayLight,
+            margin: "0 0 24px",
+          }}
+        >
+          This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
+        </p>
         <p
           style={{
             fontFamily: F.body,
