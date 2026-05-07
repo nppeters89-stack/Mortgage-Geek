@@ -2,7 +2,7 @@ import { P, F, globalCSS } from "../theme";
 import { HEADSHOT } from "../data/headshot";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME } from "../data/compliance";
+import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME, LO_TITLE } from "../data/compliance";
 
 export function AboutPage() {
   return (
@@ -42,7 +42,7 @@ export function AboutPage() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
             <h1 style={{ fontFamily: F.display, fontSize: "clamp(28px, 4vw, 38px)", color: P.navy, marginBottom: 6 }}>Nick Peters</h1>
-            <p style={{ fontSize: 14, color: P.warmGray }}>Mortgage Loan Originator at {TRADE_NAME} · NMLS# {PERSONAL_NMLS}</p>
+            <p style={{ fontSize: 14, color: P.warmGray }}>{LO_TITLE} at {TRADE_NAME} · NMLS# {PERSONAL_NMLS}</p>
             <p style={{ fontSize: 13, color: P.warmGrayLight, marginTop: 2 }}>Nashville, TN · Licensed since 2014</p>
           </div>
         </div>
@@ -50,7 +50,7 @@ export function AboutPage() {
         {/* Bio */}
         <div style={{ maxWidth: 640, marginBottom: 48 }}>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            I'm a licensed Mortgage Loan Originator (NMLS# {PERSONAL_NMLS}) at {TRADE_NAME} (Corporate NMLS# {CORPORATE_NMLS}).
+            I'm a {LO_TITLE} at {TRADE_NAME} and a licensed Mortgage Loan Originator (NMLS# {PERSONAL_NMLS}, Corporate NMLS# {CORPORATE_NMLS}).
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
             For twelve years, I worked the sales desk in new construction model homes. I was the person families approached after falling in love with a house — the one responsible for turning that excitement into numbers that actually worked. Some conversations ended in approvals. Others required me to gently explain why the answer was "not yet," and what steps we could take to change that.
