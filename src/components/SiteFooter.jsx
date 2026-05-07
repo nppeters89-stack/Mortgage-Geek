@@ -128,13 +128,19 @@ export function SiteFooter({ hasSidebar = false }) {
       <div
         style={{
           // Mirror the Page primitive (src/components/homepage/Page.jsx)
-          // so the footer's gutters line up exactly with content above:
-          // maxWidth 1180, fluid horizontal padding clamp(20, 4vw, 56).
-          // Vertical padding stays responsive per the spec (32 mobile / 48 desktop).
+          // so the footer's gutters line up exactly with content above.
+          // Page applies clamp(20, 4vw, 56) horizontal, then EVERY
+          // homepage <section> wraps its content in another 40px
+          // horizontal pad (e.g. PreApprovalChecklist, JargonDecoder
+          // both use `padding: "64px 40px"`). The footer has no such
+          // section wrapper, so its horizontal padding has to absorb
+          // both layers — clamp + 40 — to land on the same vertical
+          // guide as the section content above. Vertical padding stays
+          // on the footer's own scale (32 mobile / 48 desktop).
           maxWidth: 1180,
           margin: "0 auto",
-          paddingLeft: "clamp(20px, 4vw, 56px)",
-          paddingRight: "clamp(20px, 4vw, 56px)",
+          paddingLeft: "clamp(60px, calc(4vw + 40px), 96px)",
+          paddingRight: "clamp(60px, calc(4vw + 40px), 96px)",
           paddingTop: isMobile ? 32 : 48,
           paddingBottom: isMobile ? 32 : 48,
           boxSizing: "border-box",
@@ -150,7 +156,7 @@ export function SiteFooter({ hasSidebar = false }) {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 48,
+            gap: 100,
           }}
         >
           {/* LEFT — Brand voice + LO + contact + EHL */}
