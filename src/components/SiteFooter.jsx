@@ -156,7 +156,7 @@ export function SiteFooter({ hasSidebar = false }) {
             display: "flex",
             flexWrap: "wrap",
             justifyContent: "center",
-            gap: 48,
+            gap: 180,
             maxWidth: 880,
             margin: "0 auto",
           }}
