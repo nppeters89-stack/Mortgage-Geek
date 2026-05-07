@@ -184,11 +184,16 @@ export function SiteFooter({ hasSidebar = false }) {
 
         <hr style={dividerStyle} />
 
-        {/* ----------------- ZONE 2 — Attribution ----------------- */}
+        {/* ----------------- ZONE 2 — Attribution -----------------
+            auto-fit grid: keep two columns whenever the container can
+            hold two 260px tracks side-by-side, otherwise collapse to one.
+            This responds to actual container width (so the homepage,
+            which loses 280px to the sidebar, behaves correctly) instead
+            of guessing from viewport via a JS breakpoint. */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: 32,
           }}
         >
