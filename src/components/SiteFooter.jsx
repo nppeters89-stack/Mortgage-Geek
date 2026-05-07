@@ -141,22 +141,22 @@ export function SiteFooter({ hasSidebar = false }) {
         }}
       >
         {/* ----------------- ZONE 2 — Attribution -----------------
-            auto-fit grid: keep two columns whenever the container can
-            hold two 260px tracks side-by-side, otherwise collapse to one.
-            This responds to actual container width (so the homepage,
-            which loses 280px to the sidebar, behaves correctly) instead
-            of guessing from viewport via a JS breakpoint.
+            Flex row with wrap + justify-content center: each column
+            sizes to its own content (not forced to equal 1fr widths),
+            and the pair sits centered as a group. The gap between
+            them is therefore the gap between actual content edges,
+            not between empty grid tracks, so it reads visually
+            balanced even though the LEFT column (LO + website) is a
+            bit wider than the RIGHT column (branch + licensing).
 
-            The grid wrapper itself is capped at 880px and centered so
-            on very wide viewports the two columns don't drift apart to
-            opposite edges with a sea of empty middle. Disclosures
-            below stay full inner-container width since paragraph text
-            is fine at the wider measure. */}
+            On narrow widths, flex-wrap moves the second column below
+            the first, both centered. */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: 32,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 48,
             maxWidth: 880,
             margin: "0 auto",
           }}
