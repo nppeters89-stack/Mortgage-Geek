@@ -100,6 +100,16 @@ export function SiteFooter({ hasSidebar = false }) {
         // homepage, width:100% would force the footer to overflow the
         // viewport by 280px on the right. Block-level <footer> defaults
         // to "available width minus margin", which is what we want.
+
+        // Stack above the homepage's fixed sidebar (z-index 100 at
+        // <=900px, 150 at >900px). .main-content uses position:relative
+        // + z-index:130 so its cream background covers the sidebar at
+        // mobile widths; the footer sits OUTSIDE .main-content, so it
+        // needs the same trick on its own. 130 is high enough to cover
+        // the mobile sidebar (100) and harmless at desktop where the
+        // footer is shifted 280px and never overlaps the sidebar.
+        position: "relative",
+        zIndex: 130,
       }}
     >
       {/* Hover treatment for inline footer links + the homepage sidebar
