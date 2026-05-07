@@ -110,6 +110,16 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
   const isMobile = useIsMobile(768);
   const L = FOOTER_LAYOUTS[layout] || FOOTER_LAYOUTS.home;
 
+  // Mobile keeps the two columns side-by-side instead of stacking, but
+  // the column content has to shrink to fit. fs/sz pick the desktop
+  // value at >768px and the mobile value at <=768px. Mobile padding
+  // overrides the layout's default to free up enough horizontal room
+  // for two columns at 375px viewport.
+  const fs = (desktop, mobile) => (isMobile ? mobile : desktop);
+  const sz = (desktop, mobile) => (isMobile ? mobile : desktop);
+  const innerPaddingX = isMobile ? 20 : L.paddingX;
+  const columnGap = isMobile ? 16 : 100;
+
   return (
     <footer
       className={hasSidebar ? "mg-site-footer mg-site-footer--shifted" : "mg-site-footer"}
@@ -176,8 +186,8 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
           // on the same vertical guide as the page-content wrapper above.
           maxWidth: L.maxWidth,
           margin: "0 auto",
-          paddingLeft: L.paddingX,
-          paddingRight: L.paddingX,
+          paddingLeft: innerPaddingX,
+          paddingRight: innerPaddingX,
           paddingTop: isMobile ? 32 : 48,
           paddingBottom: isMobile ? 32 : 48,
           boxSizing: "border-box",
@@ -193,16 +203,19 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 100,
+            gap: columnGap,
             // Tool layouts center the columns on desktop to balance the
-            // wider canvas, but on mobile (where columns wrap to a
-            // single stacked row) left-align reads cleaner alongside
-            // the left-aligned disclaimers below.
+            // wider canvas. On mobile, columns scale down to fit
+            // side-by-side and left-align reads cleaner.
             justifyContent: L.centerColumns && !isMobile ? "center" : "flex-start",
           }}
         >
-          {/* LEFT — Brand voice + LO + contact + EHL */}
-          <div>
+          {/* LEFT — Brand voice + LO + contact + EHL.
+              On mobile: flex 1 1 0 + minWidth 0 makes the column take
+              an equal share of the available width and lets text wrap
+              instead of forcing the row to overflow.
+              On desktop: default content-width sizing. */}
+          <div style={{ flex: isMobile ? "1 1 0" : undefined, minWidth: 0 }}>
             {/* Brand voice anchors the column. The AnnieMac block now
                 lives at the top of the right column, above Branch Office. */}
             <h2
@@ -210,7 +223,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               style={{
                 fontFamily: F.display,
                 fontWeight: 400,
-                fontSize: 22,
+                fontSize: fs(22, 18),
                 color: P.navy,
                 margin: 0,
                 display: "flex",
@@ -219,13 +232,13 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               }}
             >
               <span>The Mortgage Geek</span>
-              <span aria-hidden="true" style={{ fontSize: 18 }}>🤓</span>
+              <span aria-hidden="true" style={{ fontSize: fs(18, 16) }}>🤓</span>
             </h2>
             <p
               style={{
                 fontFamily: F.display,
                 fontStyle: "italic",
-                fontSize: 14,
+                fontSize: fs(14, 12),
                 color: P.gold,
                 margin: "2px 0 0",
               }}
@@ -237,7 +250,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             <p
               style={{
                 fontFamily: F.body,
-                fontSize: 14,
+                fontSize: fs(14, 13),
                 fontWeight: 500,
                 color: P.navy,
                 margin: "14px 0 0",
@@ -248,7 +261,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             <p
               style={{
                 fontFamily: F.body,
-                fontSize: 13,
+                fontSize: fs(13, 11),
                 color: P.warmGray,
                 margin: "2px 0 0",
               }}
@@ -260,10 +273,11 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             <p
               style={{
                 fontFamily: F.body,
-                fontSize: 13,
+                fontSize: fs(13, 11),
                 color: P.warmGray,
                 margin: "12px 0 0",
                 lineHeight: 1.85,
+                wordBreak: "break-word",
               }}
             >
               Direct:{" "}
@@ -290,11 +304,11 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
 
             {/* Equal Housing Lender row */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 14 }}>
-              <EHLLogo size={22} color={P.navy} />
+              <EHLLogo size={sz(22, 18)} color={P.navy} />
               <span
                 style={{
                   fontFamily: F.body,
-                  fontSize: 12,
+                  fontSize: fs(12, 11),
                   color: P.warmGray,
                   letterSpacing: 0.3,
                 }}
@@ -304,23 +318,24 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             </div>
           </div>
 
-          {/* RIGHT — AnnieMac + Branch office + licensing */}
-          <div>
+          {/* RIGHT — AnnieMac + Branch office + licensing. Mobile-flex
+              treatment matches the LEFT column. */}
+          <div style={{ flex: isMobile ? "1 1 0" : undefined, minWidth: 0 }}>
             {/* AnnieMac icon + trade name + corporate NMLS, sitting
                 above Branch Office so the corporate identity anchors
                 the right column. */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12, marginBottom: isMobile ? 16 : 24 }}>
               <img
                 src="/anniemac-icon.png"
                 alt=""
                 aria-hidden="true"
-                style={{ width: 36, height: 36, display: "block", flexShrink: 0 }}
+                style={{ width: sz(36, 28), height: sz(36, 28), display: "block", flexShrink: 0 }}
               />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
                 <span
                   style={{
                     fontFamily: F.body,
-                    fontSize: 13,
+                    fontSize: fs(13, 11),
                     fontWeight: 500,
                     color: P.navy,
                     letterSpacing: 0.3,
@@ -331,7 +346,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 <span
                   style={{
                     fontFamily: F.body,
-                    fontSize: 11,
+                    fontSize: fs(11, 10),
                     fontWeight: 500,
                     color: P.warmGrayLight,
                     textTransform: "uppercase",
@@ -343,11 +358,11 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               </div>
             </div>
 
-            <h3 style={sectionHeadingStyle}>Branch Office</h3>
+            <h3 style={{ ...sectionHeadingStyle, fontSize: fs(11, 10) }}>Branch Office</h3>
             <p
               style={{
                 fontFamily: F.body,
-                fontSize: 13,
+                fontSize: fs(13, 11),
                 lineHeight: 1.7,
                 color: P.text,
                 margin: 0,
@@ -363,11 +378,11 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               </a>
             </p>
 
-            <h3 style={{ ...sectionHeadingStyle, marginTop: 24 }}>Licensing</h3>
+            <h3 style={{ ...sectionHeadingStyle, fontSize: fs(11, 10), marginTop: 24 }}>Licensing</h3>
             <div
               style={{
                 fontFamily: F.body,
-                fontSize: 13,
+                fontSize: fs(13, 11),
                 lineHeight: 1.85,
                 display: "flex",
                 flexDirection: "column",
