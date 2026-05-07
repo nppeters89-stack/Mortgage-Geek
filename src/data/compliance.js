@@ -10,6 +10,7 @@ export const LO_NAME = "Nick Peters";
 export const LO_TITLE = "Sales Manager";
 export const LO_PHONE = "(615) 656-0737";
 export const LO_EMAIL = "npeters@annie-mac.com";
+export const LO_WEBSITE = "https://annie-mac.com/lo/nickpeters/";
 
 export const BRANCH_PHONE = "(302) 327-6115";
 export const BRANCH_ADDRESS = {

@@ -24,6 +24,7 @@ import {
   LO_TITLE,
   LO_PHONE,
   LO_EMAIL,
+  LO_WEBSITE,
   BRANCH_PHONE,
   BRANCH_ADDRESS,
   TRADE_NAME,
@@ -274,6 +275,18 @@ export function SiteFooter({ hasSidebar = false }) {
               <br />
               <a href={`mailto:${LO_EMAIL}`} className="mg-footer-link" style={inlineLinkStyle}>
                 {LO_EMAIL}
+              </a>
+              <br />
+              {/* Display strips protocol + trailing slash for a cleaner read;
+                  href keeps the canonical URL from compliance.js. */}
+              <a
+                href={LO_WEBSITE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mg-footer-link"
+                style={inlineLinkStyle}
+              >
+                {LO_WEBSITE.replace(/^https?:\/\//, "").replace(/\/$/, "")}
               </a>
             </p>
 
