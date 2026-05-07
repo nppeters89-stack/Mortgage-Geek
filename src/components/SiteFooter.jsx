@@ -145,12 +145,20 @@ export function SiteFooter({ hasSidebar = false }) {
             hold two 260px tracks side-by-side, otherwise collapse to one.
             This responds to actual container width (so the homepage,
             which loses 280px to the sidebar, behaves correctly) instead
-            of guessing from viewport via a JS breakpoint. */}
+            of guessing from viewport via a JS breakpoint.
+
+            The grid wrapper itself is capped at 880px and centered so
+            on very wide viewports the two columns don't drift apart to
+            opposite edges with a sea of empty middle. Disclosures
+            below stay full inner-container width since paragraph text
+            is fine at the wider measure. */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
             gap: 32,
+            maxWidth: 880,
+            margin: "0 auto",
           }}
         >
           {/* LEFT — Brand voice + LO + contact + EHL */}
