@@ -140,39 +140,6 @@ export function SiteFooter({ hasSidebar = false }) {
           boxSizing: "border-box",
         }}
       >
-        {/* ----------------- ZONE 1 — Brand voice ----------------- */}
-        <div>
-          <h2
-            aria-label="The Mortgage Geek"
-            style={{
-              fontFamily: F.display,
-              fontWeight: 400,
-              fontSize: 22,
-              color: P.navy,
-              margin: 0,
-              display: "flex",
-              alignItems: "baseline",
-              gap: 6,
-            }}
-          >
-            <span>The Mortgage Geek</span>
-            <span aria-hidden="true" style={{ fontSize: 18 }}>🤓</span>
-          </h2>
-          <p
-            style={{
-              fontFamily: F.display,
-              fontStyle: "italic",
-              fontSize: 14,
-              color: P.gold,
-              margin: "2px 0 0",
-            }}
-          >
-            Mortgages Demystified.
-          </p>
-        </div>
-
-        <hr style={dividerStyle} />
-
         {/* ----------------- ZONE 2 — Attribution -----------------
             auto-fit grid: keep two columns whenever the container can
             hold two 260px tracks side-by-side, otherwise collapse to one.
@@ -186,42 +153,37 @@ export function SiteFooter({ hasSidebar = false }) {
             gap: 32,
           }}
         >
-          {/* LEFT — AnnieMac + LO + contact + EHL */}
+          {/* LEFT — Brand voice + LO + contact + EHL */}
           <div>
-            {/* AnnieMac icon + trade name + corporate NMLS */}
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <img
-                src="/anniemac-icon.png"
-                alt=""
-                aria-hidden="true"
-                style={{ width: 36, height: 36, display: "block", flexShrink: 0 }}
-              />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <span
-                  style={{
-                    fontFamily: F.body,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: P.navy,
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  AnnieMac Home Mortgage
-                </span>
-                <span
-                  style={{
-                    fontFamily: F.body,
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: P.warmGrayLight,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Corporate NMLS# {CORPORATE_NMLS}
-                </span>
-              </div>
-            </div>
+            {/* Brand voice anchors the column. The AnnieMac block now
+                lives at the top of the right column, above Branch Office. */}
+            <h2
+              aria-label="The Mortgage Geek"
+              style={{
+                fontFamily: F.display,
+                fontWeight: 400,
+                fontSize: 22,
+                color: P.navy,
+                margin: 0,
+                display: "flex",
+                alignItems: "baseline",
+                gap: 6,
+              }}
+            >
+              <span>The Mortgage Geek</span>
+              <span aria-hidden="true" style={{ fontSize: 18 }}>🤓</span>
+            </h2>
+            <p
+              style={{
+                fontFamily: F.display,
+                fontStyle: "italic",
+                fontSize: 14,
+                color: P.gold,
+                margin: "2px 0 0",
+              }}
+            >
+              Mortgages Demystified.
+            </p>
 
             {/* Loan officer name */}
             <p
@@ -294,8 +256,45 @@ export function SiteFooter({ hasSidebar = false }) {
             </div>
           </div>
 
-          {/* RIGHT — Branch office + licensing */}
+          {/* RIGHT — AnnieMac + Branch office + licensing */}
           <div>
+            {/* AnnieMac icon + trade name + corporate NMLS, sitting
+                above Branch Office so the corporate identity anchors
+                the right column. */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+              <img
+                src="/anniemac-icon.png"
+                alt=""
+                aria-hidden="true"
+                style={{ width: 36, height: 36, display: "block", flexShrink: 0 }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span
+                  style={{
+                    fontFamily: F.body,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: P.navy,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  AnnieMac Home Mortgage
+                </span>
+                <span
+                  style={{
+                    fontFamily: F.body,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: P.warmGrayLight,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Corporate NMLS# {CORPORATE_NMLS}
+                </span>
+              </div>
+            </div>
+
             <h3 style={sectionHeadingStyle}>Branch Office</h3>
             <p
               style={{
