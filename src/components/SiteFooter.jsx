@@ -96,7 +96,10 @@ export function SiteFooter({ hasSidebar = false }) {
       style={{
         background: P.cream,
         borderTop: `1px solid ${P.creamDark}`,
-        width: "100%",
+        // No `width: 100%` here. With `margin-left: 280px` on the
+        // homepage, width:100% would force the footer to overflow the
+        // viewport by 280px on the right. Block-level <footer> defaults
+        // to "available width minus margin", which is what we want.
       }}
     >
       {/* Hover treatment for inline footer links + the homepage sidebar
@@ -113,9 +116,17 @@ export function SiteFooter({ hasSidebar = false }) {
 
       <div
         style={{
+          // Mirror the Page primitive (src/components/homepage/Page.jsx)
+          // so the footer's gutters line up exactly with content above:
+          // maxWidth 1180, fluid horizontal padding clamp(20, 4vw, 56).
+          // Vertical padding stays responsive per the spec (32 mobile / 48 desktop).
           maxWidth: 1180,
           margin: "0 auto",
-          padding: isMobile ? "32px 20px" : "48px 32px",
+          paddingLeft: "clamp(20px, 4vw, 56px)",
+          paddingRight: "clamp(20px, 4vw, 56px)",
+          paddingTop: isMobile ? 32 : 48,
+          paddingBottom: isMobile ? 32 : 48,
+          boxSizing: "border-box",
         }}
       >
         {/* ----------------- ZONE 1 — Brand voice ----------------- */}
