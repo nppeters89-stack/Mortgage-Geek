@@ -7,7 +7,7 @@ export const PERSONAL_NMLS = "1119524";
 export const CORPORATE_NMLS = "338923";
 
 export const LO_NAME = "Nick Peters";
-export const LO_TITLE = "Mortgage Loan Originator";
+export const LO_TITLE = "Sales Manager";
 export const LO_PHONE = "(615) 656-0737";
 export const LO_EMAIL = "npeters@annie-mac.com";
 
