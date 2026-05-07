@@ -98,8 +98,30 @@ export default function MortgageLandingPage() {
       </Suspense>
       {/* Homepage (MainSite) renders the fixed 280px Sidebar. Other pages
           don't, so only pass hasSidebar on '/'. The footer uses this to
-          mirror .main-content's margin-left offset at >900px. */}
-      <SiteFooter hasSidebar={currentPage === "main"} />
+          mirror .main-content's margin-left offset at >900px.
+
+          `layout` selects the footer's max-width + horizontal padding so
+          its gutters line up with whichever page-content wrapper is
+          rendered above:
+            - 'home'     → MainSite (Page primitive + section padding)
+            - 'tool'     → calc / prequal / compare / cash-to-close
+                           (tool-page-content at maxW 1100, columns centered)
+            - 'deepdive' → individual Deep Dive articles
+                           (article at maxW 860)
+            - default 'home' for hub/about/install/geek-maps */}
+      <SiteFooter
+        hasSidebar={currentPage === "main"}
+        layout={
+          currentPage === "calculator" ||
+          currentPage === "prequal" ||
+          currentPage === "compare" ||
+          currentPage === "cashtoclose"
+            ? "tool"
+            : currentPage.startsWith("deepdives-") && currentPage !== "deepdives-hub"
+            ? "deepdive"
+            : "home"
+        }
+      />
       <WelcomeToast />
     </>
   );

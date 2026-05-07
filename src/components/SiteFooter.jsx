@@ -88,8 +88,27 @@ const dividerStyle = {
   margin: "28px 0",
 };
 
-export function SiteFooter({ hasSidebar = false }) {
+// Per-route layout knobs. Each entry mirrors the page-content wrapper of
+// that route family so the footer's left/right gutters land on the same
+// vertical guide as the body content above.
+//
+//   home     → Homepage Page primitive (maxW 1180) + each <section>
+//              applies an extra 40px horizontal pad on top, so the
+//              footer's padding has to absorb both layers.
+//   tool     → calc / prequal / compare / cash-to-close use
+//              tool-page-content with maxW 1100 + 24px horizontal.
+//              Columns are centered to balance the wider canvas.
+//   deepdive → Deep Dive articles use <article> at maxW 860 +
+//              24px horizontal.
+const FOOTER_LAYOUTS = {
+  home:     { maxWidth: 1180, paddingX: "clamp(60px, calc(4vw + 40px), 96px)", centerColumns: false },
+  tool:     { maxWidth: 1100, paddingX: 24,                                     centerColumns: true  },
+  deepdive: { maxWidth: 860,  paddingX: 24,                                     centerColumns: false },
+};
+
+export function SiteFooter({ hasSidebar = false, layout = "home" }) {
   const isMobile = useIsMobile(768);
+  const L = FOOTER_LAYOUTS[layout] || FOOTER_LAYOUTS.home;
 
   return (
     <footer
@@ -127,20 +146,13 @@ export function SiteFooter({ hasSidebar = false }) {
 
       <div
         style={{
-          // Mirror the Page primitive (src/components/homepage/Page.jsx)
-          // so the footer's gutters line up exactly with content above.
-          // Page applies clamp(20, 4vw, 56) horizontal, then EVERY
-          // homepage <section> wraps its content in another 40px
-          // horizontal pad (e.g. PreApprovalChecklist, JargonDecoder
-          // both use `padding: "64px 40px"`). The footer has no such
-          // section wrapper, so its horizontal padding has to absorb
-          // both layers — clamp + 40 — to land on the same vertical
-          // guide as the section content above. Vertical padding stays
-          // on the footer's own scale (32 mobile / 48 desktop).
-          maxWidth: 1180,
+          // Page-equivalent inner container. Width + horizontal padding
+          // come from FOOTER_LAYOUTS so the footer's content edges land
+          // on the same vertical guide as the page-content wrapper above.
+          maxWidth: L.maxWidth,
           margin: "0 auto",
-          paddingLeft: "clamp(60px, calc(4vw + 40px), 96px)",
-          paddingRight: "clamp(60px, calc(4vw + 40px), 96px)",
+          paddingLeft: L.paddingX,
+          paddingRight: L.paddingX,
           paddingTop: isMobile ? 32 : 48,
           paddingBottom: isMobile ? 32 : 48,
           boxSizing: "border-box",
@@ -157,6 +169,7 @@ export function SiteFooter({ hasSidebar = false }) {
             display: "flex",
             flexWrap: "wrap",
             gap: 100,
+            justifyContent: L.centerColumns ? "center" : "flex-start",
           }}
         >
           {/* LEFT — Brand voice + LO + contact + EHL */}
