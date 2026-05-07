@@ -54,7 +54,7 @@ function renderDisclosure() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ hasSidebar = false }) {
   const isMobile = useIsMobile(768);
 
   const linkColor = P.navy;
@@ -72,6 +72,7 @@ export function SiteFooter() {
 
   return (
     <footer
+      className={hasSidebar ? "mg-site-footer mg-site-footer--shifted" : "mg-site-footer"}
       style={{
         background: P.cream,
         borderTop: `1px solid ${P.creamDark}`,
@@ -82,9 +83,19 @@ export function SiteFooter() {
       {/* Hover treatment for footer links. Inline styles can't express
           :hover, so we scope a tiny rule here. Underline-on-hover is
           off by default per the spec; the corporate-disclosure URL is
-          always underlined so it reads as a link in the dense fine print. */}
+          always underlined so it reads as a link in the dense fine print.
+
+          Sidebar offset: when the page above renders the homepage's
+          fixed 280px sidebar (only MainSite does), shift the footer the
+          same amount so it doesn't go behind the sidebar. Mirrors the
+          existing .main-content margin-left rule and its 900px mobile
+          breakpoint. */}
       <style>{`
         .mg-footer-link:hover { text-decoration: underline; }
+        .mg-site-footer--shifted { margin-left: 280px; }
+        @media (max-width: 900px) {
+          .mg-site-footer--shifted { margin-left: 0; }
+        }
       `}</style>
 
       <div

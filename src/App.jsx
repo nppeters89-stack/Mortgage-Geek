@@ -96,7 +96,10 @@ export default function MortgageLandingPage() {
       }>
         {renderPage()}
       </Suspense>
-      <SiteFooter />
+      {/* Homepage (MainSite) renders the fixed 280px Sidebar. Other pages
+          don't, so only pass hasSidebar on '/'. The footer uses this to
+          mirror .main-content's margin-left offset at >900px. */}
+      <SiteFooter hasSidebar={currentPage === "main"} />
       <WelcomeToast />
     </>
   );
