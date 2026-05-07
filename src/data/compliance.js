@@ -23,11 +23,11 @@ export const TRADE_NAME = "AnnieMac Home Mortgage";
 export const LEGAL_ENTITY = "American Neighborhood Mortgage Acceptance Company LLC";
 
 export const NMLS_CONSUMER_ACCESS_URL = "https://www.nmlsconsumeraccess.org/";
-export const LICENSING_URL = "https://annie-mac.com/pages/licensing";
+export const LICENSING_URL = "https://annie-mac.com/licensing/";
 
 // Verbatim corporate disclosure block. Preserves the http:// vs https://
 // asymmetry, all parentheses, hyphens, and the single quote in
 // "Veteran's" exactly as supplied. Do not paraphrase. Do not add or
 // remove punctuation.
 export const CORPORATE_DISCLOSURE =
-  "©2025 American Neighborhood Mortgage Acceptance Company LLC (dba AnnieMac Home Mortgage, OVM with AnnieMac Home Mortgage, Family First A Division of AnnieMac Home Mortgage, homecomings Mortgage & Equity A Division of AnnieMac Home Mortgage) Corporate NMLS# 338923 (http://www.nmlsconsumeraccess.org/). AnnieMac Home Mortgage is an Equal Housing Opportunity. For a complete list of our licensed states visit: https://annie-mac.com/pages/licensing. American Neighborhood Mortgage Acceptance Company LLC (dba AnnieMac Home Mortgage, OVM with AnnieMac Home Mortgage, Family First A Division of AnnieMac Home Mortgage, homecomings Mortgage & Equity A Division of AnnieMac Home Mortgage) is not affiliated with the U.S. Department of Veteran's Affairs, the U.S. Department of Housing and Urban Development, the U.S. Department of Agriculture, or any other Federal Government Agency.";
+  "©2025 American Neighborhood Mortgage Acceptance Company LLC (dba AnnieMac Home Mortgage, OVM with AnnieMac Home Mortgage, Family First A Division of AnnieMac Home Mortgage, homecomings Mortgage & Equity A Division of AnnieMac Home Mortgage) Corporate NMLS# 338923 (http://www.nmlsconsumeraccess.org/). AnnieMac Home Mortgage is an Equal Housing Opportunity. For a complete list of our licensed states visit: https://annie-mac.com/licensing/. American Neighborhood Mortgage Acceptance Company LLC (dba AnnieMac Home Mortgage, OVM with AnnieMac Home Mortgage, Family First A Division of AnnieMac Home Mortgage, homecomings Mortgage & Equity A Division of AnnieMac Home Mortgage) is not affiliated with the U.S. Department of Veteran's Affairs, the U.S. Department of Housing and Urban Development, the U.S. Department of Agriculture, or any other Federal Government Agency.";
