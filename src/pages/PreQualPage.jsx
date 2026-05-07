@@ -675,28 +675,6 @@ export function PreQualPage() {
     );
   };
 
-  const geekTipJsx = (
-    <div className="content-card" style={{ padding: "20px 24px", marginBottom: 24, maxWidth: 800, margin: "0 auto 24px" }}>
-      <div style={{ display: "flex", gap: 12 }}>
-        <span style={{ fontSize: 20, flexShrink: 0 }}>🤓</span>
-        <div style={{ fontSize: 13, lineHeight: 1.7, color: P.warmGray }}>
-          <p style={{ marginBottom: 8 }}>
-            <strong>Why the numbers differ:</strong> FHA uses two separate DTI caps — a 46.99% front-end (housing payment alone can't exceed this) and a 56.99% back-end (housing + all debts combined). With low debts, the front-end is your ceiling; as debts rise, the back-end takes over. Conventional uses a single 49.99% cap for both front-end and back-end — your housing payment and your total debts must each stay under this threshold. VA allows up to 50% back-end with no monthly MI — often the strongest option for eligible borrowers. USDA caps tighter — 34% front-end, 44.99% back-end — and adds a $119,850/yr household income limit (1-4 person, most areas). Those DTI ceilings are stretch maximums; USDA's standard GUS-Accept threshold is 29%/41%, and going above requires compensating factors.
-          </p>
-          <p>
-            <strong>This is a simulator, not a commitment.</strong> Actual pre-approval depends on credit score, reserves, employment history, and property type. Use these numbers to guide your house hunting — then call me for the real thing.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-
-  const disclaimerJsx = (
-    <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-      This simulator is for educational purposes only. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized pre-approval. NMLS# 1119524.
-    </p>
-  );
-
   // ===================================================================
   // COCKPIT BRANCH — desktop ≥1100px renders the rail+canvas layout.
   // The legacy stacked layout below is used at <1100px (tablets/mobile).
@@ -731,7 +709,6 @@ export function PreQualPage() {
           dtiLayout="stacked"
           calculatorHref={calculatorHref}
         />
-        {geekTipJsx}
       </>
     );
 
@@ -743,11 +720,6 @@ export function PreQualPage() {
           {introJsx}
         </div>
         <CockpitShell rail={railJsx} canvas={canvasJsx} />
-        <div style={{ background: P.creamDark, padding: "24px 24px 64px" }}>
-          <div style={{ maxWidth: 1320, margin: "0 auto" }}>
-            {disclaimerJsx}
-          </div>
-        </div>
         <MobileToolbar />
       </main>
     );
@@ -949,8 +921,6 @@ export function PreQualPage() {
             );
           })}
         </div>
-
-        {disclaimerJsx}
         </div>
       </div>
       <MobileToolbar />
