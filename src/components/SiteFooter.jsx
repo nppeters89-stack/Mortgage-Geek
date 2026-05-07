@@ -2,9 +2,17 @@
 // Rendered once in App.jsx beneath the routed page content so it appears
 // on every route.
 //
+// Three zones, separated by 1px P.creamDark dividers:
+//   Zone 1 — Brand voice (Mortgage Geek heading, tagline, educational
+//            disclaimer)
+//   Zone 2 — Attribution (AnnieMac icon + LO + branch/licensing in two
+//            columns on desktop, stacked on mobile)
+//   Zone 3 — Verbatim corporate disclosure
+//
 // All compliance copy and contact data is sourced from
 // `data/compliance.js` (single source of truth). All colors and fonts
-// come from `theme.js` (no hardcoded hex values).
+// come from `theme.js` (no hardcoded hex values). Consumes EHLLogo as
+// a black-box component for the Equal Housing Lender mark.
 
 import { P, F } from "../theme";
 import { useIsMobile } from "../utils/hooks";
@@ -24,11 +32,11 @@ import {
   CORPORATE_DISCLOSURE,
 } from "../data/compliance";
 
-// Phone string normalized to a tel: href ("(615) 656-0737" → "+16156560737").
-const telHref = (display) => `tel:+1${display.replace(/\D/g, "")}`;
+// Phone display string normalized to a tel: href ("(615) 656-0737" → "6156560737").
+const telHref = (display) => `tel:${display.replace(/\D/g, "")}`;
 
 // The verbatim corporate disclosure embeds the http:// URL inside parens.
-// We render the URL portion as a clickable anchor while keeping the
+// Render the URL portion as a clickable anchor while keeping the
 // surrounding parens and the rest of the paragraph as plain text. The
 // href intentionally matches the displayed http:// URL exactly.
 function renderDisclosure() {
@@ -54,21 +62,33 @@ function renderDisclosure() {
   );
 }
 
+// Shared style for inline link anchors (phone, email, licensing).
+const inlineLinkStyle = {
+  color: P.navy,
+  fontWeight: 500,
+  textDecoration: "none",
+};
+
+// Section heading style ("BRANCH OFFICE", "LICENSING").
+const sectionHeadingStyle = {
+  fontFamily: F.body,
+  fontSize: 11,
+  fontWeight: 500,
+  letterSpacing: 1.2,
+  textTransform: "uppercase",
+  color: P.navy,
+  marginBottom: 8,
+};
+
+// Divider rule between zones.
+const dividerStyle = {
+  border: 0,
+  borderTop: `1px solid ${P.creamDark}`,
+  margin: "28px 0",
+};
+
 export function SiteFooter({ hasSidebar = false }) {
   const isMobile = useIsMobile(768);
-
-  const linkColor = P.navy;
-
-  // Section heading style ("Branch Office", "Licensing").
-  const sectionHeadingStyle = {
-    fontFamily: F.body,
-    fontSize: 12,
-    fontWeight: 700,
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    color: P.navy,
-    marginBottom: 8,
-  };
 
   return (
     <footer
@@ -76,20 +96,13 @@ export function SiteFooter({ hasSidebar = false }) {
       style={{
         background: P.cream,
         borderTop: `1px solid ${P.creamDark}`,
-        // Footer should always sit at the bottom, full width.
         width: "100%",
       }}
     >
-      {/* Hover treatment for footer links. Inline styles can't express
-          :hover, so we scope a tiny rule here. Underline-on-hover is
-          off by default per the spec; the corporate-disclosure URL is
-          always underlined so it reads as a link in the dense fine print.
-
-          Sidebar offset: when the page above renders the homepage's
-          fixed 280px sidebar (only MainSite does), shift the footer the
-          same amount so it doesn't go behind the sidebar. Mirrors the
-          existing .main-content margin-left rule and its 900px mobile
-          breakpoint. */}
+      {/* Hover treatment for inline footer links + the homepage sidebar
+          offset. .main-content uses 280px margin-left at >900px and 0
+          on mobile; the footer mirrors the same behavior when its
+          parent (App.jsx) flags hasSidebar. */}
       <style>{`
         .mg-footer-link:hover { text-decoration: underline; }
         .mg-site-footer--shifted { margin-left: 280px; }
@@ -103,130 +116,227 @@ export function SiteFooter({ hasSidebar = false }) {
           maxWidth: 1180,
           margin: "0 auto",
           padding: isMobile ? "32px 20px" : "48px 32px",
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-          gap: isMobile ? 32 : 48,
         }}
       >
-        {/* LEFT — Loan-officer attribution */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <img
-            src="/anniemac-logo.png"
-            alt="AnnieMac Home Mortgage"
-            style={{ height: 40, width: "auto", display: "block" }}
-          />
-
+        {/* ----------------- ZONE 1 — Brand voice ----------------- */}
+        <div>
+          <h2
+            aria-label="The Mortgage Geek"
+            style={{
+              fontFamily: F.display,
+              fontWeight: 400,
+              fontSize: 22,
+              color: P.navy,
+              margin: 0,
+              display: "flex",
+              alignItems: "baseline",
+              gap: 6,
+            }}
+          >
+            <span>The Mortgage Geek</span>
+            <span aria-hidden="true" style={{ fontSize: 18 }}>🤓</span>
+          </h2>
+          <p
+            style={{
+              fontFamily: F.display,
+              fontStyle: "italic",
+              fontSize: 14,
+              color: P.gold,
+              margin: "2px 0 0",
+            }}
+          >
+            Mortgages Demystified.
+          </p>
           <p
             style={{
               fontFamily: F.body,
-              fontSize: 14,
-              fontWeight: 600,
-              color: P.navy,
-              margin: 0,
-              lineHeight: 1.5,
+              fontSize: 12,
+              lineHeight: 1.65,
+              color: P.warmGray,
+              maxWidth: 560,
+              margin: "14px 0 0",
             }}
           >
-            {LO_NAME} · {LO_TITLE} at {TRADE_NAME}
+            This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
           </p>
-
-          <p style={{ fontFamily: F.body, fontSize: 13, color: P.warmGray, margin: 0, lineHeight: 1.5 }}>
-            NMLS# {PERSONAL_NMLS} | Corporate NMLS# {CORPORATE_NMLS}
-          </p>
-
-          <p style={{ fontFamily: F.body, fontSize: 13, color: P.warmGray, margin: 0, lineHeight: 1.6 }}>
-            Direct:{" "}
-            <a
-              href={telHref(LO_PHONE)}
-              className="mg-footer-link"
-              style={{ color: linkColor, textDecoration: "none", fontWeight: 600 }}
-            >
-              {LO_PHONE}
-            </a>
-            {" · "}
-            <a
-              href={`mailto:${LO_EMAIL}`}
-              className="mg-footer-link"
-              style={{ color: linkColor, textDecoration: "none", fontWeight: 600 }}
-            >
-              {LO_EMAIL}
-            </a>
-          </p>
-
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-            <EHLLogo size={32} color={P.navy} />
-            <span style={{ fontFamily: F.body, fontSize: 12, color: P.warmGray }}>
-              Equal Housing Lender
-            </span>
-          </div>
         </div>
 
-        {/* RIGHT — Branch office + licensing */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <hr style={dividerStyle} />
+
+        {/* ----------------- ZONE 2 — Attribution ----------------- */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gap: 32,
+          }}
+        >
+          {/* LEFT — AnnieMac + LO + contact + EHL */}
+          <div>
+            {/* AnnieMac icon + trade name + corporate NMLS */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <img
+                src="/anniemac-icon.png"
+                alt=""
+                aria-hidden="true"
+                style={{ width: 36, height: 36, display: "block", flexShrink: 0 }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <span
+                  style={{
+                    fontFamily: F.body,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: P.navy,
+                    letterSpacing: 0.3,
+                  }}
+                >
+                  AnnieMac Home Mortgage
+                </span>
+                <span
+                  style={{
+                    fontFamily: F.body,
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: P.warmGrayLight,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Corporate NMLS# {CORPORATE_NMLS}
+                </span>
+              </div>
+            </div>
+
+            {/* Loan officer name */}
+            <p
+              style={{
+                fontFamily: F.body,
+                fontSize: 14,
+                fontWeight: 500,
+                color: P.navy,
+                margin: "14px 0 0",
+              }}
+            >
+              {LO_NAME}
+            </p>
+            <p
+              style={{
+                fontFamily: F.body,
+                fontSize: 13,
+                color: P.warmGray,
+                margin: "2px 0 0",
+              }}
+            >
+              {LO_TITLE} · NMLS# {PERSONAL_NMLS}
+            </p>
+
+            {/* Direct contact */}
+            <p
+              style={{
+                fontFamily: F.body,
+                fontSize: 13,
+                color: P.warmGray,
+                margin: "12px 0 0",
+                lineHeight: 1.85,
+              }}
+            >
+              Direct:{" "}
+              <a href={telHref(LO_PHONE)} className="mg-footer-link" style={inlineLinkStyle}>
+                {LO_PHONE}
+              </a>
+              <br />
+              <a href={`mailto:${LO_EMAIL}`} className="mg-footer-link" style={inlineLinkStyle}>
+                {LO_EMAIL}
+              </a>
+            </p>
+
+            {/* Equal Housing Lender row */}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 14 }}>
+              <EHLLogo size={22} color={P.navy} />
+              <span
+                style={{
+                  fontFamily: F.body,
+                  fontSize: 12,
+                  color: P.warmGray,
+                  letterSpacing: 0.3,
+                }}
+              >
+                Equal Housing Lender
+              </span>
+            </div>
+          </div>
+
+          {/* RIGHT — Branch office + licensing */}
           <div>
             <h3 style={sectionHeadingStyle}>Branch Office</h3>
-            <p style={{ fontFamily: F.body, fontSize: 13, color: P.warmGray, margin: 0, lineHeight: 1.6 }}>
+            <p
+              style={{
+                fontFamily: F.body,
+                fontSize: 13,
+                lineHeight: 1.7,
+                color: P.text,
+                margin: 0,
+              }}
+            >
               {BRANCH_ADDRESS.street}
               <br />
               {BRANCH_ADDRESS.city}, {BRANCH_ADDRESS.state} {BRANCH_ADDRESS.zip}
               <br />
               Phone:{" "}
-              <a
-                href={telHref(BRANCH_PHONE)}
-                className="mg-footer-link"
-                style={{ color: linkColor, textDecoration: "none", fontWeight: 600 }}
-              >
+              <a href={telHref(BRANCH_PHONE)} className="mg-footer-link" style={inlineLinkStyle}>
                 {BRANCH_PHONE}
               </a>
             </p>
-          </div>
 
-          <div>
-            <h3 style={sectionHeadingStyle}>Licensing</h3>
-            <p style={{ fontFamily: F.body, fontSize: 13, color: P.warmGray, margin: 0, lineHeight: 1.8 }}>
+            <h3 style={{ ...sectionHeadingStyle, marginTop: 24 }}>Licensing</h3>
+            <div
+              style={{
+                fontFamily: F.body,
+                fontSize: 13,
+                lineHeight: 1.85,
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
               <a
                 href={LICENSING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mg-footer-link"
-                style={{ color: linkColor, textDecoration: "none", fontWeight: 600, display: "block" }}
+                style={inlineLinkStyle}
               >
-                View licensed states
+                View licensed states{" "}
+                <span style={{ color: P.gold, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
+                  ↗
+                </span>
               </a>
               <a
                 href={NMLS_CONSUMER_ACCESS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mg-footer-link"
-                style={{ color: linkColor, textDecoration: "none", fontWeight: 600, display: "block" }}
+                style={inlineLinkStyle}
               >
-                NMLS Consumer Access
+                NMLS Consumer Access{" "}
+                <span style={{ color: P.gold, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
+                  ↗
+                </span>
               </a>
-            </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Full-width corporate disclosure beneath both columns. */}
-      <div
-        style={{
-          maxWidth: 1180,
-          margin: "0 auto",
-          padding: isMobile ? "0 20px 32px" : "0 32px 48px",
-        }}
-      >
-        <hr
-          style={{
-            border: 0,
-            borderTop: `1px solid ${P.creamDark}`,
-            margin: "24px 0",
-          }}
-        />
+        <hr style={dividerStyle} />
+
+        {/* ----------------- ZONE 3 — Corporate fine print ----------------- */}
         <p
           style={{
             fontFamily: F.body,
             fontSize: 11,
-            lineHeight: 1.6,
-            color: P.warmGray,
+            lineHeight: 1.65,
+            color: P.warmGrayLight,
             margin: 0,
           }}
         >
