@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 import { WelcomeToast } from "./components/WelcomeToast";
+import { SiteFooter } from "./components/SiteFooter";
 
 const AboutPage = lazy(() => import("./pages/AboutPage").then(m => ({ default: m.AboutPage })));
 const ComparePage = lazy(() => import("./pages/ComparePage").then(m => ({ default: m.ComparePage })));
@@ -95,6 +96,7 @@ export default function MortgageLandingPage() {
       }>
         {renderPage()}
       </Suspense>
+      <SiteFooter />
       <WelcomeToast />
     </>
   );
