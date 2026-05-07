@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME } from "../data/compliance";
 
 export function DeepDiveFooter() {
   return (
@@ -7,7 +8,10 @@ export function DeepDiveFooter() {
         Nick Peters <span style={{ color: P.gold }}>🤓</span>
       </p>
       <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, marginBottom: 6 }}>
-        NMLS# 1119524
+        NMLS# {PERSONAL_NMLS}
+      </p>
+      <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, marginBottom: 6 }}>
+        {TRADE_NAME} · Corporate NMLS# {CORPORATE_NMLS}
       </p>
       <p style={{ fontSize: 12, color: P.warmGrayLight, lineHeight: 1.6, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
         <svg
