@@ -141,24 +141,16 @@ export function SiteFooter({ hasSidebar = false }) {
         }}
       >
         {/* ----------------- ZONE 2 — Attribution -----------------
-            Flex row with wrap + justify-content center: each column
-            sizes to its own content (not forced to equal 1fr widths),
-            and the pair sits centered as a group. The gap between
-            them is therefore the gap between actual content edges,
-            not between empty grid tracks, so it reads visually
-            balanced even though the LEFT column (LO + website) is a
-            bit wider than the RIGHT column (branch + licensing).
-
-            On narrow widths, flex-wrap moves the second column below
-            the first, both centered. */}
+            Flex row with wrap: each column sizes to its own content
+            and the pair sits left-aligned at the inner container's
+            left edge, matching the disclaimer paragraphs below them.
+            On narrow widths flex-wrap drops the second column under
+            the first. */}
         <div
           style={{
             display: "flex",
             flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 180,
-            maxWidth: 880,
-            margin: "0 auto",
+            gap: 48,
           }}
         >
           {/* LEFT — Brand voice + LO + contact + EHL */}
