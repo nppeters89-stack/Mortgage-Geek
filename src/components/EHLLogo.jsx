@@ -2,39 +2,41 @@
 // the parent component is expected to provide a visible "Equal Housing
 // Lender" text label beside it where context requires one.
 //
-// The mark is the standard FDIC/HUD silhouette: a square frame, a
-// gabled-roof house centered inside it, and three horizontal bars
-// across the lower portion representing the floors of the house.
-// Color is single-tone so it can be tinted via the `color` prop and
-// match whichever palette token the consumer wants (defaults to navy).
+// Path mirrors the canonical EHL silhouette already used in the mobile
+// sidebar (src/components/Sidebar.jsx): a steep-roof house outline
+// with two horizontal stripes inside its lower half. No outer frame —
+// the mark is the house itself, which matches the FDIC/HUD pictogram.
+//
+// `color` tints both the stroke (house outline) and the stripe fill
+// so the mark stays single-tone against any background.
 
 import { P } from "../theme";
 
 export function EHLLogo({ size = 24, color = P.navy }) {
+  // Aspect ratio matches the viewBox (40 wide × 42 tall) so the icon
+  // doesn't squash when consumers pass a single `size` value.
+  const height = size * (42 / 40);
   return (
     <svg
       role="img"
       aria-label="Equal Housing Lender"
       width={size}
-      height={size}
-      viewBox="0 0 32 32"
+      height={height}
+      viewBox="0 0 40 42"
       xmlns="http://www.w3.org/2000/svg"
       style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
     >
-      {/* Outer square frame */}
-      <rect x="1" y="1" width="30" height="30" rx="2" fill="none" stroke={color} strokeWidth="2" />
-      {/* House silhouette: gabled roof + body */}
+      {/* House outline — apex centered at top, walls down to the base */}
       <path
-        d="M16 6 L26 14 L26 25 L6 25 L6 14 Z"
-        fill="none"
+        d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z"
         stroke={color}
-        strokeWidth="2"
+        strokeWidth="2.5"
+        fill="none"
         strokeLinejoin="round"
       />
-      {/* Three horizontal bars representing floors */}
-      <rect x="9" y="16" width="14" height="1.5" fill={color} />
-      <rect x="9" y="19.25" width="14" height="1.5" fill={color} />
-      <rect x="9" y="22.5" width="14" height="1.5" fill={color} />
+      {/* Two horizontal stripes inside the house, signature EHL detail */}
+      <rect x="12" y="22" width="16" height="3" fill={color} />
+      <rect x="12" y="28" width="16" height="3" fill={color} />
     </svg>
   );
 }
