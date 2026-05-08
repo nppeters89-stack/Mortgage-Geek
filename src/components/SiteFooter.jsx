@@ -304,7 +304,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
 
             {/* Equal Housing Lender row */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 14 }}>
-              <EHLLogo size={sz(22, 18)} color={P.navy} />
+              <EHLLogo size={sz(14, 12)} color={P.navy} />
               <span
                 style={{
                   fontFamily: F.body,
