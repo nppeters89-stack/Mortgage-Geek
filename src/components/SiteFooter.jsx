@@ -433,7 +433,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             margin: "0 0 24px",
           }}
         >
-          This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation.
+          This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation. All applicants are subject to underwriting approval.
         </p>
         <p
           style={{
