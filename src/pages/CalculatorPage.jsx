@@ -141,8 +141,10 @@ export function CalculatorPage() {
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
 
-  // Round to nearest 0.125%
-  const roundRate = (r) => Math.round(r / 0.125) * 0.125;
+  // Round to nearest 0.125%, then add a 0.25% buffer so the starting
+  // auto-populated rate runs conservative (above true market). Users
+  // can drag the slider down to match their actual quote.
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.25;
 
   // Fetch live rates on mount
   useEffect(() => {
@@ -668,7 +670,7 @@ export function CalculatorPage() {
 
           {/* Disclaimer */}
           <p style={{ fontSize: 11, color: P.cream, opacity: 0.65, marginBottom: 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
-            National averages via Mortgage News Daily, rounded to the nearest 0.125%. Your actual rate may differ — adjust below to match your quote.
+            National averages via Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% for a conservative starting estimate. Your actual rate may differ. Adjust below to match your quote.
           </p>
 
           {/* Rate pills — RateInput component unchanged, cream pills sit on navy.
@@ -1194,7 +1196,7 @@ export function CalculatorPage() {
 
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-          {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily) and rounded to the nearest 0.125%. " : ""}
+          {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
           This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
         </p>
         </div>
@@ -1382,7 +1384,7 @@ export function CalculatorPage() {
                   )}
                 </div>
                 <p style={{ fontSize: 10, color: P.cream, opacity: 0.65, marginBottom: 10, lineHeight: 1.4 }}>
-                  National averages via Mortgage News Daily, rounded to 0.125%. Adjust to match your quote.
+                  National averages via Mortgage News Daily, rounded to 0.125% then bumped up 0.25% for a conservative estimate. Adjust to match your quote.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {[
@@ -1514,7 +1516,7 @@ export function CalculatorPage() {
 
               {/* Disclaimer — preserved verbatim */}
               <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
-                {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily) and rounded to the nearest 0.125%. " : ""}
+                {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
                 This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
               </p>
             </>

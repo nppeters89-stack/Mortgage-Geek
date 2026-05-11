@@ -172,7 +172,10 @@ export function CashToClosePage() {
     else                                 setVaRate(v);
   };
 
-  const roundRate = (r) => Math.round(r / 0.125) * 0.125;
+  // Round to nearest 0.125%, then add a 0.25% buffer so the starting
+  // auto-populated rate runs conservative (above true market). Users
+  // can drag the slider down to match their actual quote.
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.25;
 
   // Fetch live MND rates on mount. Sets rateLoading=true during fetch,
   // rateLoading=false + ratesLoaded=true + rateSource=date when complete.
@@ -933,7 +936,7 @@ export function CashToClosePage() {
         )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily and rounded to the nearest 0.125%. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS# 1119524.
+          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS# 1119524.
         </p>
       </div>
       <MobileToolbar />
