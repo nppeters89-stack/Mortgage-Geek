@@ -281,8 +281,8 @@ export function PreQualPage() {
 
     const currentBackDTI = grossIncome > 0 ? ((monthlyDebts + maxPayment) / grossIncome * 100) : 0;
 
-    // APR calculation for the max scenario
-    const aprLenderFees = 1500 + 750 + (prog.name === "VA" ? 650 : prog.name === "FHA" ? 550 : prog.name === "USDA" ? 625 : 600) + 300 + 15 + 80;
+    // APR calculation for the max scenario — flat lender fees across all programs (matches Cash to Close simulator)
+    const aprLenderFees = 995 + 910 + 800 + 1000 + 300 + 15 + 80; // underwriting + processing + appraisal + verification + credit + flood + tax service
     const aprUpfront = maxLoan * (prog.upfrontFee / 100);
     const aprCharges = aprLenderFees + aprUpfront;
     let aprMI = 0, aprMiMonths = 0;

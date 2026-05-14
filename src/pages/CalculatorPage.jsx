@@ -224,7 +224,7 @@ export function CalculatorPage() {
   const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
   // Lender fees for APR calculation (matches Cash to Close simulator)
-  const calcLenderFees = 1500 + 750 + 600 + 300 + 15 + 80; // underwriting + processing + appraisal + credit + flood + tax service
+  const calcLenderFees = 995 + 910 + 800 + 1000 + 300 + 15 + 80; // underwriting + processing + appraisal + verification + credit + flood + tax service
 
   // APR per program — includes lender fees, upfront MI, and monthly MI per Reg Z §1026.4(b)(5)
   const convAprCharges = calcLenderFees;

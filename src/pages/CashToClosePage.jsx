@@ -146,10 +146,11 @@ export function CashToClosePage() {
   const [waiveEscrows, setWaiveEscrows] = useState(false);
   const paramVaUsage = params.get("vaUsage");
   const [vaUsage, setVaUsage] = useState(["first", "subsequent", "exempt"].includes(paramVaUsage) ? paramVaUsage : "first");
-  // Editable lender fees
-  const [feeUnderwriting, setFeeUnderwriting] = useState(1500);
-  const [feeProcessing, setFeeProcessing] = useState(750);
-  const [feeAppraisal, setFeeAppraisal] = useState(() => program === "VA" ? 650 : program === "FHA" ? 550 : program === "USDA" ? 625 : 600);
+  // Editable lender fees — same defaults across all loan programs
+  const [feeUnderwriting, setFeeUnderwriting] = useState(995);
+  const [feeProcessing, setFeeProcessing] = useState(910);
+  const [feeAppraisal, setFeeAppraisal] = useState(800);
+  const [feeVerification, setFeeVerification] = useState(1000);
   const [feeCreditReport, setFeeCreditReport] = useState(300);
   const [feeFloodCert, setFeeFloodCert] = useState(15);
   const [feeTaxService, setFeeTaxService] = useState(80);
@@ -157,7 +158,6 @@ export function CashToClosePage() {
   const [discountPointsPct, setDiscountPointsPct] = useState(0);
   const [discountPointsDollar, setDiscountPointsDollar] = useState(0);
   const [showPointsInfo, setShowPointsInfo] = useState(false);
-  useEffect(() => { setFeeAppraisal(program === "VA" ? 650 : program === "FHA" ? 550 : program === "USDA" ? 625 : 600); }, [program]);
 
   // Active rate switches with selected program
   const rate =
@@ -263,9 +263,9 @@ export function CashToClosePage() {
 
   // Lender fees (editable)
   const underwriting = feeUnderwriting, processing = feeProcessing;
-  const appraisal = feeAppraisal;
+  const appraisal = feeAppraisal, verification = feeVerification;
   const creditReport = feeCreditReport, floodCert = feeFloodCert, taxService = feeTaxService;
-  const lenderTotal = underwriting + processing + appraisal + creditReport + floodCert + taxService + discountPointsDollar;
+  const lenderTotal = underwriting + processing + appraisal + verification + creditReport + floodCert + taxService + discountPointsDollar;
 
   // Title & Escrow — rates approximated from First American filed schedules for our 5 states
   // Lender's title: tiered rate, declines as loan amount grows (industry standard)
@@ -755,6 +755,7 @@ export function CashToClosePage() {
             <CalcInput label="Underwriting" value={feeUnderwriting} onChange={setFeeUnderwriting} prefix="$" step={50} comma />
             <CalcInput label="Processing" value={feeProcessing} onChange={setFeeProcessing} prefix="$" step={50} comma />
             <CalcInput label="Appraisal" value={feeAppraisal} onChange={setFeeAppraisal} prefix="$" step={25} comma />
+            <CalcInput label="Verification Fees" value={feeVerification} onChange={setFeeVerification} prefix="$" step={50} comma />
             <CalcInput label="Credit Report" value={feeCreditReport} onChange={setFeeCreditReport} prefix="$" step={25} comma />
             <CalcInput label="Flood Certification" value={feeFloodCert} onChange={setFeeFloodCert} prefix="$" step={5} />
             <CalcInput label="Tax Service" value={feeTaxService} onChange={setFeeTaxService} prefix="$" step={10} />
