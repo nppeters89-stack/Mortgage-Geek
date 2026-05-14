@@ -67,6 +67,7 @@ export function MainSite() {
 
     const getMain = () => document.querySelector(".main-content");
     const getBar = () => document.querySelector(".mobile-bar");
+    const getFooter = () => document.querySelector(".mg-site-footer");
 
     const addScrollBlocker = () => {
       if (scrollBlocker) return;
@@ -112,8 +113,10 @@ export function MainSite() {
         if (!isHorizontal) { tracking = false; return; }
         const main = getMain();
         const bar = getBar();
+        const footer = getFooter();
         if (main) main.classList.add("sidebar-dragging");
         if (bar) bar.classList.add("sidebar-dragging");
+        if (footer) footer.classList.add("sidebar-dragging");
         addScrollBlocker();
       }
 
@@ -121,6 +124,7 @@ export function MainSite() {
 
       const main = getMain();
       const bar = getBar();
+      const footer = getFooter();
       if (!main) return;
 
       if (mode === "opening") {
@@ -131,6 +135,10 @@ export function MainSite() {
         main.style.borderRadius = `${radius}px 0 0 0`;
         main.style.setProperty("--sidebar-dim", pct);
         if (bar) bar.style.transform = `translateX(${dragPx}px)`;
+        if (footer) {
+          footer.style.transform = `translateX(${dragPx}px)`;
+          footer.style.setProperty("--sidebar-dim", pct);
+        }
       } else if (mode === "closing") {
         const dragPx = Math.max(0, Math.min(-dx, SIDEBAR_W));
         const pct = 1 - (dragPx / SIDEBAR_W);
@@ -140,6 +148,10 @@ export function MainSite() {
         main.style.borderRadius = `${radius}px 0 0 0`;
         main.style.setProperty("--sidebar-dim", pct);
         if (bar) bar.style.transform = `translateX(${offset}px)`;
+        if (footer) {
+          footer.style.transform = `translateX(${offset}px)`;
+          footer.style.setProperty("--sidebar-dim", pct);
+        }
       }
     };
 
@@ -148,14 +160,17 @@ export function MainSite() {
       const dx = currentX - startX;
       const main = getMain();
       const bar = getBar();
+      const footer = getFooter();
 
       // Re-enable CSS transitions for snap
       if (main) main.classList.remove("sidebar-dragging");
       if (bar) bar.classList.remove("sidebar-dragging");
+      if (footer) footer.classList.remove("sidebar-dragging");
 
       // Clear inline styles — let CSS classes handle the snap
       if (main) { main.style.transform = ""; main.style.borderRadius = ""; main.style.removeProperty("--sidebar-dim"); }
       if (bar) bar.style.transform = "";
+      if (footer) { footer.style.transform = ""; footer.style.removeProperty("--sidebar-dim"); }
       removeScrollBlocker();
 
       if (mode === "opening" && dx > SNAP_THRESHOLD) {
@@ -198,8 +213,10 @@ export function MainSite() {
         // Disable transition so content snaps back instantly (no navy flash)
         const main = document.querySelector(".main-content");
         const bar = document.querySelector(".mobile-bar");
+        const footer = document.querySelector(".mg-site-footer");
         if (main) main.style.transition = "none";
         if (bar) bar.style.transition = "none";
+        if (footer) footer.style.transition = "none";
         setMobileOpen(false);
         // Wait one frame for DOM to update, then scroll and restore transitions
         requestAnimationFrame(() => {
@@ -208,6 +225,7 @@ export function MainSite() {
           requestAnimationFrame(() => {
             if (main) main.style.transition = "";
             if (bar) bar.style.transition = "";
+            if (footer) footer.style.transition = "";
           });
         });
       } else {

@@ -156,24 +156,35 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
              is OUTSIDE .main-content, so it has to slide in lockstep on
              its own — otherwise the page slab above slides over but the
              footer stays put, leaving an obvious seam. Match the same
-             timing (.3s ease) as .main-content's transform. */
-          .mg-site-footer { transition: transform 0.3s ease; will-change: transform; }
-          html.sidebar-locked .mg-site-footer { transform: translateX(280px); }
+             timing (.3s ease) as .main-content's transform.
+
+             touch-action: pan-y mirrors .main-content. Without it, iOS
+             treats a horizontal drag starting over the footer as a
+             native back-swipe gesture and adds its own translation on
+             top of our JS transform, so the footer races ahead of
+             .main-content during the drag — visible as a speed mismatch
+             and a seam at the footer's top edge. */
+          .mg-site-footer { transition: transform 0.3s ease; will-change: transform; touch-action: pan-y; }
+          html.sidebar-locked .mg-site-footer { transform: translateX(280px); --sidebar-dim: 1; }
           /* Mirror .main-content-open's dim overlay so the entire page
-             slab — main-content + footer — darkens uniformly when the
-             sidebar is open. */
+             slab — main-content + footer — darkens uniformly. Opacity
+             tracks --sidebar-dim (set inline by the swipe handler frame
+             by frame, and to 1 by the rule above when fully open) so
+             the footer dims at exactly the same rate as .main-content
+             during the drag — otherwise the page slab darkens
+             progressively while the footer stays bright, leaving a
+             visible horizontal seam at the boundary. */
           .mg-site-footer::after {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            opacity: 0;
+            opacity: var(--sidebar-dim, 0);
             pointer-events: none;
             transition: opacity 0.3s ease;
             z-index: 9999;
           }
           html.sidebar-locked .mg-site-footer::after {
-            opacity: 1;
             pointer-events: auto;
           }
         }
