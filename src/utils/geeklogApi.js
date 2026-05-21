@@ -62,3 +62,30 @@ export async function saveEntry(key, entryRecord) {
 export async function fetchYearStats(key, year) {
   return request(key, `/year?year=${encodeURIComponent(year)}`);
 }
+
+// GET /api/geeklog/closing?year=YYYY — returns the per-date map
+// { "YYYY-MM-DD": [closingRecord, ...] }. Empty year → {}.
+export async function fetchClosings(key, year) {
+  const data = await request(key, `/closing?year=${encodeURIComponent(year)}`);
+  return data || {};
+}
+
+// POST /api/geeklog/closing — appends to that date's array. Server
+// returns the new full array for the date.
+export async function saveClosing(key, closingRecord) {
+  return request(key, `/closing`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(closingRecord),
+  });
+}
+
+// DELETE /api/geeklog/closing — body { date, index }. Server returns
+// the updated array (empty array if the last closing was removed).
+export async function deleteClosing(key, dateISO, index) {
+  return request(key, `/closing`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date: dateISO, index }),
+  });
+}

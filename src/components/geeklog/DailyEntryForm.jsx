@@ -3,17 +3,20 @@
 //   - four NumberStepperInputs (one per metric)
 //   - 80-char headline textarea with live counter
 //   - Save button
-//   - SaveToast for confirmation
 //
 // On mount and on every selectedDate change, fetches the entry for
 // that date and populates the form. Save POSTs to /api/geeklog/entry
 // and updates lastSavedAt for the quiet "Last saved" line.
+//
+// Toast surfacing is owned by the parent (AuthorizedView). This
+// component calls the passed-in showToast({message, variant}) for
+// both success and error feedback so the page only renders one toast
+// at a time.
 
 import { useEffect, useId, useState } from "react";
 import { P, F } from "../../theme";
 import { fetchEntry, saveEntry } from "../../utils/geeklogApi";
 import { NumberStepperInput } from "./NumberStepperInput";
-import { SaveToast } from "./SaveToast";
 
 const HEADLINE_MAX = 80;
 const HEADLINE_WARN = 70;
@@ -28,19 +31,6 @@ function todayChicagoISO() {
   }).format(new Date());
 }
 
-// "2026-05-21" → "Thursday, May 21, 2026"
-function humanDate(iso) {
-  const [y, m, d] = iso.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: "UTC",
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).format(dt);
-}
-
 // 1747776000000 → "14:32" (24-hour, Chicago)
 function timeHHMM(ms) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -53,13 +43,12 @@ function timeHHMM(ms) {
 
 const EMPTY_METRICS = { applications: 0, prospecting: 0, appointments: 0, contentShipped: 0 };
 
-export function DailyEntryForm({ apiKey }) {
+export function DailyEntryForm({ apiKey, showToast }) {
   const [selectedDate, setSelectedDate] = useState(todayChicagoISO);
   const [metrics, setMetrics] = useState(EMPTY_METRICS);
   const [headline, setHeadline] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [toast, setToast] = useState(null); // { id, message, variant }
   const [lastSavedAt, setLastSavedAt] = useState(null);
 
   const headlineId = useId();
@@ -89,13 +78,13 @@ export function DailyEntryForm({ apiKey }) {
       })
       .catch((err) => {
         if (cancelled) return;
-        setToast({ id: Date.now(), message: `Load failed: ${err.message}`, variant: "error" });
+        showToast?.({ message: `Load failed: ${err.message}`, variant: "error" });
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
       });
     return () => { cancelled = true; };
-  }, [apiKey, selectedDate]);
+  }, [apiKey, selectedDate, showToast]);
 
   const setMetric = (field) => (n) => setMetrics((prev) => ({ ...prev, [field]: n }));
 
@@ -112,9 +101,9 @@ export function DailyEntryForm({ apiKey }) {
         headline,
       });
       setLastSavedAt(saved.updatedAt ?? Date.now());
-      setToast({ id: Date.now(), message: "Entry saved", variant: "success" });
+      showToast?.({ message: "Entry saved", variant: "success" });
     } catch (err) {
-      setToast({ id: Date.now(), message: `Save failed: ${err.message}`, variant: "error" });
+      showToast?.({ message: `Save failed: ${err.message}`, variant: "error" });
     } finally {
       setIsSaving(false);
     }
@@ -128,205 +117,161 @@ export function DailyEntryForm({ apiKey }) {
     P.warmGray;
 
   return (
-    <main style={{ minHeight: "100dvh", background: P.cream, color: P.text }}>
-      {/* Header strip — same navy aesthetic as snapshot card lands in G5 */}
-      <header style={{
-        background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`,
-        color: P.cream,
-        padding: "calc(32px + env(safe-area-inset-top, 0px)) 24px 32px",
-      }}>
-        <div style={{ maxWidth: 640, margin: "0 auto" }}>
-          <h1 style={{
-            fontFamily: F.display,
-            fontSize: 32,
-            fontWeight: 400,
-            margin: 0,
-            color: P.cream,
-            letterSpacing: 0.5,
-          }}>
-            Geek Log
-          </h1>
-          <p style={{
+    <section style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 24,
+    }}>
+      {/* Date picker */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label
+          htmlFor={dateId}
+          style={{
             fontFamily: F.body,
-            fontSize: 13,
-            color: P.cream,
-            opacity: 0.7,
-            margin: "6px 0 0",
-            letterSpacing: 0.3,
-          }}>
-            Daily Entry · {humanDate(selectedDate)}
-          </p>
-        </div>
-      </header>
+            fontSize: 11,
+            fontWeight: 700,
+            color: P.warmGray,
+            textTransform: "uppercase",
+            letterSpacing: 1.5,
+          }}
+        >
+          Date
+        </label>
+        <input
+          id={dateId}
+          type="date"
+          value={selectedDate}
+          onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+          disabled={formDisabled}
+          style={{
+            fontFamily: F.body,
+            fontSize: 16,
+            padding: "12px 14px",
+            minHeight: 44,
+            background: P.white,
+            color: P.navyDark,
+            border: `1px solid ${P.creamDark}`,
+            borderRadius: 8,
+            outline: "none",
+          }}
+        />
+      </div>
 
-      <section style={{
-        maxWidth: 640,
-        margin: "0 auto",
-        padding: "32px 24px 96px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 24,
+      {/* Metrics — 2-col on desktop, 1-col on narrow */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+        gap: 12,
       }}>
-        {/* Date picker */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <label
-            htmlFor={dateId}
-            style={{
-              fontFamily: F.body,
-              fontSize: 11,
-              fontWeight: 700,
-              color: P.warmGray,
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-            }}
-          >
-            Date
-          </label>
-          <input
-            id={dateId}
-            type="date"
-            value={selectedDate}
-            onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
-            disabled={formDisabled}
-            style={{
-              fontFamily: F.body,
-              fontSize: 16,
-              padding: "12px 14px",
-              minHeight: 44,
-              background: P.white,
-              color: P.navyDark,
-              border: `1px solid ${P.creamDark}`,
-              borderRadius: 8,
-              outline: "none",
-            }}
-          />
-        </div>
+        <NumberStepperInput
+          label="Applications"
+          value={metrics.applications}
+          onChange={setMetric("applications")}
+          disabled={formDisabled}
+        />
+        <NumberStepperInput
+          label="Prospecting"
+          value={metrics.prospecting}
+          onChange={setMetric("prospecting")}
+          disabled={formDisabled}
+        />
+        <NumberStepperInput
+          label="Appointments"
+          value={metrics.appointments}
+          onChange={setMetric("appointments")}
+          disabled={formDisabled}
+        />
+        <NumberStepperInput
+          label="Content"
+          value={metrics.contentShipped}
+          onChange={setMetric("contentShipped")}
+          disabled={formDisabled}
+        />
+      </div>
 
-        {/* Metrics — 2-col on desktop, 1-col on narrow */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 12,
+      {/* Headline */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <label
+          htmlFor={headlineId}
+          style={{
+            fontFamily: F.body,
+            fontSize: 11,
+            fontWeight: 700,
+            color: P.warmGray,
+            textTransform: "uppercase",
+            letterSpacing: 1.5,
+          }}
+        >
+          Headline <span style={{ fontWeight: 400, color: P.warmGrayLight, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
+        </label>
+        <textarea
+          id={headlineId}
+          value={headline}
+          onChange={(e) => setHeadline(e.target.value.slice(0, HEADLINE_MAX))}
+          disabled={formDisabled}
+          rows={2}
+          maxLength={HEADLINE_MAX}
+          placeholder="Day 141. 23 families home, 77 to go."
+          style={{
+            fontFamily: F.body,
+            fontSize: 15,
+            lineHeight: 1.5,
+            padding: "12px 14px",
+            background: P.white,
+            color: P.navyDark,
+            border: `1px solid ${P.creamDark}`,
+            borderRadius: 8,
+            outline: "none",
+            resize: "vertical",
+            minHeight: 60,
+          }}
+        />
+        <span style={{
+          fontFamily: F.body,
+          fontSize: 12,
+          color: headlineColor,
+          alignSelf: "flex-end",
+          fontVariantNumeric: "tabular-nums",
         }}>
-          <NumberStepperInput
-            label="Applications"
-            value={metrics.applications}
-            onChange={setMetric("applications")}
-            disabled={formDisabled}
-          />
-          <NumberStepperInput
-            label="Prospecting"
-            value={metrics.prospecting}
-            onChange={setMetric("prospecting")}
-            disabled={formDisabled}
-          />
-          <NumberStepperInput
-            label="Appointments"
-            value={metrics.appointments}
-            onChange={setMetric("appointments")}
-            disabled={formDisabled}
-          />
-          <NumberStepperInput
-            label="Content"
-            value={metrics.contentShipped}
-            onChange={setMetric("contentShipped")}
-            disabled={formDisabled}
-          />
-        </div>
+          {headlineLen} / {HEADLINE_MAX}
+        </span>
+      </div>
 
-        {/* Headline */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          <label
-            htmlFor={headlineId}
-            style={{
-              fontFamily: F.body,
-              fontSize: 11,
-              fontWeight: 700,
-              color: P.warmGray,
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-            }}
-          >
-            Headline <span style={{ fontWeight: 400, color: P.warmGrayLight, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
-          </label>
-          <textarea
-            id={headlineId}
-            value={headline}
-            onChange={(e) => setHeadline(e.target.value.slice(0, HEADLINE_MAX))}
-            disabled={formDisabled}
-            rows={2}
-            maxLength={HEADLINE_MAX}
-            placeholder="Day 141. 23 families home, 77 to go."
-            style={{
-              fontFamily: F.body,
-              fontSize: 15,
-              lineHeight: 1.5,
-              padding: "12px 14px",
-              background: P.white,
-              color: P.navyDark,
-              border: `1px solid ${P.creamDark}`,
-              borderRadius: 8,
-              outline: "none",
-              resize: "vertical",
-              minHeight: 60,
-            }}
-          />
+      {/* Save */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 8, marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={formDisabled}
+          style={{
+            fontFamily: F.body,
+            fontSize: 15,
+            fontWeight: 600,
+            letterSpacing: 0.3,
+            padding: "14px 28px",
+            minHeight: 48,
+            background: formDisabled ? P.warmGrayLight : P.navy,
+            color: P.cream,
+            border: "none",
+            borderRadius: 8,
+            cursor: formDisabled ? "not-allowed" : "pointer",
+            transition: "background 0.15s ease",
+          }}
+        >
+          {isSaving ? "Saving…" : "Save Entry"}
+        </button>
+        {lastSavedAt && (
           <span style={{
             fontFamily: F.body,
             fontSize: 12,
-            color: headlineColor,
-            alignSelf: "flex-end",
-            fontVariantNumeric: "tabular-nums",
+            color: P.warmGrayLight,
+            textAlign: "center",
+            letterSpacing: 0.3,
           }}>
-            {headlineLen} / {HEADLINE_MAX}
+            Last saved: {timeHHMM(lastSavedAt)}
           </span>
-        </div>
-
-        {/* Save */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: 8, marginTop: 8 }}>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={formDisabled}
-            style={{
-              fontFamily: F.body,
-              fontSize: 15,
-              fontWeight: 600,
-              letterSpacing: 0.3,
-              padding: "14px 28px",
-              minHeight: 48,
-              background: formDisabled ? P.warmGrayLight : P.navy,
-              color: P.cream,
-              border: "none",
-              borderRadius: 8,
-              cursor: formDisabled ? "not-allowed" : "pointer",
-              transition: "background 0.15s ease",
-            }}
-          >
-            {isSaving ? "Saving…" : "Save Entry"}
-          </button>
-          {lastSavedAt && (
-            <span style={{
-              fontFamily: F.body,
-              fontSize: 12,
-              color: P.warmGrayLight,
-              textAlign: "center",
-              letterSpacing: 0.3,
-            }}>
-              Last saved: {timeHHMM(lastSavedAt)}
-            </span>
-          )}
-        </div>
-      </section>
-
-      {toast && (
-        <SaveToast
-          key={toast.id}
-          message={toast.message}
-          variant={toast.variant}
-          onDismiss={() => setToast(null)}
-        />
-      )}
-    </main>
+        )}
+      </div>
+    </section>
   );
 }

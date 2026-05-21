@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { P, F } from "../theme";
 import { fetchYearStats } from "../utils/geeklogApi";
-import { DailyEntryForm } from "../components/geeklog/DailyEntryForm";
+import { AuthorizedView } from "../components/geeklog/AuthorizedView";
 
 const STATE = { LOADING: "loading", AUTHORIZED: "authorized", DENIED: "denied" };
 
@@ -67,7 +67,7 @@ export function GeekLogPage() {
     return (
       <>
         {helmet}
-        <DailyEntryForm apiKey={apiKey} />
+        <AuthorizedView apiKey={apiKey} />
       </>
     );
   }
