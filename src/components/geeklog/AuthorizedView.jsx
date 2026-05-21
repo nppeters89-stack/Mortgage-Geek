@@ -102,6 +102,17 @@ export function AuthorizedView({ apiKey }) {
         reader.readAsDataURL(blob);
       }))
       .then((dataUrl) => {
+        // TEMP DIAGNOSTIC (remove after mobile export fix verified):
+        // surface the prefetched data URL's prefix + length so Nick
+        // can confirm via mobile Safari remote debugging whether the
+        // FileReader produced a valid base64 PNG payload.
+        // eslint-disable-next-line no-console
+        console.log(
+          "[geeklog:debug] logoDataUrl resolved:",
+          typeof dataUrl === "string" ? dataUrl.substring(0, 60) : dataUrl,
+          "length:",
+          typeof dataUrl === "string" ? dataUrl.length : null,
+        );
         if (!cancelled && typeof dataUrl === "string") setLogoDataUrl(dataUrl);
       })
       .catch((err) => {
