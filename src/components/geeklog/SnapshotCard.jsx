@@ -80,13 +80,23 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         boxSizing: "border-box",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          <img
-            src={logoSrc}
-            alt=""
-            width={96}
-            height={96}
-            data-snapshot-logo="true"
-            style={{ width: 96, height: 96, display: "block" }}
+          {/* Background-image on a div rather than an <img> — iOS
+              Safari's <foreignObject> renderer drops nested HTML
+              <img> elements during html-to-image capture. CSS
+              backgrounds are serialized inline into the style
+              attribute, which mobile WebKit handles reliably. */}
+          <div
+            role="img"
+            aria-label="The Mortgage Geek"
+            style={{
+              width: 96,
+              height: 96,
+              flexShrink: 0,
+              backgroundImage: `url(${logoSrc})`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
           />
           <span style={{
             fontFamily: F.display,
