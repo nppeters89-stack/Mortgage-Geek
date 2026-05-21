@@ -43,6 +43,13 @@ export function AuthorizedView({ apiKey }) {
   const [allEntries, setAllEntries] = useState({});
   const [yearStats, setYearStats] = useState(null);
   const [toast, setToast] = useState(null); // { id, message, variant }
+  // Logo prefetched once as a data URL so the snapshot export bypasses
+  // the service worker (which on iOS Safari can serve a response
+  // html-to-image fails to embed via fetch + canvas). Non-blocking:
+  // the dashboard renders immediately; the visible preview falls back
+  // to the network image until this resolves; the export button's
+  // cold-start guard prevents a logo-less PNG.
+  const [logoDataUrl, setLogoDataUrl] = useState(null);
   // Dashboard-only DotGrid scaling. Below 640px viewport, swap to a
   // 20/10 layout that totals ~280px wide and clears a 320px viewport
   // with padding. This is a CALL-SITE override only — DotGrid's
@@ -79,6 +86,29 @@ export function AuthorizedView({ apiKey }) {
   useEffect(() => {
     refreshAll();
   }, [refreshAll]);
+
+  // Non-blocking logo prefetch. Runs once at mount; never gates render.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/icon-512.png", { cache: "force-cache" })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Logo fetch failed: ${r.status}`);
+        return r.blob();
+      })
+      .then((blob) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(blob);
+      }))
+      .then((dataUrl) => {
+        if (!cancelled && typeof dataUrl === "string") setLogoDataUrl(dataUrl);
+      })
+      .catch((err) => {
+        console.warn("[geeklog] logo prefetch failed:", err);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   const closingsCount = yearStats?.closingsCount ?? 0;
   const goalTarget = yearStats?.goal?.target ?? 100;
@@ -229,10 +259,10 @@ export function AuthorizedView({ apiKey }) {
               width: 1080,
               height: 1080,
             }}>
-              <SnapshotCard data={snapshotData} />
+              <SnapshotCard data={snapshotData} logoDataUrl={logoDataUrl} />
             </div>
           </div>
-          <SnapshotExportButton data={snapshotData} showToast={showToast} />
+          <SnapshotExportButton data={snapshotData} logoDataUrl={logoDataUrl} showToast={showToast} />
         </div>
       </div>
 

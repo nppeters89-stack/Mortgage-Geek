@@ -37,11 +37,18 @@ export function DotGrid({
         style={{
           width: dotSize,
           height: dotSize,
+          // box-sizing: border-box keeps the dot's outer size at dotSize
+          // regardless of border width, so the grid math stays exact.
+          boxSizing: "border-box",
           borderRadius: "50%",
           background: isFilled ? filledColor : "transparent",
-          boxShadow: isFilled
-            ? `inset 0 0 0 1px ${filledRingColor}`
-            : `inset 0 0 0 1.5px ${unfilledRingColor}`,
+          // Borders render reliably in html-to-image's foreignObject
+          // pipeline on mobile WebKit; the previous box-shadow inset
+          // ring rendered as a dash-like artifact in the exported PNG
+          // on iOS Safari. Visual parity preserved at this scale.
+          border: isFilled
+            ? `1px solid ${filledRingColor}`
+            : `1.5px solid ${unfilledRingColor}`,
         }}
       />
     );

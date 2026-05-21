@@ -48,10 +48,15 @@ function DotSeparator({ size = 3, mx = 12, color = P.warmGrayLight }) {
   );
 }
 
-export function SnapshotCard({ data }) {
+export function SnapshotCard({ data, logoDataUrl = null }) {
   const { letters: dayLetters, sundayIndex } = buildDayLetters(data.dateISO);
   const goalTarget = data.goalTarget || 100;
   const headlineText = (data.headline || "").trim();
+  // Prefer the pre-fetched data URL (already bypassed the service
+  // worker → reliable in html-to-image's mobile capture). Fall back to
+  // the original path for the visible preview during cold-start before
+  // the prefetch resolves.
+  const logoSrc = logoDataUrl || "/icon-512.png";
 
   return (
     <div style={{
@@ -76,7 +81,7 @@ export function SnapshotCard({ data }) {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <img
-            src="/icon-512.png"
+            src={logoSrc}
             alt=""
             width={96}
             height={96}
