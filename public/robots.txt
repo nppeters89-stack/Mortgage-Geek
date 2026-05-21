@@ -3,6 +3,7 @@
 
 User-agent: *
 Allow: /
+Disallow: /geek-log
 
 # Sitemap location (absolute URL required per protocol)
 Sitemap: https://mortgagegeek.ai/sitemap.xml

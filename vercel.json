@@ -16,7 +16,8 @@
     { "source": "/deep-dives", "destination": "/" },
     { "source": "/deep-dives/:slug*", "destination": "/" },
     { "source": "/geek-maps", "destination": "/" },
-    { "source": "/geek-maps/:slug*", "destination": "/" }
+    { "source": "/geek-maps/:slug*", "destination": "/" },
+    { "source": "/geek-log", "destination": "/" }
   ],
   "headers": [
     {

@@ -24,6 +24,7 @@ const HourlyPartTimeIncomePage = lazy(() => import("./pages/HourlyPartTimeIncome
 const GeekMapsHubPage = lazy(() => import("./pages/GeekMapsHubPage").then(m => ({ default: m.GeekMapsHubPage })));
 const TNLoanLimitsPage = lazy(() => import("./pages/TNLoanLimitsPage").then(m => ({ default: m.TNLoanLimitsPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
+const GeekLogPage = lazy(() => import("./pages/GeekLogPage").then(m => ({ default: m.GeekLogPage })));
 
 export default function MortgageLandingPage() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -49,6 +50,7 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/hourly-and-part-time-income") return "deepdives-hourly-part-time";
     if (path === "geek-maps") return "geek-maps-hub";
     if (path === "geek-maps/tennessee-loan-limits") return "geek-maps-tn-loan-limits";
+    if (path === "geek-log") return "geek-log";
     return "main";
   });
 
@@ -74,6 +76,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-hourly-part-time") return <HourlyPartTimeIncomePage />;
     if (currentPage === "geek-maps-hub") return <GeekMapsHubPage />;
     if (currentPage === "geek-maps-tn-loan-limits") return <TNLoanLimitsPage />;
+    if (currentPage === "geek-log") return <GeekLogPage />;
     return <MainSite />;
   };
 
