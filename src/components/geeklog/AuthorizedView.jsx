@@ -93,29 +93,48 @@ export function AuthorizedView({ apiKey }) {
     refreshAll();
   }, [refreshAll]);
 
-  // Non-blocking logo prefetch. Runs once at mount; never gates
-  // render. Targets the bundled `snapshotLogoUrl` (hashed by Vite)
-  // rather than the public `/icon-512.png` so the request bypasses
-  // the service worker's cache key entirely.
+  // Non-blocking logo prefetch via canvas pre-rasterization. Loads
+  // the bundled PNG into an <img>, draws it onto an offscreen
+  // <canvas>, then re-encodes via canvas.toDataURL("image/png").
+  //
+  // Earlier attempts (FileReader from fetch / bundled-asset URL /
+  // <img>→<div> background swap) all worked on desktop and all
+  // failed on iOS Safari — the failure was in html-to-image's
+  // <foreignObject> rendering of externally-decoded PNG payloads,
+  // not in the URL or the element type. Canvas pre-rasterization
+  // produces a fresh, browser-encoded PNG with no metadata chunks
+  // and a known-good byte layout, which mobile WebKit's
+  // SVG→canvas→PNG pipeline handles reliably.
+  //
+  // Rendered at the image's natural dimensions so CSS scaling to
+  // the 96x96 display size doesn't lose detail.
   useEffect(() => {
     let cancelled = false;
-    fetch(snapshotLogoUrl)
-      .then((r) => {
-        if (!r.ok) throw new Error(`Logo fetch failed: ${r.status}`);
-        return r.blob();
-      })
-      .then((blob) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(blob);
-      }))
-      .then((dataUrl) => {
-        if (!cancelled && typeof dataUrl === "string") setLogoDataUrl(dataUrl);
-      })
-      .catch((err) => {
-        console.warn("[geeklog] logo prefetch failed:", err);
-      });
+    const img = new Image();
+    img.onload = () => {
+      if (cancelled) return;
+      try {
+        const w = img.naturalWidth || 512;
+        const h = img.naturalHeight || 512;
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("2D context unavailable");
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/png");
+        if (!cancelled) setLogoDataUrl(dataUrl);
+      } catch (err) {
+        console.warn("[geeklog] logo canvas encode failed:", err);
+      }
+    };
+    img.onerror = () => {
+      console.warn("[geeklog] logo image load failed");
+    };
+    // Same-origin asset (bundled by Vite at /assets/...). No
+    // crossOrigin attribute — same-origin images don't taint the
+    // canvas and don't require CORS headers in the response.
+    img.src = snapshotLogoUrl;
     return () => { cancelled = true; };
   }, []);
 
