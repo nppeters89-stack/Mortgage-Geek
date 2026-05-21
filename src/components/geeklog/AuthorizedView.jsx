@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { P, F } from "../../theme";
+import { useIsMobile } from "../../utils/hooks";
 import { fetchClosings, fetchYearStats } from "../../utils/geeklogApi";
 import { DailyEntryForm } from "./DailyEntryForm";
 import { DotGrid } from "./DotGrid";
@@ -29,6 +30,14 @@ export function AuthorizedView({ apiKey }) {
   const [closingsByDate, setClosingsByDate] = useState({});
   const [yearStats, setYearStats] = useState(null);
   const [toast, setToast] = useState(null); // { id, message, variant }
+  // Dashboard-only DotGrid scaling. Below 640px viewport, swap to a
+  // 20/10 layout that totals ~280px wide and clears a 320px viewport
+  // with padding. This is a CALL-SITE override only — DotGrid's
+  // defaults stay at the snapshot card spec (26/14 → 386px) so G5
+  // instantiates the canonical size with no props.
+  const isNarrow = useIsMobile(640);
+  const dotSize = isNarrow ? 20 : 26;
+  const dotGap = isNarrow ? 10 : 14;
 
   const showToast = useCallback((payload) => {
     setToast({ id: Date.now(), ...payload });
@@ -133,13 +142,12 @@ export function AuthorizedView({ apiKey }) {
               {closingsCount} of {goalTarget} customers home
             </p>
           </div>
-          {/* Allow horizontal scroll on very narrow viewports so the
-              386px grid stays at its canonical size — shrinking the
-              dots on mobile would mean the dashboard preview no longer
-              matches the G5 export. */}
-          <div style={{ overflowX: "auto", maxWidth: "100%", padding: "4px 0" }}>
-            <DotGrid filled={closingsCount} total={goalTarget > 0 ? goalTarget : 100} />
-          </div>
+          <DotGrid
+            filled={closingsCount}
+            total={goalTarget > 0 ? goalTarget : 100}
+            dotSize={dotSize}
+            gap={dotGap}
+          />
         </div>
 
         <DailyEntryForm apiKey={apiKey} showToast={showToast} />
