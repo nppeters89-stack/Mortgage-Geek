@@ -15,6 +15,8 @@
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { P, F } from "../theme";
+import { fetchYearStats } from "../utils/geeklogApi";
+import { DailyEntryForm } from "../components/geeklog/DailyEntryForm";
 
 const STATE = { LOADING: "loading", AUTHORIZED: "authorized", DENIED: "denied" };
 
@@ -29,28 +31,19 @@ function readKeyFromURL() {
 
 export function GeekLogPage() {
   const [state, setState] = useState(STATE.LOADING);
+  const [apiKey] = useState(() => readKeyFromURL());
 
   useEffect(() => {
     let cancelled = false;
-    const key = readKeyFromURL();
-    if (!key) {
+    if (!apiKey) {
       setState(STATE.DENIED);
       return;
     }
-    const probeYear = new Date().getFullYear();
-    fetch(`/api/geeklog/year?year=${probeYear}`, {
-      method: "GET",
-      headers: { "X-Geeklog-Key": key },
-    })
-      .then((res) => {
-        if (cancelled) return;
-        setState(res.ok ? STATE.AUTHORIZED : STATE.DENIED);
-      })
-      .catch(() => {
-        if (!cancelled) setState(STATE.DENIED);
-      });
+    fetchYearStats(apiKey, new Date().getFullYear())
+      .then(() => { if (!cancelled) setState(STATE.AUTHORIZED); })
+      .catch(() => { if (!cancelled) setState(STATE.DENIED); });
     return () => { cancelled = true; };
-  }, []);
+  }, [apiKey]);
 
   // Always emit noindex + a non-revealing title regardless of state so
   // a wrong-key visitor can't infer the route exists from <head>.
@@ -74,24 +67,7 @@ export function GeekLogPage() {
     return (
       <>
         {helmet}
-        <main style={{
-          minHeight: "100dvh",
-          background: P.cream,
-          color: P.navy,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 32,
-          textAlign: "center",
-        }}>
-          <h1 style={{ fontFamily: F.display, fontSize: 56, fontWeight: 400, color: P.navyDark, margin: 0, lineHeight: 1.1 }}>
-            Geek Log
-          </h1>
-          <p style={{ fontFamily: F.body, fontSize: 13, color: P.navy, opacity: 0.6, marginTop: 16, letterSpacing: 0.4 }}>
-            Coming soon.
-          </p>
-        </main>
+        <DailyEntryForm apiKey={apiKey} />
       </>
     );
   }
