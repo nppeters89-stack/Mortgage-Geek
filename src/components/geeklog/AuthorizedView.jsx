@@ -16,6 +16,12 @@ import { ClosingsList } from "./ClosingsList";
 import { SaveToast } from "./SaveToast";
 import { SnapshotCard } from "./SnapshotCard";
 import { SnapshotExportButton } from "./SnapshotExportButton";
+// Imported as a bundled asset so Vite emits a content-hashed URL
+// (e.g. /assets/mortgage-geek-logo-a8c4f2.png). The service worker's
+// fetch handler caches `/icon-512.png` specifically; hashed asset
+// URLs flow through normally without SW interception, which is what
+// the mobile PNG export needs.
+import snapshotLogoUrl from "../../assets/mortgage-geek-logo.png";
 
 const currentYear = () => new Date().getFullYear();
 
@@ -87,10 +93,13 @@ export function AuthorizedView({ apiKey }) {
     refreshAll();
   }, [refreshAll]);
 
-  // Non-blocking logo prefetch. Runs once at mount; never gates render.
+  // Non-blocking logo prefetch. Runs once at mount; never gates
+  // render. Targets the bundled `snapshotLogoUrl` (hashed by Vite)
+  // rather than the public `/icon-512.png` so the request bypasses
+  // the service worker's cache key entirely.
   useEffect(() => {
     let cancelled = false;
-    fetch("/icon-512.png", { cache: "force-cache" })
+    fetch(snapshotLogoUrl)
       .then((r) => {
         if (!r.ok) throw new Error(`Logo fetch failed: ${r.status}`);
         return r.blob();
@@ -102,17 +111,6 @@ export function AuthorizedView({ apiKey }) {
         reader.readAsDataURL(blob);
       }))
       .then((dataUrl) => {
-        // TEMP DIAGNOSTIC (remove after mobile export fix verified):
-        // surface the prefetched data URL's prefix + length so Nick
-        // can confirm via mobile Safari remote debugging whether the
-        // FileReader produced a valid base64 PNG payload.
-        // eslint-disable-next-line no-console
-        console.log(
-          "[geeklog:debug] logoDataUrl resolved:",
-          typeof dataUrl === "string" ? dataUrl.substring(0, 60) : dataUrl,
-          "length:",
-          typeof dataUrl === "string" ? dataUrl.length : null,
-        );
         if (!cancelled && typeof dataUrl === "string") setLogoDataUrl(dataUrl);
       })
       .catch((err) => {

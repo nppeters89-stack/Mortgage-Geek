@@ -28,15 +28,6 @@ export function SnapshotExportButton({ data, logoDataUrl = null, showToast }) {
       return;
     }
     setIsExporting(true);
-    // TEMP DIAGNOSTIC (remove after mobile export fix verified): log
-    // the state of logoDataUrl right at capture time so Nick can rule
-    // in/out a state-propagation race between prefetch and click.
-    // eslint-disable-next-line no-console
-    console.log(
-      "[geeklog:debug] Capturing with logoDataUrl:",
-      !!logoDataUrl,
-      logoDataUrl?.length,
-    );
     try {
       // Wait for any pending layout, then for web fonts to be loaded —
       // otherwise the first export after a cold load can fall back to
