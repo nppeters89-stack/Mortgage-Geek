@@ -47,6 +47,13 @@ export async function fetchEntry(key, dateISO) {
   }
 }
 
+// GET /api/geeklog/entry?year=YYYY — returns the per-date map
+// { "YYYY-MM-DD": EntryRecord, ... }. Empty year → {}.
+export async function fetchAllEntries(key, year) {
+  const data = await request(key, `/entry?year=${encodeURIComponent(year)}`);
+  return data || {};
+}
+
 // POST /api/geeklog/entry — server upserts, returns saved EntryRecord
 // with createdAt/updatedAt populated.
 export async function saveEntry(key, entryRecord) {

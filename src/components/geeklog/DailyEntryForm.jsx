@@ -43,7 +43,7 @@ function timeHHMM(ms) {
 
 const EMPTY_METRICS = { applications: 0, prospecting: 0, appointments: 0, contentShipped: 0 };
 
-export function DailyEntryForm({ apiKey, showToast }) {
+export function DailyEntryForm({ apiKey, showToast, onEntrySaved }) {
   const [selectedDate, setSelectedDate] = useState(todayChicagoISO);
   const [metrics, setMetrics] = useState(EMPTY_METRICS);
   const [headline, setHeadline] = useState("");
@@ -102,6 +102,7 @@ export function DailyEntryForm({ apiKey, showToast }) {
       });
       setLastSavedAt(saved.updatedAt ?? Date.now());
       showToast?.({ message: "Entry saved", variant: "success" });
+      onEntrySaved?.();
     } catch (err) {
       showToast?.({ message: `Save failed: ${err.message}`, variant: "error" });
     } finally {
