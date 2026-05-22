@@ -1,10 +1,11 @@
-// The 1080×1080 snapshot card — exactly the dimensions html-to-image
-// captures. Zone heights sum to 1080:
-//   Header 132 + Hero 442 + TextBlock 162 + Metrics 280 + Footer 64
+// 4:5 portrait snapshot card — exactly 1080×1350, the dimensions
+// html-to-image captures. Zone heights sum to 1350:
+//   Header 132 + Hero 544 + TextBlock 190 + Metrics 420 + Footer 64
 //
-// All sizing/typography per CD's V3+YTD spec. No transform: scale()
-// here — the preview wrapper in AuthorizedView handles its own
-// scaling, the export pipeline captures this at native resolution.
+// Layout, typography, and colors are lifted from CD's locked V3+YTD
+// portrait spec (Geek Log Implementation Notes + snapshot-card.jsx +
+// metric-variants.jsx L scale). The card always renders portrait L;
+// no variant prop is exposed.
 
 import { P, F } from "../../theme";
 import { DotGrid } from "./DotGrid";
@@ -14,34 +15,33 @@ import { Sparkbar } from "./Sparkbar";
 const DAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
 
 // Build the 7 day-letter labels for the bars ending on `today`.
-// Returns { letters, sundayIndex }. Index 6 corresponds to today.
+// Index 6 is today. The Sparkbar component highlights index 6 per
+// CD's source (today's letter, not Sunday — Sunday landed at idx 6
+// only because the mock used Sun as today).
 function buildDayLetters(todayISO) {
   const [y, m, d] = todayISO.split("-").map(Number);
   const todayMs = Date.UTC(y, m - 1, d);
   const letters = [];
-  let sundayIndex = -1;
   for (let i = 6; i >= 0; i--) {
     const dt = new Date(todayMs - i * 86400000);
-    const dow = dt.getUTCDay();
-    if (dow === 0) sundayIndex = 6 - i;
-    letters.push(DAY_LETTERS[dow]);
+    letters.push(DAY_LETTERS[dt.getUTCDay()]);
   }
-  return { letters, sundayIndex };
+  return letters;
 }
 
 // 3px circle separator used in the header DAY · DATE line and the
 // footer credits. Same construction in both places.
-function DotSeparator({ size = 3, mx = 12, color = P.warmGrayLight }) {
+function DotSeparator({ color = P.warmGrayLight, mx = 12, mb = 0 }) {
   return (
     <span
       aria-hidden="true"
       style={{
         display: "inline-block",
-        width: size,
-        height: size,
+        width: 3,
+        height: 3,
         borderRadius: "50%",
         background: color,
-        margin: `0 ${mx}px`,
+        margin: `0 ${mx}px ${mb}px`,
         verticalAlign: "middle",
       }}
     />
@@ -49,26 +49,29 @@ function DotSeparator({ size = 3, mx = 12, color = P.warmGrayLight }) {
 }
 
 export function SnapshotCard({ data, logoDataUrl = null }) {
-  const { letters: dayLetters, sundayIndex } = buildDayLetters(data.dateISO);
+  const dayLetters = buildDayLetters(data.dateISO);
   const goalTarget = data.goalTarget || 100;
   const headlineText = (data.headline || "").trim();
-  // Prefer the pre-fetched data URL (already bypassed the service
-  // worker → reliable in html-to-image's mobile capture). Fall back to
-  // the original path for the visible preview during cold-start before
-  // the prefetch resolves.
+  // Visible preview cold-start fallback: if the data URL hasn't
+  // resolved yet, point at the public asset so the preview still
+  // shows a logo. SnapshotExportButton refuses to export until the
+  // data URL is ready, so the captured PNG never falls back.
   const logoSrc = logoDataUrl || "/icon-512.png";
 
   return (
     <div style={{
       width: 1080,
-      height: 1080,
+      height: 1350,
       position: "relative",
       background: P.cream,
-      color: P.text,
+      color: P.navyDark,
       overflow: "hidden",
       fontFamily: F.body,
+      display: "flex",
+      flexDirection: "column",
     }}>
-      {/* HEADER — 132px navy strip with logo + wordmark + DAY/DATE */}
+      {/* HEADER — 132px navy strip. Logo + GEEK LOG wordmark on the
+          left, DAY · DATE on the right. */}
       <div style={{
         height: 132,
         background: P.navy,
@@ -80,11 +83,11 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         boxSizing: "border-box",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {/* Background-image on a div rather than an <img> — iOS
-              Safari's <foreignObject> renderer drops nested HTML
-              <img> elements during html-to-image capture. CSS
-              backgrounds are serialized inline into the style
-              attribute, which mobile WebKit handles reliably. */}
+          {/* Logo rendered as CSS background-image on a div rather than
+              an <img> child. iOS Safari's <foreignObject> renderer
+              drops nested HTML <img> elements during html-to-image
+              capture (G6 fix); CSS backgrounds are serialized inline
+              into the style attribute and render reliably. */}
           <div
             role="img"
             aria-label="The Mortgage Geek"
@@ -111,7 +114,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         </div>
         <span style={{
           fontFamily: F.body,
-          fontSize: 13,
+          fontSize: 20,
           letterSpacing: "0.22em",
           fontWeight: 500,
           textTransform: "uppercase",
@@ -125,39 +128,45 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         </span>
       </div>
 
-      {/* HERO — 442px, DotGrid only. Canonical defaults: 26/14 → 386x386 */}
+      {/* HERO — 544px, DotGrid only. Pinned high with paddingTop 48 so
+          the grid pairs visually with the masthead. Canonical 26/14
+          defaults (no size overrides) → 386×386 grid. */}
       <div style={{
-        height: 442,
-        paddingTop: 56,
+        height: 544,
+        paddingTop: 48,
         boxSizing: "border-box",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
       }}>
         <DotGrid filled={data.closings} total={goalTarget} />
       </div>
 
-      {/* TEXTBLOCK — 162px. Italic headline (or gold diamond fallback) + caption */}
+      {/* TEXTBLOCK — 190px. Italic headline (or 8×8 gold diamond
+          fallback) + tri-color caption. 36px symmetric vertical
+          padding, 18px inner gap, centered. */}
       <div style={{
-        height: 162,
-        padding: "48px 64px",
+        height: 190,
+        padding: "36px 48px",
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 14,
+        gap: 18,
       }}>
         {headlineText ? (
           <p style={{
             fontFamily: F.display,
             fontStyle: "italic",
-            fontSize: 28,
+            fontSize: 36,
             lineHeight: 1.15,
             letterSpacing: "0.005em",
             color: P.navy,
             margin: 0,
             whiteSpace: "nowrap",
+            textAlign: "center",
           }}>
             {headlineText}
           </p>
@@ -165,8 +174,8 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           <div
             aria-hidden="true"
             style={{
-              width: 6,
-              height: 6,
+              width: 8,
+              height: 8,
               background: P.gold,
               transform: "rotate(45deg)",
             }}
@@ -174,9 +183,10 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         )}
         <p style={{
           fontFamily: F.body,
-          fontSize: 20,
+          fontSize: 24,
           lineHeight: 1.0,
           letterSpacing: "0.01em",
+          textAlign: "center",
           margin: 0,
         }}>
           <span style={{ color: P.navyDark, fontWeight: 600 }}>{data.closings}</span>
@@ -185,9 +195,10 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         </p>
       </div>
 
-      {/* METRICS — 280px. 4 sparkbar cells, cream bg, creamDark top+bottom borders */}
+      {/* METRICS — 420px. 4 sparkbar cells at L scale, cream bg,
+          creamDark top+bottom borders + inter-cell verticals. */}
       <div style={{
-        height: 280,
+        height: 420,
         background: P.cream,
         borderTop: `1px solid ${P.creamDark}`,
         borderBottom: `1px solid ${P.creamDark}`,
@@ -197,17 +208,15 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         gridTemplateColumns: "repeat(4, 1fr)",
       }}>
         {[
-          { key: "applications", label: "Applications" },
+          { key: "applications", label: "Apps" },
           { key: "prospecting", label: "Prospecting" },
-          { key: "appointments", label: "Appointments" },
+          { key: "appointments", label: "Appts" },
           { key: "contentShipped", label: "Content" },
         ].map((m, i) => (
           <div
             key={m.key}
             style={{
-              paddingLeft: i === 0 ? 0 : 24,
-              paddingRight: i === 3 ? 0 : 24,
-              borderLeft: i === 0 ? "none" : `1px solid ${P.creamDark}`,
+              borderRight: i < 3 ? `1px solid ${P.creamDark}` : "none",
               boxSizing: "border-box",
             }}
           >
@@ -218,7 +227,6 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
               label={m.label}
               dayOfYear={data.day}
               dayLetters={dayLetters}
-              sundayIndex={sundayIndex}
             />
           </div>
         ))}
@@ -233,7 +241,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
       }}>
         <span style={{
           fontFamily: F.body,
-          fontSize: 11,
+          fontSize: 13,
           letterSpacing: "0.22em",
           fontWeight: 500,
           textTransform: "uppercase",
@@ -243,9 +251,9 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           alignItems: "center",
         }}>
           nick peters
-          <DotSeparator />
+          <DotSeparator mb={3} />
           nmls# 1119524
-          <DotSeparator />
+          <DotSeparator mb={3} />
           mortgagegeek.ai
         </span>
       </div>

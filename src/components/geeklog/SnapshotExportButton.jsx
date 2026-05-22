@@ -42,9 +42,9 @@ export function SnapshotExportButton({ data, logoDataUrl = null, showToast }) {
         backgroundColor: P.cream,
         fontEmbedCSS,
         width: 1080,
-        height: 1080,
+        height: 1350,
         canvasWidth: 1080,
-        canvasHeight: 1080,
+        canvasHeight: 1350,
       });
       const link = document.createElement("a");
       link.download = `geeklog-${data.dateISO}.png`;
@@ -95,7 +95,7 @@ export function SnapshotExportButton({ data, logoDataUrl = null, showToast }) {
           left: -100000,
           top: 0,
           width: 1080,
-          height: 1080,
+          height: 1350,
           pointerEvents: "none",
         }}
       >

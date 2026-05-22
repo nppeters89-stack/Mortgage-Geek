@@ -64,11 +64,14 @@ export function AuthorizedView({ apiKey }) {
   const isNarrow = useIsMobile(640);
   const dotSize = isNarrow ? 20 : 26;
   const dotGap = isNarrow ? 10 : 14;
-  // Preview scale: 0.4 on desktop (1080·0.4 = 432px), 0.28 on narrow
-  // (1080·0.28 = 302px) so the preview fits inside a 375px viewport
-  // with side padding.
-  const previewScale = isNarrow ? 0.28 : 0.4;
-  const previewSize = Math.round(1080 * previewScale);
+  // 4:5 portrait preview scale. Pick values that fit comfortably
+  // alongside the other dashboard cards.
+  //   Desktop (>= 640px): scale 0.32 → 346w × 432h
+  //   Narrow  (<  640px): scale 0.22 → 238w × 297h (fits 327px content
+  //                       inside a 375px viewport with 24px padding)
+  const previewScale = isNarrow ? 0.22 : 0.32;
+  const previewWidth = Math.round(1080 * previewScale);
+  const previewHeight = Math.round(1350 * previewScale);
 
   const showToast = useCallback((payload) => {
     setToast({ id: Date.now(), ...payload });
@@ -270,8 +273,8 @@ export function AuthorizedView({ apiKey }) {
             Today's Snapshot
           </h2>
           <div style={{
-            width: previewSize,
-            height: previewSize,
+            width: previewWidth,
+            height: previewHeight,
             overflow: "hidden",
             border: `1px solid ${P.creamDark}`,
             borderRadius: 8,
@@ -285,7 +288,7 @@ export function AuthorizedView({ apiKey }) {
               transform: `scale(${previewScale})`,
               transformOrigin: "top left",
               width: 1080,
-              height: 1080,
+              height: 1350,
             }}>
               <SnapshotCard data={snapshotData} logoDataUrl={logoDataUrl} />
             </div>
