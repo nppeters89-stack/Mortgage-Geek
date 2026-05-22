@@ -14,6 +14,20 @@ import { Sparkbar } from "./Sparkbar";
 // Map JS Date.getUTCDay() index (0=Sun) → single-letter label.
 const DAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
 
+// Auto-size the italic headline so it always fits on one line. CD's
+// spec assumed ~38-char headlines at 36px; the G3 input allows up to
+// 80 chars and longer headlines overflow the 984px content width at
+// the canonical size. Scale down to 24px (matches the caption) at
+// the upper bound — italic equal in size to the caption is the
+// floor before the typographic hierarchy inverts.
+function autoSizeItalic(text) {
+  const len = (text || "").length;
+  if (len <= 38) return 36;
+  if (len <= 50) return 32;
+  if (len <= 65) return 28;
+  return 24;
+}
+
 // Build the 7 day-letter labels for the bars ending on `today`.
 // Index 6 is today. The Sparkbar component highlights index 6 per
 // CD's source (today's letter, not Sunday — Sunday landed at idx 6
@@ -122,9 +136,9 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           display: "inline-flex",
           alignItems: "center",
         }}>
-          Day {data.day}
-          <DotSeparator color={P.goldLight} mx={10} />
-          <span style={{ fontVariantNumeric: "tabular-nums" }}>{data.dateISO}</span>
+          {/* Literal middle-dot character per CD's source — kept inline
+              with the text so its weight matches the surrounding type. */}
+          Day {data.day} · <span style={{ fontVariantNumeric: "tabular-nums" }}>{data.dateISO}</span>
         </span>
       </div>
 
@@ -160,7 +174,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           <p style={{
             fontFamily: F.display,
             fontStyle: "italic",
-            fontSize: 36,
+            fontSize: autoSizeItalic(headlineText),
             lineHeight: 1.15,
             letterSpacing: "0.005em",
             color: P.navy,

@@ -89,8 +89,12 @@ export function Sparkbar({ value, ytd, weekBars, label, dayOfYear, dayLetters })
               </div>
             );
           }
-          // Zero non-today: fixed 2px tick in creamDark @ 55%.
-          if (!isToday && v === 0) {
+          // Zero days render as a fixed 2px tick in creamDark @ 55%,
+          // including today — today is gold only when value > 0. Per
+          // CD's source, the zero treatment dominates over the today
+          // highlight so an empty day doesn't get a misleading gold
+          // bar.
+          if (v === 0) {
             return (
               <div
                 key={i}
