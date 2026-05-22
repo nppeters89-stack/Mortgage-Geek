@@ -97,24 +97,27 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         boxSizing: "border-box",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {/* Logo rendered as CSS background-image on a div rather than
-              an <img> child. iOS Safari's <foreignObject> renderer
-              drops nested HTML <img> elements during html-to-image
-              capture (G6 fix); CSS backgrounds are serialized inline
-              into the style attribute and render reliably. */}
-          <div
+          {/* Logo rendered as an inline SVG <image> with a data URL
+              href. Two prior approaches (HTML <img>, CSS
+              background-image on a <div>) both broke on mobile
+              WebKit's <foreignObject> capture pipeline — the
+              background-image fix from G6 worked at 1080x1080 but
+              dropped the image at the larger 1080x1350 output canvas.
+              SVG <image> is processed as native SVG content during
+              the outer SVG's rasterization (not as foreignObject
+              HTML/CSS), which sidesteps the dimension-related
+              rendering quirks entirely. */}
+          <svg
             role="img"
             aria-label="The Mortgage Geek"
-            style={{
-              width: 96,
-              height: 96,
-              flexShrink: 0,
-              backgroundImage: `url(${logoSrc})`,
-              backgroundSize: "contain",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }}
-          />
+            width="96"
+            height="96"
+            viewBox="0 0 96 96"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ flexShrink: 0, display: "block" }}
+          >
+            <image href={logoSrc} width="96" height="96" preserveAspectRatio="xMidYMid meet" />
+          </svg>
           <span style={{
             fontFamily: F.display,
             fontSize: 34,
