@@ -6,8 +6,8 @@
 //   Zone 1 — Brand voice (Mortgage Geek heading, tagline, educational
 //            disclaimer)
 //   Zone 2 — Attribution (LO + branch/licensing in two columns on
-//            desktop, stacked on mobile). The corporate lender logo
-//            slot is text-only during the Rate transition.
+//            desktop, stacked on mobile). The right column opens with
+//            the Rate wordmark image followed by the corporate NMLS.
 //   Zone 3 — Verbatim corporate disclosure
 //
 // All compliance copy and contact data is sourced from
@@ -348,22 +348,16 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
           {/* RIGHT — Lender + Branch office + licensing. Mobile-flex
               treatment matches the LEFT column. */}
           <div style={{ flex: isMobile ? "1 1 0" : undefined, minWidth: 0 }}>
-            {/* Trade name + corporate NMLS, sitting above Branch Office
-                so the corporate identity anchors the right column. Icon
-                slot is text-only during the Rate transition; a logo will
-                land here in a follow-up pass. */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: isMobile ? 16 : 24, minWidth: 0 }}>
-              <span
-                style={{
-                  fontFamily: F.body,
-                  fontSize: fs(13, 11),
-                  fontWeight: 500,
-                  color: P.navy,
-                  letterSpacing: 0.3,
-                }}
-              >
-                {TRADE_NAME}
-              </span>
+            {/* Rate wordmark + corporate NMLS, sitting above Branch
+                Office so the corporate identity anchors the right
+                column. Logo height is the live tuning knob — width is
+                auto so the 2.5:1 wordmark scales proportionally. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: isMobile ? 16 : 24, minWidth: 0, alignItems: "flex-start" }}>
+              <img
+                src="/rate-logo.png"
+                alt={TRADE_NAME}
+                style={{ height: fs(28, 22), width: "auto", display: "block" }}
+              />
               <span
                 style={{
                   fontFamily: F.body,
