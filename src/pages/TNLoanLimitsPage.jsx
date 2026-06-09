@@ -247,8 +247,8 @@ export function TNLoanLimitsPage() {
               </a>
               <a
                 className="tnpage-cta-btn secondary"
-                href="mailto:npeters@annie-mac.com"
-                aria-label="Email Nick Peters at npeters@annie-mac.com"
+                href="mailto:nick@mortgagegeek.ai"
+                aria-label="Email Nick Peters at nick@mortgagegeek.ai"
               >
                 ✉ Email Nick
               </a>
@@ -409,7 +409,7 @@ export function TNLoanLimitsPage() {
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Want to walk through how the limits hit your specific situation?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or email <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={LINK_STYLE}>npeters@annie-mac.com</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={LINK_STYLE}>nick@mortgagegeek.ai</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring a target county, a price range, and which programs you're weighing. We'll figure out the rest before you go under contract.

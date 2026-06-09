@@ -421,13 +421,13 @@ export function ResidencyRulesPage() {
           "**A guarantee of approval.** Even within an eligible status category, individual files have to clear all the standard underwriting hurdles (credit, income, assets, etc.). Status eligibility is necessary but not sufficient.",
         ]} />
         <Para>
-          If you're trying to navigate this for a real loan and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={FHA_LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={FHA_LINK_STYLE}>npeters@annie-mac.com</a>. Bring your status documents and a clear picture of your timeline. We'll figure out what's possible.
+          If you're trying to navigate this for a real loan and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={FHA_LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={FHA_LINK_STYLE}>nick@mortgagegeek.ai</a>. Bring your status documents and a clear picture of your timeline. We'll figure out what's possible.
         </Para>
 
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Need help figuring out your status?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>npeters@annie-mac.com</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>nick@mortgagegeek.ai</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring your status documents and a clear picture of your timeline. We'll figure out what's possible.

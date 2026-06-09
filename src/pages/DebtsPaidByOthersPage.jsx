@@ -318,13 +318,13 @@ export function DebtsPaidByOthersPage() {
           "**A guarantee that any specific debt can be excluded.** Even when the rules support exclusion, individual underwriters can require additional documentation.",
         ]} />
         <Para>
-          If you're navigating a mortgage application with debts paid by others in play and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={LINK_STYLE}>npeters@annie-mac.com</a>. Bring a copy of your credit report, an idea of who's paying what, and what documentation you can pull together. We'll work through the rest.
+          If you're navigating a mortgage application with debts paid by others in play and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={LINK_STYLE}>nick@mortgagegeek.ai</a>. Bring a copy of your credit report, an idea of who's paying what, and what documentation you can pull together. We'll work through the rest.
         </Para>
 
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Trying to figure out if a debt can be excluded?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>npeters@annie-mac.com</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>nick@mortgagegeek.ai</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring your credit report and an idea of who's been paying what. We'll work through the rest before you go under contract.
