@@ -937,7 +937,7 @@ export function CashToClosePage() {
         )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS# 1119524.
+          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS #1119524.
         </p>
       </div>
       <MobileToolbar />

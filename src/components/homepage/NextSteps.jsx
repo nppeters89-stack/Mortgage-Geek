@@ -74,7 +74,7 @@ export function NextSteps() {
               </div>
             </div>
 
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 24, textAlign: "center" }}>NMLS# 1119524 · Equal Housing Lender</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 24, textAlign: "center" }}>NMLS #1119524 · Equal Housing Lender</p>
           </div>
         </div>
       </div>
