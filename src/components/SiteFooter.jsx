@@ -1,12 +1,13 @@
-// Global site footer with all required AnnieMac compliance disclosures.
+// Global site footer with all required lender compliance disclosures.
 // Rendered once in App.jsx beneath the routed page content so it appears
 // on every route.
 //
 // Three zones, separated by 1px P.creamDark dividers:
 //   Zone 1 — Brand voice (Mortgage Geek heading, tagline, educational
 //            disclaimer)
-//   Zone 2 — Attribution (AnnieMac icon + LO + branch/licensing in two
-//            columns on desktop, stacked on mobile)
+//   Zone 2 — Attribution (LO + branch/licensing in two columns on
+//            desktop, stacked on mobile). The right column opens with
+//            the Rate wordmark image followed by the corporate NMLS.
 //   Zone 3 — Verbatim corporate disclosure
 //
 // All compliance copy and contact data is sourced from
@@ -36,31 +37,41 @@ import {
 // Phone display string normalized to a tel: href ("(615) 656-0737" → "6156560737").
 const telHref = (display) => `tel:${display.replace(/\D/g, "")}`;
 
-// The verbatim corporate disclosure embeds the http:// URL inside parens.
-// Render the URL portion as a clickable anchor while keeping the
-// surrounding parens and the rest of the paragraph as plain text. The
-// href intentionally matches the displayed http:// URL exactly.
+// The verbatim corporate disclosure embeds four URLs inline (rate.com,
+// nmlsconsumeraccess.org, rate.com/licensing, rate.com/privacy). Walk
+// the string left-to-right wrapping each occurrence in an anchor while
+// preserving every other character. Order matters: matching "rate.com"
+// before the www-prefixed variants ensures it doesn't get re-matched as
+// a substring of "www.rate.com/licensing".
 function renderDisclosure() {
-  const url = "http://www.nmlsconsumeraccess.org/";
-  const idx = CORPORATE_DISCLOSURE.indexOf(url);
-  if (idx === -1) return CORPORATE_DISCLOSURE;
-  const before = CORPORATE_DISCLOSURE.slice(0, idx);
-  const after = CORPORATE_DISCLOSURE.slice(idx + url.length);
-  return (
-    <>
-      {before}
+  const links = [
+    { text: "rate.com", href: "https://www.rate.com" },
+    { text: "www.nmlsconsumeraccess.org", href: "https://www.nmlsconsumeraccess.org/" },
+    { text: "www.rate.com/licensing", href: "https://www.rate.com/licensing" },
+    { text: "www.rate.com/privacy", href: "https://www.rate.com/privacy" },
+  ];
+  const parts = [];
+  let cursor = 0;
+  links.forEach(({ text, href }, i) => {
+    const idx = CORPORATE_DISCLOSURE.indexOf(text, cursor);
+    if (idx === -1) return;
+    parts.push(CORPORATE_DISCLOSURE.slice(cursor, idx));
+    parts.push(
       <a
-        href={url}
+        key={i}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="mg-footer-link"
         style={{ color: P.warmGray, textDecoration: "underline" }}
       >
-        {url}
+        {text}
       </a>
-      {after}
-    </>
-  );
+    );
+    cursor = idx + text.length;
+  });
+  parts.push(CORPORATE_DISCLOSURE.slice(cursor));
+  return <>{parts}</>;
 }
 
 // Shared style for inline link anchors (phone, email, licensing).
@@ -227,8 +238,9 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               instead of forcing the row to overflow.
               On desktop: default content-width sizing. */}
           <div style={{ flex: isMobile ? "1 1 0" : undefined, minWidth: 0 }}>
-            {/* Brand voice anchors the column. The AnnieMac block now
-                lives at the top of the right column, above Branch Office. */}
+            {/* Brand voice anchors the column. The lender attribution
+                block lives at the top of the right column, above Branch
+                Office. */}
             <h2
               aria-label="The Mortgage Geek"
               style={{
@@ -277,7 +289,9 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 margin: "2px 0 0",
               }}
             >
-              {LO_TITLE} · NMLS# {PERSONAL_NMLS}
+              NMLS #{PERSONAL_NMLS}
+              <br />
+              {LO_TITLE}
             </p>
 
             {/* Direct contact */}
@@ -299,18 +313,22 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               <a href={`mailto:${LO_EMAIL}`} className="mg-footer-link" style={inlineLinkStyle}>
                 {LO_EMAIL}
               </a>
-              <br />
-              {/* Display strips protocol + trailing slash for a cleaner read;
-                  href keeps the canonical URL from compliance.js. */}
-              <a
-                href={LO_WEBSITE}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mg-footer-link"
-                style={inlineLinkStyle}
-              >
-                {LO_WEBSITE.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-              </a>
+              {LO_WEBSITE && (
+                <>
+                  <br />
+                  {/* Display strips protocol + trailing slash for a cleaner read;
+                      href keeps the canonical URL from compliance.js. */}
+                  <a
+                    href={LO_WEBSITE}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mg-footer-link"
+                    style={inlineLinkStyle}
+                  >
+                    {LO_WEBSITE.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                  </a>
+                </>
+              )}
             </p>
 
             {/* Equal Housing Lender row */}
@@ -329,44 +347,31 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             </div>
           </div>
 
-          {/* RIGHT — AnnieMac + Branch office + licensing. Mobile-flex
+          {/* RIGHT — Lender + Branch office + licensing. Mobile-flex
               treatment matches the LEFT column. */}
           <div style={{ flex: isMobile ? "1 1 0" : undefined, minWidth: 0 }}>
-            {/* AnnieMac icon + trade name + corporate NMLS, sitting
-                above Branch Office so the corporate identity anchors
-                the right column. */}
-            <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 8 : 12, marginBottom: isMobile ? 16 : 24 }}>
+            {/* Rate wordmark + corporate NMLS, sitting above Branch
+                Office so the corporate identity anchors the right
+                column. Logo height is the live tuning knob — width is
+                auto so the 2.5:1 wordmark scales proportionally. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: isMobile ? 16 : 24, minWidth: 0, alignItems: "flex-start" }}>
               <img
-                src="/anniemac-icon.png"
-                alt=""
-                aria-hidden="true"
-                style={{ width: sz(36, 28), height: sz(36, 28), display: "block", flexShrink: 0 }}
+                src="/rate-logo.png"
+                alt={TRADE_NAME}
+                style={{ height: fs(28, 22), width: "auto", display: "block" }}
               />
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-                <span
-                  style={{
-                    fontFamily: F.body,
-                    fontSize: fs(13, 11),
-                    fontWeight: 500,
-                    color: P.navy,
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  AnnieMac Home Mortgage
-                </span>
-                <span
-                  style={{
-                    fontFamily: F.body,
-                    fontSize: fs(11, 10),
-                    fontWeight: 500,
-                    color: P.warmGrayLight,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Corporate NMLS# {CORPORATE_NMLS}
-                </span>
-              </div>
+              <span
+                style={{
+                  fontFamily: F.body,
+                  fontSize: fs(11, 10),
+                  fontWeight: 500,
+                  color: P.warmGrayLight,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5,
+                }}
+              >
+                Corporate NMLS #{CORPORATE_NMLS}
+              </span>
             </div>
 
             <h3 style={{ ...sectionHeadingStyle, fontSize: fs(11, 10) }}>Branch Office</h3>

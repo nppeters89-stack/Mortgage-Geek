@@ -123,7 +123,7 @@ export function ComparePage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
               <div style={{ fontFamily: F.display, fontSize: 22, color: P.navy, marginBottom: 2 }}>🤓 The Mortgage Geek · Loan Comparison</div>
-              <div style={{ fontSize: 11, color: P.warmGray }}>Nick Peters · NMLS# 1119524 · (615) 656-0737 · mortgagegeek.ai</div>
+              <div style={{ fontSize: 11, color: P.warmGray }}>Nick Peters · NMLS #1119524 · (615) 656-0737 · mortgagegeek.ai</div>
             </div>
             <div style={{ fontSize: 10, color: P.warmGrayLight, textAlign: "right" }}>Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</div>
           </div>
@@ -257,12 +257,12 @@ export function ComparePage() {
         )}
 
         <p className="no-print" style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 40, maxWidth: 600, marginLeft: "auto", marginRight: "auto" }}>
-          Scenarios are saved locally on this device only. Clearing your browser data will remove them. NMLS# 1119524.
+          Scenarios are saved locally on this device only. Clearing your browser data will remove them. NMLS #1119524.
         </p>
 
         {/* Print-only footer */}
         <div className="print-only" style={{ marginTop: 24, paddingTop: 12, borderTop: `1px solid ${P.creamDark}`, textAlign: "center", fontSize: 9, color: P.warmGrayLight, lineHeight: 1.6 }}>
-          Educational only · Not a loan estimate or commitment to lend · Rates and terms subject to change · NMLS# 1119524 · Equal Housing Lender · mortgagegeek.ai
+          Educational only · Not a loan estimate or commitment to lend · Rates and terms subject to change · NMLS #1119524 · Equal Housing Lender · mortgagegeek.ai
         </div>
       </div>
       <MobileToolbar />

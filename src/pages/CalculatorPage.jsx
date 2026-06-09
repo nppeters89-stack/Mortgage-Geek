@@ -1197,7 +1197,7 @@ export function CalculatorPage() {
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
           {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
-          This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
+          This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
         </p>
         </div>
       </div>
@@ -1517,7 +1517,7 @@ export function CalculatorPage() {
               {/* Disclaimer — preserved verbatim */}
               <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
                 {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
-                This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS# 1119524.
+                This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
               </p>
             </>
           }

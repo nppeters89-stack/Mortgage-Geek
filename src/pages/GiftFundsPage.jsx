@@ -432,13 +432,13 @@ export function GiftFundsPage() {
           If you have a self-employed donor whose gift comes from business funds, that's a different framework. For more on how lenders evaluate business funds going to personal use, see the <a href="/deep-dives/self-employed-documentation" style={LINK_STYLE}>Self-Employment Documentation Deep Dive</a>. And if you're trying to figure out how a gift moves the math on your monthly numbers, the <a href="/calculator" style={LINK_STYLE}>calculator</a> is the fastest way to see it.
         </Para>
         <Para>
-          If you're navigating a mortgage application with gift funds in play and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={LINK_STYLE}>npeters@annie-mac.com</a>. Bring an idea of who's giving, how much, and what loan program you're targeting. We'll work through the rest.
+          If you're navigating a mortgage application with gift funds in play and want to talk through your specific situation, I'm reachable at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={LINK_STYLE}>nick@mortgagegeek.ai</a>. Bring an idea of who's giving, how much, and what loan program you're targeting. We'll work through the rest.
         </Para>
 
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Got a gift in play and want to talk through it?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>npeters@annie-mac.com</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>nick@mortgagegeek.ai</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring an idea of who's giving, how much, and what loan program you're targeting. We'll work through the rest before you go under contract.

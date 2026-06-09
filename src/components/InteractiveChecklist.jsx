@@ -400,7 +400,7 @@ export function InteractiveChecklist({
                 🤓 The Mortgage Geek · FHA Manual Underwriting Checklist
                 {hasTabs ? ` · ${activeFlow.label} workflow` : ""}
               </div>
-              <div style={{ fontSize: 10, color: P.warmGray }}>Nick Peters · NMLS# 1119524 · (615) 656-0737 · mortgagegeek.ai/deep-dives/fha-manual-underwriting</div>
+              <div style={{ fontSize: 10, color: P.warmGray }}>Nick Peters · NMLS #1119524 · (615) 656-0737 · mortgagegeek.ai/deep-dives/fha-manual-underwriting</div>
             </div>
             <div style={{ fontSize: 9, color: P.warmGrayLight, textAlign: "right" }}>
               Generated {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
@@ -501,7 +501,7 @@ export function InteractiveChecklist({
       })}
 
         <div className="print-only" style={{ marginTop: 24, paddingTop: 12, borderTop: `1px solid ${P.creamDark}`, textAlign: "center", fontSize: 9, color: P.warmGrayLight, lineHeight: 1.6 }}>
-          Nick Peters · NMLS# 1119524 · (615) 656-0737 · Full guide: mortgagegeek.ai/deep-dives/fha-manual-underwriting · Educational only · Equal Housing Lender
+          Nick Peters · NMLS #1119524 · (615) 656-0737 · Full guide: mortgagegeek.ai/deep-dives/fha-manual-underwriting · Educational only · Equal Housing Lender
         </div>
       </div>
     </div>

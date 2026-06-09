@@ -2,13 +2,13 @@ import { P, F, globalCSS } from "../theme";
 import { HEADSHOT } from "../data/headshot";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME, LO_TITLE } from "../data/compliance";
+import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME, LO_TITLE, LO_EMAIL } from "../data/compliance";
 
 export function AboutPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <SEOHead
-        title="About Nick Peters — Mortgage Loan Officer | NMLS# 1119524"
+        title="About Nick Peters — Mortgage Loan Officer | NMLS #1119524"
         description="12+ years helping first-time buyers through the mortgage process. Licensed in multiple states. Straight answers, no jargon — based in Tennessee."
         path="/about"
       />
@@ -42,7 +42,7 @@ export function AboutPage() {
           <div style={{ flex: 1, minWidth: 220 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>The Person Behind the Site</span>
             <h1 style={{ fontFamily: F.display, fontSize: "clamp(28px, 4vw, 38px)", color: P.navy, marginBottom: 6 }}>Nick Peters</h1>
-            <p style={{ fontSize: 14, color: P.warmGray }}>{LO_TITLE} at {TRADE_NAME} · NMLS# {PERSONAL_NMLS}</p>
+            <p style={{ fontSize: 14, color: P.warmGray }}>{LO_TITLE} at {TRADE_NAME} · NMLS #{PERSONAL_NMLS}</p>
             <p style={{ fontSize: 13, color: P.warmGrayLight, marginTop: 2 }}>Nashville, TN · Licensed since 2014</p>
           </div>
         </div>
@@ -50,7 +50,7 @@ export function AboutPage() {
         {/* Bio */}
         <div style={{ maxWidth: 640, marginBottom: 48 }}>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
-            I'm a {LO_TITLE} at {TRADE_NAME} and a licensed Mortgage Loan Originator (NMLS# {PERSONAL_NMLS}, Corporate NMLS# {CORPORATE_NMLS}).
+            I'm a {LO_TITLE} at {TRADE_NAME} and a licensed Mortgage Loan Originator (NMLS #{PERSONAL_NMLS}, Corporate NMLS #{CORPORATE_NMLS}).
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: P.warmGray, marginBottom: 20 }}>
             For twelve years, I worked the sales desk in new construction model homes. I was the person families approached after falling in love with a house — the one responsible for turning that excitement into numbers that actually worked. Some conversations ended in approvals. Others required me to gently explain why the answer was "not yet," and what steps we could take to change that.
@@ -116,7 +116,7 @@ export function AboutPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Text me
             </a>
-            <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{
+            <a href={`mailto:${LO_EMAIL}`} aria-label={`Email Nick Peters at ${LO_EMAIL}`} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "12px 22px", borderRadius: 8,
               background: "rgba(255,255,255,0.1)", color: "#fff",
@@ -139,7 +139,7 @@ export function AboutPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
-          <span>NMLS# {PERSONAL_NMLS} ·</span>
+          <span>NMLS #{PERSONAL_NMLS} ·</span>
           <svg width="11" height="12" viewBox="0 0 40 42" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: "middle" }}>
             <path d="M20 1L0.5 16.8V41.5H39.5V16.8L20 1Z" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinejoin="round"/>
             <rect x="12" y="22" width="16" height="3" fill="currentColor"/>
