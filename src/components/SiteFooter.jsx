@@ -289,7 +289,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 margin: "2px 0 0",
               }}
             >
-              NMLS# {PERSONAL_NMLS}
+              NMLS #{PERSONAL_NMLS}
               <br />
               {LO_TITLE}
             </p>
@@ -370,7 +370,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                   letterSpacing: 0.5,
                 }}
               >
-                Corporate NMLS# {CORPORATE_NMLS}
+                Corporate NMLS #{CORPORATE_NMLS}
               </span>
             </div>
 
