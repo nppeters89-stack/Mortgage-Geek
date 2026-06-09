@@ -2,7 +2,7 @@ import { P, F, globalCSS } from "../theme";
 import { HEADSHOT } from "../data/headshot";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { SEOHead } from "../components/SEOHead";
-import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME, LO_TITLE } from "../data/compliance";
+import { PERSONAL_NMLS, CORPORATE_NMLS, TRADE_NAME, LO_TITLE, LO_EMAIL } from "../data/compliance";
 
 export function AboutPage() {
   return (
@@ -116,7 +116,7 @@ export function AboutPage() {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               Text me
             </a>
-            <a href="mailto:npeters@annie-mac.com" aria-label="Email Nick Peters at npeters@annie-mac.com" style={{
+            <a href={`mailto:${LO_EMAIL}`} aria-label={`Email Nick Peters at ${LO_EMAIL}`} style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "12px 22px", borderRadius: 8,
               background: "rgba(255,255,255,0.1)", color: "#fff",
