@@ -289,7 +289,9 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 margin: "2px 0 0",
               }}
             >
-              {LO_TITLE} · NMLS# {PERSONAL_NMLS}
+              {LO_TITLE}
+              <br />
+              NMLS# {PERSONAL_NMLS}
             </p>
 
             {/* Direct contact */}
