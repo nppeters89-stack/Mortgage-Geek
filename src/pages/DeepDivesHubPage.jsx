@@ -88,6 +88,13 @@ export function DeepDivesHubPage() {
       summary: "Mortgage qualifying with non-salary W-2 income across all five major loan programs. The hourly consistency test, FHA's 12-month-at-current-rate exception, the 2-year history standard for part-time and secondary income, the rehire-confirmation requirement for seasonal workers, and the off-season unemployment rule. Includes two interactive comparison grids and worked examples showing how qualifying income shifts by hundreds per month depending on methodology.",
       lastVerified: "April 2026",
     },
+    {
+      slug: "seller-concessions",
+      emoji: "💰",
+      title: "Seller Concessions",
+      summary: "What sellers can pay toward your costs on Conventional, FHA, VA, and USDA loans. The tier system, the VA two-bucket rule, and agent commissions after NAR.",
+      lastVerified: "June 2026",
+    },
   ];
 
   return (
