@@ -913,7 +913,7 @@ export function CashToClosePage() {
             <Row label="+ Total Closing Costs" val={fmt(closingCostsExFee)} />
             <div style={{ marginTop: 12, marginBottom: 4 }}>
               <CalcInput label="− Total Credits" value={totalCredits} onChange={setTotalCredits} prefix="$" step={500} comma />
-              <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 4, lineHeight: 1.5 }}>Combine earnest money already paid, seller concessions, lender credits, and any other credits into one total here.</p>
+              <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 4, lineHeight: 1.5 }}>Combine earnest money already paid, <a href="/deep-dives/seller-concessions" style={{ color: P.warmGray, fontWeight: 600, textDecoration: "underline" }}>seller concessions</a>, lender credits, and any other credits into one total here.</p>
             </div>
 
             <div style={{ marginTop: 16, padding: "16px 18px", background: PROG_COLOR, borderRadius: 10, textAlign: "center" }}>
