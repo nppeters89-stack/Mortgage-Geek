@@ -272,7 +272,7 @@ export function RateBuydownsPage() {
           Seller money is only as good as its deployment. The same $10,000 can be $63 a month, $157 a month, $488 a month for a year, or $10,000 of day-one cash, and the seller is indifferent between every version. The choice is entirely yours, it's worth real money, and it takes one conversation with your lender to make deliberately instead of by default.
         </Para>
         <Para>
-          If you want to run your own numbers, the deployment calculator on this site models all four options on your actual loan size and credit. And if you've got a live deal and an incentive on the table, bring me the scenario; pressure-testing a deployment takes me about ten minutes and it's the highest-leverage ten minutes in most purchase files. Contact info below.
+          If you want to run your own numbers, <a href="/tools/seller-credit-optimizer" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>the deployment calculator</a> on this site models all four options on your actual loan size and credit. And if you've got a live deal and an incentive on the table, bring me the scenario; pressure-testing a deployment takes me about ten minutes and it's the highest-leverage ten minutes in most purchase files. Contact info below.
         </Para>
 
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
