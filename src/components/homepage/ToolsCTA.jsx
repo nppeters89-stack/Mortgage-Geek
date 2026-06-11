@@ -1,6 +1,6 @@
 import { P, F } from "../../theme";
 import { SectionHeader } from "./SectionHeader";
-import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon } from "../icons";
+import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon, SellerCreditIcon } from "../icons";
 
 export function ToolsCTA() {
   const tools = [
@@ -20,6 +20,10 @@ export function ToolsCTA() {
       icon: "__CASH_ICON__", title: "Cash to Close", href: "/cash-to-close",
       desc: "Estimate how much money you'll need at the closing table — down payment, closing costs, prepaids, and reserves.",
     },
+    {
+      icon: "__SELLER_CREDIT_ICON__", title: "Seller Credit Optimizer", href: "/tools/seller-credit-optimizer",
+      desc: "Deploy a seller credit four ways and see what each is worth.",
+    },
   ];
   return (
     <section id="tools-cta" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
@@ -36,14 +40,14 @@ export function ToolsCTA() {
             >
               <div style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "28px 24px", textAlign: "center" }}>
                 <span style={{ fontSize: 36, display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 8, height: 44 }}>
-                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={48} variant="cream" /> : t.icon}
+                  {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={44} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={48} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={48} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={48} variant="cream" /> : t.icon === "__SELLER_CREDIT_ICON__" ? <SellerCreditIcon size={48} variant="cream" /> : t.icon}
                 </span>
                 <span style={{ fontFamily: F.display, fontSize: 20, color: "#fff", display: "block" }}>{t.title}</span>
               </div>
               <div style={{ padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" }}>
                 <p style={{ fontSize: 13, lineHeight: 1.6, color: P.warmGray, flex: 1 }}>{t.desc}</p>
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14, fontSize: 13, fontWeight: 600, color: P.gold }}>
-                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={14} variant="navy" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={14} variant="navy" /> : t.icon} →
+                  Open {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={14} /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={14} variant="navy" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={14} variant="navy" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={14} variant="navy" /> : t.icon === "__SELLER_CREDIT_ICON__" ? <SellerCreditIcon size={14} variant="navy" /> : t.icon} →
                 </span>
               </div>
             </a>

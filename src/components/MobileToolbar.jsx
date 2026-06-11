@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { F } from "../theme";
 import { useIsMobile, useIsStandalone } from "../utils/hooks";
-import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon } from "./icons";
+import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon, SellerCreditIcon } from "./icons";
 
 export function MobileToolbar({ hrefOverrides = {} }) {
   const isMobile = useIsMobile();
@@ -42,7 +42,7 @@ export function MobileToolbar({ hrefOverrides = {} }) {
           ].map((t) => (
             <a key={t.href} href={hrefOverrides[t.href] || t.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, textDecoration: "none", padding: "0" }}>
               <span style={{ fontSize: 22, lineHeight: 1, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={22} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={22} variant="cream" /> : t.icon}
+                {t.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={20} variant="cream" /> : t.icon === "__COMPARE_ICON__" ? <CompareIcon size={22} variant="cream" /> : t.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={22} variant="cream" /> : t.icon === "__CASH_ICON__" ? <CashToCloseIcon size={22} variant="cream" /> : t.icon === "__SELLER_CREDIT_ICON__" ? <SellerCreditIcon size={22} variant="cream" /> : t.icon}
               </span>
               <span style={{ fontSize: 9, fontWeight: 600, color: "#fff", fontFamily: F.body, letterSpacing: 0.3 }}>{t.label}</span>
             </a>
