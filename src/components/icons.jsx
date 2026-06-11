@@ -193,11 +193,11 @@ export function SellerCreditIcon({ size = 24, variant = "navy", style = {} }) {
   const branchColor = variant === "cream" ? P.cream : P.navy;
   // The coin stays goldLight in both variants (signature accent).
   const coinColor = P.goldLight;
-  // $ glyph color: dark on the coin in cream-variant contexts (high
-  // contrast against goldLight). In navy-variant (light background)
-  // contexts the brief specifies P.cream; flagged in the build report
-  // because that is the lower-contrast pairing of the two.
-  const dollarColor = variant === "cream" ? P.navyDark : P.cream;
+  // $ glyph stays navyDark on the gold coin in both variants. NavyDark
+  // on goldLight gives ~7:1 contrast; the alternative cream-on-gold
+  // tested at ~2:1 and failed at 14px. This also matches the CashToClose
+  // coin so the two gold coins read identically across the site.
+  const dollarColor = P.navyDark;
   const branchStrokeWidth = size <= 20 ? 4 : 3;
   return (
     <svg
