@@ -95,6 +95,13 @@ export function DeepDivesHubPage() {
       summary: "What sellers can pay toward your costs on Conventional, FHA, VA, and USDA loans. The tier system, the VA two-bucket rule, and agent commissions after NAR.",
       lastVerified: "June 2026",
     },
+    {
+      slug: "rate-buydowns",
+      emoji: "📉",
+      title: "Rate Buydowns",
+      summary: "The same $10,000 seller credit run four ways: price cut, closing costs, discount points, and a 2-1 buydown. Exact math and honest tradeoffs.",
+      lastVerified: "June 2026",
+    },
   ];
 
   return (
