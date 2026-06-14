@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { P, F, globalCSS } from "../theme";
+import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { fmt } from "../utils/format";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
@@ -88,6 +88,116 @@ function Caveat({ children }) {
   );
 }
 
+// Program-aware per-card cap message. Reads the engine's discriminated
+// capStatus and renders the matching copy. Returns null when there is
+// nothing to say (Price Cut, or "fit" without a VA caveat). Warnings
+// use the gold-accent treatment that the existing edge messages
+// already establish on this page.
+function CapMessage({ capStatus, programLabel, fmtMoney }) {
+  if (!capStatus || capStatus.kind === "none" || capStatus.kind === "fit") return null;
+  const warnStyle = { fontSize: 12, color: P.gold, fontWeight: 600, marginTop: 10, lineHeight: 1.55 };
+  const caveatStyle = { fontSize: 12, fontStyle: "italic", color: P.warmGrayLight, marginTop: 10, lineHeight: 1.55 };
+  switch (capStatus.kind) {
+    case "exceeded":
+      return (
+        <p role="note" style={warnStyle}>
+          This credit ({fmtMoney(capStatus.credit)}) exceeds the {programLabel} cap of {fmtMoney(capStatus.capValue)}. The excess has to be restructured or moved to a price reduction.
+        </p>
+      );
+    case "va-uncapped-closing":
+      return (
+        <p style={caveatStyle}>
+          Customary closing costs are uncapped on VA (bucket one). The only limit here is your actual costs.
+        </p>
+      );
+    case "va-uncapped-points":
+      return (
+        <p style={caveatStyle}>
+          Market-rate points are uncapped on VA (bucket one). Points beyond the customary market rate count toward the 4% concession bucket. Confirm what's customary with your lender.
+        </p>
+      );
+    case "va-2-1-fit":
+      return (
+        <p style={caveatStyle}>
+          A temporary buydown escrow is a VA concession (bucket two), capped at 4% of value. The portion flowing to closing costs is bucket one and uncapped.
+        </p>
+      );
+    case "va-2-1-exceeded":
+      return (
+        <p role="note" style={warnStyle}>
+          This buydown escrow ({fmtMoney(capStatus.buydownCost)}) exceeds VA's 4% concession cap ({fmtMoney(capStatus.capValue)}). Trim the buydown or shift dollars to closing costs, which are uncapped.
+        </p>
+      );
+    default:
+      return null;
+  }
+}
+
+// Cap summary block shown beneath the inputs panel. The text varies by
+// active program; each variant ends with a link to the Seller
+// Concessions Deep Dive for the full rules.
+function CapSummary({ cap, fmtMoney }) {
+  const link = <a href="/deep-dives/seller-concessions" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>Seller Concessions Deep Dive</a>;
+  const pct = (cap.capPct * 100).toFixed(0);
+  const wrap = (body) => (
+    <p style={{ fontSize: 13, color: P.warmGray, lineHeight: 1.65, marginTop: 16 }}>
+      {body} Full rules: {link}.
+    </p>
+  );
+  switch (cap.program) {
+    case "fha":
+      return wrap(<>FHA concession cap: 6% of price = <strong style={{ color: P.navy }}>{fmtMoney(cap.capValue)}</strong>. Every deployment except a price cut counts toward this cap. Cap is figured on the purchase price (assumes the home appraises at or above it).</>);
+    case "usda":
+      return wrap(<>USDA concession cap: 6% of the sales price = <strong style={{ color: P.navy }}>{fmtMoney(cap.capValue)}</strong>. Every deployment except a price cut counts toward this cap.</>);
+    case "va":
+      return wrap(<>VA uses two buckets. Customary closing costs are uncapped. True concessions (a temporary buydown escrow, prepaid escrows, above-market points) are capped at 4% of the appraised value = <strong style={{ color: P.navy }}>{fmtMoney(cap.capValue)}</strong>. A price cut is neither. Figured on the purchase price as a proxy for the Notice of Value.</>);
+    case "conventional":
+    default:
+      return wrap(<>Conventional concession cap at this down payment: {pct}% of price = <strong style={{ color: P.navy }}>{fmtMoney(cap.capValue)}</strong>. Every deployment except a price cut counts toward this cap. Cap is figured on the purchase price (assumes the home appraises at or above it).</>);
+  }
+}
+
+// Four-button program selector. Active button fills with the program
+// color; inactive shows a tinted outline. Touch targets >=44px.
+const PROGRAM_OPTIONS = [
+  { key: "conventional", label: "Conventional" },
+  { key: "fha",          label: "FHA"          },
+  { key: "va",           label: "VA"           },
+  { key: "usda",         label: "USDA"         },
+];
+
+function ProgramSelector({ value, onChange }) {
+  return (
+    <div role="group" aria-label="Loan program" style={{
+      display: "flex", flexWrap: "wrap", gap: 8,
+      background: "#fff", border: `1px solid ${P.creamDark}`,
+      borderRadius: 10, padding: 8, marginBottom: 20,
+    }}>
+      {PROGRAM_OPTIONS.map((opt) => {
+        const isActive = value === opt.key;
+        const color = PROGRAM_COLORS[opt.label];
+        return (
+          <button
+            key={opt.key}
+            type="button"
+            aria-pressed={isActive}
+            onClick={() => onChange(opt.key)}
+            style={{
+              flex: "1 1 120px", minHeight: 44, padding: "10px 14px",
+              border: `1px solid ${color}`, borderRadius: 8,
+              background: isActive ? color : "transparent",
+              color: isActive ? "#fff" : color,
+              fontFamily: F.body, fontSize: 14, fontWeight: 700, letterSpacing: 0.4,
+              cursor: "pointer",
+              transition: "background 0.15s, color 0.15s",
+            }}
+          >{opt.label}</button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function SellerCreditOptimizerPage() {
   // -------- Inputs --------
   const [price, setPrice] = useState(400000);
@@ -110,13 +220,19 @@ export function SellerCreditOptimizerPage() {
   const creditCap = price * 0.15;
   const creditResolved = Math.min(creditCap, creditMode === "$" ? creditDollar : (price * creditPct) / 100);
 
+  // Active loan program. Conventional on load; switches do NOT mutate
+  // any input (down payment / rate / credit all stay where the user
+  // left them, per the brief).
+  const [program, setProgram] = useState("conventional");
+
   // -------- Engine --------
   const result = useMemo(() => computeDeployments({
     price, downMode, downPct, downDollar,
     rate, term,
     credit: creditResolved,
     costsInput: effectiveCosts,
-  }), [price, downMode, downPct, downDollar, rate, term, creditResolved, effectiveCosts]);
+    program,
+  }), [price, downMode, downPct, downDollar, rate, term, creditResolved, effectiveCosts, program]);
 
   // -------- Five-year bar scaling --------
   const fiveYearBars = [
@@ -248,20 +364,21 @@ export function SellerCreditOptimizerPage() {
             </div>
           </div>
 
-          {/* Always-on program caveat below the inputs (rule 7) */}
-          <p style={{ fontSize: 12, color: P.warmGrayLight, fontStyle: "italic", marginTop: 16, lineHeight: 1.5 }}>
-            Caps shown assume a conventional primary or second home purchase. FHA, VA, and USDA work differently.
-          </p>
+          {/* Program-aware cap summary (replaces the old conventional-only caveat) */}
+          <CapSummary cap={result.cap} fmtMoney={fmt} />
         </section>
 
-        {/* ---------- Cap warning banner ---------- */}
-        {result.cap.exceedsCap && (
+        {/* ---------- Program selector ---------- */}
+        <ProgramSelector value={program} onChange={setProgram} />
+
+        {/* ---------- Cap warning banner (single-cap programs only; VA never fires) ---------- */}
+        {result.cap.headlineExceeded && (
           <div role="alert" style={{
             background: "rgba(184, 134, 11, 0.10)", border: `1px solid ${P.gold}`,
             borderLeft: `4px solid ${P.gold}`, borderRadius: 8,
             padding: "14px 18px", marginBottom: 20, fontSize: 14, color: P.navy, lineHeight: 1.6,
           }}>
-            <strong style={{ color: P.navyDark }}>Concession cap exceeded.</strong> This credit exceeds the conventional concession cap for this down payment ({fmt(result.cap.capDollars)} at {(result.cap.capPct * 100).toFixed(0)}%). Anything over the cap has to be restructured. See the <a href="/deep-dives/seller-concessions" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>Seller Concessions Deep Dive</a>.
+            <strong style={{ color: P.navyDark }}>Concession cap exceeded.</strong> This credit exceeds the {result.cap.label} concession cap ({fmt(result.cap.capValue)} at {(result.cap.capPct * 100).toFixed(0)}%). Anything over the cap has to be restructured. See the <a href="/deep-dives/seller-concessions" style={{ color: P.navy, fontWeight: 600, textDecoration: "underline" }}>Seller Concessions Deep Dive</a>.
           </div>
         )}
 
@@ -303,6 +420,7 @@ export function SellerCreditOptimizerPage() {
             <Row label="New loan amount" value={fmt(result.priceCut.newLoan)} />
             <Row label="Down payment change" value={result.priceCut.downPaymentDelta > 0 ? `−${fmt(result.priceCut.downPaymentDelta)}` : "no change"} />
             <Row label="Five-year value" value={fmt(result.priceCut.fiveYearValue)} />
+            <CapMessage capStatus={result.priceCut.capStatus} programLabel={result.cap.label} fmtMoney={fmt} />
             <Caveat>Consumes none of your concession cap. Most of its value is stored as a smaller balance, not delivered as monthly relief.</Caveat>
           </Card>
 
@@ -321,6 +439,7 @@ export function SellerCreditOptimizerPage() {
                 Credits can't exceed your actual costs and prepaids. {fmt(result.closingCosts.excess)} of this credit has nowhere to go in this slot; see the price cut or buydown options.
               </p>
             )}
+            <CapMessage capStatus={result.closingCosts.capStatus} programLabel={result.cap.label} fmtMoney={fmt} />
             <Caveat>Credits can't exceed your actual closing costs and prepaids.</Caveat>
           </Card>
 
@@ -343,6 +462,7 @@ export function SellerCreditOptimizerPage() {
                 This credit is too small to move the rate a full eighth under our conservative model. Closing costs are likely the better slot. Your lender may be able to apply it as a pricing credit; ask after lock.
               </p>
             )}
+            <CapMessage capStatus={result.points.capStatus} programLabel={result.cap.label} fmtMoney={fmt} />
             <Caveat>Planning assumption: 0.25% per point, rounded conservatively to the eighth. Real pricing varies daily with diminishing returns. Confirm with your lender after lock.</Caveat>
           </Card>
 
@@ -365,6 +485,7 @@ export function SellerCreditOptimizerPage() {
               </p>
             )}
             <Row label="Five-year value" value={fmt(result.twoOne.fiveYearValue)} />
+            <CapMessage capStatus={result.twoOne.capStatus} programLabel={result.cap.label} fmtMoney={fmt} />
             <Caveat>You qualify at the full note rate, not the bought-down payment. Unused escrow is credited if you refinance or sell during the buydown.</Caveat>
           </Card>
         </section>
