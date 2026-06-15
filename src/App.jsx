@@ -23,7 +23,6 @@ const GiftFundsPage = lazy(() => import("./pages/GiftFundsPage").then(m => ({ de
 const HourlyPartTimeIncomePage = lazy(() => import("./pages/HourlyPartTimeIncomePage").then(m => ({ default: m.HourlyPartTimeIncomePage })));
 const SellerConcessionsPage = lazy(() => import("./pages/SellerConcessionsPage").then(m => ({ default: m.SellerConcessionsPage })));
 const RateBuydownsPage = lazy(() => import("./pages/RateBuydownsPage").then(m => ({ default: m.RateBuydownsPage })));
-const SellerCreditOptimizerPage = lazy(() => import("./pages/SellerCreditOptimizerPage").then(m => ({ default: m.SellerCreditOptimizerPage })));
 const GeekMapsHubPage = lazy(() => import("./pages/GeekMapsHubPage").then(m => ({ default: m.GeekMapsHubPage })));
 const TNLoanLimitsPage = lazy(() => import("./pages/TNLoanLimitsPage").then(m => ({ default: m.TNLoanLimitsPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
@@ -53,7 +52,6 @@ export default function MortgageLandingPage() {
     if (path === "deep-dives/hourly-and-part-time-income") return "deepdives-hourly-part-time";
     if (path === "deep-dives/seller-concessions") return "deepdives-seller-concessions";
     if (path === "deep-dives/rate-buydowns") return "deepdives-rate-buydowns";
-    if (path === "tools/seller-credit-optimizer") return "seller-credit-optimizer";
     if (path === "geek-maps") return "geek-maps-hub";
     if (path === "geek-maps/tennessee-loan-limits") return "geek-maps-tn-loan-limits";
     if (path === "geek-log") return "geek-log";
@@ -82,7 +80,6 @@ export default function MortgageLandingPage() {
     if (currentPage === "deepdives-hourly-part-time") return <HourlyPartTimeIncomePage />;
     if (currentPage === "deepdives-seller-concessions") return <SellerConcessionsPage />;
     if (currentPage === "deepdives-rate-buydowns") return <RateBuydownsPage />;
-    if (currentPage === "seller-credit-optimizer") return <SellerCreditOptimizerPage />;
     if (currentPage === "geek-maps-hub") return <GeekMapsHubPage />;
     if (currentPage === "geek-maps-tn-loan-limits") return <TNLoanLimitsPage />;
     if (currentPage === "geek-log") return <GeekLogPage />;
@@ -127,8 +124,7 @@ export default function MortgageLandingPage() {
           currentPage === "calculator" ||
           currentPage === "prequal" ||
           currentPage === "compare" ||
-          currentPage === "cashtoclose" ||
-          currentPage === "seller-credit-optimizer"
+          currentPage === "cashtoclose"
             ? "tool"
             : currentPage.startsWith("deepdives-") && currentPage !== "deepdives-hub"
             ? "deepdive"
