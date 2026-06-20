@@ -14,6 +14,8 @@ export const P = {
   success: "#3F5A4F", // eligible / pass / savings (same value as sageDark)
   caution: "#9C5811", // conditional / review / "you pay" — burnt amber, 5.05:1
   danger:  "#B0322B", // ineligible / fail / error — distinct from brand red
+  successLight: "#7FB89B", // on-dark variant of success (~6.6:1 on navy)
+  dangerLight:  "#E8918C", // on-dark variant of danger (~6.3:1 on navy)
   // Equation-only palette — scoped to DTIDeepDive's stacked-fraction render.
   // Housing uses prog.color; these apply to debts and income only.
   equationDebts: "#9A2B2B",

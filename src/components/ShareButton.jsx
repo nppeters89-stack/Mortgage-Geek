@@ -94,11 +94,11 @@ export function ShareButton({ title, url, variant = "default" }) {
 
   const headerIdleColor = "rgba(255,255,255,0.55)";
   const headerHoverColor = "rgba(255,255,255,0.95)";
-  const headerActiveColor = isError ? "#F1B5B5" : "#E8C875";
+  const headerActiveColor = isError ? P.dangerLight : P.successLight;
 
   const baseBg = isHeader ? "transparent" : P.navy;
   const hoverBg = isHeader ? "transparent" : P.navyLight;
-  const errorBg = isHeader ? "transparent" : "#8B2D2D";
+  const errorBg = isHeader ? "transparent" : P.danger;
   const background = isError ? errorBg : baseBg;
 
   const buttonStyle = isHeader

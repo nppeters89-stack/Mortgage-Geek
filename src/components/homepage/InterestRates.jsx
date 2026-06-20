@@ -204,8 +204,8 @@ export function InterestRates({ navTarget }) {
                         <span style={{
                           fontSize: 12, fontWeight: 600,
                           color: i === 0
-                            ? (parseFloat(r.change) <= 0 ? "#7DCEA0" : "#F1948A")
-                            : (parseFloat(r.change) <= 0 ? "#27AE60" : "#E74C3C"),
+                            ? (parseFloat(r.change) <= 0 ? P.successLight : P.dangerLight)
+                            : (parseFloat(r.change) <= 0 ? P.success : P.danger),
                         }}>
                           {parseFloat(r.change) > 0 ? "+" : ""}{r.change}
                         </span>

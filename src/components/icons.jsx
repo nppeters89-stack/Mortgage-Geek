@@ -2,11 +2,11 @@ import { P } from "../theme";
 
 // All four custom icons share a prop contract: { size = 24, variant = "navy", style = {} }
 // "navy" variant is for light backgrounds (cream/white cards). "cream" variant is for dark
-// backgrounds (navy sidebar, mobile toolbar). Each icon keeps its gold accents constant
-// across variants — the navy/cream flip is the structural color, gold is the signature accent.
+// backgrounds (navy sidebar, mobile toolbar). Each icon keeps its accent constant across
+// variants — the navy/cream flip is the structural color, Arrow Red (P.gold) is the accent.
 
 export function MortgageCalcIcon({ size = 24, variant = "navy", style = {} }) {
-  // Body and buttons flip based on background context. Screen always stays gold.
+  // Body and buttons flip based on background context. Screen is the one Arrow-Red detail.
   const bodyColor = variant === "cream" ? P.cream : P.navy;
   const buttonColor = variant === "cream" ? P.navy : P.cream;
   return (
@@ -20,9 +20,9 @@ export function MortgageCalcIcon({ size = 24, variant = "navy", style = {} }) {
     >
       {/* Body */}
       <rect x="0" y="0" width="72" height="88" rx="10" fill={bodyColor} />
-      {/* Gold screen (always gold, both variants) */}
+      {/* Arrow Red screen (the one accent detail, both variants) */}
       <rect x="8" y="8" width="56" height="22" rx="3" fill={P.gold} />
-      {/* Dark readout dashes on gold screen (always navy-dark) */}
+      {/* Dark readout dashes on the red screen (always navy-dark) */}
       <rect x="52" y="22" width="8" height="2" fill={P.navyDark} />
       <rect x="42" y="22" width="6" height="2" fill={P.navyDark} />
       <rect x="34" y="22" width="4" height="2" fill={P.navyDark} />
