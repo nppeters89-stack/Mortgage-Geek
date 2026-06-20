@@ -292,7 +292,7 @@ export function ARMRateAnatomyGraphic() {
           swatch={<StepSwatch color={P.gold} />}
         />
         <LegendChip
-          color={P.warmGrayLight}
+          color={P.textLight}
           label="+ Margin"
           sub="Fixed lender markup"
           swatch={<SolidSwatch color={P.warmGrayLight} dashed />}
