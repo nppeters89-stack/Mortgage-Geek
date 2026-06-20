@@ -115,7 +115,7 @@ export function TNLoanLimitsPage() {
           </p>
         </header>
 
-        <div style={{ background: "rgba(184, 134, 11, 0.06)", border: `1px solid rgba(184, 134, 11, 0.25)`, borderLeft: `3px solid ${P.gold}`, borderRadius: 6, padding: "14px 18px", marginBottom: 8 }}>
+        <div style={{ background: "rgba(207, 51, 56, 0.06)", border: `1px solid rgba(207, 51, 56, 0.25)`, borderLeft: `3px solid ${P.gold}`, borderRadius: 6, padding: "14px 18px", marginBottom: 8 }}>
           <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.6, margin: 0 }}>
             <strong style={{ color: P.navy, fontWeight: 600 }}>Updated for 2026.</strong> Conventional and FHA limits effective January 1, 2026. Sourced directly from FHFA and HUD.
           </p>

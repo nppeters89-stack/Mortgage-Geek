@@ -255,7 +255,7 @@ export function DetailPanel({
               {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
               <a
                 href={cashToCloseHref}
-                style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
+                style={{ color: P.textLight, textDecoration: 'underline' }}
               >
                 Full APR detail →
               </a>

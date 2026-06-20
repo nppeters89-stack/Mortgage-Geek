@@ -236,9 +236,9 @@ export function SellerConcessionsGrid() {
         }
         .scg-table tbody tr.scg-row:nth-child(odd)  { background: ${P.white}; }
         .scg-table tbody tr.scg-row:nth-child(even) { background: ${P.cream}; }
-        .scg-table tbody tr.scg-row:hover { background: rgba(184, 134, 11, 0.06); }
+        .scg-table tbody tr.scg-row:hover { background: rgba(207, 51, 56, 0.06); }
         .scg-table tbody tr.scg-row.active {
-          background: rgba(184, 134, 11, 0.10);
+          background: rgba(207, 51, 56, 0.10);
           border-left: 3px solid ${P.gold};
         }
         .scg-table tbody tr.scg-row:focus-visible { outline: 2px solid ${P.navy}; outline-offset: -2px; }
@@ -294,7 +294,7 @@ export function SellerConcessionsGrid() {
         }
         .scg-panel-cell {
           background: rgba(250, 247, 242, 0.05);
-          border: 1px solid rgba(212, 168, 67, 0.25);
+          border: 1px solid rgba(207, 51, 56, 0.25);
           border-radius: 6px;
           padding: 14px;
         }

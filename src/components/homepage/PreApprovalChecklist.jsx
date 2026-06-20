@@ -71,7 +71,7 @@ export function PreApprovalChecklist() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 12, color: P.warmGrayLight }}>{totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0}%</span>
               {checkedCount > 0 && (
-                <button onClick={resetAll} style={{ background: "none", border: "none", fontSize: 11, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body, opacity: 0.6, textDecoration: "underline" }}>Reset</button>
+                <button onClick={resetAll} style={{ background: "none", border: "none", fontSize: 11, color: P.textLight, cursor: "pointer", fontFamily: F.body, opacity: 0.6, textDecoration: "underline" }}>Reset</button>
               )}
             </div>
           </div>

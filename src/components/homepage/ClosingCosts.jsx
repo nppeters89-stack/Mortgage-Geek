@@ -186,7 +186,7 @@ export function ClosingCosts({ navTarget }) {
               <p style={{ fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.7)", maxWidth: 460, margin: "0 auto 20px" }}>
                 You know what every cost is — now see how they add up for your scenario. State-specific transfer taxes, metro-level property tax rates, and month-accurate reserve schedules across all 50 states.
               </p>
-              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(184,134,11,0.3)" }}>
+              <a href="/cash-to-close" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 10, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 14, fontWeight: 600, textDecoration: "none", boxShadow: "0 4px 16px rgba(207,51,56,0.3)" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                   <CashToCloseIcon size={18} variant="cream" dollarColor="#fff" />
                   Open the Cash to Close Simulator →

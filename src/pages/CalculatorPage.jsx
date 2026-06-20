@@ -375,8 +375,8 @@ export function CalculatorPage() {
         .calc-cards-grid[data-count="3"] { grid-template-columns: repeat(3, 1fr); max-width: 900px; }
         .calc-cards-grid[data-count="4"] { grid-template-columns: repeat(4, 1fr); }
         .calc-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .calc-tax-group { background: ${P.cream}; border: 1px solid rgba(184, 134, 11, 0.25); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
-        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8B6914; }
+        .calc-tax-group { background: ${P.cream}; border: 1px solid rgba(207, 51, 56, 0.25); border-radius: 10px; padding: 12px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+        .calc-tax-group-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: ${P.textLight}; }
         .calc-program-toggle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; max-width: 1100px; margin: 0 auto 24px; padding: 0 4px; }
         .calc-toggle-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-right: 4px; }
         .calc-toggle-pill { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; min-height: 36px; border-radius: 50px; border: 1.5px solid; font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.3px; transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s; }
@@ -516,7 +516,7 @@ export function CalculatorPage() {
                     style={{
                       background: isVisible ? prog.color : "#fff",
                       color: isVisible ? "#fff" : P.warmGray,
-                      border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
+                      border: `2.5px solid ${isVisible ? P.goldLight : "rgba(207, 51, 56, 0.3)"}`,
                       borderRadius: 50,
                       padding: "10px 4px",
                       minHeight: 40,
@@ -528,7 +528,7 @@ export function CalculatorPage() {
                       opacity: isLast ? 0.7 : 1,
                       transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
                       textAlign: "center",
-                      boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
+                      boxShadow: isVisible ? "0 2px 8px rgba(207, 51, 56, 0.35)" : "none",
                     }}
                   >
                     {prog.name === "Conventional" ? "Conv" : prog.name}
@@ -647,7 +647,7 @@ export function CalculatorPage() {
             right: 0,
             width: 180,
             height: "100%",
-            background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
+            background: "radial-gradient(circle at top right, rgba(207, 51, 56, 0.08) 0%, transparent 60%)",
             pointerEvents: "none",
           }} />
 
@@ -660,7 +660,7 @@ export function CalculatorPage() {
                   width: 6, height: 6, borderRadius: "50%",
                   background: P.goldLight,
                   display: "inline-block",
-                  boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
+                  boxShadow: "0 0 6px rgba(207, 51, 56, 0.6)",
                   animation: "rate-pulse 2s ease-in-out infinite",
                 }} />
                 Live rates loaded · {rateSource}
@@ -744,14 +744,14 @@ export function CalculatorPage() {
                     <span style={{ fontFamily: F.display, fontSize: 28, color: "#fff" }}>Over Loan Limit</span>
                   </div>
                   <div style={{ padding: "28px 20px", textAlign: "center" }}>
-                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(184, 134, 11, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(207, 51, 56, 0.15)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
                       <span style={{ fontSize: 24 }}>⚠️</span>
                     </div>
                     <p style={{ fontSize: 14, fontWeight: 600, color: P.text, marginBottom: 6 }}>Exceeds {countyLabel} {prog.name} Limit</p>
                     <p style={{ fontSize: 12, lineHeight: 1.6, color: P.warmGray, marginBottom: 10 }}>
                       The {prog.name} loan limit for this area is <strong style={{ color: P.text }}>{fmt(prog.loanLimit)}</strong>. Your current loan amount of <strong style={{ color: P.text }}>{fmt(baseLoan)}</strong> exceeds it.
                     </p>
-                    <div style={{ background: "rgba(184, 134, 11, 0.08)", border: "1px solid rgba(184, 134, 11, 0.25)", borderRadius: 8, padding: "10px 12px" }}>
+                    <div style={{ background: "rgba(207, 51, 56, 0.08)", border: "1px solid rgba(207, 51, 56, 0.25)", borderRadius: 8, padding: "10px 12px" }}>
                       <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldMuted, marginBottom: 4 }}>To Qualify</p>
                       <p style={{ fontSize: 13, color: P.text, lineHeight: 1.5 }}>
                         Increase down payment to at least <strong>{fmt(neededDown)}</strong> ({neededPct.toFixed(1)}%)
@@ -767,7 +767,7 @@ export function CalculatorPage() {
               <div key={i} className="content-card" onClick={() => setSelectedProgram(isSelected ? null : prog.name)} style={{
                 overflow: "hidden", position: "relative", cursor: "pointer",
                 border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
-                boxShadow: isSelected ? `0 0 0 4px rgba(184,134,11,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
+                boxShadow: isSelected ? `0 0 0 4px rgba(207,51,56,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
                 transform: isSelected ? "translateY(-2px)" : "translateY(0)",
                 transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
               }}>
@@ -1117,7 +1117,7 @@ export function CalculatorPage() {
                                   </div>
 
                                   {showPmiNote && (
-                                    <div style={{ marginTop: 8, padding: "7px 11px", background: "rgba(184, 134, 11, 0.08)", borderRadius: 4, borderLeft: `2px solid ${P.gold}` }}>
+                                    <div style={{ marginTop: 8, padding: "7px 11px", background: "rgba(207, 51, 56, 0.08)", borderRadius: 4, borderLeft: `2px solid ${P.gold}` }}>
                                       <p style={{ fontSize: 10.5, color: P.warmGray, lineHeight: 1.4 }}>
                                         <strong style={{ color: P.navy }}>{isFHA ? "Note:" : "Bonus:"}</strong>{" "}
                                         {isFHA
@@ -1139,7 +1139,7 @@ export function CalculatorPage() {
                   <div style={{ marginTop: 12, padding: "10px 12px", background: P.cream, borderRadius: 8, textAlign: "center" }}>
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, display: "block", marginBottom: 2 }}>Est. APR</span>
                     <span style={{ fontFamily: F.display, fontSize: 22, color: prog.color }}>{prog.apr.toFixed(3)}%</span>
-                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.warmGrayLight, textDecoration: "underline" }}>Full APR detail →</a></p>
+                    <p style={{ fontSize: 9, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4 }}>Includes lender fees{prog.upfront > 0 ? `, ${prog.upfrontLabel}` : ""}{prog.mi > 0 ? ", monthly MI" : ""}. <a href={`/cash-to-close?price=${homePrice}&down=${downPct}&term=${term}&program=${encodeURIComponent(prog.name)}&rate=${prog.rate}&state=${taxState}&metro=${encodeURIComponent(taxMetro)}${prog.isVA ? `&vaUsage=${vaUsage}` : ""}${hoa > 0 ? `&hoa=${hoa}` : ""}`} style={{ color: P.textLight, textDecoration: "underline" }}>Full APR detail →</a></p>
                     <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                   </div>
 
@@ -1197,7 +1197,7 @@ export function CalculatorPage() {
         {/* Disclaimer */}
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
           {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
-          This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
+          This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.textLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
         </p>
         </div>
       </div>
@@ -1257,7 +1257,7 @@ export function CalculatorPage() {
                             style={{
                               background: isVisible ? prog.color : "#fff",
                               color: isVisible ? "#fff" : P.warmGray,
-                              border: `2.5px solid ${isVisible ? P.goldLight : "rgba(184, 134, 11, 0.3)"}`,
+                              border: `2.5px solid ${isVisible ? P.goldLight : "rgba(207, 51, 56, 0.3)"}`,
                               borderRadius: 50,
                               padding: "8px 4px",
                               minHeight: 36,
@@ -1269,7 +1269,7 @@ export function CalculatorPage() {
                               opacity: isLast ? 0.7 : 1,
                               transition: "background 0.15s, color 0.15s, border-color 0.15s, font-weight 0.15s",
                               textAlign: "center",
-                              boxShadow: isVisible ? "0 2px 8px rgba(212, 168, 67, 0.35)" : "none",
+                              boxShadow: isVisible ? "0 2px 8px rgba(207, 51, 56, 0.35)" : "none",
                             }}
                           >
                             {label}
@@ -1378,7 +1378,7 @@ export function CalculatorPage() {
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", color: P.goldLight }}>Rates by Program</span>
                   {ratesLoaded && (
                     <span style={{ fontSize: 10, color: P.goldLight, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, opacity: 0.9 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.goldLight, display: "inline-block", boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)", animation: "rate-pulse 2s ease-in-out infinite" }} />
+                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: P.goldLight, display: "inline-block", boxShadow: "0 0 6px rgba(207, 51, 56, 0.6)", animation: "rate-pulse 2s ease-in-out infinite" }} />
                       Live · {rateSource}
                     </span>
                   )}
@@ -1517,7 +1517,7 @@ export function CalculatorPage() {
               {/* Disclaimer — preserved verbatim */}
               <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", maxWidth: 600, margin: "0 auto" }}>
                 {ratesLoaded ? "Rates auto-populated from current national averages (Mortgage News Daily), rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative." : ""}
-                This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
+                This calculator is for educational purposes only. Actual rates, fees, and payment amounts vary by lender, credit profile, and loan scenario. Contact me at <a href="tel:+16156560737" style={{ color: P.textLight, textDecoration: "underline" }}>(615) 656-0737</a> for a personalized quote. NMLS #1119524.
               </p>
             </>
           }

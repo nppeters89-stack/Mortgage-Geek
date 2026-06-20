@@ -436,8 +436,8 @@ export function PreQualPage() {
         .pq-cards-grid--compact + .pq-detail-panel { margin-top: 0; }
         .pq-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 24px; }
         @media (min-width: 1100px) { .pq-detail-panel-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; } }
-        .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(184, 134, 11, 0.4); }
-        .pq-card-compact:focus-visible { outline: 2px solid #B8860B; outline-offset: 2px; }
+        .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(207, 51, 56, 0.4); }
+        .pq-card-compact:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
         /* In the cockpit rail the inputs card collapses to a single column
            and drops its centered max-width so it fits the 340px sticky rail. */
         .cockpit-rail .pq-input-cols { grid-template-columns: 1fr; }
@@ -631,7 +631,7 @@ export function PreQualPage() {
           right: 0,
           width: 180,
           height: "100%",
-          background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
+          background: "radial-gradient(circle at top right, rgba(207, 51, 56, 0.08) 0%, transparent 60%)",
           pointerEvents: "none",
         }} />
 
@@ -644,7 +644,7 @@ export function PreQualPage() {
                 width: 6, height: 6, borderRadius: "50%",
                 background: P.goldLight,
                 display: "inline-block",
-                boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
+                boxShadow: "0 0 6px rgba(207, 51, 56, 0.6)",
                 animation: "rate-pulse 2s ease-in-out infinite",
               }} />
               {isRail ? `Live · ${rateSource}` : `Live rates loaded · ${rateSource}`}
@@ -789,7 +789,7 @@ export function PreQualPage() {
               <div key={i} className="content-card" onClick={() => setSelectedProgram(isSelected ? null : prog.name)} style={{
                 overflow: "hidden", position: "relative", cursor: "pointer",
                 border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
-                boxShadow: isSelected ? `0 0 0 4px rgba(184,134,11,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
+                boxShadow: isSelected ? `0 0 0 4px rgba(207,51,56,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
                 transform: isSelected ? "translateY(-2px)" : "translateY(0)",
                 transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
               }}>

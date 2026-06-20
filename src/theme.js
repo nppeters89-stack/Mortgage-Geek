@@ -7,7 +7,6 @@ export const P = {
   cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB",
   warmGray: "#6E7176", warmGrayLight: "#9A9DA2",
   white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",
-  siennaDark: "#6F3A1F",
   text: "#16171A", textLight: "#5E6166",
   // Equation-only palette — scoped to DTIDeepDive's stacked-fraction render.
   // Housing uses prog.color; these apply to debts and income only.

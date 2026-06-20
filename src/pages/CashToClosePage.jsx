@@ -633,7 +633,7 @@ export function CashToClosePage() {
             <div style={{
               border: `1.5px solid ${P.gold}`,
               borderRadius: 8,
-              background: "linear-gradient(135deg, rgba(184, 134, 11, 0.04) 0%, rgba(212, 168, 67, 0.06) 100%)",
+              background: "linear-gradient(135deg, rgba(207, 51, 56, 0.04) 0%, rgba(207, 51, 56, 0.06) 100%)",
               padding: "8px 12px 10px",
               position: "relative",
             }}>
@@ -805,7 +805,7 @@ export function CashToClosePage() {
             <Row label="Government & Recording Subtotal" val={fmt(transferTax + mortgageTax)} subtotal />
             <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{transferTaxNote}</p>
 
-            <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(184,134,11,0.06)", borderRadius: 10, border: `1px solid rgba(184,134,11,0.15)` }}>
+            <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(207,51,56,0.06)", borderRadius: 10, border: `1px solid rgba(207,51,56,0.15)` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Prepaid Items</h3>
               <Row label="12 Months Homeowner's Insurance" val={fmt(insurancePrepaid)} />
               <Row label={`Daily Interest (${daysRemaining} days × ${fmt(dailyInterest)})`} val={fmt(prepaidInterest)} />

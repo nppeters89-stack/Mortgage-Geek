@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense } from "react";
+import { P } from "./theme";
 import { WelcomeToast } from "./components/WelcomeToast";
 import { SiteFooter } from "./components/SiteFooter";
 
@@ -94,10 +95,10 @@ export default function MortgageLandingPage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#FAF7F2",
+          background: P.cream,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "14px",
-          color: "#6B6358",
+          color: P.warmGray,
           letterSpacing: "0.5px"
         }}>
           Loading…

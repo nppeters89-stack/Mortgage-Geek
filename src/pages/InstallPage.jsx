@@ -118,7 +118,7 @@ export function InstallPage() {
         )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          Questions? Call Nick at <a href="tel:+16156560737" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>(615) 656-0737</a>. No account needed — just tap the icon.
+          Questions? Call Nick at <a href="tel:+16156560737" style={{ color: P.textLight, textDecoration: "underline" }}>(615) 656-0737</a>. No account needed — just tap the icon.
         </p>
       </div>
     </main>

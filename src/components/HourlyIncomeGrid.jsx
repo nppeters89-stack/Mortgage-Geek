@@ -128,9 +128,9 @@ export function HourlyIncomeGrid() {
         }
         .hig-table tbody tr.hig-row:nth-child(odd)  { background: ${P.white}; }
         .hig-table tbody tr.hig-row:nth-child(even) { background: ${P.cream}; }
-        .hig-table tbody tr.hig-row:hover { background: rgba(184, 134, 11, 0.06); }
+        .hig-table tbody tr.hig-row:hover { background: rgba(207, 51, 56, 0.06); }
         .hig-table tbody tr.hig-row.active {
-          background: rgba(184, 134, 11, 0.10);
+          background: rgba(207, 51, 56, 0.10);
           border-left: 3px solid ${P.gold};
         }
         .hig-table tbody tr.hig-row:focus-visible { outline: 2px solid ${P.navy}; outline-offset: -2px; }
@@ -186,7 +186,7 @@ export function HourlyIncomeGrid() {
         }
         .hig-panel-cell {
           background: rgba(250, 247, 242, 0.05);
-          border: 1px solid rgba(212, 168, 67, 0.25);
+          border: 1px solid rgba(207, 51, 56, 0.25);
           border-radius: 6px;
           padding: 14px;
         }

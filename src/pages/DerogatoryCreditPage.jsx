@@ -133,7 +133,7 @@ export function DerogatoryCreditPage() {
           </p>
         </div>
 
-        <div style={{ background: "rgba(184, 134, 11, 0.06)", border: `1px solid rgba(184, 134, 11, 0.25)`, borderRadius: 8, padding: "12px 16px", marginBottom: 32, display: "flex", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ background: "rgba(207, 51, 56, 0.06)", border: `1px solid rgba(207, 51, 56, 0.25)`, borderRadius: 8, padding: "12px 16px", marginBottom: 32, display: "flex", alignItems: "flex-start", gap: 10 }}>
           <span style={{ fontSize: 14, flexShrink: 0 }}>⚠️</span>
           <p style={{ fontSize: 12, color: P.warmGray, lineHeight: 1.6, margin: 0 }}>
             This reference reflects published agency guidelines as of the verification date above. Individual lenders often apply stricter "overlays" on top of these baselines. Always verify against the current agency handbook and confirm with your loan officer before making decisions based on this information.
