@@ -307,7 +307,7 @@ export function ResidencyEligibilityGrid() {
           text-align: left;
           cursor: pointer;
         }
-        .reg-detail-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
+        .reg-detail-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
         .reg-detail-title {
           flex: 1;
           font-size: 16px;

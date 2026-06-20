@@ -135,7 +135,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           letterSpacing: "0.22em",
           fontWeight: 500,
           textTransform: "uppercase",
-          color: P.goldLight,
+          color: "#F9F1F1", /* out-of-scope: Geek Log export card, frozen */
           display: "inline-flex",
           alignItems: "center",
         }}>

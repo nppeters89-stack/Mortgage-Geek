@@ -134,7 +134,7 @@ export function DTICompFactorsGrid() {
         }
         .dti-row-btn:first-of-type { border-top: none; }
         .dti-row-btn:hover { background: rgba(255, 255, 255, 0.03); }
-        .dti-row-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
+        .dti-row-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
         .dti-row-btn-open {
           background: rgba(255, 255, 255, 0.04) !important;
           border-left-color: ${P.gold} !important;

@@ -373,7 +373,7 @@ export function StackedTierCardsBranded({ plainMode = true, density = "regular" 
     >
       <style>{`
         .stcb-row-btn:focus-visible {
-          outline: 2px solid ${P.goldLight};
+          outline: 2px solid ${P.gold};
           outline-offset: -2px;
         }
         @media (max-width: 600px) {

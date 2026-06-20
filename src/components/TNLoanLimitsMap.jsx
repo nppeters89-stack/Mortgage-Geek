@@ -110,7 +110,7 @@ const MAP_CSS = `
   .tnmap-tt-title {
     font-family: ${F.display};
     font-size: 18px;
-    color: ${P.goldLight};
+    color: #F9F1F1; /* out-of-scope: frozen until its own phase */
     font-weight: 400;
     margin-bottom: 2px;
   }
@@ -140,7 +140,7 @@ const MAP_CSS = `
     font-size: 13px;
   }
   .tnmap-tt-value.cap {
-    color: ${P.goldLight};
+    color: #F9F1F1; /* out-of-scope: frozen until its own phase */
     font-weight: 700;
     font-size: 14px;
   }

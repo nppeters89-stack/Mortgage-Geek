@@ -84,7 +84,7 @@ export function ARMTermsGlossary() {
           min-height: 44px;
         }
         .armg-tab:hover { background: rgba(255, 255, 255, 0.1); }
-        .armg-tab:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+        .armg-tab:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
         .armg-tab-active {
           background: ${P.gold} !important;
           color: ${P.navyDark} !important;
