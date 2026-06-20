@@ -1,89 +1,71 @@
-# Mortgage Geek — CLAUDE.md
+# CLAUDE.md — Mortgage Geek (mortgagegeek.ai)
 
-## Overview
+Standing instructions for Claude Code. Read this fully at the start of every session. This is
+the always-loaded essentials; the fuller reference is listed at the bottom.
 
-Single-page React app (Vite) deployed on Vercel. No router library — routing is manual via `window.location.pathname`. The UI is split across `src/pages/` (~25 page components, lazy-loaded) and `src/components/` (~70 components); `src/App.jsx` is a thin (~140-line) router shell that maps the path to a lazy-loaded page. Design tokens live in `src/theme.js`; shared data in `src/data/` and helpers in `src/utils/`.
+## What this is
+The Mortgage Geek: a mortgage-education and lead-capture site for first-time homebuyers.
+React + Vite, deployed on Vercel. Owner: Nick Peters, VP of Mortgage Lending at Rate
+(Guaranteed Rate, Inc.), NMLS #1119524.
 
-## Color Palette (`P`)
+## Architecture (current — do not assume otherwise)
+The app is modular. Routing in src/App.jsx (lazy-loaded routes), pages in src/pages/*, shared
+UI in src/components/*, data in src/data/*, helpers in src/utils/*. It is NOT a single
+monolithic App.jsx; any note that says so is stale. Design tokens live in src/theme.js: the P
+color object, F fonts, PROGRAM_COLORS, the semantic tokens (P.success / P.caution / P.danger),
+and globalCSS.
 
-Rate brand palette (Phase 2 refresh — charcoal/Arrow-red/Rate-cream/grey):
+## Non-negotiable conventions
+- Named exports only. The one default export is the App.jsx lazy-load adapter.
+- No barrel/index files. Explicit import paths. Per-file React hook imports.
+- All colors come from theme.js tokens. No hardcoded hex in components.
+- TOKEN NAMES ARE HISTORICAL, NOT SEMANTIC. After the Rate refresh, values were swapped but
+  names kept. P.gold is Arrow Red #CF3338, P.navy is charcoal, P.sage is grey, P.goldLight is
+  a light red. Pick a token by the VISUAL RESULT you want, never by its old color name. Status
+  colors use P.success / P.caution / P.danger. The four loan programs use PROGRAM_COLORS. Keep
+  these three color systems independent.
+- New routes are lazy-loaded via the App.jsx adapter pattern.
+- Public pages need a <SEOHead> (unique title, description, canonical, schema). Private/gated
+  routes follow the separate rulebook in engineering_standards.md.
+- Images need explicit width and height (CLS).
+- No new npm dependencies without explicit approval.
 
-```js
-export const P = {
-  navy: "#24272A", navyDark: "#131416", navyLight: "#3C3D40",   // dark surfaces (Rate Black family)
-  gold: "#CF3338", goldLight: "#F9F1F1", goldMuted: "#AE2A2E",  // Arrow Red — accent/CTA only
-  cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB", // backgrounds / panels / cards
-  warmGray: "#6E7176", warmGrayLight: "#9A9DA2",                // greys (warmGrayLight is on-dark only)
-  white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",       // sage retired to grey
-  siennaDark: "#6F3A1F",
-  text: "#16171A", textLight: "#5E6166",                        // ink + secondary text
-  equationDebts: "#9A2B2B", equationIncome: "#2E9D6B",          // scoped to DTIDeepDive only
-};
-```
+## Content voice (any user-visible text)
+- No em-dashes. Use periods, colons, or parentheses.
+- No formulaic AI phrasing ("it's not just X it's Y", "in today's world", "unlock",
+  "leverage", "dive deep"). Write plainly, like an experienced loan officer talking.
 
-Note: token NAMES are legacy (navy/gold/sage) but their VALUES are now Rate's palette — `navy` is charcoal, `gold` is Arrow Red, `sage` is grey. Renaming is deliberately deferred.
+## Workflow discipline (every task)
+- Inventory first. Read the relevant files and report what you find BEFORE editing. Surface
+  decisions; do not assume.
+- One workstream per session. One commit per logical change, descriptive message.
+- Verify before declaring done: `npx vite build` (zero errors), `npm run dev` (clean, no red
+  console errors), and a smoke test of the affected routes.
+- On any failure: `git checkout .` and retry. Never patch forward.
+- Work on a branch and push a Vercel preview. Never merge to main without explicit review.
 
-Program-specific colors: `PROGRAM_COLORS` holds its own hardcoded hex literals, **decoupled from `P`** — `Conventional` #1B3A4B, `FHA` #8B6914, `VA` #5A7A6E, `USDA` #A0522D. These intentionally retain the pre-refresh navy/gold/sage/sienna so the comparison grids and TN map are unaffected by `P` swaps; recoloring them is a later phase.
+## TRIPWIRE — when to STOP and ask instead of proceeding
+You may run multi-step or batched work autonomously. But STOP, report, and wait if you hit any
+of these, where a wrong call is expensive:
+1. A WCAG AA contrast failure you cannot resolve with an obvious token choice.
+2. A regulated mortgage-disclosure question, or any use of a Rate trademark or product mark
+   (PowerBid, Same Day Mortgage, the Rate logo) whose exact treatment or wording is not already
+   locked in the task.
+3. An unexpected cross-dependency: a change that would touch something outside the task's stated
+   scope.
+4. Anything that would put a wrong or irreversible thing live (a bad recolor across many
+   surfaces, a disclosure error, a merge to main).
+Outside these, proceed on your best judgment and capture the decisions in your summary for human
+review on the preview.
 
-## Fonts (`F`)
+## Project reference docs (consult as relevant)
+- engineering_standards.md — full conventions, SEO requirements, private-route rulebook.
 
-```js
-const F = {
-  display: "'Instrument Serif', Georgia, serif",
-  body: "'DM Sans', -apple-system, sans-serif",
-};
-```
-
-## Brand Info
-
-- **Loan Officer:** Nick Peters
-- **NMLS#:** 1119524
-- **Phone:** (615) 656-0737 (`tel:+16156560737`)
-- **SMS body patterns:**
-  - `"Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages."`
-  - `"Hi%20Nick%2C%20I%20found%20your%20site%20and%20wanted%20to%20connect."`
-- **Location:** Nashville, TN — Licensed since 2014
-
-## Routing
-
-Manual path-based routing in `MortgageLandingPage` (the default export):
-
-| Path | Page Component |
-|------|---------------|
-| `/` | `MainSite` |
-| `/calculator` | `CalculatorPage` |
-| `/prequal` | `PreQualPage` |
-| `/about` | `AboutPage` |
-| `/compare` | `ComparePage` |
-| `/cash-to-close` | `CashToClosePage` |
-| `/install` | `InstallPage` |
-
-Within `MainSite`, sections are rendered in order and linked via `id` attributes: `hero`, `getting-started`, `process`, `types`, `costs`, `profile`, `structure`, `rates`, `checklist`, `next-steps`. Navigation uses `navTarget` state with `{ section, step }` shape, and hash-based deep linking.
-
-## PWA Setup
-
-- `manifest.json` at project root — app name "The Mortgage Geek", standalone display, portrait orientation
-- Icons: `/icon-192.png`, `/icon-512.png` (both `any` and `maskable`)
-- Shortcuts defined for Calculator, Pre-Qual, Cash to Close
-- `WelcomeToast` component shows a one-time toast on first PWA launch (localStorage key `mg_welcomed`)
-- `InstallPage` provides platform-specific install instructions; detects iOS-not-Safari to warn about PWA limitations
-
-## Custom Hooks
-
-### `useIsMobile(breakpoint = 820)`
-Returns `true` when viewport width <= breakpoint. Listens to `matchMedia` changes.
-
-### `useIsStandalone()`
-Returns `true` when running as installed PWA. Checks both W3C `display-mode: standalone` media query and iOS `navigator.standalone`.
-
-## Utilities
-
-- `fmt(n)` — formats number as USD currency with no decimals
-- `generateAmortData(principal, annualRate, years)` — produces yearly amortization data for charts
-
-## Key Patterns
-
-- All styling is inline (no CSS modules/Tailwind) using `P` and `F` constants
-- Components receive `navTarget` prop for deep-link navigation into specific steps
-- Charts use `recharts` (AreaChart)
-- Single file architecture — all components colocated in `src/App.jsx`
+## Build and environment
+- Scripts: `npm run dev` (Vite dev server), `npm run build` (production build),
+  `npm run preview` (serve the build locally).
+- Geek Log KV (Upstash Redis), consumed by api/geeklog/_redis.js: `GEEKLOG_KEY` (API auth),
+  `GEEKLOG_KV_REST_API_URL`, `GEEKLOG_KV_REST_API_TOKEN`. Set in the Vercel project env
+  (and .env.local for local dev).
+- Vercel: deployed on Vercel; vercel.json holds the SPA rewrites (routes → /) and cache
+  headers for service-worker.js and manifest.json. Branch pushes get preview deploys.
