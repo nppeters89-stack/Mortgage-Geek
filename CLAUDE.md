@@ -2,22 +2,28 @@
 
 ## Overview
 
-Single-page React app (Vite) deployed on Vercel. All UI lives in one large file: `src/App.jsx` (~4700 lines). No router library — routing is manual via `window.location.pathname`.
+Single-page React app (Vite) deployed on Vercel. No router library — routing is manual via `window.location.pathname`. The UI is split across `src/pages/` (~25 page components, lazy-loaded) and `src/components/` (~70 components); `src/App.jsx` is a thin (~140-line) router shell that maps the path to a lazy-loaded page. Design tokens live in `src/theme.js`; shared data in `src/data/` and helpers in `src/utils/`.
 
 ## Color Palette (`P`)
 
+Rate brand palette (Phase 2 refresh — charcoal/Arrow-red/Rate-cream/grey):
+
 ```js
-const P = {
-  navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
-  gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#FAF7F2", creamDark: "#F0EBE3",
-  warmGray: "#6B6358", warmGrayLight: "#9B9488",
-  white: "#FFFFFF", sage: "#5A7A6E",
-  text: "#2C2825", textLight: "#5C5650",
+export const P = {
+  navy: "#24272A", navyDark: "#131416", navyLight: "#3C3D40",   // dark surfaces (Rate Black family)
+  gold: "#CF3338", goldLight: "#F9F1F1", goldMuted: "#AE2A2E",  // Arrow Red — accent/CTA only
+  cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB", // backgrounds / panels / cards
+  warmGray: "#6E7176", warmGrayLight: "#9A9DA2",                // greys (warmGrayLight is on-dark only)
+  white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",       // sage retired to grey
+  siennaDark: "#6F3A1F",
+  text: "#16171A", textLight: "#5E6166",                        // ink + secondary text
+  equationDebts: "#9A2B2B", equationIncome: "#2E9D6B",          // scoped to DTIDeepDive only
 };
 ```
 
-Program-specific colors: `PROGRAM_COLORS` maps `Conventional` (navy), `FHA` (goldMuted), `VA` (sage).
+Note: token NAMES are legacy (navy/gold/sage) but their VALUES are now Rate's palette — `navy` is charcoal, `gold` is Arrow Red, `sage` is grey. Renaming is deliberately deferred.
+
+Program-specific colors: `PROGRAM_COLORS` holds its own hardcoded hex literals, **decoupled from `P`** — `Conventional` #1B3A4B, `FHA` #8B6914, `VA` #5A7A6E, `USDA` #A0522D. These intentionally retain the pre-refresh navy/gold/sage/sienna so the comparison grids and TN map are unaffected by `P` swaps; recoloring them is a later phase.
 
 ## Fonts (`F`)
 
