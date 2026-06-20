@@ -2,13 +2,13 @@
 // When updating brand colors or typography, update here — every component will reflect the change.
 
 export const P = {
-  navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
-  gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#FAF7F2", creamDark: "#F0EBE3",
-  warmGray: "#6B6358", warmGrayLight: "#6F6860",
-  white: "#FFFFFF", sage: "#5A7A6E", sageDark: "#3F5A4F",
+  navy: "#24272A", navyDark: "#131416", navyLight: "#3C3D40",
+  gold: "#CF3338", goldLight: "#F9F1F1", goldMuted: "#AE2A2E",
+  cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB",
+  warmGray: "#6E7176", warmGrayLight: "#9A9DA2",
+  white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",
   siennaDark: "#6F3A1F",
-  text: "#2C2825", textLight: "#5C5650",
+  text: "#16171A", textLight: "#5E6166",
   // Equation-only palette — scoped to DTIDeepDive's stacked-fraction render.
   // Housing uses prog.color; these apply to debts and income only.
   equationDebts: "#9A2B2B",
@@ -31,8 +31,9 @@ export const F = {
 export const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { background: #FAF7F2; overscroll-behavior-y: none; }
-  body { background: #FAF7F2; margin: 0; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+  ::selection { background: #CF3338; color: #fff; }
+  html { background: #F6F5F3; overscroll-behavior-y: none; }
+  body { background: #F6F5F3; margin: 0; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
   #root { min-height: 100vh; min-height: 100dvh; }
   html { scroll-behavior: auto; }
 
@@ -65,7 +66,7 @@ export const globalCSS = `
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; --side-offset: 280px; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #131416; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
@@ -77,22 +78,22 @@ export const globalCSS = `
 
   .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #6F6860; cursor: pointer; transition: all 0.15s; }
-  .tab-btn:hover { border-color: #1B3A4B; color: #1B3A4B; }
-  .tab-btn-active { background: #1B3A4B !important; color: #fff !important; border-color: #1B3A4B !important; }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #E0DDD6; background: #fff; color: #9A9DA2; cursor: pointer; transition: all 0.15s; }
+  .tab-btn:hover { border-color: #24272A; color: #24272A; }
+  .tab-btn-active { background: #24272A !important; color: #fff !important; border-color: #24272A !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B6358; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6E7176; cursor: pointer; text-align: left; transition: all 0.15s; }
   .process-step:hover { background: rgba(255,255,255,0.6); }
-  .process-step-active { background: #fff !important; color: #2C2825 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #6F6860; min-width: 28px; line-height: 1.3; }
-  .process-num-active { color: #B8860B !important; }
+  .process-step-active { background: #fff !important; color: #16171A !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #9A9DA2; min-width: 28px; line-height: 1.3; }
+  .process-num-active { color: #CF3338 !important; }
   .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1B3A4B; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #FAF7F2; }
-  .costs-cat-head-active { background: #1B3A4B !important; color: #fff !important; border-radius: 12px 12px 0 0; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #24272A; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head:hover { background: #F6F5F3; }
+  .costs-cat-head-active { background: #24272A !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
   .calc-grid > *:first-child { flex: 1 1 300px; }
@@ -114,16 +115,16 @@ export const globalCSS = `
   .app-root { background: transparent; }
 
   @media (max-width: 900px) {
-    html, body { background: #0F2530 !important; }
+    html, body { background: #131416 !important; }
     body { overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
     .sidebar { transform: translateZ(0); padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; left: 0; width: 280px; height: 100vh; height: 100dvh; bottom: auto; }
-    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
+    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #131416; z-index: -1; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
     .sidebar-overlay { display: none; }
     .sidebar-overlay-visible { display: none; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #131416; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
     /* will-change: transform is permanent on mobile so the compositor layer
        exists BEFORE the sidebar-open transition starts. On iOS, applying
@@ -138,7 +139,7 @@ export const globalCSS = `
        snap back on release. The header is position:fixed so iOS native
        gestures don't affect it — hence it was the only element that moved
        correctly before this fix. */
-    .main-content { margin-left: 0 !important; --side-offset: 0px; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
+    .main-content { margin-left: 0 !important; --side-offset: 0px; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #F6F5F3; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
     .main-content::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
     .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
     .main-content-open::after { pointer-events: auto; }
