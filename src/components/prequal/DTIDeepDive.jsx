@@ -231,17 +231,13 @@ function DTISection({ variant, prog, ratio, cap, binding, grossMonthlyIncome, mo
   );
 }
 
-// Map prog.color → text color for the housing key-pill so the pill text
-// stays legible against the withAlpha-tinted background. Falls back to
-// P.text for any unknown color.
+// Map prog.color → text color for the housing key-pill. The pill background is
+// a ~10% withAlpha tint of the program color, so the full program color reads
+// cleanly on top (each new program color clears AA on cream: ≥4.84:1) and stays
+// coordinated. Falls back to P.text for any unknown color.
 function housingPillTextColor(progColor) {
-  switch (progColor) {
-    case PROGRAM_COLORS.Conventional: return P.navy;
-    case PROGRAM_COLORS.FHA: return P.goldMuted;
-    case PROGRAM_COLORS.VA: return P.sage;
-    case PROGRAM_COLORS.USDA: return P.siennaDark;
-    default: return P.text;
-  }
+  const programColors = [PROGRAM_COLORS.Conventional, PROGRAM_COLORS.FHA, PROGRAM_COLORS.VA, PROGRAM_COLORS.USDA];
+  return programColors.includes(progColor) ? progColor : P.text;
 }
 
 /* ----------------- the bar component ----------------- */

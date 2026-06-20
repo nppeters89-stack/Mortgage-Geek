@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
-import { fmt, pctCap } from "../utils/format";
+import { fmt, pctCap, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { useIsCockpit } from "../utils/hooks";
 import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
@@ -662,9 +662,9 @@ export function PreQualPage() {
         {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
         <div style={{ display: "flex", flexDirection: "column", gap: pillGap, position: "relative", zIndex: 1 }}>
           {[
-            { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy, market: term === 15 ? convRate15Api : convRate30Api },
-            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914", market: fhaRateApi },
-            { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage, market: vaRateApi },
+            { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+            { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
             { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
           ].map((p) => (
             <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
@@ -816,7 +816,7 @@ export function PreQualPage() {
                 <div style={{ padding: "16px 20px" }}>
                   {prog.name === "USDA" && (
                     <div style={{
-                      background: "rgba(160, 82, 45, 0.08)",
+                      background: withAlpha(PROGRAM_COLORS.USDA, 0.08),
                       borderLeft: `3px solid ${PROGRAM_COLORS.USDA}`,
                       padding: "10px 14px",
                       marginBottom: 14,

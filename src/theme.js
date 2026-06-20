@@ -17,10 +17,10 @@ export const P = {
 
 // Single source of truth for program colors — used in calculator, prequal, and comparison
 export const PROGRAM_COLORS = {
-  Conventional: "#1B3A4B", // navy
-  FHA: "#8B6914",          // goldMuted (darker for better white text contrast)
-  VA: "#5A7A6E",           // sage
-  USDA: "#A0522D",         // sienna — distinct from navy/gold/sage, evokes earth/rural
+  Conventional: "#295994", // Rate Blue
+  FHA: "#896619",          // Rate Gold, darkened for AA (white text 5.28:1, on-cream 4.84:1)
+  VA: "#5E2224",           // Rate Burgundy
+  USDA: "#226257",         // Rate Green
 };
 
 export const F = {

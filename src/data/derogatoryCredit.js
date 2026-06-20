@@ -1,12 +1,17 @@
 // Normalized data for the Derogatory Credit Wait Periods deep dive.
 // Drives the WaitPeriodRows + Ch13Card components.
+import { PROGRAM_COLORS } from "../theme";
 
+// Ported to the Rate secondary palette (Phase 4a). Fannie/Freddie are both
+// Conventional, so Fannie takes Rate Blue and Freddie a lighter sibling shade
+// (#3D6FA8, 4.77:1 on cream) to keep the two agencies visually distinct — these
+// values render as 26px display text and as bar fills.
 export const DEROG_PROGRAM_COLORS = {
-  Fannie: "#1B3A4B",
-  Freddie: "#2C5468",
-  FHA: "#8B6914",
-  VA: "#5A7A6E",
-  USDA: "#B8860B",
+  Fannie: PROGRAM_COLORS.Conventional, // Rate Blue
+  Freddie: "#3D6FA8",                  // lighter Rate Blue (Conventional sibling)
+  FHA: PROGRAM_COLORS.FHA,             // Rate Gold
+  VA: PROGRAM_COLORS.VA,               // Rate Burgundy
+  USDA: PROGRAM_COLORS.USDA,           // Rate Green
 };
 
 export const PROGRAM_META = {
