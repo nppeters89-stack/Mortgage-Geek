@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from "../data/taxRates";
-import { fmt } from "../utils/format";
+import { fmt, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { CashToCloseIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -812,7 +812,7 @@ export function CashToClosePage() {
               <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} subtotal />
             </div>
 
-            <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
+            <div style={{ marginTop: 14, padding: "16px 18px", background: withAlpha(P.success, 0.07), borderRadius: 10, border: `1px solid ${withAlpha(P.success, 0.18)}` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
 
               {/* Escrow Waiver — Conv only. FHA/VA always require escrows. */}
@@ -846,7 +846,7 @@ export function CashToClosePage() {
 
               {escrowsWaived ? (
                 <>
-                  <p style={{ fontSize: 12, color: P.sageDark, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
+                  <p style={{ fontSize: 12, color: P.success, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
                   <Row label="Reserves Subtotal" val={fmt(0)} subtotal />
                 </>
               ) : (

@@ -874,7 +874,7 @@ export function PreQualPage() {
                       <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: r.dim ? P.creamDark : P.warmGray, borderBottom: `1px solid ${P.cream}`, opacity: r.dim ? 0.6 : 1 }}>
                         <span>{r.label}</span>
                         <div style={{ textAlign: "right" }}>
-                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.warn ? "#C0392B" : r.bold ? prog.color : r.dim ? P.warmGrayLight : P.text }}>{r.val}</span>
+                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.warn ? P.danger : r.bold ? prog.color : r.dim ? P.warmGrayLight : P.text }}>{r.val}</span>
                           {r.sub && <span style={{ display: "block", fontSize: 9, color: P.warmGrayLight }}>{r.sub}</span>}
                         </div>
                       </div>

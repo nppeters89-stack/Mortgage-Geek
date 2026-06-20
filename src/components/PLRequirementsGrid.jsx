@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const ROWS = [
   {
@@ -32,8 +33,8 @@ const ROWS = [
 ];
 
 const VERDICT_VISUALS = {
-  yes: { color: P.sageDark, accent: P.sage, bg: "rgba(90, 122, 110, 0.10)" },
-  no:  { color: P.warmGray, accent: P.warmGrayLight, bg: "rgba(107, 99, 88, 0.06)" },
+  yes: { color: P.success, accent: P.success, bg: withAlpha(P.success, 0.10) },
+  no:  { color: P.warmGray, accent: P.warmGrayLight, bg: withAlpha(P.warmGray, 0.06) },
 };
 
 export function PLRequirementsGrid() {

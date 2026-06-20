@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const PROGRAMS = [
   { key: "FNMA", label: "Conv (FNMA)" },
@@ -33,15 +34,15 @@ const DONORS = [
 
 const YES = {
   symbol: "✓",
-  bg: "rgba(90, 122, 110, 0.15)",
-  border: "rgba(90, 122, 110, 0.30)",
-  color: P.sageDark,
+  bg: withAlpha(P.success, 0.15),
+  border: withAlpha(P.success, 0.30),
+  color: P.success,
 };
 
 const NO = {
   symbol: "✗",
-  bg: "rgba(107, 99, 88, 0.10)",
-  border: "rgba(107, 99, 88, 0.22)",
+  bg: withAlpha(P.warmGray, 0.10),
+  border: withAlpha(P.warmGray, 0.22),
   color: P.warmGray,
 };
 

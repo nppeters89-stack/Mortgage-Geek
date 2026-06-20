@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const ROWS = [
   {
@@ -38,8 +39,6 @@ const ROWS = [
     gusOutcome: "Ineligible",
   },
 ];
-
-const WARN_RED = "#B0322B";
 
 export function USDARatioThresholdGrid() {
   const captionId = "usdartg-caption";
@@ -98,9 +97,9 @@ export function USDARatioThresholdGrid() {
         }
         .usdartg-table tbody tr:last-child td { border-bottom: none; }
 
-        .usdartg-row-standard td { background: rgba(90, 122, 110, 0.10); }
-        .usdartg-row-waiver td { background: rgba(184, 134, 11, 0.09); }
-        .usdartg-row-ineligible td { background: rgba(176, 50, 43, 0.09); }
+        .usdartg-row-standard td { background: ${withAlpha(P.success, 0.10)}; }
+        .usdartg-row-waiver td { background: ${withAlpha(P.caution, 0.09)}; }
+        .usdartg-row-ineligible td { background: ${withAlpha(P.danger, 0.09)}; }
 
         .usdartg-range {
           font-weight: 600;
@@ -117,9 +116,9 @@ export function USDARatioThresholdGrid() {
           letter-spacing: 0.3px;
           line-height: 1.3;
         }
-        .usdartg-status-standard { color: ${P.sageDark}; }
-        .usdartg-status-waiver { color: ${P.goldMuted}; }
-        .usdartg-status-ineligible { color: ${WARN_RED}; }
+        .usdartg-status-standard { color: ${P.success}; }
+        .usdartg-status-waiver { color: ${P.caution}; }
+        .usdartg-status-ineligible { color: ${P.danger}; }
         .usdartg-status-icon {
           flex-shrink: 0;
           font-size: 14px;
@@ -168,9 +167,9 @@ export function USDARatioThresholdGrid() {
             padding: 14px 16px;
             margin-bottom: 12px;
           }
-          .usdartg-card-standard { border-left: 3px solid ${P.sage}; background: rgba(90, 122, 110, 0.08); }
-          .usdartg-card-waiver { border-left: 3px solid ${P.gold}; background: rgba(184, 134, 11, 0.08); }
-          .usdartg-card-ineligible { border-left: 3px solid ${WARN_RED}; background: rgba(176, 50, 43, 0.08); }
+          .usdartg-card-standard { border-left: 3px solid ${P.success}; background: ${withAlpha(P.success, 0.08)}; }
+          .usdartg-card-waiver { border-left: 3px solid ${P.caution}; background: ${withAlpha(P.caution, 0.08)}; }
+          .usdartg-card-ineligible { border-left: 3px solid ${P.danger}; background: ${withAlpha(P.danger, 0.08)}; }
           .usdartg-card-range {
             display: block;
             font-family: ${F.body};

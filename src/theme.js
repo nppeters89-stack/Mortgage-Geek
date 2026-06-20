@@ -8,10 +8,16 @@ export const P = {
   warmGray: "#6E7176", warmGrayLight: "#9A9DA2",
   white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",
   text: "#16171A", textLight: "#5E6166",
+  // Semantic status colors (meaning-carrying) — harmonized to the Rate palette,
+  // AA on cream, distinct from brand red (#CF3338). Tints derive from these via
+  // withAlpha() at call sites so the system has one source of truth.
+  success: "#3F5A4F", // eligible / pass / savings (same value as sageDark)
+  caution: "#9C5811", // conditional / review / "you pay" — burnt amber, 5.05:1
+  danger:  "#B0322B", // ineligible / fail / error — distinct from brand red
   // Equation-only palette — scoped to DTIDeepDive's stacked-fraction render.
   // Housing uses prog.color; these apply to debts and income only.
   equationDebts: "#9A2B2B",
-  equationIncome: "#2E9D6B",
+  equationIncome: "#2E7D5B",
 };
 
 // Single source of truth for program colors — used in calculator, prequal, and comparison

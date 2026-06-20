@@ -1,3 +1,5 @@
+import { P } from "../theme";
+
 export const PRE_CONTRACT_STEPS = [
   { num: "01", title: "Pre-Qualification", short: "Know your numbers before you shop.", detail: "Your financial snapshot. A lender reviews your income, assets, and credit to estimate what you can afford. Fast, usually free, and gets you a realistic price range before house-hunting. Not a guarantee of approval — just a starting point.", tip: "Get pre-qualified before you fall in love with a house you can't afford.", timeframe: "Same day" },
   { num: "02", title: "Pre-Approval", short: "The green light sellers want to see.", detail: "Deeper than pre-qualification. Your lender verifies income, pulls credit, and reviews your financials. You get a conditional commitment letter stating how much you're approved to borrow. In competitive markets, sellers won't consider offers without one.", tip: "A pre-approval letter typically expires after 60–90 days. Time your application wisely.", timeframe: "1–2 business days" },
@@ -66,7 +68,7 @@ export const TRID_BUCKETS = [
     category: "Zero Tolerance",
     limit: "0%",
     limitNote: "No increase allowed",
-    color: "#C0392B",
+    color: P.danger,
     examples: "Origination fees, discount points, transfer taxes, appraisal fees, credit report fees, and any fee paid to the lender or its affiliates",
     cure: "Any increase in amount — the lender must reimburse the borrower for the full difference",
     detail: "Fees in this category cannot increase from the Loan Estimate to the Closing Disclosure. Period. The logic is simple: lenders control these fees or have direct access to exact amounts, so there's no excuse for underestimating them. If the actual fee exceeds the estimate, the lender pays the difference back to you — this is called a \"fee cure.\" The only exception is if a valid changed circumstance occurs (like switching loan products or a property change) that triggers a revised Loan Estimate.",
@@ -75,7 +77,7 @@ export const TRID_BUCKETS = [
     category: "10% Cumulative Tolerance",
     limit: "10%",
     limitNote: "Aggregate increase",
-    color: "#D4A843",
+    color: P.caution,
     examples: "Third-party services selected from the lender's written list, title and settlement fees, and recording fees",
     cure: "Sum of these fees exceeds 10% of the original total — lender reimburses the overage",
     detail: "Unlike zero-tolerance fees (assessed individually), these are assessed as a group. The lender adds up all 10%-bucket fees on the Loan Estimate, then compares that total to what you actually pay at closing. If the actual total exceeds the estimate by more than 10%, the lender must cure the overage. For example, if your estimated 10%-bucket total is $2,000 and actual costs come in at $2,250 — that's a 12.5% increase, so the lender owes you $50 (the amount over the $2,200 threshold). Key detail: if you shop for a service and choose a provider not on the lender's written list, that fee shifts out of this bucket and into the unlimited category.",
@@ -84,7 +86,7 @@ export const TRID_BUCKETS = [
     category: "No Tolerance (Unlimited)",
     limit: "∞",
     limitNote: "Good faith only",
-    color: "#3F5A4F",
+    color: P.success,
     examples: "Prepaid interest, property insurance premiums, property taxes, HOA fees, and services where the borrower chose a provider not on the lender's list",
     cure: "None — as long as the original estimate was disclosed in good faith based on the best information available",
     detail: "These fees can increase by any amount without triggering a fee cure, provided the lender made the original estimate in good faith using the best information reasonably available at the time. The rationale: these are costs the lender doesn't control — insurance premiums are set by carriers, property taxes by municipalities, and prepaid interest depends on your closing date. If you shop for a service (like a home inspection) and pick a provider outside the lender's written list, that fee also moves here — giving you freedom to choose, but removing the lender's obligation to guarantee the price.",

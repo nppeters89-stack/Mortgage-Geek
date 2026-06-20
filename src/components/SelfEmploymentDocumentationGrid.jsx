@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const COLUMNS = [
   { key: "soleprop",    label: "Sole Prop",    sub: "Schedule C" },
@@ -35,30 +36,30 @@ const STATUS_VISUALS = {
   required: {
     icon: "✓",
     label: "Required",
-    color: P.sageDark,
-    bg: "rgba(90, 122, 110, 0.15)",
-    border: "rgba(90, 122, 110, 0.30)",
+    color: P.success,
+    bg: withAlpha(P.success, 0.15),
+    border: withAlpha(P.success, 0.30),
   },
   na: {
     icon: "—",
     label: "N/A",
     color: P.warmGray,
-    bg: "rgba(107, 99, 88, 0.08)",
-    border: "rgba(107, 99, 88, 0.20)",
+    bg: withAlpha(P.warmGray, 0.08),
+    border: withAlpha(P.warmGray, 0.20),
   },
   sometimes: {
     icon: "⚠",
     label: "Sometimes",
-    color: P.goldMuted,
-    bg: "rgba(184, 134, 11, 0.12)",
-    border: "rgba(184, 134, 11, 0.32)",
+    color: P.caution,
+    bg: withAlpha(P.caution, 0.12),
+    border: withAlpha(P.caution, 0.32),
   },
   no: {
     icon: "·",
     label: "No",
     color: P.warmGray,
     bg: P.white,
-    border: "rgba(107, 99, 88, 0.15)",
+    border: withAlpha(P.warmGray, 0.15),
   },
 };
 

@@ -76,13 +76,13 @@ export function PreApprovalChecklist() {
             </div>
           </div>
           <div style={{ height: 8, background: P.creamDark, borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${(checkedCount / totalItems) * 100}%`, background: checkedCount === totalItems ? P.sage : P.gold, borderRadius: 4, transition: "width 0.3s" }} />
+            <div style={{ height: "100%", width: `${(checkedCount / totalItems) * 100}%`, background: checkedCount === totalItems ? P.success : P.gold, borderRadius: 4, transition: "width 0.3s" }} />
           </div>
           {checkedCount > 0 && checkedCount < totalItems && (
             <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 6, textAlign: "center" }}>Your progress is saved automatically</p>
           )}
           {checkedCount === totalItems && (
-            <p style={{ fontSize: 12, color: P.sageDark, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
+            <p style={{ fontSize: 12, color: P.success, fontWeight: 600, marginTop: 8, textAlign: "center" }}>You're ready to apply! Reach out and let's get started.</p>
           )}
         </div>
 

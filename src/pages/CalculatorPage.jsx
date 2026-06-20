@@ -1164,7 +1164,7 @@ export function CalculatorPage() {
                     </button>
                   )}
                   {isSelected && saveToast && (
-                    <p style={{ fontSize: 12, marginTop: 8, fontWeight: 600, textAlign: "center", color: saveToast.type === "error" ? "#C0392B" : P.sageDark }}>{saveToast.msg}</p>
+                    <p style={{ fontSize: 12, marginTop: 8, fontWeight: 600, textAlign: "center", color: saveToast.type === "error" ? P.danger : P.success }}>{saveToast.msg}</p>
                   )}
                 </div>
               </div>
