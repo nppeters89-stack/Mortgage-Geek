@@ -19,7 +19,7 @@ export function AboutPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 800, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-              <span style={{ fontSize: 16, lineHeight: 1 }}>🤓</span>
+              <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={16} height={20} style={{ display: "block" }} />
             </div>
             <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
           </a>
