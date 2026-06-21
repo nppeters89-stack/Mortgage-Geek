@@ -242,7 +242,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 block lives at the top of the right column, above Branch
                 Office. */}
             <h2
-              aria-label="The Mortgage Geek"
+              aria-label="Mortgage Geek"
               style={{
                 fontFamily: F.display,
                 fontWeight: 400,
@@ -250,12 +250,14 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 color: P.navy,
                 margin: 0,
                 display: "flex",
-                alignItems: "baseline",
-                gap: 6,
+                alignItems: "center",
+                gap: fs(11, 9),
               }}
             >
-              <span>The Mortgage Geek</span>
-              <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={18} height={22} style={{ alignSelf: "center", display: "block" }} />
+              {/* Lock-up: MG house mark then wordmark. Mark height ~1.45x the
+                  wordmark size per the brand spec; "Geek" in Arrow Red on cream. */}
+              <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={fs(26, 21)} height={fs(32, 26)} style={{ display: "block", flexShrink: 0 }} />
+              <span>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
             </h2>
             <p
               style={{
