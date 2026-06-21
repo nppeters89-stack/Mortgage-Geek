@@ -5,6 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { Hero } from "../components/homepage/Hero";
 import { Page } from "../components/homepage/Page";
+import { Reviews } from "../components/homepage/Reviews";
 import { JourneyOverview } from "../components/homepage/JourneyOverview";
 import { PreContract } from "../components/homepage/PreContract";
 import { ActiveLoanProcess } from "../components/homepage/ActiveLoanProcess";
@@ -283,6 +284,7 @@ export function MainSite() {
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
         <Hero onNavigate={handleNavigate} />
         <Page>
+          <Reviews />
           <JourneyOverview />
           <PreContract navTarget={navTarget} />
           <ActiveLoanProcess navTarget={navTarget} />
