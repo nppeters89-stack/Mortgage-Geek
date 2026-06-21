@@ -78,7 +78,7 @@ export const globalCSS = `
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-  .hamburger { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+  .hamburger { background: none; border: none; color: #24272A; font-size: 22px; cursor: pointer; }
 
   .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
   .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
@@ -132,7 +132,7 @@ export const globalCSS = `
     .sidebar-dragging { transition: none !important; }
     .sidebar-overlay { display: none; }
     .sidebar-overlay-visible { display: none; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #131416; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #FFFFFF; border-bottom: 1px solid #E0DDD6; padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
     /* will-change: transform is permanent on mobile so the compositor layer
        exists BEFORE the sidebar-open transition starts. On iOS, applying
