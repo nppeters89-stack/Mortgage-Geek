@@ -251,25 +251,16 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 margin: 0,
                 display: "flex",
                 alignItems: "center",
-                gap: fs(11, 9),
+                gap: fs(9, 7),
               }}
             >
               {/* Lock-up: MG house mark then wordmark. Mark height ~1.45x the
                   wordmark size per the brand spec; "Geek" in Arrow Red on cream. */}
               <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={fs(26, 21)} height={fs(32, 26)} style={{ display: "block", flexShrink: 0 }} />
-              <span>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
+              {/* line-height:1 + translateY(0.1em) optically centers the serif
+                  caps on the mark, per the spec lock-up. */}
+              <span style={{ lineHeight: 1, transform: "translateY(0.1em)" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
             </h2>
-            <p
-              style={{
-                fontFamily: F.display,
-                fontStyle: "italic",
-                fontSize: fs(14, 12),
-                color: P.gold,
-                margin: "2px 0 0",
-              }}
-            >
-              Mortgages Demystified.
-            </p>
 
             {/* Loan officer name */}
             <p
