@@ -9,7 +9,7 @@ export const CORPORATE_NMLS = "2611";
 export const LO_NAME = "Nick Peters";
 export const LO_TITLE = "VP of Mortgage Lending";
 export const LO_PHONE = "(615) 656-0737";
-export const LO_EMAIL = "nick@mortgagegeek.ai";
+export const LO_EMAIL = "Nick.Peters@rate.com";
 // LO landing page on the lender's site. Empty string while transition is
 // in flight; the footer hides the link when this is falsy.
 export const LO_WEBSITE = "";
