@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { DebtsPaidByOthersGrid } from "../components/DebtsPaidByOthersGrid";
 
-const TITLE = "Debts Paid by Others: How to Exclude Someone Else's Payments From Your Mortgage DTI | The Mortgage Geek";
+const TITLE = "Debts Paid by Others: How to Exclude Someone Else's Payments From Your Mortgage DTI | Mortgage Geek";
 const DESCRIPTION = "Debts paid by others mortgage rules: when a parent or spouse pays your loan, when you can exclude it from DTI. Agency-by-agency rules. Real LO insights.";
 const PATH = "/deep-dives/debts-paid-by-others";
 const URL = `https://mortgagegeek.ai${PATH}`;

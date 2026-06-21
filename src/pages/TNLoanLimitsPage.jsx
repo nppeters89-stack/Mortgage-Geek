@@ -5,7 +5,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { TNLoanLimitsMap } from "../components/TNLoanLimitsMap";
 
-const TITLE = "Tennessee Loan Limits 2026: Interactive Map by County | The Mortgage Geek";
+const TITLE = "Tennessee Loan Limits 2026: Interactive Map by County | Mortgage Geek";
 const DESCRIPTION = "Interactive map of 2026 Tennessee loan limits by county. Conforming, FHA, VA, USDA limits for all 95 TN counties. Updated annually. Real LO insight on what they mean.";
 const PATH = "/geek-maps/tennessee-loan-limits";
 const URL = `https://mortgagegeek.ai${PATH}`;

@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { BusinessAssetDocsGrid } from "../components/BusinessAssetDocsGrid";
 
-const TITLE = "Business Assets for Down Payment: How to Use Money From Your Company to Buy a Home | The Mortgage Geek";
+const TITLE = "Business Assets for Down Payment: How to Use Money From Your Company to Buy a Home | Mortgage Geek";
 const DESCRIPTION = "Using business funds for a down payment? Lenders need to see that the withdrawal won't hurt the business. Cash flow analysis, CPA letters, agency-specific rules.";
 const PATH = "/deep-dives/business-assets";
 const URL = `https://mortgagegeek.ai${PATH}`;

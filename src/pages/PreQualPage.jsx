@@ -416,7 +416,7 @@ export function PreQualPage() {
         description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, VA, and USDA. Free pre-qualification estimate, no credit check."
         path="/prequal"
         schema={webApplicationSchema({
-          title: "Pre-Qualification Calculator — The Mortgage Geek",
+          title: "Pre-Qualification Calculator — Mortgage Geek",
           description: "See what mortgage you can afford across Conventional, FHA, VA, and USDA based on your income and debts.",
           url: "https://mortgagegeek.ai/prequal",
         })}

@@ -274,7 +274,7 @@ export function MainSite() {
   return (
     <div className="app-root" style={{ fontFamily: F.body, color: P.text, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <SEOHead
-        title="The Mortgage Geek — Plain-English Mortgage Tools & Guides"
+        title="Mortgage Geek — Plain-English Mortgage Tools & Guides"
         description="Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm."
         path="/"
       />

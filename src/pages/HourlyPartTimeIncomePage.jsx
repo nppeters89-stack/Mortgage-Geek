@@ -7,7 +7,7 @@ import { articleSchema } from "../utils/schema";
 import { HourlyIncomeGrid } from "../components/HourlyIncomeGrid";
 import { PartTimeSeasonalGrid } from "../components/PartTimeSeasonalGrid";
 
-const TITLE = "Hourly, Part-Time & Seasonal Income for Mortgage Qualifying: Real LO Guide | The Mortgage Geek";
+const TITLE = "Hourly, Part-Time & Seasonal Income for Mortgage Qualifying: Real LO Guide | Mortgage Geek";
 const DESCRIPTION = "Mortgage qualifying with hourly, part-time, or seasonal income. Calculation rules by loan program (FNMA, FHLMC, FHA, VA, USDA), with worked examples and real LO insight.";
 const PATH = "/deep-dives/hourly-and-part-time-income";
 const URL = `https://mortgagegeek.ai${PATH}`;

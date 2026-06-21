@@ -7,7 +7,7 @@ import { articleSchema } from "../utils/schema";
 import { USDARatioThresholdGrid } from "../components/USDARatioThresholdGrid";
 import { USDACompFactorsGrid } from "../components/USDACompFactorsGrid";
 
-const TITLE = "USDA Manual Underwriting: Refer with Caution, Ratio Waivers, and How to Get Approved | The Mortgage Geek";
+const TITLE = "USDA Manual Underwriting: Refer with Caution, Ratio Waivers, and How to Get Approved | Mortgage Geek";
 const DESCRIPTION = "USDA manual underwriting explained: GUS Refer, ratio waivers, compensating factors, credit rules. Plain English from a real LO with 12+ years of USDA experience.";
 const PATH = "/deep-dives/usda-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;

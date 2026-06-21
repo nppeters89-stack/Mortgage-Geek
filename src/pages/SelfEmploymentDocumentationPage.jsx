@@ -7,7 +7,7 @@ import { articleSchema } from "../utils/schema";
 import { SelfEmploymentDocumentationGrid } from "../components/SelfEmploymentDocumentationGrid";
 import { PLRequirementsGrid } from "../components/PLRequirementsGrid";
 
-const TITLE = "Self-Employed Mortgage Documentation: What Lenders Actually Want to See | The Mortgage Geek";
+const TITLE = "Self-Employed Mortgage Documentation: What Lenders Actually Want to See | Mortgage Geek";
 const DESCRIPTION = "Self-employed mortgage requirements explained: 2-year rule, tax returns, P&L statements, qualifying income calculations. From a real LO with 12+ years.";
 const PATH = "/deep-dives/self-employed-documentation";
 const URL = `https://mortgagegeek.ai${PATH}`;

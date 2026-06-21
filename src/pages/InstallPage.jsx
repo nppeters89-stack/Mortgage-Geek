@@ -48,7 +48,7 @@ export function InstallPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
       <SEOHead
-        title="Install The Mortgage Geek — Add to Home Screen"
+        title="Install Mortgage Geek — Add to Home Screen"
         description="Install The Mortgage Geek as an app on your phone or tablet. Access mortgage calculators and guides offline, anytime."
         path="/install"
       />

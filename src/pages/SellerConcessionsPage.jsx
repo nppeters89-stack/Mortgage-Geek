@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SellerConcessionsGrid } from "../components/SellerConcessionsGrid";
 
-const TITLE = "Seller Concessions: How Much the Seller Can Pay, by Loan Program | The Mortgage Geek";
+const TITLE = "Seller Concessions: How Much the Seller Can Pay, by Loan Program | Mortgage Geek";
 const DESCRIPTION = "Conventional, FHA, VA, and USDA seller concession limits explained by a 12-year LO. What counts, what doesn't, agent commissions after NAR, and where deals break.";
 const PATH = "/deep-dives/seller-concessions";
 const URL = `https://mortgagegeek.ai${PATH}`;

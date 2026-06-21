@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SellerCreditDeploymentGrid } from "../components/SellerCreditDeploymentGrid";
 
-const TITLE = "Rate Buydowns: 2-1, Points, or Price Cut? The Same $10,000 Four Ways | The Mortgage Geek";
+const TITLE = "Rate Buydowns: 2-1, Points, or Price Cut? The Same $10,000 Four Ways | Mortgage Geek";
 const DESCRIPTION = "A 12-year LO runs the same $10,000 seller credit four ways: price cut, closing costs, discount points, and a 2-1 buydown. Exact math, honest tradeoffs.";
 const PATH = "/deep-dives/rate-buydowns";
 const URL = `https://mortgagegeek.ai${PATH}`;

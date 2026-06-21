@@ -56,7 +56,7 @@ export function financialServiceSchema() {
     "@context": "https://schema.org",
     "@type": "FinancialService",
     "@id": ORG_ID,
-    name: "The Mortgage Geek",
+    name: "Mortgage Geek",
     url: BASE_URL,
     description: "Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro.",
     founder: { "@id": PERSON_ID },

@@ -8,7 +8,7 @@ import { VAResidualIncomeGrid } from "../components/VAResidualIncomeGrid";
 import { VADTIThresholdGrid } from "../components/VADTIThresholdGrid";
 import { VACompFactorsGrid } from "../components/VACompFactorsGrid";
 
-const TITLE = "VA Manual Underwriting: Residual Income, Compensating Factors, and How to Get Approved | The Mortgage Geek";
+const TITLE = "VA Manual Underwriting: Residual Income, Compensating Factors, and How to Get Approved | Mortgage Geek";
 const DESCRIPTION = "VA manual underwriting explained: residual income tables, compensating factors, DTI thresholds, and how to actually get approved. From a real LO with 12+ years.";
 const PATH = "/deep-dives/va-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;

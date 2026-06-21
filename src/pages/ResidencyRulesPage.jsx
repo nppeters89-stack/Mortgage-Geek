@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ResidencyEligibilityGrid } from "../components/ResidencyEligibilityGrid";
 
-const TITLE = "Residency and Visa Rules for US Mortgages: What Status Lets You Buy a Home | The Mortgage Geek";
+const TITLE = "Residency and Visa Rules for US Mortgages: What Status Lets You Buy a Home | Mortgage Geek";
 const DESCRIPTION = "Mortgage residency rules explained: which visas, EADs, and statuses qualify for FHA, VA, conventional, and USDA loans. Updated for the May 2025 FHA rule change.";
 const PATH = "/deep-dives/residency-rules";
 const URL = `https://mortgagegeek.ai${PATH}`;

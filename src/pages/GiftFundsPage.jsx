@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { GiftFundDonorMatrix } from "../components/GiftFundDonorMatrix";
 
-const TITLE = "Gift Funds for Down Payment: Who Can Give, How They Document It, by Loan Program | The Mortgage Geek";
+const TITLE = "Gift Funds for Down Payment: Who Can Give, How They Document It, by Loan Program | Mortgage Geek";
 const DESCRIPTION = "Gift funds mortgage rules: donor eligibility by loan program, gift letter requirements, transfer documentation, the donor-direct-to-title privacy path. Real LO guide.";
 const PATH = "/deep-dives/gift-funds";
 const URL = `https://mortgagegeek.ai${PATH}`;

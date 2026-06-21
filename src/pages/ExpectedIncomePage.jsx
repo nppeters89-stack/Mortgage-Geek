@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ExpectedIncomeMatrix } from "../components/ExpectedIncomeMatrix";
 
-const TITLE = "Expected Income for Mortgages: Using a New Job Offer to Qualify | The Mortgage Geek";
+const TITLE = "Expected Income for Mortgages: Using a New Job Offer to Qualify | Mortgage Geek";
 const DESCRIPTION = "Expected income mortgage rules explained: how to qualify with a new job offer letter, 60-day vs 90-day windows, reserve requirements, by loan program. Real LO insights.";
 const PATH = "/deep-dives/expected-income";
 const URL = `https://mortgagegeek.ai${PATH}`;

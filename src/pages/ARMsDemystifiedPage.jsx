@@ -7,7 +7,7 @@ import { articleSchema } from "../utils/schema";
 import { ARMRateAnatomyGraphic } from "../components/ARMRateAnatomyGraphic";
 import { ARMTermsGlossary } from "../components/ARMTermsGlossary";
 
-const TITLE = "ARMs Demystified: How Adjustable-Rate Mortgages Work, When They Make Sense, and What the Caps Actually Mean | The Mortgage Geek";
+const TITLE = "ARMs Demystified: How Adjustable-Rate Mortgages Work, When They Make Sense, and What the Caps Actually Mean | Mortgage Geek";
 const DESCRIPTION = "Adjustable-rate mortgages explained in plain English. How caps work, when ARMs make sense, qualifying rate quirks. From a real LO with 12+ years.";
 const PATH = "/deep-dives/arms-demystified";
 const URL = `https://mortgagegeek.ai${PATH}`;
