@@ -1,5 +1,4 @@
 import { P, F } from "../../theme";
-import { HeroJourneyTrack } from "./HeroJourneyTrack";
 import { REVIEWS } from "../../data/reviews";
 
 // Hero photo treatment (spec Photo §): half-body cutout on the charcoal hero,
@@ -15,6 +14,7 @@ const heroCSS = `
   .hero-photo::after { content: ""; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); width: 72%; height: 34px; background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%); filter: blur(5px); z-index: -1; }
   @media (min-width: 1024px) { .hero-copy { max-width: 600px; } }
   @media (max-width: 1023px) {
+    #hero { padding-bottom: 0 !important; }
     .hero-photo { position: static; display: block; margin: 28px auto 0; }
     .hero-photo img { height: auto; width: clamp(220px, 62vw, 300px); margin: 0 auto; }
     .hero-photo::after { display: none; }
@@ -87,25 +87,23 @@ export function Hero({ onNavigate }) {
             </button>
           </div>
         </div>
-
-        <picture className="hero-photo">
-          <source media="(min-width: 1024px)" srcSet="/hero-cutout-desktop.webp" />
-          <source srcSet="/hero-cutout-mobile.webp" />
-          <img
-            src="/hero-cutout-desktop.webp"
-            width="1323"
-            height="1280"
-            alt="Nick Peters, mortgage loan officer"
-            loading="eager"
-            fetchpriority="high"
-            decoding="async"
-          />
-        </picture>
       </div>
 
-      <div style={{ position: "relative", marginTop: 8 }}>
-        <HeroJourneyTrack />
-      </div>
+      {/* Cutout is a direct child of the section so it anchors flush to the
+          charcoal bottom edge (not the copy block). */}
+      <picture className="hero-photo">
+        <source media="(min-width: 1024px)" srcSet="/hero-cutout-desktop.webp" />
+        <source srcSet="/hero-cutout-mobile.webp" />
+        <img
+          src="/hero-cutout-desktop.webp"
+          width="1323"
+          height="1280"
+          alt="Nick Peters, mortgage loan officer"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
     </section>
   );
 }
