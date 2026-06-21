@@ -26,9 +26,9 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             style={{ display: "flex", alignItems: "center", gap: 7, textDecoration: "none", color: "inherit", cursor: "pointer", minWidth: 0 }}
           >
             {/* Co-brand lock-up on the white mobile bar: Rate (black) | MG mark + wordmark. */}
-            <img src="/rate-2color-black.svg" alt="Rate" width={28} height={18} style={{ display: "block", flexShrink: 0 }} />
+            <img src="/rate-2color-black.svg" alt="Rate" width={37} height={24} style={{ display: "block", flexShrink: 0 }} />
             <span aria-hidden="true" style={{ width: 1, height: 24, background: P.creamDark, flexShrink: 0 }} />
-            <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={18} height={22} style={{ display: "block", flexShrink: 0 }} />
+            <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={19} height={24} style={{ display: "block", flexShrink: 0 }} />
             <span style={{ fontFamily: F.display, fontSize: 16, lineHeight: 1, color: P.text, whiteSpace: "nowrap", transform: "translateY(0.05em)" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
           </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
