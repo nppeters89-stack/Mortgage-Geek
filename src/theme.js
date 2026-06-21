@@ -199,4 +199,11 @@ export const globalCSS = `
     0%, 100% { opacity: 0.3; }
     50% { opacity: 0.9; }
   }
+
+  /* Co-brand header lock-up: on narrow phones the tool/deep-dive headers also
+     carry Call/Text/back controls, so drop the Rate mark + divider there and
+     fall back to the MG lock-up. The full co-brand shows from 600px up. */
+  @media (max-width: 600px) {
+    .cobrand-rate { display: none !important; }
+  }
 `;
