@@ -436,11 +436,11 @@ export function CalculatorPage() {
       `}</style>
 
       {/* Calculator header */}
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+      <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={16} height={20} style={{ display: "block" }} /></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+            <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={21} height={26} style={{ display: "block" }} />
+            <span style={{ fontFamily: F.display, fontSize: 18, color: P.text }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{
@@ -456,15 +456,15 @@ export function CalculatorPage() {
             <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20mortgage%20calculator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               padding: "8px 16px", borderRadius: 8,
-              background: "rgba(255,255,255,0.1)", color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
+              background: "transparent", color: P.navy,
+              border: `1px solid ${P.creamDark}`,
               fontFamily: F.body, fontSize: 13, fontWeight: 600,
               textDecoration: "none",
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span className="btn-label-mobile-hide">Text</span>
             </a>
-            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
+            <a href="/" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
           </div>
         </div>
       </div>

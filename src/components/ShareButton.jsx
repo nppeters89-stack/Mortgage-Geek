@@ -43,7 +43,7 @@ function CheckIcon() {
   );
 }
 
-export function ShareButton({ title, url, variant = "default" }) {
+export function ShareButton({ title, url, variant = "default", headerTone = "dark" }) {
   const [status, setStatus] = useState("idle");
   const timerRef = useRef(null);
 
@@ -92,9 +92,14 @@ export function ShareButton({ title, url, variant = "default" }) {
   const labelText = isCopied ? "Link copied!" : isError ? "Couldn't copy link" : "Share";
   const liveText = isCopied ? "Link copied" : isError ? "Couldn't copy link" : "";
 
-  const headerIdleColor = "rgba(255,255,255,0.55)";
-  const headerHoverColor = "rgba(255,255,255,0.95)";
-  const headerActiveColor = isError ? P.dangerLight : P.successLight;
+  // Header variant sits on a dark bar by default; the light tone is for the
+  // white tool-page headers (ink idle/hover, AA-dark status colors).
+  const onLightHeader = isHeader && headerTone === "light";
+  const headerIdleColor = onLightHeader ? P.textLight : "rgba(255,255,255,0.55)";
+  const headerHoverColor = onLightHeader ? P.navy : "rgba(255,255,255,0.95)";
+  const headerActiveColor = isError
+    ? (onLightHeader ? P.danger : P.dangerLight)
+    : (onLightHeader ? P.success : P.successLight);
 
   const baseBg = isHeader ? "transparent" : P.navy;
   const hoverBg = isHeader ? "transparent" : P.navyLight;
