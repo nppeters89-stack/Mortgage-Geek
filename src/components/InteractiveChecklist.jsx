@@ -397,7 +397,7 @@ export function InteractiveChecklist({
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
             <div>
               <div style={{ fontFamily: F.display, fontSize: 18, color: P.navy, marginBottom: 2 }}>
-                🤓 The Mortgage Geek · FHA Manual Underwriting Checklist
+                <img src="/mg-mark-sm.svg" alt="" width={15} height={19} style={{ verticalAlign: "-3px", marginRight: 6 }} />The Mortgage Geek · FHA Manual Underwriting Checklist
                 {hasTabs ? ` · ${activeFlow.label} workflow` : ""}
               </div>
               <div style={{ fontSize: 10, color: P.warmGray }}>Nick Peters · NMLS #1119524 · (615) 656-0737 · mortgagegeek.ai/deep-dives/fha-manual-underwriting</div>

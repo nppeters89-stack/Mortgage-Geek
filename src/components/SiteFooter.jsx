@@ -255,7 +255,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               }}
             >
               <span>The Mortgage Geek</span>
-              <span aria-hidden="true" style={{ fontSize: fs(18, 16) }}>🤓</span>
+              <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={18} height={22} style={{ alignSelf: "center", display: "block" }} />
             </h2>
             <p
               style={{
