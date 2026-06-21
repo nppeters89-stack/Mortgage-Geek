@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { F } from "../theme";
+import { F, P } from "../theme";
+import { withAlpha } from "../utils/format";
 import { useIsMobile, useIsStandalone } from "../utils/hooks";
 import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon } from "./icons";
 
@@ -32,7 +33,7 @@ export function MobileToolbar({ hrefOverrides = {} }) {
   if (!isMobile) return null;
   return (
     <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 150, overflow: "hidden", pointerEvents: offset >= toolbarH ? "none" : "auto" }}>
-      <nav style={{ transform: `translateY(${offset}px)`, willChange: "transform", background: "rgba(15, 37, 48, 0.75)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: `max(${isStandalone ? 32 : 16}px, env(safe-area-inset-bottom, 0px))`, display: "flex", justifyContent: "center", alignItems: "center", height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : `max(16px, env(safe-area-inset-bottom, 0px))` }}>
+      <nav style={{ transform: `translateY(${offset}px)`, willChange: "transform", background: withAlpha(P.navyDark, 0.75), backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderTop: "1px solid rgba(255,255,255,0.08)", paddingBottom: `max(${isStandalone ? 32 : 16}px, env(safe-area-inset-bottom, 0px))`, display: "flex", justifyContent: "center", alignItems: "center", height: isStandalone ? 76 : 56, paddingTop: isStandalone ? 32 : `max(16px, env(safe-area-inset-bottom, 0px))` }}>
         <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center", maxWidth: 320, width: "100%" }}>
           {[
             { icon: "__CASH_ICON__", label: "Cash to Close", href: "/cash-to-close" },
