@@ -25,10 +25,8 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             }}
             style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", color: "inherit", cursor: "pointer" }}
           >
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={16} height={20} style={{ display: "block" }} />
-            </div>
-            <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
+            <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={21} height={26} style={{ display: "block", flexShrink: 0 }} />
+            <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>Mortgage <span style={{ color: P.goldReverse }}>Geek</span></span>
           </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
             {mobileOpen ? "✕" : "☰"}
@@ -52,10 +50,8 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
               }}
               style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer" }}
             >
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
-                <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={24} height={30} style={{ display: "block" }} />
-              </div>
-              <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
+              <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={34} height={42} style={{ display: "block", margin: "0 auto 6px" }} />
+              <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>Mortgage <span style={{ color: P.goldReverse }}>Geek</span></h1>
             </a>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <a href="/about" style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textDecoration: "none", marginTop: 6, display: "inline-block", transition: "color 0.15s" }} onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.7)"} onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.35)"}>About Nick →</a>

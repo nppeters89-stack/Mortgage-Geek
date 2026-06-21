@@ -4,6 +4,7 @@
 export const P = {
   navy: "#24272A", navyDark: "#131416", navyLight: "#3C3D40",
   gold: "#CF3338", goldLight: "#E66A6E", goldMuted: "#AE2A2E",
+  goldReverse: "#E2575B", // Arrow Red lifted for dark surfaces (reverse "Geek" wordmark / cream-mark window)
   cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB",
   warmGray: "#6E7176", warmGrayLight: "#9A9DA2",
   white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",
