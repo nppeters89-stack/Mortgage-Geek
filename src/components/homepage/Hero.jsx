@@ -6,16 +6,18 @@ import { REVIEWS } from "../../data/reviews";
 // mobile. The journey track is a sibling below, so it never overlaps. Red lives
 // only in the primary CTA; the photo is never tinted.
 const heroCSS = `
-  .hero-top { position: relative; }
-  .hero-copy { position: relative; z-index: 2; max-width: 680px; }
-  .hero-photo { position: absolute; right: 0; bottom: 0; z-index: 1; pointer-events: none; line-height: 0; }
-  .hero-photo img { display: block; width: auto; height: clamp(300px, 34vw, 440px); }
+  /* Hero content is constrained to the same centered column as the content
+     cards below (Page: max 1180 + clamp gutters). The section background stays
+     full-bleed. */
+  .hero-inner { position: relative; max-width: 1180px; margin: 0 auto; padding-left: clamp(20px, 4vw, 56px); padding-right: clamp(20px, 4vw, 56px); }
+  .hero-copy { position: relative; z-index: 2; max-width: 600px; padding-bottom: clamp(48px, 6vw, 72px); }
+  .hero-photo { position: absolute; right: clamp(20px, 4vw, 56px); bottom: 0; z-index: 1; pointer-events: none; line-height: 0; }
+  .hero-photo img { display: block; width: auto; height: clamp(300px, 32vw, 430px); }
   /* Soft elliptical ground shadow so the cutout sits on the surface. */
   .hero-photo::after { content: ""; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); width: 72%; height: 34px; background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%); filter: blur(5px); z-index: -1; }
-  @media (min-width: 1024px) { .hero-copy { max-width: 600px; } }
   @media (max-width: 1023px) {
-    #hero { padding-bottom: 0 !important; }
-    .hero-photo { position: static; display: block; margin: 28px auto 0; }
+    .hero-copy { max-width: none; padding-bottom: 0; }
+    .hero-photo { position: static; display: block; right: auto; margin: 28px auto 0; }
     .hero-photo img { height: auto; width: clamp(220px, 62vw, 300px); margin: 0 auto; }
     .hero-photo::after { display: none; }
   }
@@ -26,11 +28,11 @@ export function Hero() {
   const hasRating = typeof rating === "number" && count > 0;
 
   return (
-    <section id="hero" style={{ position: "relative", background: `linear-gradient(145deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`, padding: "80px 40px 64px", overflow: "hidden" }}>
+    <section id="hero" style={{ position: "relative", background: `linear-gradient(145deg, ${P.navyDark} 0%, ${P.navy} 55%, ${P.navyLight} 100%)`, padding: "80px 0 0", overflow: "hidden" }}>
       <style>{heroCSS}</style>
       <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(207,51,56,0.08) 0%, transparent 50%), radial-gradient(ellipse at 85% 15%, rgba(207,51,56,0.08) 0%, transparent 50%)" }} />
 
-      <div className="hero-top">
+      <div className="hero-inner">
         <div className="hero-copy">
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
           <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.2, marginBottom: 20 }}>
@@ -87,11 +89,10 @@ export function Hero() {
             </a>
           </div>
         </div>
-      </div>
 
-      {/* Cutout is a direct child of the section so it anchors flush to the
-          charcoal bottom edge (not the copy block). */}
-      <picture className="hero-photo">
+        {/* Cutout anchors to .hero-inner, so it sits flush at the bottom of the
+            centered hero column (aligned with the content cards below). */}
+        <picture className="hero-photo">
         <source media="(min-width: 1024px)" srcSet="/hero-cutout-desktop.webp" />
         <source srcSet="/hero-cutout-mobile.webp" />
         <img
@@ -103,7 +104,8 @@ export function Hero() {
           fetchpriority="high"
           decoding="async"
         />
-      </picture>
+        </picture>
+      </div>
     </section>
   );
 }
