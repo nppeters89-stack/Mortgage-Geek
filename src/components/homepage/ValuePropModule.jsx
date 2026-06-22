@@ -33,12 +33,22 @@ const SURFACES = {
   },
 };
 
+// Media slot sizing by aspect. Portrait stays a slim column with a width cap so
+// it never towers (cap ~290 -> ~516px tall); square/landscape get wider slots.
+// The column centers its video, so it's also centered when stacked on mobile.
+const MEDIA = {
+  portrait:  { aspect: "9 / 16", colFlex: "1 1 240px", maxW: 290 },
+  square:    { aspect: "1 / 1",  colFlex: "1 1 300px", maxW: 380 },
+  landscape: { aspect: "16 / 9", colFlex: "1 1 420px", maxW: 560 },
+};
+
 export function ValuePropModule({
-  eyebrow, headline, body, bullets, ctaLabel, ctaHref, videoUrl, videoPoster,
+  eyebrow, headline, body, bullets, ctaLabel, ctaHref, videoUrl, videoAspect = "square",
   surface = "charcoal", agentFacing = false, markSlot = null, disclosureSlot = null,
   disclosurePending = false, fullTermsHref = null,
 }) {
   const t = SURFACES[surface] || SURFACES.charcoal;
+  const m = MEDIA[videoAspect] || MEDIA.square;
 
   const ctaStyle = {
     display: "inline-flex", alignItems: "center", gap: 8,
@@ -59,7 +69,7 @@ export function ValuePropModule({
       }}
     >
       <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(24px, 4vw, 44px)", alignItems: "center" }}>
-        <div style={{ flex: "1 1 320px", minWidth: 0 }}>
+        <div style={{ flex: "1 1 360px", minWidth: 0 }}>
           {/* Reserved slot for the official Rate product mark. Renders nothing
               until provided — no placeholder text. */}
           {markSlot ? <div style={{ marginBottom: 16 }}>{markSlot}</div> : null}
@@ -134,10 +144,13 @@ export function ValuePropModule({
           ) : null}
         </div>
 
-        {/* Video column only when a clip (or stand-in) is wired. */}
+        {/* Media column only when a clip is wired. Sized by videoAspect; the
+            column centers its video so portrait stays slim and never towers. */}
         {videoUrl && (
-          <div style={{ flex: "0 1 360px", width: "100%", maxWidth: 380 }}>
-            <LazyVideo videoUrl={videoUrl} poster={videoPoster} label={headline || eyebrow || "value prop"} />
+          <div style={{ flex: m.colFlex, minWidth: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: m.maxW }}>
+              <LazyVideo videoUrl={videoUrl} aspect={m.aspect} surface={surface} label={eyebrow || headline || "value prop"} />
+            </div>
           </div>
         )}
       </div>

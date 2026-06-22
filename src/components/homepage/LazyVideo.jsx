@@ -1,17 +1,25 @@
 import { useState } from "react";
 import { P, F } from "../../theme";
 
-// Poster + play-button facade. The <video> element is not mounted until the
-// user clicks, so nothing downloads on page load (preload="none" + lazy mount).
-// No autoplay with sound on load — playback only starts on the user's click.
-// Approved clips are square (1080x1080); default aspect is 1:1.
-export function LazyVideo({ videoUrl, poster, label = "video", aspect = "1 / 1" }) {
+// Click-to-play facade: no video bytes load before the click (the <video> is
+// not mounted until then), and no poster-image file is needed — the facade is a
+// colored panel matching the module surface, showing the module name + a play
+// button. On click it swaps in a user-initiated <video> (sound OK).
+//
+// Facade panel colors by surface (the disc + label read against each).
+const FACADE = {
+  red:      { panel: `linear-gradient(135deg, ${P.goldMuted} 0%, ${P.gold} 100%)`, label: "#FFFFFF", tri: P.gold },
+  charcoal: { panel: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navyLight} 100%)`, label: "rgba(255,255,255,0.92)", tri: P.gold },
+  cream:    { panel: P.creamDark, label: P.navy, tri: P.gold },
+};
+
+export function LazyVideo({ videoUrl, aspect = "1 / 1", surface = "charcoal", label = "video" }) {
   const [playing, setPlaying] = useState(false);
-  const hasVideo = Boolean(videoUrl);
+  const f = FACADE[surface] || FACADE.charcoal;
 
   return (
-    <div style={{ position: "relative", width: "100%", aspectRatio: aspect, borderRadius: 12, overflow: "hidden", background: P.navyDark }}>
-      {playing && hasVideo ? (
+    <div style={{ position: "relative", width: "100%", aspectRatio: aspect, borderRadius: 12, overflow: "hidden", background: "#000" }}>
+      {playing ? (
         <video
           src={videoUrl}
           controls
@@ -23,40 +31,32 @@ export function LazyVideo({ videoUrl, poster, label = "video", aspect = "1 / 1" 
       ) : (
         <button
           type="button"
-          onClick={() => hasVideo && setPlaying(true)}
-          aria-label={hasVideo ? `Play video: ${label}` : `Video coming soon: ${label}`}
-          aria-disabled={!hasVideo}
+          onClick={() => setPlaying(true)}
+          aria-label={`Play video: ${label}`}
           style={{
             position: "absolute", inset: 0, width: "100%", height: "100%",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            border: "none", padding: 0, margin: 0,
-            background: P.navyDark,
-            cursor: hasVideo ? "pointer" : "default",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18,
+            border: "none", padding: 24, margin: 0,
+            background: f.panel,
+            cursor: "pointer",
             WebkitTapHighlightColor: "transparent",
           }}
         >
-          {poster && (
-            <img src={poster} alt="" aria-hidden="true" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-          )}
-          {/* Play glyph in a translucent disc (decorative; the button has the label). */}
           <span
             aria-hidden="true"
             style={{
-              position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center",
-              width: 64, height: 64, borderRadius: "50%",
-              background: hasVideo ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.18)",
-              boxShadow: hasVideo ? "0 4px 16px rgba(0,0,0,0.3)" : "none",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              width: 66, height: 66, borderRadius: "50%",
+              background: "rgba(255,255,255,0.95)", boxShadow: "0 4px 18px rgba(0,0,0,0.32)",
             }}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill={hasVideo ? P.gold : "rgba(255,255,255,0.5)"} style={{ marginLeft: 3 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill={f.tri} style={{ marginLeft: 4 }}>
               <path d="M8 5v14l11-7z" />
             </svg>
           </span>
-          {!hasVideo && (
-            <span style={{ position: "absolute", bottom: 16, left: 0, right: 0, textAlign: "center", fontFamily: F.body, fontSize: 12, fontWeight: 600, letterSpacing: 0.4, color: "rgba(255,255,255,0.6)" }}>
-              Video coming soon
-            </span>
-          )}
+          <span style={{ fontFamily: F.display, fontSize: 18, color: f.label, letterSpacing: 0.2, textAlign: "center", lineHeight: 1.2 }}>
+            {label}
+          </span>
         </button>
       )}
     </div>
