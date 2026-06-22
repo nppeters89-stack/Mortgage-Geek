@@ -3,7 +3,10 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { HomeHeader } from "../components/homepage/HomeHeader";
 import { Hero } from "../components/homepage/Hero";
 import { Page } from "../components/homepage/Page";
+import { ValuePropModule } from "../components/homepage/ValuePropModule";
+import { LearningCTA } from "../components/homepage/LearningCTA";
 import { Reviews } from "../components/homepage/Reviews";
+import { VALUE_PROPS } from "../data/valueProps";
 import { SEOHead } from "../components/SEOHead";
 
 // Homepage = the sales / value-prop page. The educational scroll and the
@@ -23,6 +26,15 @@ export function MainSite() {
       <HomeHeader />
       <Hero />
       <Page>
+        {/* Sales body: value-prop modules -> learning CTA -> social proof.
+            Data-driven via src/data/valueProps.js; gated Rate marks, funnel
+            URLs, and final video URLs slot in there later. */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "clamp(20px, 3vw, 32px)", padding: "clamp(40px, 6vw, 72px) 0" }}>
+          {VALUE_PROPS.map((m) => (
+            <ValuePropModule key={m.id} {...m} markSlot={m.mark} disclosureSlot={m.disclosure} />
+          ))}
+          <LearningCTA />
+        </div>
         <Reviews />
       </Page>
       <MobileToolbar />
