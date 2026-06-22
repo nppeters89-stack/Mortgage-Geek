@@ -21,7 +21,7 @@ const heroCSS = `
   }
 `;
 
-export function Hero({ onNavigate }) {
+export function Hero() {
   const { rating, count } = REVIEWS;
   const hasRating = typeof rating === "number" && count > 0;
 
@@ -75,16 +75,16 @@ export function Hero({ onNavigate }) {
               </svg>
               <span className="btn-label-mobile-hide">Text</span>
             </a>
-            <button onClick={() => onNavigate("getting-started")} style={{
+            <a href="/learn" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "14px 24px", borderRadius: 10,
               background: "transparent", color: "rgba(255,255,255,0.5)",
               border: "1px solid rgba(255,255,255,0.08)",
               fontFamily: F.body, fontSize: 14, fontWeight: 500,
-              cursor: "pointer", letterSpacing: 0.2,
+              textDecoration: "none", letterSpacing: 0.2,
             }}>
-              Start Learning ↓
-            </button>
+              Start Learning →
+            </a>
           </div>
         </div>
       </div>

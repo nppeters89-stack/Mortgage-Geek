@@ -27,6 +27,7 @@ const RateBuydownsPage = lazy(() => import("./pages/RateBuydownsPage").then(m =>
 const GeekMapsHubPage = lazy(() => import("./pages/GeekMapsHubPage").then(m => ({ default: m.GeekMapsHubPage })));
 const TNLoanLimitsPage = lazy(() => import("./pages/TNLoanLimitsPage").then(m => ({ default: m.TNLoanLimitsPage })));
 const MainSite = lazy(() => import("./pages/MainSite").then(m => ({ default: m.MainSite })));
+const LearnPage = lazy(() => import("./pages/LearnPage").then(m => ({ default: m.LearnPage })));
 const GeekLogPage = lazy(() => import("./pages/GeekLogPage").then(m => ({ default: m.GeekLogPage })));
 
 export default function MortgageLandingPage() {
@@ -56,6 +57,7 @@ export default function MortgageLandingPage() {
     if (path === "geek-maps") return "geek-maps-hub";
     if (path === "geek-maps/tennessee-loan-limits") return "geek-maps-tn-loan-limits";
     if (path === "geek-log") return "geek-log";
+    if (path === "learn") return "learn";
     return "main";
   });
 
@@ -84,6 +86,7 @@ export default function MortgageLandingPage() {
     if (currentPage === "geek-maps-hub") return <GeekMapsHubPage />;
     if (currentPage === "geek-maps-tn-loan-limits") return <TNLoanLimitsPage />;
     if (currentPage === "geek-log") return <GeekLogPage />;
+    if (currentPage === "learn") return <LearnPage />;
     return <MainSite />;
   };
 
@@ -106,8 +109,8 @@ export default function MortgageLandingPage() {
       }>
         {renderPage()}
       </Suspense>
-      {/* Homepage (MainSite) renders the fixed 280px Sidebar. Other pages
-          don't, so only pass hasSidebar on '/'. The footer uses this to
+      {/* /learn (LearnPage) renders the fixed 280px Sidebar. Other pages
+          don't, so only pass hasSidebar on '/learn'. The footer uses this to
           mirror .main-content's margin-left offset at >900px.
 
           `layout` selects the footer's max-width + horizontal padding so
@@ -120,7 +123,7 @@ export default function MortgageLandingPage() {
                            (article at maxW 860)
             - default 'home' for hub/about/install/geek-maps */}
       <SiteFooter
-        hasSidebar={currentPage === "main"}
+        hasSidebar={currentPage === "learn"}
         layout={
           currentPage === "calculator" ||
           currentPage === "prequal" ||
