@@ -241,25 +241,19 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             {/* Brand voice anchors the column. The lender attribution
                 block lives at the top of the right column, above Branch
                 Office. */}
-            <h2
-              aria-label="Mortgage Geek"
-              style={{
-                fontFamily: F.display,
-                fontWeight: 400,
-                fontSize: fs(22, 18),
-                color: P.navy,
-                margin: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: fs(9, 7),
-              }}
-            >
-              {/* Lock-up: MG house mark then wordmark. Mark height ~1.45x the
-                  wordmark size per the brand spec; "Geek" in Arrow Red on cream. */}
-              <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={fs(26, 21)} height={fs(32, 26)} style={{ display: "block", flexShrink: 0 }} />
-              {/* line-height:1 + translateY(0.1em) optically centers the serif
-                  caps on the mark, per the spec lock-up. */}
-              <span style={{ lineHeight: 1, transform: "translateY(0.1em)" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
+            {/* Standalone Mortgage Geek lock-up (Lockup Implementation Spec).
+                Light variant because this footer surface is cream (P.cream); the
+                four-pane monogram is used above 32px. Both light/dark variants
+                are wired in globalCSS — swap mg--light/mg--dark + the mark src if
+                the footer ever goes charcoal. Scales from --mg-h. */}
+            <h2 aria-label="Mortgage Geek" style={{ margin: 0 }}>
+              <span className="mg-lockup mg--light" style={{ "--mg-h": "clamp(40px, 7vw, 52px)" }}>
+                <img className="mg-lockup__mark" src="/assets/mg-mark.svg" alt="" aria-hidden="true" />
+                <span className="mg-lockup__words">
+                  <span className="mg-lockup__top">Mortgage</span>
+                  <span className="mg-lockup__geek">Geek</span>
+                </span>
+              </span>
             </h2>
 
             {/* Loan officer name */}

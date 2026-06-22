@@ -24,13 +24,24 @@ export function HomeHeader() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, maxWidth: 1180, margin: "0 auto" }}>
-        <a href="/" aria-label="Mortgage Geek home" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}>
-            <img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} />
-            <span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} />
+        {/* Rate x Mortgage Geek co-brand lock-up (light variant). Per the Lockup
+            Implementation Spec; all sizing scales from --mg-h. The Rate mark +
+            divider collapse <=600px (where the CTA shares the bar), leaving the
+            standalone MG lock-up. */}
+        <a href="/" aria-label="Mortgage Geek, a loan officer at Rate" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <span className="mg-cobrand mg--light" style={{ "--mg-h": "clamp(32px, 4.2vw, 40px)" }}>
+            <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center", gap: "calc(var(--mg-h) * 0.39)" }}>
+              <img className="mg-cobrand__rate" src="/assets/rate-2color-black.png" alt="Rate" />
+              <span className="mg-cobrand__divider" aria-hidden="true"></span>
+            </span>
+            <span className="mg-lockup">
+              <img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+              <span className="mg-lockup__words">
+                <span className="mg-lockup__top">Mortgage</span>
+                <span className="mg-lockup__geek">Geek</span>
+              </span>
+            </span>
           </span>
-          <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={21} height={26} style={{ display: "block", flexShrink: 0, marginRight: 7 }} />
-          <span style={{ fontFamily: F.display, fontSize: 18, color: P.text, lineHeight: 1, transform: "translateY(0.05em)", whiteSpace: "nowrap" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
         </a>
         <nav style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <a className="home-nav-secondary" href="/learn" style={{ fontFamily: F.body, fontSize: 14, fontWeight: 600, color: P.text, textDecoration: "none" }}>Learn</a>

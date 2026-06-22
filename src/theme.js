@@ -37,7 +37,7 @@ export const F = {
 };
 
 export const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   ::selection { background: #CF3338; color: #fff; }
   html { background: #F6F5F3; overscroll-behavior-y: none; }
@@ -207,4 +207,24 @@ export const globalCSS = `
     .cobrand-rate { display: none !important; }
     .home-nav-secondary { display: none !important; }
   }
+
+  /* ── Refreshed Mortgage Geek lock-up system (Lockup Implementation Spec) ──
+     All proportions derive from one var, --mg-h (the monogram height). Set it
+     per placement; everything else scales. MORTGAGE = DM Sans 700, GEEK =
+     Archivo 800 true Arrow Red. The translateY optically centers the wordmark
+     on the monogram (GEEK's descender space drops the geometric center ~5%). */
+  .mg-lockup { display: inline-flex; align-items: center; gap: calc(var(--mg-h) * 0.24); }
+  .mg-lockup__mark { height: var(--mg-h); width: auto; display: block; }
+  .mg-lockup__words { display: flex; flex-direction: column; line-height: 1; transform: translateY(calc(var(--mg-h) * 0.05)); }
+  .mg-lockup__top { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: calc(var(--mg-h) * 0.24); letter-spacing: 0.24em; text-transform: uppercase; }
+  .mg-lockup__geek { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: calc(var(--mg-h) * 0.60); letter-spacing: -0.01em; text-transform: uppercase; color: #CF3338; margin-top: calc(var(--mg-h) * 0.05); }
+
+  .mg-cobrand { display: inline-flex; align-items: center; gap: calc(var(--mg-h) * 0.39); }
+  .mg-cobrand__rate { height: calc(var(--mg-h) * 0.61); width: auto; display: block; }
+  .mg-cobrand__divider { width: 1px; height: var(--mg-h); }
+
+  .mg--light .mg-lockup__top { color: #16171A; }
+  .mg--light .mg-cobrand__divider { background: #C7C4BC; }
+  .mg--dark .mg-lockup__top { color: #E8E6E1; }
+  .mg--dark .mg-cobrand__divider { background: #4A4B4E; }
 `;
