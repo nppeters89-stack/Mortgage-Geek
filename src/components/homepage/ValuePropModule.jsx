@@ -37,9 +37,10 @@ const SURFACES = {
 // it never towers (cap ~290 -> ~516px tall); square/landscape get wider slots.
 // The column centers its video, so it's also centered when stacked on mobile.
 const MEDIA = {
-  portrait:  { aspect: "9 / 16", colFlex: "1 1 240px", maxW: 290 },
-  square:    { aspect: "1 / 1",  colFlex: "1 1 300px", maxW: 380 },
-  landscape: { aspect: "16 / 9", colFlex: "1 1 420px", maxW: 560 },
+  portrait:   { aspect: "9 / 16", colFlex: "1 1 240px", maxW: 290 },
+  portrait45: { aspect: "4 / 5",  colFlex: "1 1 300px", maxW: 360 }, // 4:5 vertical (~450px at cap)
+  square:     { aspect: "1 / 1",  colFlex: "1 1 300px", maxW: 380 },
+  landscape:  { aspect: "16 / 9", colFlex: "1 1 420px", maxW: 560 },
 };
 
 // Auto-linkify the two known URLs that appear in official disclosure text,
@@ -67,9 +68,9 @@ function linkifyDisclosure(text) {
 }
 
 export function ValuePropModule({
-  eyebrow, headline, body, bullets, ctaLabel, ctaHref, videoUrl, videoAspect = "square",
-  coverFrame = "first", surface = "charcoal", agentFacing = false, markSlot = null,
-  disclosureSlot = null, fullTermsHref = null,
+  eyebrow, headline, body, bullets, ctaLabel, ctaHref, ctaExternal = false,
+  videoUrl, videoAspect = "square", coverFrame = "first", surface = "charcoal",
+  agentFacing = false, markSlot = null, disclosureSlot = null, fullTermsHref = null,
 }) {
   const t = SURFACES[surface] || SURFACES.charcoal;
   const m = MEDIA[videoAspect] || MEDIA.square;
@@ -135,7 +136,11 @@ export function ValuePropModule({
 
           {ctaLabel && (
             ctaHref ? (
-              <a href={ctaHref} target="_blank" rel="noopener noreferrer" style={ctaStyle}>
+              <a
+                href={ctaHref}
+                {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                style={ctaStyle}
+              >
                 {ctaLabel} <span aria-hidden="true">→</span>
               </a>
             ) : (
