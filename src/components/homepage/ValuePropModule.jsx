@@ -68,8 +68,8 @@ function linkifyDisclosure(text) {
 
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, videoUrl, videoAspect = "square",
-  surface = "charcoal", agentFacing = false, markSlot = null, disclosureSlot = null,
-  fullTermsHref = null,
+  coverFrame = "first", surface = "charcoal", agentFacing = false, markSlot = null,
+  disclosureSlot = null, fullTermsHref = null,
 }) {
   const t = SURFACES[surface] || SURFACES.charcoal;
   const m = MEDIA[videoAspect] || MEDIA.square;
@@ -169,7 +169,7 @@ export function ValuePropModule({
         {videoUrl && (
           <div style={{ flex: m.colFlex, minWidth: 0, display: "flex", justifyContent: "center", alignItems: "center" }}>
             <div style={{ width: "100%", maxWidth: m.maxW }}>
-              <LazyVideo videoUrl={videoUrl} aspect={m.aspect} surface={surface} label={eyebrow || headline || "value prop"} />
+              <LazyVideo videoUrl={videoUrl} aspect={m.aspect} coverFrame={coverFrame} label={eyebrow || headline || "value prop"} />
             </div>
           </div>
         )}

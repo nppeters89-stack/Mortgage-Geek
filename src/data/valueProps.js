@@ -17,6 +17,7 @@ export const VALUE_PROPS = [
     id: "powerbid",
     surface: "red",
     videoAspect: "portrait",
+    coverFrame: "first", // cover = the video's opening frame
     eyebrow: "PowerBid Approval",
     headline: "Make an offer that competes with cash.",
     body: "A verified approval up front, so sellers take you seriously. We do the underwriting work early, so you can shop with confidence.",
@@ -33,6 +34,7 @@ export const VALUE_PROPS = [
     id: "same-day",
     surface: "charcoal",
     videoAspect: "square",
+    coverFrame: "last", // cover = the video's closing frame
     eyebrow: "Same Day Mortgage",
     headline: "An approval in a day, if you qualify.",
     body: "Get your documents in early and you can have a loan approval within one business day. Less waiting, more house hunting.",

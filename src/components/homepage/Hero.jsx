@@ -34,12 +34,13 @@ export function Hero() {
 
       <div className="hero-inner">
         <div className="hero-copy">
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldLight, marginBottom: 20, opacity: 0.8 }}>MortgageGeek.ai</p>
-          <h2 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 50px)", fontWeight: 400, color: "#fff", lineHeight: 1.2, marginBottom: 20 }}>
-            Mortgages <span style={{ color: P.goldLight }}>Demystified.</span>
-          </h2>
-          <p style={{ fontSize: 16, lineHeight: 1.75, color: "rgba(255,255,255,0.55)", maxWidth: 540, marginBottom: hasRating ? 20 : 36 }}>
-            The mortgage process, demystified. From first conversation to closing day, in plain English.
+          <h1 style={{ fontFamily: F.body, fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.05, letterSpacing: -0.5, marginBottom: 12 }}>
+            Nick Peters
+          </h1>
+          <p style={{ fontFamily: F.body, fontSize: "clamp(14px, 1.6vw, 17px)", fontWeight: 500, letterSpacing: 0.3, color: "rgba(255,255,255,0.62)", marginBottom: hasRating ? 24 : 36 }}>
+            VP of Mortgage Lending
+            <span style={{ margin: "0 10px", color: "rgba(255,255,255,0.3)" }}>|</span>
+            NMLS #1119524
           </p>
 
           {hasRating && (
