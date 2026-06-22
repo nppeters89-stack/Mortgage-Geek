@@ -34,7 +34,7 @@ export function HomeHeader() {
         </a>
         <nav style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <a className="home-nav-secondary" href="/learn" style={{ fontFamily: F.body, fontSize: 14, fontWeight: 600, color: P.text, textDecoration: "none" }}>Learn</a>
-          <a href="tel:+16156560737" aria-label="Call Nick Peters to get pre-approved at (615) 656-0737" style={{
+          <a href="https://rate.com/nickpeters" target="_blank" rel="noopener noreferrer" aria-label="Get pre-approved with Nick Peters at Rate (opens rate.com in a new tab)" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             padding: "10px 18px", borderRadius: 10,
             background: P.gold, color: "#fff",
