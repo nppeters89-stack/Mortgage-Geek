@@ -15,6 +15,12 @@ const heroCSS = `
   .hero-photo img { display: block; width: auto; height: clamp(300px, 32vw, 430px); }
   /* Soft elliptical ground shadow so the cutout sits on the surface. */
   .hero-photo::after { content: ""; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); width: 72%; height: 34px; background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%); filter: blur(5px); z-index: -1; }
+  /* Reserve at least the photo's height in the column so the bottom-anchored
+     cutout never gets its top clipped by the section's overflow:hidden when the
+     copy is short. Matches .hero-photo img height. */
+  @media (min-width: 1024px) {
+    .hero-inner { min-height: clamp(300px, 32vw, 430px); }
+  }
   @media (max-width: 1023px) {
     .hero-copy { max-width: none; padding-bottom: 0; }
     .hero-photo { position: static; display: block; right: auto; margin: 28px auto 0; }
