@@ -63,7 +63,7 @@ function renderDisclosure() {
         target="_blank"
         rel="noopener noreferrer"
         className="mg-footer-link"
-        style={{ color: P.warmGray, textDecoration: "underline" }}
+        style={{ color: "rgba(255,255,255,0.72)", textDecoration: "underline" }}
       >
         {text}
       </a>
@@ -76,7 +76,7 @@ function renderDisclosure() {
 
 // Shared style for inline link anchors (phone, email, licensing).
 const inlineLinkStyle = {
-  color: P.navy,
+  color: "rgba(255,255,255,0.92)",
   fontWeight: 500,
   textDecoration: "none",
 };
@@ -88,14 +88,14 @@ const sectionHeadingStyle = {
   fontWeight: 500,
   letterSpacing: 1.2,
   textTransform: "uppercase",
-  color: P.navy,
+  color: "rgba(255,255,255,0.85)",
   marginBottom: 8,
 };
 
 // Divider rule between zones.
 const dividerStyle = {
   border: 0,
-  borderTop: `1px solid ${P.creamDark}`,
+  borderTop: `1px solid rgba(255,255,255,0.1)`,
   margin: "28px 0",
 };
 
@@ -135,8 +135,8 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
     <footer
       className={hasSidebar ? "mg-site-footer mg-site-footer--shifted" : "mg-site-footer"}
       style={{
-        background: P.cream,
-        borderTop: `1px solid ${P.creamDark}`,
+        background: P.navy,
+        borderTop: `1px solid rgba(255,255,255,0.1)`,
         // No `width: 100%` here. With `margin-left: 280px` on the
         // homepage, width:100% would force the footer to overflow the
         // viewport by 280px on the right. Block-level <footer> defaults
@@ -241,14 +241,12 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             {/* Brand voice anchors the column. The lender attribution
                 block lives at the top of the right column, above Branch
                 Office. */}
-            {/* Standalone Mortgage Geek lock-up (Lockup Implementation Spec).
-                Light variant because this footer surface is cream (P.cream); the
-                four-pane monogram is used above 32px. Both light/dark variants
-                are wired in globalCSS — swap mg--light/mg--dark + the mark src if
-                the footer ever goes charcoal. Scales from --mg-h. */}
+            {/* Standalone Mortgage Geek lock-up (Lockup Implementation Spec §7).
+                Dark variant — the footer surface is now charcoal (P.navy). Uses
+                the four-pane cream monogram with true-red windows. Scales from --mg-h. */}
             <h2 aria-label="Mortgage Geek" style={{ margin: 0 }}>
-              <span className="mg-lockup mg--light" style={{ "--mg-h": "clamp(40px, 7vw, 52px)" }}>
-                <img className="mg-lockup__mark" src="/assets/mg-mark.svg" alt="" aria-hidden="true" />
+              <span className="mg-lockup mg--dark" style={{ "--mg-h": "clamp(40px, 7vw, 52px)" }}>
+                <img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered.svg" alt="" aria-hidden="true" />
                 <span className="mg-lockup__words">
                   <span className="mg-lockup__top">Mortgage</span>
                   <span className="mg-lockup__geek">Geek</span>
@@ -262,7 +260,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 fontFamily: F.body,
                 fontSize: fs(14, 13),
                 fontWeight: 500,
-                color: P.navy,
+                color: "#FFFFFF",
                 margin: "14px 0 0",
               }}
             >
@@ -272,7 +270,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               style={{
                 fontFamily: F.body,
                 fontSize: fs(13, 11),
-                color: P.warmGray,
+                color: "rgba(255,255,255,0.72)",
                 margin: "2px 0 0",
               }}
             >
@@ -286,7 +284,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
               style={{
                 fontFamily: F.body,
                 fontSize: fs(13, 11),
-                color: P.warmGray,
+                color: "rgba(255,255,255,0.72)",
                 margin: "12px 0 0",
                 lineHeight: 1.85,
                 wordBreak: "break-word",
@@ -320,12 +318,12 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
 
             {/* Equal Housing Lender row */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, marginTop: 14 }}>
-              <EHLLogo size={sz(14, 12)} color={P.navy} />
+              <EHLLogo size={sz(14, 12)} color="#E8E6E1" />
               <span
                 style={{
                   fontFamily: F.body,
                   fontSize: fs(12, 11),
-                  color: P.warmGray,
+                  color: "rgba(255,255,255,0.72)",
                   letterSpacing: 0.3,
                 }}
               >
@@ -342,8 +340,10 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 column. Logo height is the live tuning knob — width is
                 auto so the 2.5:1 wordmark scales proportionally. */}
             <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: isMobile ? 16 : 24, minWidth: 0, alignItems: "flex-start" }}>
+              {/* Approved reversed (white+red) Rate mark for the dark footer
+                  surface — not a recolor, the supplied 2-color white file. */}
               <img
-                src="/rate-logo.png"
+                src="/assets/rate-2color-white.png"
                 alt={TRADE_NAME}
                 style={{ height: fs(28, 22), width: "auto", display: "block" }}
               />
@@ -352,7 +352,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                   fontFamily: F.body,
                   fontSize: fs(11, 10),
                   fontWeight: 500,
-                  color: P.warmGrayLight,
+                  color: "rgba(255,255,255,0.55)",
                   textTransform: "uppercase",
                   letterSpacing: 0.5,
                 }}
@@ -367,7 +367,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 fontFamily: F.body,
                 fontSize: fs(13, 11),
                 lineHeight: 1.7,
-                color: P.text,
+                color: "rgba(255,255,255,0.72)",
                 margin: 0,
               }}
             >
@@ -400,7 +400,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 style={inlineLinkStyle}
               >
                 View licensed states{" "}
-                <span style={{ color: P.gold, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
+                <span style={{ color: P.goldLight, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
                   ↗
                 </span>
               </a>
@@ -412,7 +412,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
                 style={inlineLinkStyle}
               >
                 NMLS Consumer Access{" "}
-                <span style={{ color: P.gold, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
+                <span style={{ color: P.goldLight, fontSize: 11, marginLeft: 4 }} aria-hidden="true">
                   ↗
                 </span>
               </a>
@@ -432,7 +432,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             fontFamily: F.body,
             fontSize: 11,
             lineHeight: 1.65,
-            color: P.warmGrayLight,
+            color: "rgba(255,255,255,0.55)",
             margin: "0 0 24px",
           }}
         >
@@ -443,7 +443,7 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
             fontFamily: F.body,
             fontSize: 11,
             lineHeight: 1.65,
-            color: P.warmGrayLight,
+            color: "rgba(255,255,255,0.55)",
             margin: 0,
           }}
         >
