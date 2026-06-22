@@ -42,10 +42,34 @@ const MEDIA = {
   landscape: { aspect: "16 / 9", colFlex: "1 1 420px", maxW: 560 },
 };
 
+// Auto-linkify the two known URLs that appear in official disclosure text,
+// keeping the config a plain string. Returns text + <a> nodes.
+const DISCLOSURE_LINKS = [
+  { token: "nmlsconsumeraccess.org", href: "https://nmlsconsumeraccess.org" },
+  { token: "rate.com/same-day-mortgage", href: "https://rate.com/same-day-mortgage" },
+];
+function linkifyDisclosure(text) {
+  if (!text) return text;
+  let parts = [text];
+  for (const { token, href } of DISCLOSURE_LINKS) {
+    parts = parts.flatMap((part) => {
+      if (typeof part !== "string" || !part.includes(token)) return [part];
+      const segs = part.split(token);
+      const out = [];
+      segs.forEach((s, i) => {
+        if (i > 0) out.push(<a key={token + i} href={href} target="_blank" rel="noopener noreferrer" style={{ color: "inherit", textDecoration: "underline" }}>{token}</a>);
+        if (s) out.push(s);
+      });
+      return out;
+    });
+  }
+  return parts;
+}
+
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, videoUrl, videoAspect = "square",
   surface = "charcoal", agentFacing = false, markSlot = null, disclosureSlot = null,
-  disclosurePending = false, fullTermsHref = null,
+  fullTermsHref = null,
 }) {
   const t = SURFACES[surface] || SURFACES.charcoal;
   const m = MEDIA[videoAspect] || MEDIA.square;
@@ -123,21 +147,17 @@ export function ValuePropModule({
             )
           )}
 
-          {/* Reserved fine-print slot. Renders nothing until provided. */}
+          {/* Official on-page fine print (rendered small but AA-legible).
+              Reserved -> renders nothing. Known URLs auto-linkified. */}
           {disclosureSlot ? (
-            <div style={{ marginTop: 22, maxWidth: 560 }}>
-              {disclosurePending && (
-                <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: t.disclosure, marginBottom: 5, opacity: 0.85 }}>
-                  Draft, pending Rate confirmation
-                </span>
-              )}
-              <p style={{ fontFamily: F.body, fontSize: 11, lineHeight: 1.5, color: t.disclosure, margin: 0 }}>
-                {disclosureSlot}
-                {" "}
-                {fullTermsHref ? (
-                  <a href={fullTermsHref} target="_blank" rel="noopener noreferrer" style={{ color: t.disclosure, textDecoration: "underline", fontWeight: 600 }}>Full terms</a>
-                ) : (
-                  <span aria-disabled="true" style={{ textDecoration: "underline", fontWeight: 600 }}>Full terms</span>
+            <div style={{ marginTop: 22, maxWidth: 580 }}>
+              <p style={{ fontFamily: F.body, fontSize: 11.5, lineHeight: 1.55, color: t.disclosure, margin: 0 }}>
+                {linkifyDisclosure(disclosureSlot)}
+                {fullTermsHref && (
+                  <>
+                    {" "}
+                    <a href={fullTermsHref} target="_blank" rel="noopener noreferrer" style={{ color: t.disclosure, textDecoration: "underline", fontWeight: 600 }}>Full terms</a>
+                  </>
                 )}
               </p>
             </div>
