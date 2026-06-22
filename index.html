@@ -13,12 +13,11 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Icons -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Icons (single-notch MG, red-tile set; see Lockup spec §8) -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16.png" />
+    <link rel="icon" type="image/png" href="/favicons/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
 
     <!-- iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -35,13 +34,13 @@
     <meta property="og:description" content="Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mortgagegeek.ai/" />
-    <meta property="og:image" content="https://mortgagegeek.ai/icon-512.png" />
+    <meta property="og:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Mortgage Geek | Mortgages Demystified" />
     <meta name="twitter:description" content="Mortgages demystified. Side-by-side payment calculator with live rates." />
-    <meta name="twitter:image" content="https://mortgagegeek.ai/icon-512.png" />
+    <meta name="twitter:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
 
     <!-- Schema.org Person entity — Nick Peters as verified author of all content on this site.
          Hardcoded in index.html (rather than injected via Helmet) so it's visible in the raw HTML
@@ -97,7 +96,7 @@
       "url": "https://mortgagegeek.ai",
       "description": "Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro.",
       "telephone": "+1-615-656-0737",
-      "image": "https://mortgagegeek.ai/icon-512.png",
+      "image": "https://mortgagegeek.ai/favicons/icon-512.png",
       "address": {
         "@type": "PostalAddress",
         "addressRegion": "TN",

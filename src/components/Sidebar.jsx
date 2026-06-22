@@ -28,7 +28,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             {/* Co-brand lock-up on the white mobile bar: Rate (black) | MG mark + wordmark. */}
             <img src="/rate-2color-black-tight.svg" alt="Rate" width={58} height={24} style={{ display: "block", flexShrink: 0 }} />
             <span aria-hidden="true" style={{ width: 1, height: 24, background: P.creamDark, flexShrink: 0, margin: "0 8px" }} />
-            <img src="/mg-mark-sm.svg" alt="" aria-hidden="true" width={19} height={24} style={{ display: "block", flexShrink: 0 }} />
+            <img src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" width={19} height={24} style={{ display: "block", flexShrink: 0 }} />
             <span style={{ fontFamily: F.display, fontSize: 16, lineHeight: 1, color: P.text, whiteSpace: "nowrap", transform: "translateY(0.05em)" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
           </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
@@ -53,7 +53,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
               }}
               style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer" }}
             >
-              <img src="/mg-mark-cream-sm.svg" alt="" aria-hidden="true" width={34} height={42} style={{ display: "block", margin: "0 auto 6px" }} />
+              <img src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" width={34} height={42} style={{ display: "block", margin: "0 auto 6px" }} />
               <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>Mortgage <span style={{ color: P.goldReverse }}>Geek</span></h1>
             </a>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>

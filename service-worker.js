@@ -4,15 +4,14 @@
 //   - HTML/JS/CSS: network-first with cache fallback (keeps content fresh, works offline)
 //   - API calls (rates, etc.): bypass cache entirely (always live data)
 
-const CACHE_VERSION = 'mortgagegeek-v1';
+const CACHE_VERSION = 'mortgagegeek-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/favicon.svg',
-  '/favicon.png',
-  '/apple-touch-icon.png',
-  '/icon-192.png',
-  '/icon-512.png',
+  '/favicons/favicon.png',
+  '/favicons/apple-touch-icon.png',
+  '/favicons/icon-192.png',
+  '/favicons/icon-512.png',
 ];
 
 // Install: pre-cache static shell

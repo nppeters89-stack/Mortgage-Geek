@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="The Mortgage Geek">
-  <title>The Mortgage Geek</title>
-  <rect width="32" height="32" rx="7" fill="#CF3338"/>
-  <g transform="translate(-0.53 -6.96) scale(0.0324)" shape-rendering="geometricPrecision">
-<path id="main-mark" d="M 511 369 L 698 499 L 640 543 L 511 455 L 382 542 L 322 500 Z M 237 1047 L 312 1047 L 312 624 L 510 769 L 706 624 L 707 752 L 782 752 L 783 476 L 511 675 L 237 476 Z &#xA;M 412 734&#xA;C 386 774 368 815 368 858&#xA;C 368 964 452 1046 520 1047&#xA;L 782 1047&#xA;L 782 824&#xA;L 621 824&#xA;C 608 809 589 799 569 799&#xA;C 540 799 517 823 517 856&#xA;C 517 889 543 912 573 912&#xA;C 594 912 610 902 621 886&#xA;L 641 886&#xA;L 642 904&#xA;L 658 904&#xA;L 659 886&#xA;L 672 886&#xA;L 672 904&#xA;L 687 904&#xA;L 688 886&#xA;L 706 886&#xA;L 707 969&#xA;L 541 970&#xA;C 485 970 445 920 445 857&#xA;C 445 826 456 799 473 778&#xA;L 415 735&#xA;Z&#xA;M 554.4 839&#xA;C 563.2 839 570.4 846.2 570.4 855&#xA;C 570.4 863.8 563.2 871 554.4 871&#xA;C 545.6 871 538.4 863.8 538.4 855&#xA;C 538.4 846.2 545.6 839 554.4 839&#xA;Z&#xA;" fill="#FBF9F5" fill-rule="evenodd"></path>
-    <rect id="window-single" x="470" y="523" width="81" height="81" fill="#FFFFFF"></rect>
-  </g>
-</svg>
