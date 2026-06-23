@@ -129,9 +129,10 @@ export function ValuePropModule({
         <span aria-hidden="true" style={{ fontFamily: F.display, fontSize: "clamp(40px, 8vw, 58px)", lineHeight: 0.7, color: "rgba(207,51,56,0.35)", fontWeight: 400, flexShrink: 0 }}>
           &#125;
         </span>
-        <span style={{ fontFamily: F.body, fontSize: "clamp(16px, 2vw, 20px)", fontWeight: 700, lineHeight: 1.25, color: P.gold }}>
+        <span style={{ fontFamily: F.body, fontSize: "clamp(16px, 2vw, 20px)", fontWeight: 700, lineHeight: 1.25, color: P.gold, flex: 1, minWidth: 0 }}>
           {b.tagline}
         </span>
+        <span aria-hidden="true" style={{ fontSize: 22, color: P.gold, flexShrink: 0, fontWeight: 700 }}>&rarr;</span>
       </>
     );
     const bannerStyle = {
