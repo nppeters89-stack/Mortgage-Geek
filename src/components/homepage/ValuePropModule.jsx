@@ -69,7 +69,7 @@ function linkifyDisclosure(text) {
 
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, ctaExternal = false,
-  ctaMark = null, ctaButton = null,
+  ctaMark = null, ctaButton = null, ctaBanner = null,
   videoUrl, videoAspect = "square", coverFrame = "first", surface = "charcoal",
   agentFacing = false, markSlot = null, disclosureSlot = null, fullTermsHref = null,
 }) {
@@ -109,6 +109,44 @@ export function ValuePropModule({
         {" "}
         <span aria-hidden="true">→</span>
       </>
+    );
+  };
+
+  // Banner-style CTA: a light/outlined pill carrying the product logomark, a
+  // brace divider, and a tagline. Clickable as a whole. ctaBanner = { logoSrc,
+  // logoAlt, logoW, logoH, tagline }.
+  const renderBanner = () => {
+    const b = ctaBanner;
+    const inner = (
+      <>
+        <img
+          src={b.logoSrc}
+          alt={b.logoAlt}
+          width={b.logoW}
+          height={b.logoH}
+          style={{ display: "block", width: "auto", height: "clamp(40px, 7vw, 52px)", flexShrink: 0 }}
+        />
+        <span aria-hidden="true" style={{ fontFamily: F.display, fontSize: "clamp(40px, 8vw, 58px)", lineHeight: 0.7, color: "rgba(207,51,56,0.35)", fontWeight: 400, flexShrink: 0 }}>
+          &#125;
+        </span>
+        <span style={{ fontFamily: F.body, fontSize: "clamp(16px, 2vw, 20px)", fontWeight: 700, lineHeight: 1.25, color: P.gold }}>
+          {b.tagline}
+        </span>
+      </>
+    );
+    const bannerStyle = {
+      display: "flex", alignItems: "center", gap: "clamp(14px, 2.5vw, 24px)",
+      width: "100%", padding: "clamp(16px, 2.5vw, 22px) clamp(20px, 3vw, 28px)",
+      background: "#FFFFFF", border: "1px solid rgba(207,51,56,0.25)",
+      borderRadius: 18, textDecoration: "none", flexWrap: "wrap",
+      boxShadow: "0 2px 14px rgba(0,0,0,0.10)",
+    };
+    return ctaHref ? (
+      <a href={ctaHref} aria-label={b.logoAlt + ": " + b.tagline} {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})} style={bannerStyle}>
+        {inner}
+      </a>
+    ) : (
+      <span role="button" aria-disabled="true" aria-label={b.logoAlt + ": " + b.tagline} style={{ ...bannerStyle, cursor: "default" }}>{inner}</span>
     );
   };
 
@@ -153,8 +191,8 @@ export function ValuePropModule({
           )}
 
           {/* Eyebrow is redundant when the product logomark already names the
-              product, so suppress it whenever a mark is shown. */}
-          {eyebrow && !(markSlot && markSlot.src) && (
+              product (card mark or CTA banner), so suppress it there. */}
+          {eyebrow && !(markSlot && markSlot.src) && !ctaBanner && (
             <span style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: t.eyebrow, marginBottom: 12 }}>
               {eyebrow}
             </span>
@@ -183,7 +221,7 @@ export function ValuePropModule({
             </ul>
           )}
 
-          {ctaLabel && (() => {
+          {ctaBanner ? renderBanner() : ctaLabel && (() => {
             // Accessible name: replace the {mark} token with the mark's alt text.
             const ctaAria = ctaMark && ctaMark.src
               ? ctaLabel.replace("{mark}", ctaMark.alt)

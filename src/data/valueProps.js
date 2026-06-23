@@ -19,11 +19,15 @@ export const VALUE_PROPS = [
     headline: "Make an offer that competes with cash.",
     body: "A verified approval up front, so sellers take you seriously. We do the underwriting work early, so you can shop with confidence.",
     bullets: null,
-    // Logo lives inside the CTA button: "Get [PowerBid] Approved". The white
-    // wordmark needs a dark button, so override to charcoal on the red card.
-    ctaLabel: "Get {mark} Approved",
-    ctaMark: { src: "/powerbid_logo_white_transparent.svg", alt: "PowerBid Approval", w: 1426, h: 397, displayH: 17 },
-    ctaButton: { background: "#131416", color: "#FFFFFF" },
+    // CTA is a banner lock-up: light pill on the red card carrying the full-color
+    // PowerBid mark, a brace divider, and a red tagline. Whole pill is the link.
+    ctaBanner: {
+      logoSrc: "/powerbid_logo_color.svg",
+      logoAlt: "PowerBid Approval",
+      logoW: 1426,
+      logoH: 397,
+      tagline: "Supercharge your offer and show sellers and agents you're ready to buy now.",
+    },
     ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-627ec8b162e66599014400627ec8b162e6a677700321.mp4",
