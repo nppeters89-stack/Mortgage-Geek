@@ -95,9 +95,27 @@ export function ValuePropModule({
     >
       <div style={{ display: "flex", flexWrap: "wrap", gap: "clamp(24px, 4vw, 44px)", alignItems: "center" }}>
         <div style={{ flex: "1 1 360px", minWidth: 0 }}>
-          {/* Reserved slot for the official Rate product mark. Renders nothing
-              until provided — no placeholder text. */}
-          {markSlot ? <div style={{ marginBottom: 16 }}>{markSlot}</div> : null}
+          {/* Official Rate product mark (lock-up). Rendered at its natural
+              aspect — never stretched. width/height from the viewBox prevent
+              layout shift; CSS max-height + width:auto does the visual sizing.
+              Wide wordmarks cap at 40px, near-square badges at 64px. Renders
+              nothing (clean empty space) when no mark is provided. */}
+          {markSlot && markSlot.src ? (
+            <img
+              src={markSlot.src}
+              alt={markSlot.alt}
+              width={markSlot.w}
+              height={markSlot.h}
+              style={{
+                display: "block",
+                width: "auto",
+                height: "auto",
+                maxHeight: markSlot.w / markSlot.h >= 2 ? 40 : 64,
+                maxWidth: "100%",
+                marginBottom: 16,
+              }}
+            />
+          ) : null}
 
           {agentFacing && (
             <span style={{ display: "inline-block", background: P.navy, color: P.cream, fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", padding: "4px 11px", borderRadius: 50, marginBottom: 14 }}>

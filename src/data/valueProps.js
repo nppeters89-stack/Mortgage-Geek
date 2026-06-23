@@ -24,7 +24,8 @@ export const VALUE_PROPS = [
     ctaHref: null, // TODO: Rate funnel URL, pending
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-627ec8b162e66599014400627ec8b162e6a677700321.mp4",
-    mark: null, // RESERVED: official Rate PowerBid Approval mark, pending Rate
+    // White wordmark on the red surface. Natural aspect (~3.6:1), capped ~40px tall.
+    mark: { src: "/powerbid_logo_white_transparent.svg", alt: "PowerBid Approval", w: 1426, h: 397 },
     disclosure: "PowerBid Approval assumes receipt of all required documentation, a re-review of financial condition and may be revoked at any time if there is a change impairing ability to repay and/or if any borrower information is inaccurate or incomplete. Applicant subject to credit and underwriting approval. Restrictions apply.",
     fullTermsHref: null,
     agentFacing: false,
@@ -42,7 +43,8 @@ export const VALUE_PROPS = [
     ctaHref: null, // TODO: Rate funnel URL, pending
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-6410ab5ca4dd49333276696410ab5ca4dda120250890.mp4",
-    mark: null, // RESERVED: official Rate Same Day Mortgage mark, pending Rate
+    // Red+white badge on the charcoal surface. Near-square (~1:1), capped ~64px tall.
+    mark: { src: "/same_day_mortgage_transparent_vector.svg", alt: "Same Day Mortgage", w: 1024, h: 979 },
     // OFFICIAL verbatim. nmlsconsumeraccess.org + rate.com/same-day-mortgage
     // auto-linkified by ValuePropModule. "8 hours" pending Rate confirmation.
     disclosure: "Equal Housing Lender. NMLS ID: 2611. (For licensing information, visit nmlsconsumeraccess.org) Guaranteed Rate's Same Day Mortgage (aka \"FastTrack\") promotion offers qualified customers who provide certain required financial information/documentation within 8 hours of locking a rate on a mortgage loan the opportunity to receive a loan approval within 1 business day of timely submission of documentation and does not suggest that the borrower will receive funding on the same day as their application submission. Guaranteed Rate cannot guarantee that a loan will be approved or that a closing will occur within a specific timeframe. Applicant subject to credit and underwriting approval. Restrictions apply. Visit rate.com/same-day-mortgage for terms and condition.",
