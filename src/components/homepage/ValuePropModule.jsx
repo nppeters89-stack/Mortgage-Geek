@@ -69,6 +69,7 @@ function linkifyDisclosure(text) {
 
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, ctaExternal = false,
+  ctaMark = null, ctaButton = null,
   videoUrl, videoAspect = "square", coverFrame = "first", surface = "charcoal",
   agentFacing = false, markSlot = null, disclosureSlot = null, fullTermsHref = null,
 }) {
@@ -81,6 +82,34 @@ export function ValuePropModule({
     fontFamily: F.body, fontSize: 15, fontWeight: 600,
     textDecoration: "none", letterSpacing: 0.2, border: "none",
     ...t.cta,
+    ...(ctaButton || {}), // per-module override so a logo reads on the button
+  };
+
+  // CTA label may embed a {mark} token replaced by the product logomark inline,
+  // so the button reads e.g. "Get [PowerBid] Approved". width/height from the
+  // viewBox prevent layout shift; displayH sets the rendered height.
+  const renderCtaContent = () => {
+    const inlineMark = ctaMark && ctaMark.src ? (
+      <img
+        key="ctamark"
+        src={ctaMark.src}
+        alt={ctaMark.alt}
+        width={ctaMark.w}
+        height={ctaMark.h}
+        style={{ display: "inline-block", width: "auto", height: ctaMark.displayH || 18, verticalAlign: "middle", margin: "0 2px" }}
+      />
+    ) : null;
+    const label = ctaLabel || "";
+    const pieces = inlineMark && label.includes("{mark}")
+      ? label.split("{mark}").flatMap((seg, i) => (i === 0 ? [seg] : [inlineMark, seg]))
+      : [inlineMark, label].filter(Boolean);
+    return (
+      <>
+        {pieces.map((p, i) => (typeof p === "string" ? <span key={i}>{p}</span> : p))}
+        {" "}
+        <span aria-hidden="true">→</span>
+      </>
+    );
   };
 
   return (
@@ -154,23 +183,28 @@ export function ValuePropModule({
             </ul>
           )}
 
-          {ctaLabel && (
-            ctaHref ? (
+          {ctaLabel && (() => {
+            // Accessible name: replace the {mark} token with the mark's alt text.
+            const ctaAria = ctaMark && ctaMark.src
+              ? ctaLabel.replace("{mark}", ctaMark.alt)
+              : ctaLabel;
+            return ctaHref ? (
               <a
                 href={ctaHref}
+                aria-label={ctaAria}
                 {...(ctaExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 style={ctaStyle}
               >
-                {ctaLabel} <span aria-hidden="true">→</span>
+                {renderCtaContent()}
               </a>
             ) : (
               // ctaHref pending (Rate funnel URL). Render the button visually but
               // inert until the URL is added in config — no dead anchor.
-              <span role="button" aria-disabled="true" style={{ ...ctaStyle, cursor: "default" }}>
-                {ctaLabel} <span aria-hidden="true">→</span>
+              <span role="button" aria-disabled="true" aria-label={ctaAria} style={{ ...ctaStyle, cursor: "default" }}>
+                {renderCtaContent()}
               </span>
-            )
-          )}
+            );
+          })()}
 
           {/* Official on-page fine print (rendered small but AA-legible).
               Reserved -> renders nothing. Known URLs auto-linkified. */}
