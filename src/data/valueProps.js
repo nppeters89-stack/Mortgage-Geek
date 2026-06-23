@@ -1,7 +1,6 @@
 // Homepage sales-body value-prop modules — DATA-DRIVEN and ASSET-INDEPENDENT.
 //
 // Remaining gated bits stay reserved so they slot in via config, not a rebuild:
-//   ctaHref (PowerBid, Same Day) -> approved Rate funnel URL (TODO, pending)
 //   mark -> official Rate product mark/lockup (RESERVED, null for now)
 //
 // Disclosures are OFFICIAL verbatim fine print. NOTE: the Same Day "8 hours"
@@ -21,10 +20,10 @@ export const VALUE_PROPS = [
     body: "A verified approval up front, so sellers take you seriously. We do the underwriting work early, so you can shop with confidence.",
     bullets: null,
     ctaLabel: "Get PowerBid Approved",
-    ctaHref: null, // TODO: Rate funnel URL, pending
+    ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-627ec8b162e66599014400627ec8b162e6a677700321.mp4",
-    // White wordmark on the red surface. Natural aspect (~3.6:1), capped ~40px tall.
+    // White wordmark on the red surface. Natural aspect (~3.6:1).
     mark: { src: "/powerbid_logo_white_transparent.svg", alt: "PowerBid Approval", w: 1426, h: 397 },
     disclosure: "PowerBid Approval assumes receipt of all required documentation, a re-review of financial condition and may be revoked at any time if there is a change impairing ability to repay and/or if any borrower information is inaccurate or incomplete. Applicant subject to credit and underwriting approval. Restrictions apply.",
     fullTermsHref: null,
@@ -40,10 +39,10 @@ export const VALUE_PROPS = [
     body: "Get your documents in early and you can have a loan approval within one business day. Less waiting, more house hunting.",
     bullets: null,
     ctaLabel: "See if you qualify",
-    ctaHref: null, // TODO: Rate funnel URL, pending
+    ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-6410ab5ca4dd49333276696410ab5ca4dda120250890.mp4",
-    // Red+white badge on the charcoal surface. Near-square (~1:1), capped ~64px tall.
+    // Red+white badge on the charcoal surface. Near-square (~1:1).
     mark: { src: "/same_day_mortgage_transparent_vector.svg", alt: "Same Day Mortgage", w: 1024, h: 979 },
     // OFFICIAL verbatim. nmlsconsumeraccess.org + rate.com/same-day-mortgage
     // auto-linkified by ValuePropModule. "8 hours" pending Rate confirmation.

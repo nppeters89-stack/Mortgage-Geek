@@ -110,7 +110,7 @@ export function ValuePropModule({
                 display: "block",
                 width: "auto",
                 height: "auto",
-                maxHeight: markSlot.w / markSlot.h >= 2 ? 40 : 64,
+                maxHeight: markSlot.w / markSlot.h >= 2 ? 58 : 92,
                 maxWidth: "100%",
                 marginBottom: 16,
               }}
@@ -123,7 +123,9 @@ export function ValuePropModule({
             </span>
           )}
 
-          {eyebrow && (
+          {/* Eyebrow is redundant when the product logomark already names the
+              product, so suppress it whenever a mark is shown. */}
+          {eyebrow && !(markSlot && markSlot.src) && (
             <span style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: 2.2, textTransform: "uppercase", color: t.eyebrow, marginBottom: 12 }}>
               {eyebrow}
             </span>
