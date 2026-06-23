@@ -69,7 +69,7 @@ function linkifyDisclosure(text) {
 
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, ctaExternal = false,
-  ctaMark = null, ctaButton = null, ctaBanner = null,
+  ctaMark = null, ctaButton = null, ctaBanner = null, headlineFootnote = null,
   videoUrl, videoAspect = "square", coverFrame = "first", surface = "charcoal",
   agentFacing = false, markSlot = null, disclosureSlot = null, fullTermsHref = null,
 }) {
@@ -202,6 +202,9 @@ export function ValuePropModule({
           {headline && (
             <h2 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3.2vw, 34px)", fontWeight: 400, color: t.headline, lineHeight: 1.18, marginBottom: body ? 14 : 22 }}>
               {headline}
+              {headlineFootnote && (
+                <sup style={{ fontSize: "0.5em", fontWeight: 600, marginLeft: 2, verticalAlign: "super", opacity: 0.8 }}>{headlineFootnote}</sup>
+              )}
             </h2>
           )}
 

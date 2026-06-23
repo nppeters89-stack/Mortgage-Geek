@@ -32,7 +32,23 @@ import {
   NMLS_CONSUMER_ACCESS_URL,
   LICENSING_URL,
   CORPORATE_DISCLOSURE,
+  PRODUCT_FOOTNOTES,
 } from "../data/compliance";
+
+// Linkify the one product URL that appears in the footnotes (rate.com/same-day-
+// mortgage), keeping the config a plain string.
+function renderFootnote(text) {
+  const token = "rate.com/same-day-mortgage";
+  if (!text.includes(token)) return text;
+  const [before, after] = text.split(token);
+  return (
+    <>
+      {before}
+      <a href="https://rate.com/same-day-mortgage" target="_blank" rel="noopener noreferrer" className="mg-footer-link" style={{ color: "inherit", textDecoration: "underline" }}>{token}</a>
+      {after}
+    </>
+  );
+}
 
 // Phone display string normalized to a tel: href ("(615) 656-0737" → "6156560737").
 const telHref = (display) => `tel:${display.replace(/\D/g, "")}`;
@@ -438,6 +454,25 @@ export function SiteFooter({ hasSidebar = false, layout = "home" }) {
         >
           This content is for educational purposes only and does not constitute financial advice. Loan programs, rates, terms, and guidelines are subject to change without notice. Always consult directly with a licensed mortgage professional for guidance specific to your situation. All applicants are subject to underwriting approval.
         </p>
+
+        {/* Product footnotes — referenced by the * / ** markers on the homepage
+            PowerBid and Same Day cards. */}
+        {PRODUCT_FOOTNOTES.map((f) => (
+          <p
+            key={f.marker}
+            style={{
+              fontFamily: F.body,
+              fontSize: 11,
+              lineHeight: 1.65,
+              color: "rgba(255,255,255,0.55)",
+              margin: "0 0 16px",
+            }}
+          >
+            <span style={{ fontWeight: 700, marginRight: 4 }}>{f.marker}</span>
+            {renderFootnote(f.text)}
+          </p>
+        ))}
+
         <p
           style={{
             fontFamily: F.body,

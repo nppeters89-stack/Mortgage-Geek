@@ -17,6 +17,7 @@ export const VALUE_PROPS = [
     coverFrame: "first",
     eyebrow: "PowerBid Approval",
     headline: "Make an offer that competes with cash.",
+    headlineFootnote: "*", // references the PowerBid footnote in the footer
     body: "A verified approval up front, so sellers take you seriously. We do the underwriting work early, so you can shop with confidence.",
     bullets: null,
     // CTA is a banner lock-up: light pill on the red card carrying the full-color
@@ -31,8 +32,8 @@ export const VALUE_PROPS = [
     ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
     videoUrl: "https://totalexpert.net/org_media/00124/00124-627ec8b162e66599014400627ec8b162e6a677700321.mp4",
-    mark: null, // logomark now lives in the CTA button (above)
-    disclosure: "PowerBid Approval assumes receipt of all required documentation, a re-review of financial condition and may be revoked at any time if there is a change impairing ability to repay and/or if any borrower information is inaccurate or incomplete. Applicant subject to credit and underwriting approval. Restrictions apply.",
+    mark: null, // logomark now lives in the CTA banner (above)
+    disclosure: null, // moved to the footer footnote (marker *)
     fullTermsHref: null,
     agentFacing: false,
   },
@@ -43,6 +44,7 @@ export const VALUE_PROPS = [
     coverFrame: "last",
     eyebrow: "Same Day Mortgage",
     headline: "An approval in a day, if you qualify.",
+    headlineFootnote: "**", // references the Same Day footnote in the footer
     body: "Get your documents in early and you can have a loan approval within one business day. Less waiting, more house hunting.",
     bullets: null,
     ctaLabel: "See if you qualify",
@@ -53,9 +55,7 @@ export const VALUE_PROPS = [
     // red+white badge disappears on a white pill. On charcoal it reads cleanly.
     // Card mark also suppresses the redundant "Same Day Mortgage" eyebrow text.
     mark: { src: "/same_day_mortgage_transparent_vector.svg", alt: "Same Day Mortgage", w: 1024, h: 979 },
-    // OFFICIAL verbatim. nmlsconsumeraccess.org + rate.com/same-day-mortgage
-    // auto-linkified by ValuePropModule. "8 hours" pending Rate confirmation.
-    disclosure: "Equal Housing Lender. NMLS ID: 2611. (For licensing information, visit nmlsconsumeraccess.org) Guaranteed Rate's Same Day Mortgage (aka \"FastTrack\") promotion offers qualified customers who provide certain required financial information/documentation within 8 hours of locking a rate on a mortgage loan the opportunity to receive a loan approval within 1 business day of timely submission of documentation and does not suggest that the borrower will receive funding on the same day as their application submission. Guaranteed Rate cannot guarantee that a loan will be approved or that a closing will occur within a specific timeframe. Applicant subject to credit and underwriting approval. Restrictions apply. Visit rate.com/same-day-mortgage for terms and condition.",
+    disclosure: null, // moved to the footer footnote (marker **)
     fullTermsHref: null,
     agentFacing: false,
   },
