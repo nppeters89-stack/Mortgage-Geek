@@ -12,6 +12,8 @@ const css = `
   .ed-section { background: ${HOME.cream}; padding: 80px 56px; }
   .ed-wrap { max-width: 1240px; margin: 0 auto; }
   .ed-head { max-width: 760px; margin-bottom: 44px; }
+  /* Learning Hub identity mark by the section heading (full, page-lines version). */
+  .ed-mark { height: 52px; width: auto; display: block; margin: 0 0 18px; }
   .ed-label { font-family: ${F.sans}; font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: ${HOME.red}; margin: 0 0 14px; }
   .ed-h2 { font-family: ${F.sans}; font-size: 64px; font-weight: 800; letter-spacing: -.035em; line-height: .98; color: ${HOME.ink}; margin: 0; }
   .ed-underline { width: 60px; height: 4px; background: ${HOME.red}; margin: 18px 0 22px; border-radius: 2px; }
@@ -21,6 +23,11 @@ const css = `
   .ed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
   .ed-card { background: ${HOME.white}; border: 1px solid ${HOME.borderCard}; border-radius: 16px; padding: 28px; transition: transform .25s ease, box-shadow .25s ease; }
   .ed-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,.08); }
+  /* Learning Hub badge on each guide card: 38px charcoal rounded square + cream mark. */
+  .ed-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .ed-badge { width: 38px; height: 38px; border-radius: 10px; background: ${HOME.charcoal}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ed-badge img { width: 22px; height: auto; display: block; }
+  .ed-eyebrow { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9C988F; }
   .ed-idx { font-family: ${F.sans}; font-size: 14px; font-weight: 800; color: ${HOME.red}; }
   .ed-card-h3 { font-family: ${F.sans}; font-size: 21px; font-weight: 700; letter-spacing: -.01em; color: ${HOME.ink}; margin: 14px 0 8px; }
   .ed-card-b { font-family: ${F.sans}; font-size: 15px; line-height: 1.55; color: ${HOME.textSecondary}; margin: 0; }
@@ -38,6 +45,7 @@ export function Education() {
       <style>{css}</style>
       <div className="ed-wrap">
         <div className="ed-head">
+          <img className="ed-mark" src="/assets/learning-hub-mark.svg" alt="Mortgage Geek Learning Hub" />
           <p className="ed-label">Just here to learn?</p>
           <h2 className="ed-h2">Mortgage education<br />and guides.</h2>
           <div className="ed-underline" aria-hidden="true" />
@@ -47,6 +55,10 @@ export function Education() {
         <div className="ed-grid">
           {CARDS.map((c) => (
             <a key={c.n} className="ed-card" href="/learn" style={{ textDecoration: "none", display: "block" }}>
+              <div className="ed-card-top">
+                <span className="ed-badge"><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" aria-hidden="true" /></span>
+                <span className="ed-eyebrow">Learning Hub · Guide</span>
+              </div>
               <span className="ed-idx">{c.n}</span>
               <h3 className="ed-card-h3">{c.h}</h3>
               <p className="ed-card-b">{c.b}</p>

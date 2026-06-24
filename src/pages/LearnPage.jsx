@@ -246,6 +246,16 @@ export function LearnPage() {
     return () => observer.disconnect();
   }, []);
 
+  // Learning Hub pages use the Learning Hub favicon (open-book mark). Swap the
+  // SVG icon link on mount; restore the site default on unmount.
+  useEffect(() => {
+    const link = document.querySelector('link[rel="icon"][type="image/svg+xml"]')
+      || (() => { const l = document.createElement("link"); l.rel = "icon"; l.type = "image/svg+xml"; document.head.appendChild(l); return l; })();
+    const prev = link.getAttribute("href");
+    link.setAttribute("href", "/favicons/learning-hub-favicon.svg");
+    return () => { if (prev) link.setAttribute("href", prev); else link.remove(); };
+  }, []);
+
   return (
     <div className="app-root" style={{ fontFamily: F.body, color: P.text, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
       <SEOHead

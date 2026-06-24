@@ -46,7 +46,10 @@ export function HomeHeader() {
           </span>
         </a>
         <nav style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <a className="home-nav-secondary" href="/learn" style={{ fontFamily: F.sans, fontSize: 15, fontWeight: 600, color: HOME.ink, textDecoration: "none" }}>Learn</a>
+          <a className="home-nav-secondary" href="/learn" style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: F.sans, fontSize: 15, fontWeight: 700, color: HOME.ink, textDecoration: "none" }}>
+            <img src="/assets/learning-hub-mark-sm.svg" alt="" aria-hidden="true" width={22} height={18} style={{ display: "block" }} />
+            Learning Hub
+          </a>
           <a
             href="https://rate.com/nickpeters" target="_blank" rel="noopener noreferrer"
             aria-label="Apply now with Nick Peters at Rate (opens rate.com in a new tab)"

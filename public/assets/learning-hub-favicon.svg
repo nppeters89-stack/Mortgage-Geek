@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Learning Hub">
+  <title>Mortgage Geek — Learning Hub</title>
+  <rect width="64" height="64" rx="15" fill="#24272A"></rect>
+  <g transform="translate(14.000 17.375) scale(0.28125)" fill="none" stroke="#F6F5F3" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M64 28 C46 19 26 19 12 25 L12 80 C26 74 46 74 64 83"></path>
+    <path d="M64 28 C82 19 102 19 116 25 L116 80 C102 74 82 74 64 83"></path>
+    <path d="M64 27 L64 84" stroke="#E2575B" stroke-width="10"></path>
+  </g>
+</svg>
