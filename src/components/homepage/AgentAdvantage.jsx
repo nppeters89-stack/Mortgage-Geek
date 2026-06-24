@@ -14,7 +14,10 @@ const css = `
   .aa-body { font-family: ${F.sans}; font-size: 18px; line-height: 1.55; color: ${HOME.textOnDark}; margin: 0 0 28px; max-width: 440px; }
   .aa-cta { display: inline-flex; align-items: center; gap: 8px; font-family: ${F.sans}; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 10px; padding: 14px 24px; min-height: 44px; box-sizing: border-box; background: ${HOME.white}; color: ${HOME.ink}; transition: transform .2s ease; }
   .aa-cta:hover { transform: translateY(-2px); }
-  .aa-tile { position: relative; aspect-ratio: 16/9; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 24px 60px rgba(0,0,0,.4); background: linear-gradient(150deg, #3A3D42, ${HOME.charcoal}); }
+  /* Tile matches the overview clip's native 4:5 portrait aspect, so the video
+     fills it with no crop and keeps full resolution. Capped + centered in the
+     column so it doesn't tower. */
+  .aa-tile { position: relative; aspect-ratio: 4/5; width: 100%; max-width: 380px; margin: 0 auto; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 24px 60px rgba(0,0,0,.4); background: linear-gradient(150deg, #3A3D42, ${HOME.charcoal}); }
   .aa-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .aa-facade { position: absolute; inset: 0; width: 100%; height: 100%; border: none; cursor: pointer; background: linear-gradient(150deg, #3A3D42, ${HOME.charcoal}); display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
   .aa-play { display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 84px; border-radius: 50%; background: ${HOME.red}; box-shadow: 0 8px 24px rgba(0,0,0,.4); }

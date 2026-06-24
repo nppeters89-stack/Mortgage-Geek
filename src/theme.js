@@ -33,11 +33,11 @@ export const PROGRAM_COLORS = {
 };
 
 export const F = {
-  display: "'Instrument Serif', Georgia, serif",
-  body: "'DM Sans', -apple-system, sans-serif",
-  // Rate's web typeface. Scoped to the editorial homepage (per the design
-  // handoff: "Figtree everywhere, no serif" on the homepage). The rest of the
-  // site keeps the serif display + DM Sans body.
+  // Rate's web typeface, now site-wide for congruence with the editorial
+  // homepage. display/body/sans all resolve to Figtree; the only exceptions are
+  // the locked wordmark glyphs (MORTGAGE = DM Sans 700, GEEK = Archivo 800).
+  display: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
+  body: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
   sans: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
 };
 
@@ -76,7 +76,7 @@ export const HOME = {
 };
 
 export const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   ::selection { background: #CF3338; color: #fff; }
   html { background: #F6F5F3; overscroll-behavior-y: none; }
@@ -119,26 +119,26 @@ export const globalCSS = `
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
   .hamburger { background: none; border: none; color: #24272A; font-size: 22px; cursor: pointer; }
 
-  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
   .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
   .nav-btn-active { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
 
   .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #E0DDD6; background: #fff; color: #9A9DA2; cursor: pointer; transition: all 0.15s; }
+  .tab-btn { font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #E0DDD6; background: #fff; color: #9A9DA2; cursor: pointer; transition: all 0.15s; }
   .tab-btn:hover { border-color: #24272A; color: #24272A; }
   .tab-btn-active { background: #24272A !important; color: #fff !important; border-color: #24272A !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6E7176; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'Figtree', sans-serif; font-size: 13px; color: #6E7176; cursor: pointer; text-align: left; transition: all 0.15s; }
   .process-step:hover { background: rgba(255,255,255,0.6); }
   .process-step-active { background: #fff !important; color: #16171A !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #9A9DA2; min-width: 28px; line-height: 1.3; }
+  .process-num { font-family: 'Figtree', sans-serif; font-weight: 700; font-size: 20px; color: #9A9DA2; min-width: 28px; line-height: 1.3; }
   .process-num-active { color: #CF3338 !important; }
   .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #24272A; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'Figtree', sans-serif; font-size: 15px; font-weight: 600; color: #24272A; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
   .costs-cat-head:hover { background: #F6F5F3; }
   .costs-cat-head-active { background: #24272A !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
