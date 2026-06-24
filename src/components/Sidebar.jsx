@@ -64,7 +64,6 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                 </span>
               </span>
             </a>
-            <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <a href="/about" style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textDecoration: "none", marginTop: 6, display: "inline-block", transition: "color 0.15s" }} onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.7)"} onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.35)"}>About Nick →</a>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}><a href="tel:+16156560737" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>(615) 656-0737</a></p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>NMLS #1119524</p>
