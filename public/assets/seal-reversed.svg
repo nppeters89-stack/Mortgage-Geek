@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" role="img" aria-label="The Five-Step Process for real estate agents">
+  <title>Mortgage Geek — The Five-Step Process seal (reversed, cream)</title>
+  <defs>
+    <path id="arcTopR" d="M 46 150 A 104 104 0 0 1 254 150" fill="none"></path>
+    <path id="arcBotR" d="M 48 150 A 102 102 0 0 0 252 150" fill="none"></path>
+  </defs>
+  <circle cx="150" cy="150" r="150" fill="#F6F5F3"></circle>
+  <circle cx="150" cy="150" r="135" fill="none" stroke="#CF3338" stroke-opacity="0.6" stroke-width="1.5"></circle>
+  <text font-family="&#39;DM Sans&#39;, Arial, sans-serif" font-weight="700" font-size="13.5" letter-spacing="3.4" fill="#16171A"><textPath href="#arcTopR" startOffset="50%" text-anchor="middle">THE FIVE-STEP PROCESS</textPath></text>
+  <text font-family="&#39;DM Sans&#39;, Arial, sans-serif" font-weight="700" font-size="11" letter-spacing="2.4" fill="#82858A"><textPath href="#arcBotR" startOffset="50%" text-anchor="middle">FOR REAL ESTATE AGENTS</textPath></text>
+  <rect x="-3" y="-3" width="6" height="6" fill="#CF3338" transform="translate(14 150) rotate(45)"></rect>
+  <rect x="-3" y="-3" width="6" height="6" fill="#CF3338" transform="translate(286 150) rotate(45)"></rect>
+  <text x="150" y="150" font-family="&#39;Figtree&#39;, Arial, sans-serif" font-weight="900" font-size="132" fill="#16171A" text-anchor="middle" dominant-baseline="central">5</text>
+</svg>
