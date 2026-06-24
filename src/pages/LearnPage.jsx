@@ -267,9 +267,13 @@ export function LearnPage() {
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
         <Page>
-          <header style={{ padding: "56px 0 8px", maxWidth: 720 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 12 }}>The Mortgage Geek Learning Hub</span>
-            <h1 style={{ fontFamily: F.display, fontSize: "clamp(30px, 4.5vw, 46px)", fontWeight: 400, color: P.navy, lineHeight: 1.15, marginBottom: 12 }}>
+          <header style={{ padding: "56px 0 8px", maxWidth: 760 }}>
+            {/* Pronounced Learning Hub identity: open-book mark + bold wordmark. */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
+              <img src="/assets/learning-hub-mark.svg" alt="" aria-hidden="true" style={{ height: "clamp(48px, 7vw, 72px)", width: "auto", display: "block" }} />
+              <span style={{ fontFamily: F.display, fontSize: "clamp(30px, 5vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", color: P.navy, lineHeight: 1 }}>Learning Hub</span>
+            </div>
+            <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 400, color: P.navy, lineHeight: 1.15, marginBottom: 12 }}>
               Mortgages, <span style={{ color: P.gold }}>demystified.</span>
             </h1>
             <p style={{ fontSize: 16, lineHeight: 1.7, color: P.warmGray, maxWidth: 560 }}>
