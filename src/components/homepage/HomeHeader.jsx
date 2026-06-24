@@ -1,4 +1,4 @@
-import { P, F } from "../../theme";
+import { P, F, HOME } from "../../theme";
 
 // Slim homepage header (sales page). The homepage no longer renders the Sidebar
 // (that moved to /learn), so this is the homepage's only top chrome: the Rate
@@ -15,8 +15,10 @@ export function HomeHeader() {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        background: "#FFFFFF",
-        borderBottom: `1px solid ${P.creamDark}`,
+        background: "rgba(255,255,255,0.92)",
+        WebkitBackdropFilter: "blur(10px)",
+        backdropFilter: "blur(10px)",
+        borderBottom: `1px solid ${HOME.borderLight}`,
         paddingTop: "calc(14px + env(safe-area-inset-top, 0px))",
         paddingBottom: 14,
         paddingLeft: "clamp(20px, 4vw, 40px)",
@@ -43,15 +45,21 @@ export function HomeHeader() {
             </span>
           </span>
         </a>
-        <nav style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          <a className="home-nav-secondary" href="/learn" style={{ fontFamily: F.body, fontSize: 14, fontWeight: 600, color: P.text, textDecoration: "none" }}>Learn</a>
-          <a href="https://rate.com/nickpeters" target="_blank" rel="noopener noreferrer" aria-label="Apply now with Nick Peters at Rate (opens rate.com in a new tab)" style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            padding: "10px 18px", borderRadius: 10,
-            background: P.gold, color: "#fff",
-            fontFamily: F.body, fontSize: 14, fontWeight: 600,
-            textDecoration: "none", letterSpacing: 0.2, whiteSpace: "nowrap",
-          }}>Apply Now</a>
+        <nav style={{ display: "flex", alignItems: "center", gap: 22 }}>
+          <a className="home-nav-secondary" href="/learn" style={{ fontFamily: F.sans, fontSize: 15, fontWeight: 600, color: HOME.ink, textDecoration: "none" }}>Learn</a>
+          <a
+            href="https://rate.com/nickpeters" target="_blank" rel="noopener noreferrer"
+            aria-label="Apply now with Nick Peters at Rate (opens rate.com in a new tab)"
+            onMouseEnter={(e) => (e.currentTarget.style.background = HOME.redHover)}
+            onMouseLeave={(e) => (e.currentTarget.style.background = HOME.red)}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "11px 22px", borderRadius: 8,
+              background: HOME.red, color: "#fff",
+              fontFamily: F.sans, fontSize: 15, fontWeight: 700,
+              textDecoration: "none", whiteSpace: "nowrap", minHeight: 44, boxSizing: "border-box",
+            }}
+          >Apply Now</a>
         </nav>
       </div>
     </header>

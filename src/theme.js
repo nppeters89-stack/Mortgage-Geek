@@ -35,10 +35,48 @@ export const PROGRAM_COLORS = {
 export const F = {
   display: "'Instrument Serif', Georgia, serif",
   body: "'DM Sans', -apple-system, sans-serif",
+  // Rate's web typeface. Scoped to the editorial homepage (per the design
+  // handoff: "Figtree everywhere, no serif" on the homepage). The rest of the
+  // site keeps the serif display + DM Sans body.
+  sans: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
+};
+
+// Editorial-homepage palette (design handoff). Kept separate from P so the rest
+// of the site's tokens are untouched; values that match existing P tokens are
+// noted. Colors live here (not in components) per the no-hardcoded-hex rule.
+export const HOME = {
+  red: "#CF3338",          // = P.gold (Arrow Red, primary)
+  redHover: "#B82A2F",
+  redGradFrom: "#D6373C",
+  redGradTo: "#B82A2F",
+  brightRed: "#FF5A5F",    // eyebrows on dark, "+" in stats
+  ink: "#16171A",          // = P.text
+  darkStage: "#181A1C",
+  charcoal: "#202225",
+  cream: "#F6F5F3",        // = P.cream
+  warmWhite: "#FFFEFB",    // = P.creamLight
+  white: "#FFFFFF",
+  textSecondary: "#5E6166",
+  textMuted: "#82858A",
+  textMuted2: "#9A9DA2",
+  textOnDark: "#C9CBCE",
+  footerMuted: "#6E7176",
+  borderLight: "#E0DDD6",  // = P.creamDark
+  borderCard: "#E4E5E7",
+  borderHairline: "#EFEEE9",
+  lockupDivLight: "#C7C4BC",
+  lockupDivDark: "#4A4B4E",
+  darkDivider: "#2A2C2F",
+  dotInactive: "#D8D5CE",
+  // Red-card text tints (light text/fine print on the red PowerBid card)
+  redTint1: "#FBE3E4",
+  redTint2: "#FBD2D3",
+  redTint3: "#FBC9CB",
+  redTint4: "#F4B9BB",
 };
 
 export const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   ::selection { background: #CF3338; color: #fff; }
   html { background: #F6F5F3; overscroll-behavior-y: none; }
