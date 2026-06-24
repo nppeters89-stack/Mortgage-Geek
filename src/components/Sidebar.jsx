@@ -25,11 +25,17 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             }}
             style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none", color: "inherit", cursor: "pointer", minWidth: 0 }}
           >
-            {/* Co-brand lock-up on the white mobile bar: Rate (black) | MG mark + wordmark. */}
+            {/* Co-brand lock-up on the white mobile bar: Rate (black) | divider |
+                MG lock-up (MORTGAGE / GEEK + new single-notch mark, light variant). */}
             <img src="/rate-2color-black-tight.svg" alt="Rate" width={58} height={24} style={{ display: "block", flexShrink: 0 }} />
             <span aria-hidden="true" style={{ width: 1, height: 24, background: P.creamDark, flexShrink: 0, margin: "0 8px" }} />
-            <img src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" width={19} height={24} style={{ display: "block", flexShrink: 0 }} />
-            <span style={{ fontFamily: F.display, fontSize: 16, lineHeight: 1, color: P.text, whiteSpace: "nowrap", transform: "translateY(0.05em)" }}>Mortgage <span style={{ color: P.gold }}>Geek</span></span>
+            <span className="mg-lockup mg--light" style={{ "--mg-h": "26px" }}>
+              <img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+              <span className="mg-lockup__words">
+                <span className="mg-lockup__top">Mortgage</span>
+                <span className="mg-lockup__geek">Geek</span>
+              </span>
+            </span>
           </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
             {mobileOpen ? "✕" : "☰"}
