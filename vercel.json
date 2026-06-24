@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/learn", "destination": "/" },
     { "source": "/getting-started", "destination": "/" },
     { "source": "/process", "destination": "/" },
     { "source": "/types", "destination": "/" },
