@@ -72,7 +72,7 @@ function linkifyDisclosure(text) {
 
 export function ValuePropModule({
   eyebrow, headline, body, bullets, ctaLabel, ctaHref, ctaExternal = false,
-  ctaMark = null, ctaButton = null, ctaBanner = null, headlineFootnote = null,
+  ctaMark = null, ctaButton = null, ctaBanner = null, ctaSideMark = null, headlineFootnote = null,
   videoUrl, videoAspect = "square", coverFrame = "first", surface = "charcoal",
   agentFacing = false, markSlot = null, disclosureSlot = null, fullTermsHref = null,
 }) {
@@ -228,12 +228,12 @@ export function ValuePropModule({
             </ul>
           )}
 
-          {ctaBanner ? renderBanner() : ctaLabel && (() => {
+          {ctaBanner ? renderBanner() : (ctaLabel || (ctaSideMark && ctaSideMark.src)) && (() => {
             // Accessible name: replace the {mark} token with the mark's alt text.
             const ctaAria = ctaMark && ctaMark.src
               ? ctaLabel.replace("{mark}", ctaMark.alt)
               : ctaLabel;
-            return ctaHref ? (
+            const ctaEl = ctaLabel && (ctaHref ? (
               <a
                 href={ctaHref}
                 aria-label={ctaAria}
@@ -248,6 +248,21 @@ export function ValuePropModule({
               <span role="button" aria-disabled="true" aria-label={ctaAria} style={{ ...ctaStyle, cursor: "default" }}>
                 {renderCtaContent()}
               </span>
+            ));
+            // ctaSideMark sits to the right of the button (e.g. the Same Day badge).
+            return (
+              <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap" }}>
+                {ctaEl}
+                {ctaSideMark && ctaSideMark.src && (
+                  <img
+                    src={ctaSideMark.src}
+                    alt={ctaSideMark.alt}
+                    width={ctaSideMark.w}
+                    height={ctaSideMark.h}
+                    style={{ display: "block", width: "auto", height: ctaSideMark.displayH || 64, flexShrink: 0 }}
+                  />
+                )}
+              </div>
             );
           })()}
 

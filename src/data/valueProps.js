@@ -42,7 +42,7 @@ export const VALUE_PROPS = [
     surface: "charcoal",
     videoAspect: "square", // clip is 1080x1080 (1:1)
     coverFrame: "last",
-    eyebrow: "Same Day Mortgage",
+    eyebrow: null, // product named by the badge beside the CTA; no top eyebrow text
     headline: "An approval in a day, if you qualify.",
     headlineFootnote: "**", // references the Same Day footnote in the footer
     body: "Get your documents in early and you can have a loan approval within one business day. Less waiting, more house hunting.",
@@ -50,11 +50,10 @@ export const VALUE_PROPS = [
     ctaLabel: "See if you qualify",
     ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
+    // Badge sits to the right of the CTA button (reads cleanly on charcoal).
+    ctaSideMark: { src: "/same_day_mortgage_transparent_vector.svg", alt: "Same Day Mortgage", w: 1024, h: 979, displayH: 60 },
     videoUrl: "https://totalexpert.net/org_media/00124/00124-6410ab5ca4dd49333276696410ab5ca4dda120250890.mp4",
-    // Badge lives on the card (above the headline), not in the button: the
-    // red+white badge disappears on a white pill. On charcoal it reads cleanly.
-    // Card mark also suppresses the redundant "Same Day Mortgage" eyebrow text.
-    mark: { src: "/same_day_mortgage_transparent_vector.svg", alt: "Same Day Mortgage", w: 1024, h: 979 },
+    mark: null, // badge moved next to the CTA button (ctaSideMark)
     disclosure: null, // moved to the footer footnote (marker **)
     fullTermsHref: null,
     agentFacing: false,
