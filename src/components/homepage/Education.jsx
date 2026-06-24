@@ -1,5 +1,5 @@
 import { HOME, F } from "../../theme";
-import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon } from "../icons";
+import { MortgageCalcIcon } from "../icons";
 
 // Education hub (design handoff §5) — three refined entry cards:
 //   01 the learning hub home (comprehensive guide), 02 Deep Dives, 03 Your Toolkit.
@@ -27,7 +27,6 @@ const css = `
   .ed-badge { width: 40px; height: 40px; border-radius: 10px; background: ${HOME.charcoal}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ed-badge img { width: 24px; height: auto; display: block; }
   .ed-whale { font-size: 22px; line-height: 1; }
-  .ed-tools { display: inline-flex; align-items: center; gap: 8px; }
   .ed-idx { font-family: ${F.sans}; font-size: 14px; font-weight: 800; color: ${HOME.red}; }
   .ed-card-h3 { font-family: ${F.sans}; font-size: 21px; font-weight: 700; letter-spacing: -.01em; color: ${HOME.ink}; margin: 0 0 8px; }
   .ed-card-b { font-family: ${F.sans}; font-size: 15px; line-height: 1.55; color: ${HOME.textSecondary}; margin: 0; }
@@ -44,14 +43,8 @@ function CardIcon({ type }) {
     return <span className="ed-badge"><span className="ed-whale" role="img" aria-label="Deep Dives">🐳</span></span>;
   }
   if (type === "toolkit") {
-    return (
-      <span className="ed-tools" aria-hidden="true">
-        <MortgageCalcIcon size={26} variant="navy" />
-        <CompareIcon size={26} variant="navy" />
-        <PreQualIcon size={26} variant="navy" />
-        <CashToCloseIcon size={26} variant="navy" />
-      </span>
-    );
+    // Calculator icon in the charcoal badge; cream variant reads on the dark square.
+    return <span className="ed-badge"><MortgageCalcIcon size={22} variant="cream" /></span>;
   }
   // hub — the Learning Hub book mark
   return <span className="ed-badge"><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" aria-hidden="true" /></span>;
