@@ -1,5 +1,6 @@
 import { P, F } from "../../theme";
 import { REVIEWS } from "../../data/reviews";
+import { ContactCard } from "./ContactCard";
 
 // Hero photo treatment (spec Photo §): half-body cutout on the charcoal hero,
 // anchored bottom-right of the copy block on desktop, dropped below the copy on
@@ -40,50 +41,34 @@ export function Hero() {
 
       <div className="hero-inner">
         <div className="hero-copy">
+          {/* Tagline above the name: red eyebrow + supporting line. */}
+          <span style={{ display: "block", fontFamily: F.body, fontSize: 12, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldLight, marginBottom: 8 }}>
+            The Mortgage Geek
+          </span>
+          <p style={{ fontFamily: F.body, fontSize: "clamp(14px, 1.7vw, 18px)", fontWeight: 500, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, marginBottom: 14, maxWidth: 460 }}>
+            12+ years and 1,000+ closed loans behind him.
+          </p>
           <h1 style={{ fontFamily: F.body, fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.05, letterSpacing: -0.5, marginBottom: 12 }}>
             Nick Peters
           </h1>
-          <p style={{ fontFamily: F.body, fontSize: "clamp(14px, 1.6vw, 17px)", fontWeight: 500, letterSpacing: 0.3, color: "rgba(255,255,255,0.62)", marginBottom: hasRating ? 24 : 36 }}>
+          <p style={{ fontFamily: F.body, fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, letterSpacing: 0.3, color: "rgba(255,255,255,0.62)", marginBottom: hasRating ? 24 : 36 }}>
             VP of Mortgage Lending
-            <span style={{ margin: "0 10px", color: "rgba(255,255,255,0.3)" }}>|</span>
+            <span style={{ margin: "0 9px", color: "rgba(255,255,255,0.3)" }}>·</span>
             NMLS #1119524
+            <span style={{ margin: "0 9px", color: "rgba(255,255,255,0.3)" }}>·</span>
+            Nashville, TN
           </p>
 
           {hasRating && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
               <span aria-hidden="true" style={{ color: P.goldLight, fontSize: 16, letterSpacing: 1, lineHeight: 1 }}>★★★★★</span>
-              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.7)" }}>{rating.toFixed(1)} from {count}+ Google reviews</span>
+              <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.7)" }}>{rating.toFixed(1)} on Google</span>
             </div>
           )}
 
-          {/* CTA row */}
+          {/* CTA row: one "Contact Nick" card trigger + Start Learning. */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 24px", borderRadius: 10,
-              background: P.gold, color: "#fff",
-              fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.3,
-              boxShadow: "0 4px 16px rgba(207,51,56,0.3)",
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              <span className="btn-label-mobile-hide">Call</span>
-            </a>
-            <a href="sms:+16156560737&body=Hi%2C%20I%20found%20your%20site%20and%20had%20a%20question%20about%20mortgages." aria-label="Text Nick Peters at (615) 656-0737" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              padding: "14px 24px", borderRadius: 10,
-              background: "rgba(255,255,255,0.12)", color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-              fontFamily: F.body, fontSize: 15, fontWeight: 600,
-              textDecoration: "none", letterSpacing: 0.3,
-            }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span className="btn-label-mobile-hide">Text</span>
-            </a>
+            <ContactCard />
             <a href="/learn" style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "14px 24px", borderRadius: 10,

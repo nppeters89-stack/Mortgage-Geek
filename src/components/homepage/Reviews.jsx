@@ -38,7 +38,7 @@ export function Reviews() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <Stars value={rating} size={20} />
             <span style={{ fontSize: 15, fontWeight: 600, color: P.text }}>
-              {rating.toFixed(1)} from {count}+ Google reviews
+              {rating.toFixed(1)} on Google
             </span>
             {profileUrl && (
               <a href={profileUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600, color: P.gold, textDecoration: "none" }}>
