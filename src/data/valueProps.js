@@ -27,7 +27,7 @@ export const VALUE_PROPS = [
       logoAlt: "PowerBid Approval",
       logoW: 1426,
       logoH: 397,
-      tagline: "Get approved and start shopping like a cash buyer.",
+      tagline: "Get Started",
     },
     ctaHref: "https://rate.com/nickpeters",
     ctaExternal: true,
