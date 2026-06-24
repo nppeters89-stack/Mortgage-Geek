@@ -51,10 +51,18 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                   setMobileOpen(false);
                 }
               }}
-              style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer" }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer", textAlign: "center" }}
+              aria-label="Mortgage Geek"
             >
-              <img src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" width={34} height={42} style={{ display: "block", margin: "0 auto 6px" }} />
-              <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>Mortgage <span style={{ color: P.goldReverse }}>Geek</span></h1>
+              {/* Same MG lock-up as the main page (dark variant) with the new
+                  single-notch mark: MORTGAGE / GEEK + cream four-pane monogram. */}
+              <span className="mg-lockup mg--dark" style={{ "--mg-h": "46px" }}>
+                <img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered.svg" alt="" aria-hidden="true" />
+                <span className="mg-lockup__words">
+                  <span className="mg-lockup__top">Mortgage</span>
+                  <span className="mg-lockup__geek">Geek</span>
+                </span>
+              </span>
             </a>
             <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <a href="/about" style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textDecoration: "none", marginTop: 6, display: "inline-block", transition: "color 0.15s" }} onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.7)"} onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.35)"}>About Nick →</a>

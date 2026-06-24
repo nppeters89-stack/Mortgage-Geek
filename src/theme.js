@@ -244,7 +244,6 @@ export const globalCSS = `
      fall back to the MG lock-up. The full co-brand shows from 600px up. */
   @media (max-width: 600px) {
     .cobrand-rate { display: none !important; }
-    .home-nav-secondary { display: none !important; }
   }
 
   /* ── Refreshed Mortgage Geek lock-up system (Lockup Implementation Spec) ──

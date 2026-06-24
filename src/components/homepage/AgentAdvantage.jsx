@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HOME, F } from "../../theme";
 
 // Agent Advantage — dark media band (design handoff §4). The video tile is a
@@ -19,7 +19,9 @@ const css = `
      column so it doesn't tower. */
   .aa-tile { position: relative; aspect-ratio: 4/5; width: 100%; max-width: 380px; margin: 0 auto; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 24px 60px rgba(0,0,0,.4); background: linear-gradient(150deg, #3A3D42, ${HOME.charcoal}); }
   .aa-tile video { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .aa-facade { position: absolute; inset: 0; width: 100%; height: 100%; border: none; cursor: pointer; background: linear-gradient(150deg, #3A3D42, ${HOME.charcoal}); display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+  .aa-facade { position: absolute; inset: 0; width: 100%; height: 100%; border: none; cursor: pointer; background: transparent; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+  /* Subtle scrim so the play button + caption read over the video frame. */
+  .aa-facade::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.28) 100%); }
   .aa-play { display: inline-flex; align-items: center; justify-content: center; width: 84px; height: 84px; border-radius: 50%; background: ${HOME.red}; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
   .aa-caption { position: absolute; left: 18px; bottom: 16px; text-align: left; }
   .aa-cap1 { font-family: ${F.sans}; font-size: 14px; font-weight: 700; color: ${HOME.white}; }
@@ -35,6 +37,16 @@ const css = `
 
 export function AgentAdvantage() {
   const [playing, setPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  // Cover = the clip's first frame: load metadata only and seek just past 0.
+  const onLoadedMetadata = (e) => { if (!playing) { try { e.currentTarget.currentTime = 0.05; } catch { /* noop */ } } };
+  const start = () => {
+    setPlaying(true);
+    const v = videoRef.current;
+    if (v) { v.muted = false; try { v.currentTime = 0; } catch { /* noop */ } const p = v.play && v.play(); if (p && p.catch) p.catch(() => {}); }
+  };
+
   return (
     <section className="aa-section">
       <style>{css}</style>
@@ -46,10 +58,9 @@ export function AgentAdvantage() {
           <a className="aa-cta" href="https://agents.rate.com/agents" target="_blank" rel="noopener noreferrer">Explore Agent Advantage →</a>
         </div>
         <div className="aa-tile">
-          {playing ? (
-            <video src={AGENT_VIDEO} controls autoPlay playsInline preload="none" />
-          ) : (
-            <button type="button" className="aa-facade" onClick={() => setPlaying(true)} aria-label="Play video: Agent Advantage overview">
+          <video ref={videoRef} src={AGENT_VIDEO} muted playsInline preload="metadata" controls={playing} onLoadedMetadata={onLoadedMetadata} />
+          {!playing && (
+            <button type="button" className="aa-facade" onClick={start} aria-label="Play video: Agent Advantage overview">
               <span className="aa-play" aria-hidden="true">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" style={{ marginLeft: 4 }}><path d="M8 5v14l11-7z" /></svg>
               </span>
