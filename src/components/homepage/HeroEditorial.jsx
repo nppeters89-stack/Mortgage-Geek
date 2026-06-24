@@ -1,4 +1,5 @@
 import { HOME, F } from "../../theme";
+import { ContactCard } from "./ContactCard";
 
 // Hero — dark editorial stage (design handoff §2). Figtree throughout. Uses the
 // existing headshot cutout. Glass stat badge floats (gated behind enableMotion +
@@ -17,7 +18,7 @@ const css = `
   .he-stars { color: ${HOME.red}; letter-spacing: 1px; font-size: 15px; }
   .he-dot { color: ${HOME.lockupDivDark}; }
   .he-ctas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 32px 0 0; }
-  .he-btn { display: inline-flex; align-items: center; gap: 8px; font-family: ${F.sans}; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 10px; padding: 15px 26px; min-height: 44px; box-sizing: border-box; transition: background .2s ease, transform .2s ease, border-color .2s ease, color .2s ease; }
+  .he-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: ${F.sans}; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 10px; padding: 15px 26px; min-height: 44px; box-sizing: border-box; cursor: pointer; transition: background .2s ease, transform .2s ease, border-color .2s ease, color .2s ease; }
   .he-btn-primary { background: ${HOME.red}; color: ${HOME.white}; border: none; }
   .he-btn-primary:hover { background: ${HOME.redHover}; transform: translateY(-2px); }
   .he-btn-outline { background: transparent; color: ${HOME.borderCard}; border: 1px solid ${HOME.lockupDivDark}; }
@@ -75,7 +76,7 @@ export function HeroEditorial({ showStats = true, enableMotion = true }) {
             <span>NMLS #1119524 · Nashville, TN</span>
           </div>
           <div className="he-ctas">
-            <a className="he-btn he-btn-primary" href="tel:+16156560737">Contact Nick</a>
+            <ContactCard triggerClassName="he-btn he-btn-primary" />
             <a className="he-btn he-btn-outline" href="/learn">Start learning →</a>
           </div>
         </div>
