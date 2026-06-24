@@ -41,23 +41,31 @@ export function Hero() {
 
       <div className="hero-inner">
         <div className="hero-copy">
-          {/* Tagline above the name: red eyebrow + supporting line. */}
-          <span style={{ display: "block", fontFamily: F.body, fontSize: 12, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldLight, marginBottom: 8 }}>
-            The Mortgage Geek
-          </span>
-          <p style={{ fontFamily: F.body, fontSize: "clamp(14px, 1.7vw, 18px)", fontWeight: 500, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, marginBottom: 14, maxWidth: 460 }}>
-            12+ years and 1,000+ closed loans behind him.
-          </p>
           <h1 style={{ fontFamily: F.body, fontSize: "clamp(34px, 5vw, 56px)", fontWeight: 700, color: "#FFFFFF", lineHeight: 1.05, letterSpacing: -0.5, marginBottom: 12 }}>
             Nick Peters
           </h1>
-          <p style={{ fontFamily: F.body, fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, letterSpacing: 0.3, color: "rgba(255,255,255,0.62)", marginBottom: hasRating ? 24 : 36 }}>
+          <p style={{ fontFamily: F.body, fontSize: "clamp(13px, 1.5vw, 16px)", fontWeight: 500, letterSpacing: 0.3, color: "rgba(255,255,255,0.62)", marginBottom: 16 }}>
             VP of Mortgage Lending
             <span style={{ margin: "0 9px", color: "rgba(255,255,255,0.3)" }}>·</span>
             NMLS #1119524
             <span style={{ margin: "0 9px", color: "rgba(255,255,255,0.3)" }}>·</span>
             Nashville, TN
           </p>
+
+          {/* Track-record badge: pops against the dark hero. */}
+          <span style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            padding: "8px 16px", borderRadius: 999,
+            background: "rgba(207,51,56,0.14)", border: "1px solid rgba(230,106,110,0.45)",
+            marginBottom: hasRating ? 24 : 36,
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill={P.goldLight} aria-hidden="true">
+              <path d="M12 2l2.4 6.9H21l-5.4 4 2 6.8L12 15.6 6.4 19.7l2-6.8L3 8.9h6.6L12 2z"/>
+            </svg>
+            <span style={{ fontFamily: F.body, fontSize: "clamp(13px, 1.5vw, 15px)", fontWeight: 700, letterSpacing: 0.2, color: P.goldLight }}>
+              12+ years and 1,000+ closed loans
+            </span>
+          </span>
 
           {hasRating && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
