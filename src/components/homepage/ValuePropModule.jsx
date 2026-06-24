@@ -5,7 +5,10 @@ import { LazyVideo } from "./LazyVideo";
 // spark per the brand spec. All text/background pairs clear WCAG AA.
 const SURFACES = {
   red: {
-    bg: P.gold,
+    // Rich deep-maroon -> Arrow Red gradient (not a flat red wash). Darkest at
+    // the top-left where the copy sits, so white text pops; distinct from the
+    // Same Day card's cool charcoal gradient.
+    bg: `linear-gradient(150deg, ${P.goldDeep} 0%, ${P.goldMuted} 48%, ${P.gold} 100%)`,
     border: "none",
     eyebrow: "rgba(255,255,255,0.92)",
     headline: "#FFFFFF",
