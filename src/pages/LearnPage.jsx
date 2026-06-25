@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { P, F, globalCSS } from "../theme";
+import { P, F, HOME, globalCSS } from "../theme";
 import { useIsMobile, useIsStandalone } from "../utils/hooks";
 import { Sidebar } from "../components/Sidebar";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -266,20 +266,26 @@ export function LearnPage() {
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
-        <Page>
-          <header style={{ padding: "56px 0 8px", maxWidth: 760 }}>
-            {/* Pronounced Learning Hub identity: open-book mark + bold wordmark. */}
+        {/* Hero — full-width dark band with the same red-glow gradient as the
+            main page hero, sets the Learning Hub apart from the cream content. */}
+        <section style={{
+          background: `radial-gradient(120% 130% at 90% 6%, rgba(207,51,56,.24) 0%, transparent 48%), linear-gradient(165deg, #212327 0%, transparent 58%), ${HOME.darkStage}`,
+        }}>
+          <div style={{ maxWidth: 1180, margin: "0 auto", padding: "clamp(48px, 7vw, 84px) clamp(20px, 4vw, 56px) clamp(40px, 6vw, 64px)" }}>
+            {/* Learning Hub identity: cream open-book mark + bold wordmark on dark. */}
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 20 }}>
-              <img src="/assets/learning-hub-mark.svg" alt="" aria-hidden="true" style={{ height: "clamp(48px, 7vw, 72px)", width: "auto", display: "block" }} />
-              <span style={{ fontFamily: F.display, fontSize: "clamp(30px, 5vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", color: P.navy, lineHeight: 1 }}>Learning Hub</span>
+              <img src="/assets/learning-hub-mark-cream.svg" alt="" aria-hidden="true" style={{ height: "clamp(48px, 7vw, 72px)", width: "auto", display: "block" }} />
+              <span style={{ fontFamily: F.display, fontSize: "clamp(30px, 5vw, 48px)", fontWeight: 800, letterSpacing: "-0.02em", color: "#FFFFFF", lineHeight: 1 }}>Learning Hub</span>
             </div>
-            <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 400, color: P.navy, lineHeight: 1.15, marginBottom: 12 }}>
-              Mortgages, <span style={{ color: P.gold }}>demystified.</span>
+            <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 40px)", fontWeight: 400, color: "#FFFFFF", lineHeight: 1.15, marginBottom: 12 }}>
+              Mortgages, <span style={{ color: "#E2575B" }}>demystified.</span>
             </h1>
-            <p style={{ fontSize: 16, lineHeight: 1.7, color: P.warmGray, maxWidth: 560 }}>
+            <p style={{ fontSize: 16, lineHeight: 1.7, color: HOME.textOnDark, maxWidth: 560 }}>
               The whole process in plain English, from your first question to closing day.
             </p>
-          </header>
+          </div>
+        </section>
+        <Page>
           <JourneyOverview />
           <PreContract navTarget={navTarget} />
           <ActiveLoanProcess navTarget={navTarget} />
