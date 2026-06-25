@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { HOME, F } from "../../theme";
 import { Seal } from "./Seal";
+import { ContactCard } from "./ContactCard";
 
 // The five benefit-framed steps (intentionally vague; detail comes in the call).
 const STEPS = [
@@ -134,9 +135,10 @@ export function AgentAdvantage() {
               ))}
             </ul>
             <div className="aa-book-row">
-              {/* TODO: replace #book with the real scheduling URL (Calendly etc.)
-                  and add target="_blank" rel="noopener noreferrer". */}
-              <a className="aa-book" href="#book">Book a 15-min walkthrough →</a>
+              {/* Booking link isn't live yet, so this opens the Contact card
+                  (call/text/email). TODO: swap to a direct scheduler link once
+                  the booking URL is active. */}
+              <ContactCard triggerClassName="aa-book" triggerLabel="Book a 15-min walkthrough →" />
               <p className="aa-helper">I'll walk you through all five, live.</p>
             </div>
           </div>
