@@ -66,8 +66,10 @@ const css = `
     .aa-seal img { width: 158px; height: 158px; }
     .aa-h3 { font-size: 26px; }
     .aa-method-body { font-size: 15px; margin-left: auto; margin-right: auto; }
-    .aa-chips { justify-content: center; }
-    .aa-chip { padding: 10px 14px; }
+    /* Stack the steps in one centered column (01-05), uniform width with a clean
+       shared left edge instead of ragged wrapped rows. */
+    .aa-chips { flex-direction: column; flex-wrap: nowrap; align-items: stretch; width: max-content; max-width: 100%; margin: 0 auto 32px; }
+    .aa-chip { padding: 10px 14px; justify-content: flex-start; }
     .aa-book-row { flex-direction: column; align-items: stretch; }
     .aa-book { justify-content: center; width: 100%; }
     .aa-helper { max-width: none; text-align: center; }
