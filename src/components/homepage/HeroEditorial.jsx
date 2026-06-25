@@ -15,7 +15,7 @@ const css = `
   .he-name { font-family: ${F.sans}; font-size: 128px; font-weight: 900; letter-spacing: -.035em; line-height: .86; color: ${HOME.white}; margin: 0; }
   .he-subhead { font-family: ${F.sans}; font-size: 20px; font-weight: 500; line-height: 1.5; color: ${HOME.textOnDark}; margin: 26px 0 0; max-width: 540px; }
   .he-rating { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 22px 0 0; font-family: ${F.sans}; font-size: 15px; color: ${HOME.textOnDark}; }
-  .he-stars { color: ${HOME.red}; letter-spacing: 1px; font-size: 15px; }
+  .he-stars { color: ${HOME.star}; letter-spacing: 1px; font-size: 15px; }
   .he-dot { color: ${HOME.lockupDivDark}; }
   .he-ctas { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 32px 0 0; }
   .he-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: ${F.sans}; font-size: 16px; font-weight: 700; text-decoration: none; border-radius: 10px; padding: 15px 26px; min-height: 44px; box-sizing: border-box; cursor: pointer; transition: background .2s ease, transform .2s ease, border-color .2s ease, color .2s ease; }

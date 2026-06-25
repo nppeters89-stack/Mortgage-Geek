@@ -50,6 +50,7 @@ export const HOME = {
   redGradFrom: "#D6373C",
   redGradTo: "#B82A2F",
   brightRed: "#FF5A5F",    // eyebrows on dark, "+" in stats
+  star: "#FBBC04",         // Google review star gold
   ink: "#16171A",          // = P.text
   darkStage: "#181A1C",
   charcoal: "#202225",

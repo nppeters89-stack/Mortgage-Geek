@@ -13,7 +13,7 @@ const css = `
   .rv-label { font-family: ${F.sans}; font-size: 13px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: ${HOME.red}; margin: 0 0 10px; }
   .rv-h2 { font-family: ${F.sans}; font-size: 52px; font-weight: 800; letter-spacing: -.03em; line-height: 1.0; color: ${HOME.ink}; margin: 0; }
   .rv-chip { display: inline-flex; align-items: center; gap: 8px; background: ${HOME.cream}; border-radius: 99px; padding: 10px 18px; }
-  .rv-chip-stars { color: ${HOME.red}; font-size: 15px; letter-spacing: 1px; }
+  .rv-chip-stars { color: ${HOME.star}; font-size: 15px; letter-spacing: 1px; }
   .rv-chip-num { font-family: ${F.sans}; font-size: 22px; font-weight: 800; color: ${HOME.ink}; }
   .rv-chip-sub { font-family: ${F.sans}; font-size: 14px; color: ${HOME.textMuted}; }
   /* auto-fit + centered so 1-2 reviews don't look broken; 3+ fill the row. */
@@ -25,7 +25,7 @@ const css = `
   .rv-google { font-size: 14px; }
   .rv-card { background: ${HOME.warmWhite}; border: 1px solid ${HOME.borderCard}; border-radius: 16px; padding: 30px 28px; transition: transform .25s ease, box-shadow .25s ease; }
   .rv-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,.08); }
-  .rv-stars { color: ${HOME.red}; font-size: 15px; letter-spacing: 1px; }
+  .rv-stars { color: ${HOME.star}; font-size: 15px; letter-spacing: 1px; }
   .rv-quote { font-family: ${F.sans}; font-size: 17px; font-weight: 500; line-height: 1.55; color: ${HOME.ink}; margin: 14px 0 20px; }
   .rv-foot { display: flex; align-items: center; gap: 12px; }
   .rv-avatar { width: 40px; height: 40px; border-radius: 50%; background: ${HOME.red}; color: ${HOME.white}; display: inline-flex; align-items: center; justify-content: center; font-family: ${F.sans}; font-weight: 800; font-size: 16px; flex-shrink: 0; }
@@ -95,7 +95,6 @@ export function ReviewsCarousel() {
       <div className="rv-wrap">
         <div className="rv-head">
           <div>
-            <p className="rv-label">Social proof</p>
             <h2 className="rv-h2">Real reviews from real clients.</h2>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
