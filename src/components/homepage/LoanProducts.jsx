@@ -2,21 +2,24 @@ import { HOME, F } from "../../theme";
 
 // "Popular Home Loan Products" (design handoff). 12 programs as a scannable
 // index: 3-col editorial list on desktop, 2-up grid on mobile. Icons are inlined
-// Lucide (MIT) monoline paths, stroke 1.6, brand red. TODO: wire each href to its
-// loan-program page when those exist.
+// Lucide (MIT) monoline paths, stroke 1.6, brand red.
+//
+// Links are DISABLED for now (program pages don't exist yet): href is null, so
+// each item renders as a non-navigating row while the layout + hover animation
+// stay intact. To enable later, just set a real href on the item.
 const PRODUCTS = [
-  { label: "Conventional Loans", icon: "house", href: "#" },
-  { label: "FHA Loans", icon: "landmark", href: "#" },
-  { label: "VA Loans", icon: "shield-check", href: "#" },
-  { label: "USDA Loans", icon: "sprout", href: "#" },
-  { label: "Jumbo Loans", icon: "banknote", href: "#" },
-  { label: "Self Employed Loans", icon: "briefcase", href: "#" },
-  { label: "Construction Loans", icon: "hard-hat", href: "#" },
-  { label: "DSCR Loans", icon: "building-2", href: "#" },
-  { label: "Reverse Mortgage", icon: "rotate-ccw", href: "#" },
-  { label: "Renovation Loans 203(k)", icon: "hammer", href: "#" },
-  { label: "HELOC Loans", icon: "credit-card", href: "#" },
-  { label: "Down Payment Assistance", icon: "hand-coins", href: "#" },
+  { label: "Conventional Loans", icon: "house", href: null },
+  { label: "FHA Loans", icon: "landmark", href: null },
+  { label: "VA Loans", icon: "shield-check", href: null },
+  { label: "USDA Loans", icon: "sprout", href: null },
+  { label: "Jumbo Loans", icon: "banknote", href: null },
+  { label: "Self Employed Loans", icon: "briefcase", href: null },
+  { label: "Construction Loans", icon: "hard-hat", href: null },
+  { label: "DSCR Loans", icon: "building-2", href: null },
+  { label: "Reverse Mortgage", icon: "rotate-ccw", href: null },
+  { label: "Renovation Loans 203(k)", icon: "hammer", href: null },
+  { label: "HELOC Loans", icon: "credit-card", href: null },
+  { label: "Down Payment Assistance", icon: "hand-coins", href: null },
 ];
 
 // Inlined Lucide icon bodies (viewBox 0 0 24 24).
@@ -52,7 +55,8 @@ const css = `
   .lp-h2 .lp-red { color: ${HOME.red}; }
   .lp-sub { font-family: ${F.sans}; font-size: 16px; font-weight: 500; line-height: 1.5; color: ${HOME.textSecondary}; max-width: 300px; text-align: right; padding-bottom: 6px; margin: 0; flex-shrink: 0; }
   .lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 48px; }
-  .lp-row { display: flex; align-items: center; gap: 18px; padding: 22px 4px; border-bottom: 1px solid ${HOME.rowDivider}; text-decoration: none; transition: padding-left .18s ease; }
+  .lp-row { display: flex; align-items: center; gap: 18px; padding: 22px 4px; border-bottom: 1px solid ${HOME.rowDivider}; text-decoration: none; cursor: default; transition: padding-left .18s ease; }
+  a.lp-row { cursor: pointer; }
   .lp-row:hover { padding-left: 10px; }
   .lp-icon { flex-shrink: 0; display: inline-flex; }
   .lp-label { font-family: ${F.sans}; font-size: 17px; font-weight: 800; letter-spacing: -.005em; line-height: 1.12; text-transform: uppercase; color: ${HOME.ink}; }
@@ -83,12 +87,19 @@ export function LoanProducts() {
           <p className="lp-sub">A few of our most-requested loan options and niche lending programs.</p>
         </div>
         <div className="lp-grid">
-          {PRODUCTS.map((p) => (
-            <a key={p.label} className="lp-row" href={p.href}>
-              <span className="lp-icon" style={{ width: 30, height: 30 }}><Icon name={p.icon} /></span>
-              <span className="lp-label">{p.label}</span>
-            </a>
-          ))}
+          {PRODUCTS.map((p) => {
+            const inner = (
+              <>
+                <span className="lp-icon" style={{ width: 30, height: 30 }}><Icon name={p.icon} /></span>
+                <span className="lp-label">{p.label}</span>
+              </>
+            );
+            // Links disabled until program pages exist -> render a non-navigating
+            // row. Set p.href to enable the anchor.
+            return p.href
+              ? <a key={p.label} className="lp-row" href={p.href}>{inner}</a>
+              : <div key={p.label} className="lp-row">{inner}</div>;
+          })}
         </div>
       </div>
     </section>
