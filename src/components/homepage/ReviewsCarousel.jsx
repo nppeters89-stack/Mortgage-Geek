@@ -16,7 +16,13 @@ const css = `
   .rv-chip-stars { color: ${HOME.red}; font-size: 15px; letter-spacing: 1px; }
   .rv-chip-num { font-family: ${F.sans}; font-size: 22px; font-weight: 800; color: ${HOME.ink}; }
   .rv-chip-sub { font-family: ${F.sans}; font-size: 14px; color: ${HOME.textMuted}; }
-  .rv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  /* auto-fit + centered so 1-2 reviews don't look broken; 3+ fill the row. */
+  .rv-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 360px)); gap: 20px; justify-content: center; }
+  .rv-empty { text-align: center; padding: 8px 0 4px; }
+  .rv-empty p { font-family: ${F.sans}; font-size: 16px; color: ${HOME.textSecondary}; margin: 0 0 14px; }
+  .rv-empty a, .rv-google { display: inline-flex; align-items: center; gap: 6px; font-family: ${F.sans}; font-size: 15px; font-weight: 700; color: ${HOME.red}; text-decoration: none; }
+  .rv-empty a:hover, .rv-google:hover { text-decoration: underline; }
+  .rv-google { font-size: 14px; }
   .rv-card { background: ${HOME.warmWhite}; border: 1px solid ${HOME.borderCard}; border-radius: 16px; padding: 30px 28px; transition: transform .25s ease, box-shadow .25s ease; }
   .rv-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,.08); }
   .rv-stars { color: ${HOME.red}; font-size: 15px; letter-spacing: 1px; }
@@ -92,14 +98,26 @@ export function ReviewsCarousel() {
             <p className="rv-label">Social proof</p>
             <h2 className="rv-h2">Real reviews from real clients.</h2>
           </div>
-          <span className="rv-chip">
-            <span className="rv-chip-stars" aria-hidden="true">★★★★★</span>
-            <span className="rv-chip-num">{rating}</span>
-            <span className="rv-chip-sub">on Google</span>
-          </span>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <span className="rv-chip">
+              <span className="rv-chip-stars" aria-hidden="true">★★★★★</span>
+              <span className="rv-chip-num">{rating}</span>
+              <span className="rv-chip-sub">on Google</span>
+            </span>
+            {REVIEWS.profileUrl && (
+              <a className="rv-google" href={REVIEWS.profileUrl} target="_blank" rel="noopener noreferrer">Read on Google →</a>
+            )}
+          </div>
         </div>
 
-        {!isMobile ? (
+        {cards.length === 0 ? (
+          <div className="rv-empty">
+            <p>More reviews are coming in. Read the latest on Google.</p>
+            {REVIEWS.profileUrl && (
+              <a href={REVIEWS.profileUrl} target="_blank" rel="noopener noreferrer">See reviews on Google →</a>
+            )}
+          </div>
+        ) : !isMobile ? (
           <div className="rv-grid">
             {cards.map((r, i) => <Card key={i} r={r} />)}
           </div>
