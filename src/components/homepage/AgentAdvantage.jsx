@@ -68,7 +68,7 @@ const css = `
     .aa-method-body { font-size: 15px; margin-left: auto; margin-right: auto; }
     /* Stack the steps in one centered column (01-05), uniform width with a clean
        shared left edge instead of ragged wrapped rows. */
-    .aa-chips { flex-direction: column; flex-wrap: nowrap; align-items: stretch; width: max-content; max-width: 100%; margin: 0 auto; }
+    .aa-chips { flex-direction: column; flex-wrap: nowrap; align-items: stretch; width: max-content; max-width: 100%; margin: 0 auto 32px; }
     .aa-chip { padding: 10px 14px; justify-content: flex-start; }
     .aa-book-row { flex-direction: column; align-items: stretch; }
     .aa-book { justify-content: center; width: 100%; }
