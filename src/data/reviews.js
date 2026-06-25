@@ -13,16 +13,17 @@
 //              initial. date = "YYYY-MM". Empty [] -> the section shows the
 //              rating + a "Read reviews on Google" invite instead of cards.
 //
-// TODO (Nick): one review is live; paste it here as the first entry, e.g.
-//   { name: "Jane D.", rating: 5, date: "2026-06", quote: "…the exact review text…" }
-// and bump `count` as more come in. The rating below reflects a single 5-star
-// review — confirm/adjust when more land.
+// Append real Google reviews to `reviews` and bump `count` as more come in.
 export const REVIEWS = {
   rating: 5.0,
   count: 1,
   profileUrl: "https://share.google/XxR3CclTTKrEqo0N8",
   reviews: [
-    // Real Google reviews go here. Left empty until the live review text is
-    // pasted in (we don't display fabricated/placeholder testimonials).
+    {
+      name: "Ashlyn M. Clayton",
+      rating: 5,
+      date: "2026-06",
+      quote: "I’ve gotten the pleasure of working with Nick in a couple different capacities. I’m a realtor in Northeast Arkansas and have done roughly 40 deals with Nick including on the purchase of my own home. I genuinely do not believe there is a better loan officer than Nick. I would recommend him to anyone looking to get a mortgage loan.",
+    },
   ],
 };
