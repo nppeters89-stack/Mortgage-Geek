@@ -4,7 +4,7 @@
 //   - HTML/JS/CSS: network-first with cache fallback (keeps content fresh, works offline)
 //   - API calls (rates, etc.): bypass cache entirely (always live data)
 
-const CACHE_VERSION = 'mortgagegeek-v2';
+const CACHE_VERSION = 'mortgagegeek-v3';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
