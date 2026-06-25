@@ -2,37 +2,87 @@
 // When updating brand colors or typography, update here — every component will reflect the change.
 
 export const P = {
-  navy: "#1B3A4B", navyDark: "#0F2530", navyLight: "#2C5468",
-  gold: "#B8860B", goldLight: "#D4A843", goldMuted: "#8B6914",
-  cream: "#FAF7F2", creamDark: "#F0EBE3",
-  warmGray: "#6B6358", warmGrayLight: "#6F6860",
-  white: "#FFFFFF", sage: "#5A7A6E", sageDark: "#3F5A4F",
-  siennaDark: "#6F3A1F",
-  text: "#2C2825", textLight: "#5C5650",
+  navy: "#24272A", navyDark: "#131416", navyLight: "#3C3D40",
+  gold: "#CF3338", goldLight: "#E66A6E", goldMuted: "#AE2A2E",
+  goldDeep: "#6E1A1E", // deep maroon end of the Arrow Red ramp (rich gradients on dark/red surfaces)
+  goldReverse: "#E2575B", // Arrow Red lifted for dark surfaces (reverse "Geek" wordmark / cream-mark window)
+  cream: "#F6F5F3", creamDark: "#E0DDD6", creamLight: "#FFFEFB",
+  warmGray: "#6E7176", warmGrayLight: "#9A9DA2",
+  white: "#FFFFFF", sage: "#5E6166", sageDark: "#3F5A4F",
+  text: "#16171A", textLight: "#5E6166",
+  // Semantic status colors (meaning-carrying) — harmonized to the Rate palette,
+  // AA on cream, distinct from brand red (#CF3338). Tints derive from these via
+  // withAlpha() at call sites so the system has one source of truth.
+  success: "#3F5A4F", // eligible / pass / savings (same value as sageDark)
+  caution: "#9C5811", // conditional / review / "you pay" — burnt amber, 5.05:1
+  danger:  "#B0322B", // ineligible / fail / error — distinct from brand red
+  successLight: "#7FB89B", // on-dark variant of success (~6.6:1 on navy)
+  dangerLight:  "#E8918C", // on-dark variant of danger (~6.3:1 on navy)
   // Equation-only palette — scoped to DTIDeepDive's stacked-fraction render.
   // Housing uses prog.color; these apply to debts and income only.
   equationDebts: "#9A2B2B",
-  equationIncome: "#2E9D6B",
+  equationIncome: "#2E7D5B",
 };
 
 // Single source of truth for program colors — used in calculator, prequal, and comparison
 export const PROGRAM_COLORS = {
-  Conventional: "#1B3A4B", // navy
-  FHA: "#8B6914",          // goldMuted (darker for better white text contrast)
-  VA: "#5A7A6E",           // sage
-  USDA: "#A0522D",         // sienna — distinct from navy/gold/sage, evokes earth/rural
+  Conventional: "#295994", // Rate Blue
+  FHA: "#896619",          // Rate Gold, darkened for AA (white text 5.28:1, on-cream 4.84:1)
+  VA: "#5E2224",           // Rate Burgundy
+  USDA: "#226257",         // Rate Green
 };
 
 export const F = {
-  display: "'Instrument Serif', Georgia, serif",
-  body: "'DM Sans', -apple-system, sans-serif",
+  // Rate's web typeface, now site-wide for congruence with the editorial
+  // homepage. display/body/sans all resolve to Figtree; the only exceptions are
+  // the locked wordmark glyphs (MORTGAGE = DM Sans 700, GEEK = Archivo 800).
+  display: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
+  body: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
+  sans: "'Figtree', -apple-system, BlinkMacSystemFont, sans-serif",
+};
+
+// Editorial-homepage palette (design handoff). Kept separate from P so the rest
+// of the site's tokens are untouched; values that match existing P tokens are
+// noted. Colors live here (not in components) per the no-hardcoded-hex rule.
+export const HOME = {
+  red: "#CF3338",          // = P.gold (Arrow Red, primary)
+  redHover: "#B82A2F",
+  redGradFrom: "#D6373C",
+  redGradTo: "#B82A2F",
+  brightRed: "#FF5A5F",    // eyebrows on dark, "+" in stats
+  star: "#FBBC04",         // Google review star gold
+  ink: "#16171A",          // = P.text
+  darkStage: "#181A1C",
+  charcoal: "#202225",
+  cream: "#F6F5F3",        // = P.cream
+  warmWhite: "#FFFEFB",    // = P.creamLight
+  white: "#FFFFFF",
+  textSecondary: "#5E6166",
+  textMuted: "#82858A",
+  textMuted2: "#9A9DA2",
+  textOnDark: "#C9CBCE",
+  footerMuted: "#6E7176",
+  borderLight: "#E0DDD6",  // = P.creamDark
+  borderCard: "#E4E5E7",
+  borderHairline: "#EFEEE9",
+  rowDivider: "#E5E2DB",   // loan-products row hairline
+  lockupDivLight: "#C7C4BC",
+  lockupDivDark: "#4A4B4E",
+  darkDivider: "#2A2C2F",
+  dotInactive: "#D8D5CE",
+  // Red-card text tints (light text/fine print on the red PowerBid card)
+  redTint1: "#FBE3E4",
+  redTint2: "#FBD2D3",
+  redTint3: "#FBC9CB",
+  redTint4: "#F4B9BB",
 };
 
 export const globalCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { background: #FAF7F2; overscroll-behavior-y: none; }
-  body { background: #FAF7F2; margin: 0; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
+  ::selection { background: #CF3338; color: #fff; }
+  html { background: #F6F5F3; overscroll-behavior-y: none; }
+  body { background: #F6F5F3; margin: 0; min-height: 100vh; min-height: 100dvh; overscroll-behavior-y: none; }
   #root { min-height: 100vh; min-height: 100dvh; }
   html { scroll-behavior: auto; }
 
@@ -65,34 +115,34 @@ export const globalCSS = `
   ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
 
   .main-content { flex: 1; margin-left: 280px; min-width: 0; --side-offset: 280px; }
-  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #0F2530; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .sidebar { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #131416; z-index: 150; overflow-y: auto; padding-bottom: env(safe-area-inset-bottom, 0px); }
   .sidebar-overlay { display: none; }
   .mobile-bar { display: none; }
   .mobile-bar-inner { padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
-  .hamburger { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; }
+  .hamburger { background: none; border: none; color: #24272A; font-size: 22px; cursor: pointer; }
 
-  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
+  .nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: none; border-radius: 8px; background: transparent; color: rgba(255,255,255,0.5); font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: left; margin-bottom: 2px; }
   .nav-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
   .nav-btn-active { background: rgba(255,255,255,0.08) !important; color: #fff !important; }
 
   .content-card { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
 
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #F0EBE3; background: #fff; color: #6F6860; cursor: pointer; transition: all 0.15s; }
-  .tab-btn:hover { border-color: #1B3A4B; color: #1B3A4B; }
-  .tab-btn-active { background: #1B3A4B !important; color: #fff !important; border-color: #1B3A4B !important; }
+  .tab-btn { font-family: 'Figtree', sans-serif; font-size: 13px; font-weight: 600; padding: 9px 20px; border-radius: 8px; border: 1px solid #E0DDD6; background: #fff; color: #9A9DA2; cursor: pointer; transition: all 0.15s; }
+  .tab-btn:hover { border-color: #24272A; color: #24272A; }
+  .tab-btn-active { background: #24272A !important; color: #fff !important; border-color: #24272A !important; }
 
   .process-grid { display: flex; gap: 24px; flex-wrap: wrap; }
   .process-steps { flex: 0 0 280px; display: flex; flex-direction: column; gap: 4px; min-width: 240px; }
-  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #6B6358; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .process-step { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border: none; border-radius: 10px; background: transparent; font-family: 'Figtree', sans-serif; font-size: 13px; color: #6E7176; cursor: pointer; text-align: left; transition: all 0.15s; }
   .process-step:hover { background: rgba(255,255,255,0.6); }
-  .process-step-active { background: #fff !important; color: #2C2825 !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
-  .process-num { font-family: 'Instrument Serif', serif; font-size: 20px; color: #6F6860; min-width: 28px; line-height: 1.3; }
-  .process-num-active { color: #B8860B !important; }
+  .process-step-active { background: #fff !important; color: #16171A !important; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+  .process-num { font-family: 'Figtree', sans-serif; font-weight: 700; font-size: 20px; color: #9A9DA2; min-width: 28px; line-height: 1.3; }
+  .process-num-active { color: #CF3338 !important; }
   .process-detail { flex: 1; background: #fff; border-radius: 12px; padding: 36px 32px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04); min-width: 300px; }
 
-  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #1B3A4B; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
-  .costs-cat-head:hover { background: #FAF7F2; }
-  .costs-cat-head-active { background: #1B3A4B !important; color: #fff !important; border-radius: 12px 12px 0 0; }
+  .costs-cat-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border: none; background: #fff; font-family: 'Figtree', sans-serif; font-size: 15px; font-weight: 600; color: #24272A; cursor: pointer; transition: all 0.15s; border-radius: 12px; }
+  .costs-cat-head:hover { background: #F6F5F3; }
+  .costs-cat-head-active { background: #24272A !important; color: #fff !important; border-radius: 12px 12px 0 0; }
 
   .calc-grid { max-width: 880px; display: flex; gap: 28px; flex-wrap: wrap; }
   .calc-grid > *:first-child { flex: 1 1 300px; }
@@ -114,16 +164,16 @@ export const globalCSS = `
   .app-root { background: transparent; }
 
   @media (max-width: 900px) {
-    html, body { background: #0F2530 !important; }
+    html, body { background: #131416 !important; }
     body { overflow-x: hidden; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
     section[id], [id^="costs-cat-"], #costs-trid { scroll-margin-top: calc(64px + env(safe-area-inset-top, 0px)); }
     .sidebar { transform: translateZ(0); padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; top: 0; left: 0; width: 280px; height: 100vh; height: 100dvh; bottom: auto; }
-    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0F2530; z-index: -1; }
+    .sidebar::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #131416; z-index: -1; }
     .sidebar-open { transform: none; }
     .sidebar-dragging { transition: none !important; }
     .sidebar-overlay { display: none; }
     .sidebar-overlay-visible { display: none; }
-    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #0F2530; border-bottom: 1px solid rgba(255,255,255,0.06); padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
+    .mobile-bar { display: block !important; position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: #FFFFFF; border-bottom: 1px solid #E0DDD6; padding-top: env(safe-area-inset-top, 0px); transition: transform 0.3s ease; will-change: transform; }
     .mobile-bar-open { transform: translateX(280px); }
     /* will-change: transform is permanent on mobile so the compositor layer
        exists BEFORE the sidebar-open transition starts. On iOS, applying
@@ -138,7 +188,7 @@ export const globalCSS = `
        snap back on release. The header is position:fixed so iOS native
        gestures don't affect it — hence it was the only element that moved
        correctly before this fix. */
-    .main-content { margin-left: 0 !important; --side-offset: 0px; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #FAF7F2; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
+    .main-content { margin-left: 0 !important; --side-offset: 0px; padding-top: calc(56px + env(safe-area-inset-top, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px); transition: transform 0.3s ease, border-radius 0.3s ease; position: relative; z-index: 130; background: #F6F5F3; min-height: 100dvh; will-change: transform; touch-action: pan-y; }
     .main-content::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); opacity: var(--sidebar-dim, 0); pointer-events: none; transition: opacity 0.3s ease; z-index: 9999; }
     .main-content-open { transform: translateX(280px); border-radius: 16px 0 0 0; overflow: hidden; box-shadow: -4px 0 24px rgba(0,0,0,0.15); --sidebar-dim: 1; }
     .main-content-open::after { pointer-events: auto; }
@@ -190,4 +240,31 @@ export const globalCSS = `
     0%, 100% { opacity: 0.3; }
     50% { opacity: 0.9; }
   }
+
+  /* Co-brand header lock-up: on narrow phones the tool/deep-dive headers also
+     carry Call/Text/back controls, so drop the Rate mark + divider there and
+     fall back to the MG lock-up. The full co-brand shows from 600px up. */
+  @media (max-width: 600px) {
+    .cobrand-rate { display: none !important; }
+  }
+
+  /* ── Refreshed Mortgage Geek lock-up system (Lockup Implementation Spec) ──
+     All proportions derive from one var, --mg-h (the monogram height). Set it
+     per placement; everything else scales. MORTGAGE = DM Sans 700, GEEK =
+     Archivo 800 true Arrow Red. The translateY optically centers the wordmark
+     on the monogram (GEEK's descender space drops the geometric center ~5%). */
+  .mg-lockup { display: inline-flex; align-items: center; gap: calc(var(--mg-h) * 0.24); }
+  .mg-lockup__mark { height: var(--mg-h); width: auto; display: block; }
+  .mg-lockup__words { display: flex; flex-direction: column; line-height: 1; transform: translateY(calc(var(--mg-h) * 0.05)); }
+  .mg-lockup__top { font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: calc(var(--mg-h) * 0.24); letter-spacing: 0.24em; text-transform: uppercase; }
+  .mg-lockup__geek { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: calc(var(--mg-h) * 0.60); letter-spacing: -0.01em; text-transform: uppercase; color: #CF3338; margin-top: calc(var(--mg-h) * 0.05); }
+
+  .mg-cobrand { display: inline-flex; align-items: center; gap: calc(var(--mg-h) * 0.39); }
+  .mg-cobrand__rate { height: calc(var(--mg-h) * 0.61); width: auto; display: block; }
+  .mg-cobrand__divider { width: 1px; height: var(--mg-h); }
+
+  .mg--light .mg-lockup__top { color: #16171A; }
+  .mg--light .mg-cobrand__divider { background: #C7C4BC; }
+  .mg--dark .mg-lockup__top { color: #E8E6E1; }
+  .mg--dark .mg-cobrand__divider { background: #4A4B4E; }
 `;

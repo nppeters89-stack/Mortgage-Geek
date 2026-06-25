@@ -123,10 +123,10 @@ export function InterestRates({ navTarget }) {
                 background: row.points === 0 ? `${P.gold}08` : "transparent",
               }}>
                 <span style={{ fontSize: 14, fontWeight: 700, color: P.navy, fontFamily: F.display }}>{row.rate}</span>
-                <span style={{ fontSize: 13, fontWeight: 500, color: row.points < 0 ? P.sageDark : row.points === 0 ? P.warmGray : P.goldMuted }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: row.points < 0 ? P.success : row.points === 0 ? P.warmGray : P.caution }}>
                   {row.points > 0 ? `${row.points} pts` : row.points === 0 ? "Par" : `(${Math.abs(row.points)}) credit`}
                 </span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: row.cost < 0 ? P.sageDark : row.cost === 0 ? P.warmGray : P.text }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: row.cost < 0 ? P.success : row.cost === 0 ? P.warmGray : P.text }}>
                   {row.cost < 0 ? `-${fmt(Math.abs(row.cost))}` : row.cost === 0 ? "$0" : fmt(row.cost)}
                 </span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: P.text }}>{fmt(row.payment)}</span>
@@ -204,8 +204,8 @@ export function InterestRates({ navTarget }) {
                         <span style={{
                           fontSize: 12, fontWeight: 600,
                           color: i === 0
-                            ? (parseFloat(r.change) <= 0 ? "#7DCEA0" : "#F1948A")
-                            : (parseFloat(r.change) <= 0 ? "#27AE60" : "#E74C3C"),
+                            ? (parseFloat(r.change) <= 0 ? P.successLight : P.dangerLight)
+                            : (parseFloat(r.change) <= 0 ? P.success : P.danger),
                         }}>
                           {parseFloat(r.change) > 0 ? "+" : ""}{r.change}
                         </span>
@@ -218,7 +218,7 @@ export function InterestRates({ navTarget }) {
 
             {liveRates && (
               <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 14 }}>
-                Source: <a href="https://www.mortgagenewsdaily.com/mortgage-rates" target="_blank" rel="noopener noreferrer" style={{ color: P.warmGrayLight, textDecoration: "underline" }}>{liveRates.source}</a>
+                Source: <a href="https://www.mortgagenewsdaily.com/mortgage-rates" target="_blank" rel="noopener noreferrer" style={{ color: P.textLight, textDecoration: "underline" }}>{liveRates.source}</a>
               </p>
             )}
           </div>
@@ -296,7 +296,7 @@ export function InterestRates({ navTarget }) {
             {/* Side-by-side lender comparison */}
             <div className="content-card" style={{ padding: 28, marginBottom: 20 }}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>Real-World Example</span>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.caution, display: "block", marginBottom: 8 }}>Real-World Example</span>
                 <h4 style={{ fontFamily: F.display, fontSize: 20, color: P.navy, marginBottom: 6 }}>Same Rate. Different Cost.</h4>
                 <p style={{ fontSize: 13, color: P.warmGray }}>FHA loan · $300,000 · 3.5% down · {exRate.toFixed(3)}% note rate · 30-year fixed</p>
               </div>
@@ -305,11 +305,11 @@ export function InterestRates({ navTarget }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
                 <div />
                 <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: P.sageDark, display: "block" }}>Lender A</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: P.success, display: "block" }}>Lender A</span>
                   <span style={{ fontSize: 10, color: P.warmGrayLight }}>No points, lower fees</span>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: P.goldMuted, display: "block" }}>Lender B</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: P.caution, display: "block" }}>Lender B</span>
                   <span style={{ fontSize: 10, color: P.warmGrayLight }}>1 point + higher fees</span>
                 </div>
               </div>
@@ -323,29 +323,29 @@ export function InterestRates({ navTarget }) {
               <FeeRow label="Flood Cert + Tax Svc" a={aFlood + aTaxSvc} b={bFlood + bTaxSvc} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "5px 0", borderBottom: `1px solid ${P.cream}`, fontSize: 12 }}>
                 <span style={{ color: P.warmGray }}>Discount Points</span>
-                <span style={{ textAlign: "right", fontWeight: 600, color: P.sageDark }}>{aPoints} pts ({fmt(aPointsCost)})</span>
-                <span style={{ textAlign: "right", fontWeight: 600, color: P.goldMuted }}>{bPoints} pt ({fmt(bPointsCost)})</span>
+                <span style={{ textAlign: "right", fontWeight: 600, color: P.success }}>{aPoints} pts ({fmt(aPointsCost)})</span>
+                <span style={{ textAlign: "right", fontWeight: 600, color: P.caution }}>{bPoints} pt ({fmt(bPointsCost)})</span>
               </div>
               <FeeRow label="UFMIP (1.75%)" a={exUpfront} b={exUpfront} />
 
               {/* Totals */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, padding: "8px 0", marginTop: 4, borderTop: `2px solid ${P.navy}`, fontSize: 13, fontWeight: 700 }}>
                 <span style={{ color: P.navy }}>Total Finance Charges</span>
-                <span style={{ textAlign: "right", color: P.sageDark }}>{fmt(aCharges)}</span>
-                <span style={{ textAlign: "right", color: P.goldMuted }}>{fmt(bCharges)}</span>
+                <span style={{ textAlign: "right", color: P.success }}>{fmt(aCharges)}</span>
+                <span style={{ textAlign: "right", color: P.caution }}>{fmt(bCharges)}</span>
               </div>
 
               {/* APR result cards */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 20 }}>
                 <div style={{ background: `${P.sage}12`, border: `2px solid ${P.sage}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.sageDark, display: "block", marginBottom: 4 }}>Lender A · APR</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.success, display: "block", marginBottom: 4 }}>Lender A · APR</span>
                   <span style={{ fontFamily: F.display, fontSize: 32, color: P.sage, display: "block" }}>{aAPR.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(aTotal)}</span>
                 </div>
-                <div style={{ background: `${P.goldMuted}12`, border: `2px solid ${P.goldMuted}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 4 }}>Lender B · APR</span>
-                  <span style={{ fontFamily: F.display, fontSize: 32, color: P.goldMuted, display: "block" }}>{bAPR.toFixed(3)}%</span>
+                <div style={{ background: `${P.caution}12`, border: `2px solid ${P.caution}`, borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: P.caution, display: "block", marginBottom: 4 }}>Lender B · APR</span>
+                  <span style={{ fontFamily: F.display, fontSize: 32, color: P.caution, display: "block" }}>{bAPR.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGray, display: "block", marginTop: 4 }}>Note rate {exRate.toFixed(3)}%</span>
                   <span style={{ fontSize: 11, color: P.warmGrayLight, display: "block", marginTop: 2 }}>Fees: {fmt(bTotal)}</span>
                 </div>

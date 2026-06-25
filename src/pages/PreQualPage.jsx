@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
-import { fmt, pctCap } from "../utils/format";
+import { fmt, pctCap, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { useIsCockpit } from "../utils/hooks";
 import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
@@ -416,7 +416,7 @@ export function PreQualPage() {
         description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, VA, and USDA. Free pre-qualification estimate, no credit check."
         path="/prequal"
         schema={webApplicationSchema({
-          title: "Pre-Qualification Calculator — The Mortgage Geek",
+          title: "Pre-Qualification Calculator — Mortgage Geek",
           description: "See what mortgage you can afford across Conventional, FHA, VA, and USDA based on your income and debts.",
           url: "https://mortgagegeek.ai/prequal",
         })}
@@ -436,8 +436,8 @@ export function PreQualPage() {
         .pq-cards-grid--compact + .pq-detail-panel { margin-top: 0; }
         .pq-detail-panel-body { display: grid; grid-template-columns: 1fr; gap: 24px; }
         @media (min-width: 1100px) { .pq-detail-panel-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; } }
-        .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(184, 134, 11, 0.4); }
-        .pq-card-compact:focus-visible { outline: 2px solid #B8860B; outline-offset: 2px; }
+        .pq-card-compact:hover:not(.pq-card-compact--ineligible):not(.pq-card-compact--selected) { border-color: rgba(207, 51, 56, 0.4); }
+        .pq-card-compact:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
         /* In the cockpit rail the inputs card collapses to a single column
            and drops its centered max-width so it fits the 340px sticky rail. */
         .cockpit-rail .pq-input-cols { grid-template-columns: 1fr; }
@@ -446,22 +446,22 @@ export function PreQualPage() {
   );
 
   const headerJsx = (
-    <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+    <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
-        <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-          <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-          <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+        <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--light" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+          <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
         </a>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             <span className="btn-label-mobile-hide">Call</span>
           </a>
-          <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20pre-qual%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+          <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20pre-qual%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "transparent", color: P.navy, border: `1px solid ${P.creamDark}`, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span className="btn-label-mobile-hide">Text</span>
           </a>
-          <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
+          <a href="/" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
         </div>
       </div>
     </div>
@@ -631,7 +631,7 @@ export function PreQualPage() {
           right: 0,
           width: 180,
           height: "100%",
-          background: "radial-gradient(circle at top right, rgba(212, 168, 67, 0.08) 0%, transparent 60%)",
+          background: "radial-gradient(circle at top right, rgba(207, 51, 56, 0.08) 0%, transparent 60%)",
           pointerEvents: "none",
         }} />
 
@@ -644,7 +644,7 @@ export function PreQualPage() {
                 width: 6, height: 6, borderRadius: "50%",
                 background: P.goldLight,
                 display: "inline-block",
-                boxShadow: "0 0 6px rgba(212, 168, 67, 0.6)",
+                boxShadow: "0 0 6px rgba(207, 51, 56, 0.6)",
                 animation: "rate-pulse 2s ease-in-out infinite",
               }} />
               {isRail ? `Live · ${rateSource}` : `Live rates loaded · ${rateSource}`}
@@ -662,9 +662,9 @@ export function PreQualPage() {
         {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
         <div style={{ display: "flex", flexDirection: "column", gap: pillGap, position: "relative", zIndex: 1 }}>
           {[
-            { label: "Conventional", rate: convRate, setRate: setConvRate, color: P.navy, market: term === 15 ? convRate15Api : convRate30Api },
-            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: "#8B6914", market: fhaRateApi },
-            { label: "VA", rate: vaRate, setRate: setVaRate, color: P.sage, market: vaRateApi },
+            { label: "Conventional", rate: convRate, setRate: setConvRate, color: PROGRAM_COLORS.Conventional, market: term === 15 ? convRate15Api : convRate30Api },
+            { label: "FHA", rate: fhaRate, setRate: setFhaRate, color: PROGRAM_COLORS.FHA, market: fhaRateApi },
+            { label: "VA", rate: vaRate, setRate: setVaRate, color: PROGRAM_COLORS.VA, market: vaRateApi },
             { label: "USDA", rate: usdaRate, setRate: setUsdaRate, color: PROGRAM_COLORS.USDA, market: usdaRateApi },
           ].map((p) => (
             <RateInput key={p.label} label={p.label} rate={p.rate} setRate={p.setRate} color={p.color} marketRate={p.market} />
@@ -789,7 +789,7 @@ export function PreQualPage() {
               <div key={i} className="content-card" onClick={() => setSelectedProgram(isSelected ? null : prog.name)} style={{
                 overflow: "hidden", position: "relative", cursor: "pointer",
                 border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
-                boxShadow: isSelected ? `0 0 0 4px rgba(184,134,11,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
+                boxShadow: isSelected ? `0 0 0 4px rgba(207,51,56,0.15), 0 8px 30px rgba(0,0,0,0.12)` : undefined,
                 transform: isSelected ? "translateY(-2px)" : "translateY(0)",
                 transition: "transform 0.15s, box-shadow 0.15s, border-color 0.15s",
               }}>
@@ -816,7 +816,7 @@ export function PreQualPage() {
                 <div style={{ padding: "16px 20px" }}>
                   {prog.name === "USDA" && (
                     <div style={{
-                      background: "rgba(160, 82, 45, 0.08)",
+                      background: withAlpha(PROGRAM_COLORS.USDA, 0.08),
                       borderLeft: `3px solid ${PROGRAM_COLORS.USDA}`,
                       padding: "10px 14px",
                       marginBottom: 14,
@@ -874,7 +874,7 @@ export function PreQualPage() {
                       <div key={ri} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 11, color: r.dim ? P.creamDark : P.warmGray, borderBottom: `1px solid ${P.cream}`, opacity: r.dim ? 0.6 : 1 }}>
                         <span>{r.label}</span>
                         <div style={{ textAlign: "right" }}>
-                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.warn ? "#C0392B" : r.bold ? prog.color : r.dim ? P.warmGrayLight : P.text }}>{r.val}</span>
+                          <span style={{ fontWeight: r.bold ? 700 : 600, color: r.warn ? P.danger : r.bold ? prog.color : r.dim ? P.warmGrayLight : P.text }}>{r.val}</span>
                           {r.sub && <span style={{ display: "block", fontSize: 9, color: P.warmGrayLight }}>{r.sub}</span>}
                         </div>
                       </div>

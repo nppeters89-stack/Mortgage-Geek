@@ -23,12 +23,19 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                 setMobileOpen(false);
               }
             }}
-            style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", color: "inherit", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none", color: "inherit", cursor: "pointer", minWidth: 0 }}
           >
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ fontSize: 16, lineHeight: 1 }}>🤓</span>
-            </div>
-            <span style={{ fontFamily: F.display, fontSize: 18, color: "#fff" }}>The Mortgage Geek</span>
+            {/* Co-brand lock-up on the white mobile bar: Rate (black) | divider |
+                MG lock-up (MORTGAGE / GEEK + new single-notch mark, light variant). */}
+            <img src="/rate-2color-black-tight.svg" alt="Rate" width={58} height={24} style={{ display: "block", flexShrink: 0 }} />
+            <span aria-hidden="true" style={{ width: 1, height: 24, background: P.creamDark, flexShrink: 0, margin: "0 8px" }} />
+            <span className="mg-lockup mg--light" style={{ "--mg-h": "26px" }}>
+              <img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+              <span className="mg-lockup__words">
+                <span className="mg-lockup__top">Mortgage</span>
+                <span className="mg-lockup__geek">Geek</span>
+              </span>
+            </span>
           </a>
           <button className="hamburger" onClick={() => { if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(!mobileOpen); }}>
             {mobileOpen ? "✕" : "☰"}
@@ -50,14 +57,19 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                   setMobileOpen(false);
                 }
               }}
-              style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer" }}
+              style={{ textDecoration: "none", color: "inherit", display: "block", cursor: "pointer", textAlign: "center" }}
+              aria-label="Mortgage Geek"
             >
-              <div style={{ width: 44, height: 44, borderRadius: 10, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 6px", boxShadow: "0 2px 10px rgba(0,0,0,0.3)" }}>
-                <span style={{ fontSize: 26, lineHeight: 1 }}>🤓</span>
-              </div>
-              <h1 style={{ fontFamily: F.display, fontSize: 24, color: "#fff", fontWeight: 700, marginTop: 4, lineHeight: 1.2 }}>The Mortgage Geek</h1>
+              {/* Same MG lock-up as the main page (dark variant) with the new
+                  single-notch mark: MORTGAGE / GEEK + cream four-pane monogram. */}
+              <span className="mg-lockup mg--dark" style={{ "--mg-h": "46px" }}>
+                <img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered.svg" alt="" aria-hidden="true" />
+                <span className="mg-lockup__words">
+                  <span className="mg-lockup__top">Mortgage</span>
+                  <span className="mg-lockup__geek">Geek</span>
+                </span>
+              </span>
             </a>
-            <p style={{ fontSize: 12, color: P.goldLight, fontWeight: 500, marginTop: 8, letterSpacing: 0.5 }}>12+ Years of Mortgage Wisdom</p>
             <a href="/about" style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", textDecoration: "none", marginTop: 6, display: "inline-block", transition: "color 0.15s" }} onMouseEnter={(e) => e.target.style.color = "rgba(255,255,255,0.7)"} onMouseLeave={(e) => e.target.style.color = "rgba(255,255,255,0.35)"}>About Nick →</a>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}><a href="tel:+16156560737" style={{ color: "rgba(255,255,255,0.5)", textDecoration: "none" }}>(615) 656-0737</a></p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>NMLS #1119524</p>

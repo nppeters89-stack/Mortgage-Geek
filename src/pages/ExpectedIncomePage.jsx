@@ -6,7 +6,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { ExpectedIncomeMatrix } from "../components/ExpectedIncomeMatrix";
 
-const TITLE = "Expected Income for Mortgages: Using a New Job Offer to Qualify | The Mortgage Geek";
+const TITLE = "Expected Income for Mortgages: Using a New Job Offer to Qualify | Mortgage Geek";
 const DESCRIPTION = "Expected income mortgage rules explained: how to qualify with a new job offer letter, 60-day vs 90-day windows, reserve requirements, by loan program. Real LO insights.";
 const PATH = "/deep-dives/expected-income";
 const URL = `https://mortgagegeek.ai${PATH}`;
@@ -137,15 +137,15 @@ export function ExpectedIncomePage() {
       />
       <style>{globalCSS}</style>
 
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
+      <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+          <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--light" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+            <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <ShareButton variant="header" />
-            <a href="/deep-dives" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
+            <ShareButton variant="header" headerTone="light" />
+            <a href="/deep-dives" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@ export function ExpectedIncomePage() {
           </p>
         </header>
 
-        <div style={{ background: "rgba(184, 134, 11, 0.06)", border: `1px solid rgba(184, 134, 11, 0.25)`, borderRadius: 8, padding: "16px 20px", marginBottom: 36, display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ background: "rgba(207, 51, 56, 0.06)", border: `1px solid rgba(207, 51, 56, 0.25)`, borderRadius: 8, padding: "16px 20px", marginBottom: 36, display: "flex", alignItems: "flex-start", gap: 12 }}>
           <span style={{ fontSize: 18, flexShrink: 0 }}>🤓</span>
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
@@ -507,7 +507,7 @@ export function ExpectedIncomePage() {
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Working through an expected income scenario?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={navyLink}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters" style={navyLink}>nick@mortgagegeek.ai</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={navyLink}>(615) 656-0737</a> or email <a href="mailto:Nick.Peters@rate.com" aria-label="Email Nick Peters" style={navyLink}>Nick.Peters@rate.com</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring your offer letter, your start date, and an honest picture of your reserves. We'll figure out what works.

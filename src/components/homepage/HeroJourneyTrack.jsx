@@ -9,11 +9,10 @@ export function HeroJourneyTrack() {
     <div
       className="hero-journey-track"
       style={{
-        marginTop: 48,
         padding: "24px 32px 22px",
-        background: withAlpha(P.cream, 0.04),
+        background: `linear-gradient(145deg, ${P.navyDark} 0%, ${P.navy} 60%, ${P.navyLight} 100%)`,
         border: `1px solid ${withAlpha(P.cream, 0.1)}`,
-        borderRadius: 14,
+        borderRadius: 16,
       }}
     >
       <HeaderRow />

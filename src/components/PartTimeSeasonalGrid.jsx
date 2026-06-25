@@ -128,9 +128,9 @@ export function PartTimeSeasonalGrid() {
         }
         .pts-table tbody tr.pts-row:nth-child(odd)  { background: ${P.white}; }
         .pts-table tbody tr.pts-row:nth-child(even) { background: ${P.cream}; }
-        .pts-table tbody tr.pts-row:hover { background: rgba(184, 134, 11, 0.06); }
+        .pts-table tbody tr.pts-row:hover { background: rgba(207, 51, 56, 0.06); }
         .pts-table tbody tr.pts-row.active {
-          background: rgba(184, 134, 11, 0.10);
+          background: rgba(207, 51, 56, 0.10);
           border-left: 3px solid ${P.gold};
         }
         .pts-table tbody tr.pts-row:focus-visible { outline: 2px solid ${P.navy}; outline-offset: -2px; }
@@ -186,7 +186,7 @@ export function PartTimeSeasonalGrid() {
         }
         .pts-panel-cell {
           background: rgba(250, 247, 242, 0.05);
-          border: 1px solid rgba(212, 168, 67, 0.25);
+          border: 1px solid rgba(207, 51, 56, 0.25);
           border-radius: 6px;
           padding: 14px;
         }

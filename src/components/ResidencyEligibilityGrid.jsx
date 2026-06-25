@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { P, F } from "../theme";
-
-const INELIG_RED = "#B85450";
+import { withAlpha } from "../utils/format";
 
 const STATUSES = [
   "US Citizen",
@@ -47,9 +46,9 @@ const ELIGIBILITY = {
 };
 
 const STATUS_VISUALS = {
-  eligible: { icon: "✓", label: "Eligible", color: P.sageDark, bg: "rgba(90, 122, 110, 0.15)", border: "rgba(90, 122, 110, 0.30)" },
-  ineligible: { icon: "✗", label: "Not Eligible", color: INELIG_RED, bg: "rgba(184, 84, 80, 0.12)", border: "rgba(184, 84, 80, 0.32)" },
-  conditional: { icon: "⚠", label: "Conditional", color: P.goldMuted, bg: "rgba(184, 134, 11, 0.12)", border: "rgba(184, 134, 11, 0.32)" },
+  eligible: { icon: "✓", label: "Eligible", color: P.success, bg: withAlpha(P.success, 0.15), border: withAlpha(P.success, 0.30) },
+  ineligible: { icon: "✗", label: "Not Eligible", color: P.danger, bg: withAlpha(P.danger, 0.12), border: withAlpha(P.danger, 0.32) },
+  conditional: { icon: "⚠", label: "Conditional", color: P.caution, bg: withAlpha(P.caution, 0.12), border: withAlpha(P.caution, 0.32) },
 };
 
 const WORK_VISAS = [
@@ -307,7 +306,7 @@ export function ResidencyEligibilityGrid() {
           text-align: left;
           cursor: pointer;
         }
-        .reg-detail-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
+        .reg-detail-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
         .reg-detail-title {
           flex: 1;
           font-size: 16px;

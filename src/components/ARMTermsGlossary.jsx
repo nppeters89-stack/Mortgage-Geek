@@ -50,7 +50,7 @@ export function ARMTermsGlossary() {
       <style>{`
         .armg-container {
           background: linear-gradient(180deg, ${P.navyDark} 0%, ${P.navy} 100%);
-          border: 1px solid rgba(212, 168, 67, 0.25);
+          border: 1px solid rgba(207, 51, 56, 0.25);
           border-radius: 14px;
           padding: 18px;
           margin: 28px 0;
@@ -70,7 +70,7 @@ export function ARMTermsGlossary() {
           padding: 10px 14px;
           background: rgba(255, 255, 255, 0.06);
           color: ${P.cream};
-          border: 1px solid rgba(212, 168, 67, 0.2);
+          border: 1px solid rgba(207, 51, 56, 0.2);
           border-radius: 10px;
           font-family: ${F.body};
           font-size: 13px;
@@ -84,7 +84,7 @@ export function ARMTermsGlossary() {
           min-height: 44px;
         }
         .armg-tab:hover { background: rgba(255, 255, 255, 0.1); }
-        .armg-tab:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+        .armg-tab:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
         .armg-tab-active {
           background: ${P.gold} !important;
           color: ${P.navyDark} !important;
@@ -98,7 +98,7 @@ export function ARMTermsGlossary() {
           height: 20px;
           padding: 0 6px;
           border-radius: 10px;
-          background: rgba(212, 168, 67, 0.2);
+          background: rgba(207, 51, 56, 0.2);
           color: ${P.goldLight};
           font-size: 11px;
           font-weight: 700;
@@ -124,7 +124,7 @@ export function ARMTermsGlossary() {
         }
         .armg-card-open {
           border-color: ${P.gold} !important;
-          box-shadow: 0 4px 16px rgba(184, 134, 11, 0.18) !important;
+          box-shadow: 0 4px 16px rgba(207, 51, 56, 0.18) !important;
           grid-column: 1 / -1;
         }
         .armg-card-btn {
@@ -160,7 +160,7 @@ export function ARMTermsGlossary() {
           width: 28px;
           height: 28px;
           border-radius: 50%;
-          background: rgba(184, 134, 11, 0.12);
+          background: rgba(207, 51, 56, 0.12);
           color: ${P.goldMuted};
           display: inline-flex;
           align-items: center;

@@ -123,7 +123,7 @@ export function ProgramCardCompact({
         ...eligibleStyle,
         border: isSelected ? `3px solid ${P.gold}` : `3px solid transparent`,
         boxShadow: isSelected
-          ? '0 0 0 4px rgba(184, 134, 11, 0.15), 0 8px 30px rgba(0, 0, 0, 0.12)'
+          ? '0 0 0 4px rgba(207, 51, 56, 0.15), 0 8px 30px rgba(0, 0, 0, 0.12)'
           : undefined,
         transform: isSelected ? 'translateY(-2px)' : 'translateY(0)',
       }}
@@ -236,8 +236,8 @@ const overLimitBodyStyle = {
 };
 
 const toQualifyStyle = {
-  background: 'rgba(184, 134, 11, 0.08)',
-  border: '1px solid rgba(184, 134, 11, 0.25)',
+  background: 'rgba(207, 51, 56, 0.08)',
+  border: '1px solid rgba(207, 51, 56, 0.25)',
   borderRadius: 6,
   padding: '6px 8px',
   textAlign: 'center',

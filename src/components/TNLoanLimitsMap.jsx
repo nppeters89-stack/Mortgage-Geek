@@ -6,8 +6,8 @@ import { tnLoanLimitsData } from "../data/tnLoanLimits2026";
 // dark text stay readable; saturated enough to read on print. Kept inline
 // rather than added to theme.js because they are local to this map's
 // color encoding and shouldn't be reused elsewhere as generic tokens.
-const MAP_BASELINE = "#D4DDD8";
-const MAP_HIGH_COST = "#E8C97D";
+const MAP_BASELINE = "#E0DDD6"; // Rate cream-dark — pale neutral baseline tier
+const MAP_HIGH_COST = "#C57B5E"; // warm terracotta — high-cost tier (distinct from brand red)
 
 const formatCurrency = (n) => "$" + Number(n).toLocaleString("en-US");
 
@@ -50,7 +50,7 @@ const MAP_CSS = `
     border: 1.5px solid ${P.creamDark};
     border-radius: 8px;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231B3A4B' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2324272A' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
     min-height: 44px;
@@ -110,7 +110,7 @@ const MAP_CSS = `
   .tnmap-tt-title {
     font-family: ${F.display};
     font-size: 18px;
-    color: ${P.goldLight};
+    color: ${P.cream};
     font-weight: 400;
     margin-bottom: 2px;
   }
@@ -140,7 +140,7 @@ const MAP_CSS = `
     font-size: 13px;
   }
   .tnmap-tt-value.cap {
-    color: ${P.goldLight};
+    color: ${MAP_HIGH_COST};
     font-weight: 700;
     font-size: 14px;
   }
@@ -256,7 +256,7 @@ const MAP_CSS = `
   .tnmap-info-cell-value {
     font-size: 20px;
     font-weight: 700;
-    color: ${P.goldMuted};
+    color: ${P.navy};
     line-height: 1.1;
   }
   .tnmap-info-cell-value.text {

@@ -9,9 +9,11 @@
 
 import { P } from "../../theme";
 
-// P.warmGrayLight is "#6F6860" → rgb(111, 104, 96). 40% alpha for the
-// empty-dot inset ring. Kept inline rather than added to the palette
-// because this is the only place in the app that needs it.
+// Empty-dot inset ring: pre-refresh warm grey rgb(111, 104, 96) (old
+// P.warmGrayLight "#6F6860") at 40% alpha. Kept inline rather than added to
+// the palette. NOTE: after the Phase 2 swap P.warmGrayLight is now "#9A9DA2";
+// this inline value deliberately still holds the old grey and will be
+// reconciled in the hardcoded-hex phase.
 const DEFAULT_UNFILLED_RING = "rgba(111, 104, 96, 0.4)";
 
 export function DotGrid({

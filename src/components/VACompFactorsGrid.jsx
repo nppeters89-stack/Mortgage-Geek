@@ -151,7 +151,7 @@ export function VACompFactorsGrid() {
         }
         .vacf-row-btn:first-of-type { border-top: none; }
         .vacf-row-btn:hover { background: rgba(255, 255, 255, 0.03); }
-        .vacf-row-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
+        .vacf-row-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
         .vacf-row-btn-open {
           background: rgba(255, 255, 255, 0.04) !important;
           border-left-color: ${P.gold} !important;

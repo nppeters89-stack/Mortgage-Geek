@@ -1,10 +1,9 @@
 import { P, F } from "../theme";
 
-// Hardcoded SVG-only colors (no theme equivalent):
-//   #E89B3F = warning orange used for the lifetime cap dashed line/label
-//   #9B9488 = floor gray used for the dashed floor line/label
-const WARNING_ORANGE = "#E89B3F";
-const FLOOR_GRAY = "#9B9488";
+// Line colors (Rate palette): the lifetime cap reuses the 4c caution amber
+// (semantic ceiling); the floor uses a neutral dark grey.
+const WARNING_ORANGE = P.caution;  // lifetime cap dashed line/label
+const FLOOR_GRAY = P.navyLight;    // floor dashed line/label
 
 const printColorCSS = `
   .arm-rate-anatomy svg,
@@ -214,7 +213,7 @@ export function ARMRateAnatomyGraphic() {
           <path
             d="M 100,235 L 110,230 L 120,226 L 130,222 L 140,218 L 150,215 L 160,214 L 170,213 L 180,213 L 190,215 L 200,204 L 210,206 L 220,208 L 230,209 L 240,210 L 250,211 L 260,212 L 270,213 L 280,214 L 290,216 L 300,218 L 310,221 L 320,224 L 330,229 L 340,234 L 350,240 L 360,247 L 370,254 L 380,261 L 390,267 L 400,272 L 410,276 L 420,279 L 430,280 L 440,279 L 450,277 L 460,274 L 470,269 L 480,264 L 490,258 L 500,252 L 510,246 L 520,240 L 530,235 L 540,231 L 550,228 L 560,225 L 570,223 L 580,221 L 590,219 L 600,218 L 610,216 L 620,214 L 630,211 L 640,208 L 650,206 L 660,203 L 670,200 L 680,198 L 690,197 L 700,197 L 710,199 L 720,202 L 730,206 L 740,211 L 750,218 L 760,225 L 770,233 L 780,241 L 790,248 L 800,255 L 810,261 L 820,266 L 830,269 L 840,271 L 850,272 L 860,272 L 870,270 L 880,268 L 890,265 L 900,263"
             fill="none"
-            stroke={P.goldLight}
+            stroke={P.warmGrayLight}
             strokeWidth="2"
             strokeDasharray="4 3"
             opacity="0.65"
@@ -224,7 +223,7 @@ export function ARMRateAnatomyGraphic() {
           <path
             d="M 233,211 L 263,211 L 263,214 L 293,214 L 293,220 L 323,220 L 323,233 L 353,233 L 353,253 L 383,253 L 383,271 L 413,271 L 413,280 L 443,280 L 443,275 L 473,275 L 473,259 L 503,259 L 503,241 L 533,241 L 533,229 L 563,229 L 563,221 L 593,221 L 593,216 L 623,216 L 623,209 L 653,209 L 653,201 L 683,201 L 683,197 L 713,197 L 713,205 L 743,205 L 743,224 L 773,224 L 773,247 L 803,247 L 803,265 L 833,265 L 833,272 L 863,272 L 863,268 L 893,268 L 893,264 L 900,264"
             fill="none"
-            stroke={P.sage}
+            stroke={P.gold}
             strokeWidth="3"
             strokeLinejoin="miter"
           />
@@ -287,16 +286,16 @@ export function ARMRateAnatomyGraphic() {
           swatch={<SolidSwatch color={P.navy} />}
         />
         <LegendChip
-          color={P.sageDark}
+          color={P.gold}
           label="Fully Indexed ARM Rate"
           sub="Adjusts each period: index + margin"
-          swatch={<StepSwatch color={P.sage} />}
+          swatch={<StepSwatch color={P.gold} />}
         />
         <LegendChip
-          color={P.goldMuted}
+          color={P.textLight}
           label="+ Margin"
           sub="Fixed lender markup"
-          swatch={<SolidSwatch color={P.goldLight} dashed />}
+          swatch={<SolidSwatch color={P.warmGrayLight} dashed />}
         />
         <LegendChip
           color={P.warmGray}

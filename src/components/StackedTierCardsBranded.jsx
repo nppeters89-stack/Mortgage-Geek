@@ -124,7 +124,7 @@ function TierCard({ t, idx, expanded, onToggle, onKeyDown, plainMode, density })
       style={{
         position: "relative",
         background: P.navyDark,
-        border: `1px solid ${expanded ? "rgba(212, 168, 67, 0.5)" : "rgba(212, 168, 67, 0.18)"}`,
+        border: `1px solid ${expanded ? "rgba(207, 51, 56, 0.5)" : "rgba(207, 51, 56, 0.18)"}`,
         borderRadius: 12,
         overflow: "hidden",
         boxShadow: expanded
@@ -211,8 +211,8 @@ function TierCard({ t, idx, expanded, onToggle, onKeyDown, plainMode, density })
           style={{
             width: 36, height: 36,
             borderRadius: 999,
-            border: `1px solid rgba(212, 168, 67, ${expanded ? 0.6 : 0.3})`,
-            background: expanded ? "rgba(212, 168, 67, 0.15)" : "transparent",
+            border: `1px solid rgba(207, 51, 56, ${expanded ? 0.6 : 0.3})`,
+            background: expanded ? "rgba(207, 51, 56, 0.15)" : "transparent",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -236,7 +236,7 @@ function TierCard({ t, idx, expanded, onToggle, onKeyDown, plainMode, density })
           className="stcb-row-detail"
           style={{
             background: P.cream,
-            borderTop: `1px solid rgba(212, 168, 67, 0.25)`,
+            borderTop: `1px solid rgba(207, 51, 56, 0.25)`,
             padding: density === "compact" ? "20px 24px" : "26px 30px",
           }}
         >
@@ -246,7 +246,7 @@ function TierCard({ t, idx, expanded, onToggle, onKeyDown, plainMode, density })
             gap: 10,
             marginBottom: 16,
             paddingBottom: 12,
-            borderBottom: `1px solid rgba(184, 134, 11, 0.18)`,
+            borderBottom: `1px solid rgba(207, 51, 56, 0.18)`,
           }}>
             <span style={{ fontSize: 14 }}>🤓</span>
             <span style={{
@@ -373,7 +373,7 @@ export function StackedTierCardsBranded({ plainMode = true, density = "regular" 
     >
       <style>{`
         .stcb-row-btn:focus-visible {
-          outline: 2px solid ${P.goldLight};
+          outline: 2px solid ${P.gold};
           outline-offset: -2px;
         }
         @media (max-width: 600px) {

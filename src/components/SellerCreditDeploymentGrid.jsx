@@ -182,9 +182,9 @@ export function SellerCreditDeploymentGrid() {
         }
         .scdg-table tbody tr.scdg-row:nth-child(odd)  { background: ${P.white}; }
         .scdg-table tbody tr.scdg-row:nth-child(even) { background: ${P.cream}; }
-        .scdg-table tbody tr.scdg-row:hover { background: rgba(184, 134, 11, 0.06); }
+        .scdg-table tbody tr.scdg-row:hover { background: rgba(207, 51, 56, 0.06); }
         .scdg-table tbody tr.scdg-row.active {
-          background: rgba(184, 134, 11, 0.10);
+          background: rgba(207, 51, 56, 0.10);
           border-left: 3px solid ${P.gold};
         }
         .scdg-table tbody tr.scdg-row:focus-visible { outline: 2px solid ${P.navy}; outline-offset: -2px; }
@@ -240,7 +240,7 @@ export function SellerCreditDeploymentGrid() {
         }
         .scdg-panel-cell {
           background: rgba(250, 247, 242, 0.05);
-          border: 1px solid rgba(212, 168, 67, 0.25);
+          border: 1px solid rgba(207, 51, 56, 0.25);
           border-radius: 6px;
           padding: 14px;
         }

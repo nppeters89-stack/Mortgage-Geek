@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const SCENARIOS = [
   "Job started, no paystub yet",
@@ -39,13 +40,11 @@ const ELIGIBILITY = {
   },
 };
 
-const INELIG_RED = "#B85450";
-
 const STATUS_VISUALS = {
-  standard:          { icon: "✓", color: P.sageDark,  bg: "rgba(90, 122, 110, 0.15)", border: "rgba(90, 122, 110, 0.32)" },
-  option:            { icon: "✓", color: P.sageDark,  bg: "rgba(90, 122, 110, 0.10)", border: "rgba(90, 122, 110, 0.28)" },
-  management_review: { icon: "⚠", color: P.goldMuted, bg: "rgba(184, 134, 11, 0.12)", border: "rgba(184, 134, 11, 0.32)" },
-  ineligible:        { icon: "✗", color: INELIG_RED,  bg: "rgba(184, 84, 80, 0.12)",  border: "rgba(184, 84, 80, 0.32)" },
+  standard:          { icon: "✓", color: P.success, bg: withAlpha(P.success, 0.15), border: withAlpha(P.success, 0.32) },
+  option:            { icon: "✓", color: P.success, bg: withAlpha(P.success, 0.10), border: withAlpha(P.success, 0.28) },
+  management_review: { icon: "⚠", color: P.caution, bg: withAlpha(P.caution, 0.12), border: withAlpha(P.caution, 0.32) },
+  ineligible:        { icon: "✗", color: P.danger,  bg: withAlpha(P.danger, 0.12),  border: withAlpha(P.danger, 0.32) },
 };
 
 const TIMELINE = [

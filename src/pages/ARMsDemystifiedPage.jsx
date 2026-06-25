@@ -7,7 +7,7 @@ import { articleSchema } from "../utils/schema";
 import { ARMRateAnatomyGraphic } from "../components/ARMRateAnatomyGraphic";
 import { ARMTermsGlossary } from "../components/ARMTermsGlossary";
 
-const TITLE = "ARMs Demystified: How Adjustable-Rate Mortgages Work, When They Make Sense, and What the Caps Actually Mean | The Mortgage Geek";
+const TITLE = "ARMs Demystified: How Adjustable-Rate Mortgages Work, When They Make Sense, and What the Caps Actually Mean | Mortgage Geek";
 const DESCRIPTION = "Adjustable-rate mortgages explained in plain English. How caps work, when ARMs make sense, qualifying rate quirks. From a real LO with 12+ years.";
 const PATH = "/deep-dives/arms-demystified";
 const URL = `https://mortgagegeek.ai${PATH}`;
@@ -304,15 +304,15 @@ export function ARMsDemystifiedPage() {
       />
       <style>{globalCSS}</style>
 
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
+      <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+          <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--light" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+            <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <ShareButton variant="header" />
-            <a href="/deep-dives" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
+            <ShareButton variant="header" headerTone="light" />
+            <a href="/deep-dives" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
           </div>
         </div>
       </div>
@@ -339,7 +339,7 @@ export function ARMsDemystifiedPage() {
           </p>
         </header>
 
-        <div style={{ background: "rgba(184, 134, 11, 0.06)", border: `1px solid rgba(184, 134, 11, 0.25)`, borderRadius: 8, padding: "16px 20px", marginBottom: 36, display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ background: "rgba(207, 51, 56, 0.06)", border: `1px solid rgba(207, 51, 56, 0.25)`, borderRadius: 8, padding: "16px 20px", marginBottom: 36, display: "flex", alignItems: "flex-start", gap: 12 }}>
           <span style={{ fontSize: 18, flexShrink: 0 }}>🤓</span>
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>

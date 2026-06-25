@@ -255,7 +255,7 @@ export function DetailPanel({
               {prog.mi > 0 ? ', monthly MI' : ''}.{' '}
               <a
                 href={cashToCloseHref}
-                style={{ color: P.warmGrayLight, textDecoration: 'underline' }}
+                style={{ color: P.textLight, textDecoration: 'underline' }}
               >
                 Full APR detail →
               </a>
@@ -347,7 +347,7 @@ export function DetailPanel({
                   fontSize: 12,
                   marginTop: 10,
                   fontWeight: 600,
-                  color: saveToast.type === 'error' ? '#C0392B' : P.sageDark,
+                  color: saveToast.type === 'error' ? P.danger : P.success,
                 }}
               >
                 {saveToast.msg}

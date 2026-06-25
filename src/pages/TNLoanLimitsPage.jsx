@@ -5,7 +5,7 @@ import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { TNLoanLimitsMap } from "../components/TNLoanLimitsMap";
 
-const TITLE = "Tennessee Loan Limits 2026: Interactive Map by County | The Mortgage Geek";
+const TITLE = "Tennessee Loan Limits 2026: Interactive Map by County | Mortgage Geek";
 const DESCRIPTION = "Interactive map of 2026 Tennessee loan limits by county. Conforming, FHA, VA, USDA limits for all 95 TN counties. Updated annually. Real LO insight on what they mean.";
 const PATH = "/geek-maps/tennessee-loan-limits";
 const URL = `https://mortgagegeek.ai${PATH}`;
@@ -86,15 +86,15 @@ export function TNLoanLimitsPage() {
       />
       <style>{globalCSS}</style>
 
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px", margin: 0 }}>
+      <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+          <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--light" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+            <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <ShareButton variant="header" />
-            <a href="/geek-maps" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500 }}>← All Geek Maps</a>
+            <ShareButton variant="header" headerTone="light" />
+            <a href="/geek-maps" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500 }}>← All Geek Maps</a>
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@ export function TNLoanLimitsPage() {
           </p>
         </header>
 
-        <div style={{ background: "rgba(184, 134, 11, 0.06)", border: `1px solid rgba(184, 134, 11, 0.25)`, borderLeft: `3px solid ${P.gold}`, borderRadius: 6, padding: "14px 18px", marginBottom: 8 }}>
+        <div style={{ background: "rgba(207, 51, 56, 0.06)", border: `1px solid rgba(207, 51, 56, 0.25)`, borderLeft: `3px solid ${P.gold}`, borderRadius: 6, padding: "14px 18px", marginBottom: 8 }}>
           <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.6, margin: 0 }}>
             <strong style={{ color: P.navy, fontWeight: 600 }}>Updated for 2026.</strong> Conventional and FHA limits effective January 1, 2026. Sourced directly from FHFA and HUD.
           </p>
@@ -247,8 +247,8 @@ export function TNLoanLimitsPage() {
               </a>
               <a
                 className="tnpage-cta-btn secondary"
-                href="mailto:nick@mortgagegeek.ai"
-                aria-label="Email Nick Peters at nick@mortgagegeek.ai"
+                href="mailto:Nick.Peters@rate.com"
+                aria-label="Email Nick Peters at Nick.Peters@rate.com"
               >
                 ✉ Email Nick
               </a>
@@ -409,7 +409,7 @@ export function TNLoanLimitsPage() {
         <div style={{ marginTop: 48, padding: "28px 28px", background: P.creamDark, borderRadius: 10, textAlign: "center" }}>
           <p style={{ fontSize: 20, color: P.navy, fontWeight: 600, marginBottom: 6, fontFamily: F.display }}>Want to walk through how the limits hit your specific situation?</p>
           <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.65, marginBottom: 4 }}>
-            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or email <a href="mailto:nick@mortgagegeek.ai" aria-label="Email Nick Peters at nick@mortgagegeek.ai" style={LINK_STYLE}>nick@mortgagegeek.ai</a>.
+            Call me at <a href="tel:+16156560737" aria-label="Call Nick Peters at 615-656-0737" style={LINK_STYLE}>(615) 656-0737</a> or email <a href="mailto:Nick.Peters@rate.com" aria-label="Email Nick Peters at Nick.Peters@rate.com" style={LINK_STYLE}>Nick.Peters@rate.com</a>.
           </p>
           <p style={{ fontSize: 13, color: P.warmGrayLight, lineHeight: 1.65, fontStyle: "italic" }}>
             Bring a target county, a price range, and which programs you're weighing. We'll figure out the rest before you go under contract.

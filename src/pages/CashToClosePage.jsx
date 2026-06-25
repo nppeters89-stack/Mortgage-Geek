@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from "../data/taxRates";
-import { fmt } from "../utils/format";
+import { fmt, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { CashToCloseIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -543,7 +543,7 @@ export function CashToClosePage() {
         description="See exactly how much cash you need at closing. Includes down payment, closing costs, prepaids, and escrows — calculated for your specific state and county."
         path="/cash-to-close"
         schema={webApplicationSchema({
-          title: "Cash to Close Calculator — The Mortgage Geek",
+          title: "Cash to Close Calculator — Mortgage Geek",
           description: "Estimate total cash needed at closing including down payment, closing costs, prepaids, and escrows.",
           url: "https://mortgagegeek.ai/cash-to-close",
         })}
@@ -563,22 +563,22 @@ export function CashToClosePage() {
           .ctc-program-grid > button { flex: 1 1 calc(50% - 3px); }
         }
       `}</style>
-      <div className="pwa-safe-top" style={{ background: `linear-gradient(135deg, ${P.navyDark} 0%, ${P.navy} 100%)`, padding: "20px 24px" }}>
+      <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: P.navy, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 16 }}>🤓</span></div>
-            <span style={{ fontFamily: F.display, fontSize: 16, color: "#fff" }}>The Mortgage Geek</span>
+          <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+            <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-black-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: P.creamDark, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--light" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-sm.svg" alt="" aria-hidden="true" />
+            <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <a href="tel:+16156560737" aria-label="Call Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: P.gold, color: "#fff", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               <span className="btn-label-mobile-hide">Call</span>
             </a>
-            <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20cash%20to%20close%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)", fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            <a href="sms:+16156560737&body=Hi%2C%20I%20was%20using%20your%20cash%20to%20close%20simulator%20and%20had%20a%20question." aria-label="Text Nick Peters at (615) 656-0737" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 8, background: "transparent", color: P.navy, border: `1px solid ${P.creamDark}`, fontFamily: F.body, fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               <span className="btn-label-mobile-hide">Text</span>
             </a>
-            <a href="/" style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
+            <a href="/" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
           </div>
         </div>
       </div>
@@ -633,7 +633,7 @@ export function CashToClosePage() {
             <div style={{
               border: `1.5px solid ${P.gold}`,
               borderRadius: 8,
-              background: "linear-gradient(135deg, rgba(184, 134, 11, 0.04) 0%, rgba(212, 168, 67, 0.06) 100%)",
+              background: "linear-gradient(135deg, rgba(207, 51, 56, 0.04) 0%, rgba(207, 51, 56, 0.06) 100%)",
               padding: "8px 12px 10px",
               position: "relative",
             }}>
@@ -805,14 +805,14 @@ export function CashToClosePage() {
             <Row label="Government & Recording Subtotal" val={fmt(transferTax + mortgageTax)} subtotal />
             <p style={{ fontSize: 10, color: P.warmGrayLight, fontStyle: "italic", marginTop: 6 }}>{transferTaxNote}</p>
 
-            <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(184,134,11,0.06)", borderRadius: 10, border: `1px solid rgba(184,134,11,0.15)` }}>
+            <div style={{ marginTop: 20, padding: "16px 18px", background: "rgba(207,51,56,0.06)", borderRadius: 10, border: `1px solid rgba(207,51,56,0.15)` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Prepaid Items</h3>
               <Row label="12 Months Homeowner's Insurance" val={fmt(insurancePrepaid)} />
               <Row label={`Daily Interest (${daysRemaining} days × ${fmt(dailyInterest)})`} val={fmt(prepaidInterest)} />
               <Row label="Prepaids Subtotal" val={fmt(prepaidsTotal)} subtotal />
             </div>
 
-            <div style={{ marginTop: 14, padding: "16px 18px", background: "rgba(90,122,110,0.07)", borderRadius: 10, border: `1px solid rgba(90,122,110,0.18)` }}>
+            <div style={{ marginTop: 14, padding: "16px 18px", background: withAlpha(P.success, 0.07), borderRadius: 10, border: `1px solid ${withAlpha(P.success, 0.18)}` }}>
               <h3 style={{ fontFamily: F.display, fontSize: 16, color: headerColor, marginBottom: 8, marginTop: 0 }}>Escrow Reserves</h3>
 
               {/* Escrow Waiver — Conv only. FHA/VA always require escrows. */}
@@ -846,7 +846,7 @@ export function CashToClosePage() {
 
               {escrowsWaived ? (
                 <>
-                  <p style={{ fontSize: 12, color: P.sageDark, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
+                  <p style={{ fontSize: 12, color: P.success, fontWeight: 600, textAlign: "center", padding: "12px 0" }}>✓ Escrows waived — no reserves collected at closing</p>
                   <Row label="Reserves Subtotal" val={fmt(0)} subtotal />
                 </>
               ) : (

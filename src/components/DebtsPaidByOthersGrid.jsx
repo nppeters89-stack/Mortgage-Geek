@@ -1,4 +1,5 @@
 import { P, F } from "../theme";
+import { withAlpha } from "../utils/format";
 
 const ROWS = [
   {
@@ -94,16 +95,16 @@ const STATUS = {
   no: {
     label: "NO",
     sub: "more flexible",
-    color: P.sageDark,
-    bg: "rgba(90, 122, 110, 0.15)",
-    border: "rgba(90, 122, 110, 0.30)",
+    color: P.success,
+    bg: withAlpha(P.success, 0.15),
+    border: withAlpha(P.success, 0.30),
   },
   yes: {
     label: "YES",
     sub: "must be on debt",
-    color: P.goldMuted,
-    bg: "rgba(184, 134, 11, 0.12)",
-    border: "rgba(184, 134, 11, 0.32)",
+    color: P.caution,
+    bg: withAlpha(P.caution, 0.12),
+    border: withAlpha(P.caution, 0.32),
   },
 };
 

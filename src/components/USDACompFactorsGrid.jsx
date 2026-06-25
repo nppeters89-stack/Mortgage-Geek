@@ -91,7 +91,7 @@ export function USDACompFactorsGrid() {
         }
         .usdacf-row-btn:first-of-type { border-top: none; }
         .usdacf-row-btn:hover { background: rgba(255, 255, 255, 0.03); }
-        .usdacf-row-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: -2px; }
+        .usdacf-row-btn:focus-visible { outline: 2px solid ${P.gold}; outline-offset: -2px; }
         .usdacf-row-btn-open {
           background: rgba(255, 255, 255, 0.04) !important;
           border-left-color: ${P.gold} !important;

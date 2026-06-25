@@ -70,7 +70,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
   // resolved yet, point at the public asset so the preview still
   // shows a logo. SnapshotExportButton refuses to export until the
   // data URL is ready, so the captured PNG never falls back.
-  const logoSrc = logoDataUrl || "/icon-512.png";
+  const logoSrc = logoDataUrl || "/favicons/icon-512.png";
 
   return (
     <div style={{
@@ -135,7 +135,7 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
           letterSpacing: "0.22em",
           fontWeight: 500,
           textTransform: "uppercase",
-          color: P.goldLight,
+          color: P.cream,
           display: "inline-flex",
           alignItems: "center",
         }}>
