@@ -9,7 +9,7 @@ const css = `
   .cc-body { font-family: ${F.sans}; font-size: 18px; line-height: 1.5; color: ${HOME.textOnDark}; margin: 0; max-width: 460px; }
   .cc-right { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
   .cc-btn { display: inline-flex; align-items: center; justify-content: center; font-family: ${F.sans}; font-size: 17px; font-weight: 700; text-decoration: none; border: none; cursor: pointer; border-radius: 12px; padding: 16px 30px; min-height: 44px; box-sizing: border-box; background: ${HOME.red}; color: ${HOME.white}; transition: background .2s ease, transform .2s ease; }
-  .cc-btn:hover { background: ${HOME.redHover}; transform: translateY(-2px); }; font-size: 15px; color: ${HOME.textMuted2}; }
+  .cc-btn:hover { background: ${HOME.redHover}; transform: translateY(-2px); }
   @media (max-width: 960px) {
     .cc-section { padding: 52px 20px; }
     .cc-wrap { flex-direction: column; align-items: stretch; }
