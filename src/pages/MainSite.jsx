@@ -3,6 +3,7 @@ import { MobileToolbar } from "../components/MobileToolbar";
 import { HomeHeader } from "../components/homepage/HomeHeader";
 import { HeroEditorial } from "../components/homepage/HeroEditorial";
 import { ValueProps } from "../components/homepage/ValueProps";
+import { LoanProducts } from "../components/homepage/LoanProducts";
 import { AgentAdvantage } from "../components/homepage/AgentAdvantage";
 import { Education } from "../components/homepage/Education";
 import { ReviewsCarousel } from "../components/homepage/ReviewsCarousel";
@@ -26,6 +27,7 @@ export function MainSite({ showStats = true, showAgentSection = true, enableMoti
       <HomeHeader />
       <HeroEditorial showStats={showStats} enableMotion={enableMotion} />
       <ValueProps />
+      <LoanProducts />
       {showAgentSection && <AgentAdvantage />}
       <Education />
       <ReviewsCarousel />

@@ -65,6 +65,7 @@ export const HOME = {
   borderLight: "#E0DDD6",  // = P.creamDark
   borderCard: "#E4E5E7",
   borderHairline: "#EFEEE9",
+  rowDivider: "#E5E2DB",   // loan-products row hairline
   lockupDivLight: "#C7C4BC",
   lockupDivDark: "#4A4B4E",
   darkDivider: "#2A2C2F",
