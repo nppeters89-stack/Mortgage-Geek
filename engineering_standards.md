@@ -156,7 +156,13 @@ Standards that drift from reality are worse than no standards. The goal is a liv
 
 These are known but intentionally not enforced:
 
-- **Prerendering for SPA crawler visibility.** Per-page schema is injected post-hydration; not visible to crawlers reading raw HTML. Revisit at 40+ pages.
+- **Prerendering for SPA crawler visibility.** Per-page schema is injected post-hydration; not visible to crawlers reading raw HTML. Being addressed by the React Router v7 prerender migration (branch `seo-prerender-migration`): P1 adopted framework mode (SPA), P2 added SSR-safety guards, P3 turns on prerendering. See the P3 carry-over below.
+
+### P3 prerender carry-over (deferred from P2, branch seo-prerender-migration)
+P2 guarded the render-time browser APIs that caused Node crashes or viewport hydration mismatches. These render-time browser reads were intentionally left untouched in P2 because they are crash-safe (try/catch) and changing them in P2 would have broken P2's "identical SPA behavior" rule. They must be handled in P3 when prerendering is enabled, because they will hydration-mismatch against the static HTML:
+- **`localStorage`-seeded `useState` initializers (rows 9-13 of the P2 audit):** `PreApprovalChecklist.jsx` (checkedItems), `ComparePage.jsx` (scenarios), `CalculatorPage.jsx` (visiblePrograms), `InteractiveChecklist.jsx` (`loadInitial`), and `GeekLogPage.jsx` (URL `?key=` read).
+- **Required P3 fix = HYDRATION-CLEAN RESTORE, not the naive default+effect pattern.** The naive "default + load-in-effect" approach is rejected: it makes returning users see saved checklist/scenarios/programs briefly flash to defaults. Instead: prerender renders the neutral DEFAULT (correct for SEO/indexing), and the persisted-state read is gated behind a post-mount "hydrated" flag (or a `suppressHydrationWarning` scoped to that specific subtree) so saved state restores with minimal/no visible flash.
+- **`/geek-log` = EXCLUDE from the P3 prerender path list.** Private, `noindex`/`nofollow`, no SEO value; it has no business being prerendered. Keep it SPA-served (catch-all / SPA fallback).
 - **Sub-16ms interaction latency.** Good-enough targets; not a current optimization priority.
 - **100 Lighthouse Accessibility.** 90+ is the target; chasing 100 is not worth the redesign cost.
 - **Core Web Vitals field data.** Requires real traffic to measure; not actionable until the site has user volume.
