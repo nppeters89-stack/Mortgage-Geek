@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useId } from "react";
+import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
@@ -18,7 +19,8 @@ import { PaymentPieChart } from "../components/calculator/PaymentPieChart";
 const ALL_PROGRAMS = ["Conventional", "FHA", "VA", "USDA"];
 
 export function CalculatorPage() {
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  // URL params via React Router (SSR-safe; no window access during render).
+  const [params] = useSearchParams();
   const paramRate = parseFloat(params.get("rate"));
   const paramProgram = params.get("program");
   const [homePrice, setHomePrice] = useState(() => { const v = parseFloat(params.get("price")); return v > 0 ? v : 350000; });

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useId } from "react";
+import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from "../data/taxRates";
 import { fmt, withAlpha } from "../utils/format";
@@ -114,7 +115,8 @@ export function CashToClosePage() {
     },
   };
 
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  // URL params via React Router (SSR-safe; no window access during render).
+  const [params] = useSearchParams();
   const paramProgram = params.get("program");
   const paramRate = parseFloat(params.get("rate"));
   const [program, setProgram] = useState(["Conventional", "FHA", "VA", "USDA"].includes(paramProgram) ? paramProgram : "Conventional");
