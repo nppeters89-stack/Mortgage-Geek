@@ -91,8 +91,9 @@ export function Layout({ children }) {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-        <title>Mortgage Geek — Plain-English Mortgage Tools & Guides</title>
-        <meta name="description" content="Mortgages demystified. Everything you need to understand the mortgage process — from first conversation to closing day. Compare Conventional, FHA, and VA loans side by side." />
+        {/* title + description + og/twitter title/description/url are now provided
+            per-route via `meta` exports (root defaults below, pages override), so
+            they prerender into each route's static HTML. */}
 
         {/* Preconnect to Google Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -118,17 +119,11 @@ export function Layout({ children }) {
         <meta name="theme-color" content="#131416" />
         <meta name="application-name" content="Mortgage Geek" />
 
-        {/* Open Graph */}
-        <meta property="og:title" content="Mortgage Geek — Plain-English Mortgage Tools & Guides" />
-        <meta property="og:description" content="Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm." />
+        {/* Open Graph + Twitter — site-wide static bits (per-page title/description/
+            url come from route meta). */}
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://mortgagegeek.ai/" />
         <meta property="og:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
-
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="Mortgage Geek | Mortgages Demystified" />
-        <meta name="twitter:description" content="Mortgages demystified. Side-by-side payment calculator with live rates." />
         <meta name="twitter:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
 
         {/* Schema.org Person + FinancialService — hardcoded so they're in the raw HTML for crawlers. */}
@@ -147,6 +142,22 @@ export function Layout({ children }) {
       </body>
     </html>
   );
+}
+
+// Default title/description/og/twitter for the document shell + any route that
+// does not set its own meta (verbatim from the former index.html defaults).
+// Each public route overrides these via its own `meta` export (React Router
+// merges by key, so leaf values win and nothing is duplicated).
+export function meta() {
+  return [
+    { title: "Mortgage Geek — Plain-English Mortgage Tools & Guides" },
+    { name: "description", content: "Mortgages demystified. Everything you need to understand the mortgage process — from first conversation to closing day. Compare Conventional, FHA, and VA loans side by side." },
+    { property: "og:title", content: "Mortgage Geek — Plain-English Mortgage Tools & Guides" },
+    { property: "og:description", content: "Free mortgage calculators, side-by-side loan comparisons, and deep-dive guides for first-time buyers. Written by a 12-year mortgage pro, not an algorithm." },
+    { property: "og:url", content: "https://mortgagegeek.ai/" },
+    { name: "twitter:title", content: "Mortgage Geek | Mortgages Demystified" },
+    { name: "twitter:description", content: "Mortgages demystified. Side-by-side payment calculator with live rates." },
+  ];
 }
 
 export default function App() {

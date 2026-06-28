@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SellerCreditDeploymentGrid } from "../components/SellerCreditDeploymentGrid";
@@ -78,18 +77,6 @@ function TipBody({ children }) {
 export function RateBuydownsPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title={TITLE}
-        description={DESCRIPTION}
-        path={PATH}
-        schema={articleSchema({
-          title: "Rate Buydowns: The Same $10,000, Four Different Ways",
-          description: DESCRIPTION,
-          url: URL,
-          datePublished: PUBLISHED,
-          dateModified: MODIFIED,
-        })}
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>

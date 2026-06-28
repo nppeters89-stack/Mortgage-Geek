@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useId } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, useId } from "react";
 import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
@@ -8,7 +8,6 @@ import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
-import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
 import { useIsCockpit, usePieDiameter } from "../utils/hooks";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
@@ -44,19 +43,23 @@ export function CalculatorPage() {
   const [saveToast, setSaveToast] = useState(null);
   const isCockpit = useIsCockpit();
   const pieDiameter = usePieDiameter();
-  const [visiblePrograms, setVisiblePrograms] = useState(() => {
+  // Hydration-clean restore: prerender/first paint renders the neutral default
+  // (all programs), matching the static HTML; the saved subset is restored before
+  // paint (useLayoutEffect) so returning users see it without a flash and React
+  // never discards the prerendered tree.
+  const [visiblePrograms, setVisiblePrograms] = useState(ALL_PROGRAMS);
+  useLayoutEffect(() => {
     try {
       const saved = localStorage.getItem("mg_calc_visible_programs");
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0
             && parsed.every(n => ALL_PROGRAMS.includes(n))) {
-          return parsed;
+          setVisiblePrograms(parsed);
         }
       }
     } catch {}
-    return ALL_PROGRAMS;
-  });
+  }, []);
 
   // Force URL-param program into the visible set (one-time, on mount)
   useEffect(() => {
@@ -359,16 +362,6 @@ export function CalculatorPage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
-      <SEOHead
-        title="Mortgage Calculator — Compare Conventional, FHA, VA, USDA | Mortgage Geek"
-        description="Calculate monthly payments and see how Conventional, FHA, VA, and USDA loans compare for the same home. Includes PMI, MIP, USDA fees, and live rates."
-        path="/calculator"
-        schema={webApplicationSchema({
-          title: "Mortgage Calculator — Mortgage Geek",
-          description: "Calculate monthly payments and compare Conventional, FHA, VA, and USDA loans side by side.",
-          url: "https://mortgagegeek.ai/calculator",
-        })}
-      />
       <style>{globalCSS}{`
         .calc-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
         .calc-cards-grid { display: grid; gap: 16px; margin-bottom: 32px; max-width: 1100px; margin-left: auto; margin-right: auto; }

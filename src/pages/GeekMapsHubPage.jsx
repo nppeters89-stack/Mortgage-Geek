@@ -1,6 +1,5 @@
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 
 export function GeekMapsHubPage() {
   const maps = [
@@ -15,11 +14,6 @@ export function GeekMapsHubPage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title="Geek Maps: Interactive Mortgage Reference Tools | Mortgage Geek"
-        description="Interactive maps and look-up tools for mortgage planning. Tennessee loan limits, USDA eligibility, property taxes. Real data, refreshed as it updates."
-        path="/geek-maps"
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>
