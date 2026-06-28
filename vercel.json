@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "build/client",
   "rewrites": [
     { "source": "/learn", "destination": "/" },
     { "source": "/getting-started", "destination": "/" },
