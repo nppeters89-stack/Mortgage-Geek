@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { SelfEmploymentDocumentationGrid } from "../components/SelfEmploymentDocumentationGrid";
@@ -172,18 +171,6 @@ const LINK_STYLE = { color: P.navy, fontWeight: 600, textDecoration: "underline"
 export function SelfEmploymentDocumentationPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title={TITLE}
-        description={DESCRIPTION}
-        path={PATH}
-        schema={articleSchema({
-          title: "Self-Employed Mortgage Documentation: What Lenders Actually Want to See",
-          description: DESCRIPTION,
-          url: URL,
-          datePublished: PUBLISHED,
-          dateModified: MODIFIED,
-        })}
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>

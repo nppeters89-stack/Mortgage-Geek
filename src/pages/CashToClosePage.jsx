@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useId } from "react";
+import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from "../data/taxRates";
 import { fmt, withAlpha } from "../utils/format";
@@ -7,7 +8,6 @@ import { CashToCloseIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
-import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
 
 export function CashToClosePage() {
@@ -114,7 +114,8 @@ export function CashToClosePage() {
     },
   };
 
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  // URL params via React Router (SSR-safe; no window access during render).
+  const [params] = useSearchParams();
   const paramProgram = params.get("program");
   const paramRate = parseFloat(params.get("rate"));
   const [program, setProgram] = useState(["Conventional", "FHA", "VA", "USDA"].includes(paramProgram) ? paramProgram : "Conventional");
@@ -538,16 +539,6 @@ export function CashToClosePage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
-      <SEOHead
-        title="Cash to Close Calculator — Estimate Your Closing Costs by State"
-        description="See exactly how much cash you need at closing. Includes down payment, closing costs, prepaids, and escrows — calculated for your specific state and county."
-        path="/cash-to-close"
-        schema={webApplicationSchema({
-          title: "Cash to Close Calculator — Mortgage Geek",
-          description: "Estimate total cash needed at closing including down payment, closing costs, prepaids, and escrows.",
-          url: "https://mortgagegeek.ai/cash-to-close",
-        })}
-      />
       <style>{globalCSS}{`
         .ctc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         @media (max-width: 600px) { .ctc-grid { grid-template-columns: 1fr; } }

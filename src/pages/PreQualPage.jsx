@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useId } from "react";
+import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt, pctCap, withAlpha } from "../utils/format";
@@ -8,14 +9,14 @@ import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
-import { SEOHead } from "../components/SEOHead";
 import { webApplicationSchema } from "../utils/schema";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramResultCardCompact } from "../components/prequal/ProgramResultCardCompact";
 import { DetailPanel as PreQualDetailPanel } from "../components/prequal/DetailPanel";
 
 export function PreQualPage() {
-  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  // URL params via React Router (SSR-safe; no window access during render).
+  const [params] = useSearchParams();
   const [grossIncome, setGrossIncome] = useState(() => { const v = parseFloat(params.get("income")); return v > 0 ? v : 6500; });
   const [monthlyDebts, setMonthlyDebts] = useState(() => { const v = parseFloat(params.get("debts")); return v >= 0 ? v : 450; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 5; });
@@ -411,16 +412,6 @@ export function PreQualPage() {
 
   const sharedHead = (
     <>
-      <SEOHead
-        title="Pre-Qualification Calculator — See What Mortgage You Can Afford"
-        description="Enter your income and debts to see your maximum mortgage amount across Conventional, FHA, VA, and USDA. Free pre-qualification estimate, no credit check."
-        path="/prequal"
-        schema={webApplicationSchema({
-          title: "Pre-Qualification Calculator — Mortgage Geek",
-          description: "See what mortgage you can afford across Conventional, FHA, VA, and USDA based on your income and debts.",
-          url: "https://mortgagegeek.ai/prequal",
-        })}
-      />
       <style>{globalCSS}{`
         .pq-input-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .pq-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }

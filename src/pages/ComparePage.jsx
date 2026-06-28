@@ -1,17 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { fmt } from "../utils/format";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
-import { webApplicationSchema } from "../utils/schema";
 
 export function ComparePage() {
   const STORAGE_KEY = "mg_compare_scenarios";
-  const [scenarios, setScenarios] = useState(() => {
-    try { const saved = localStorage.getItem(STORAGE_KEY); return saved ? JSON.parse(saved) : []; }
-    catch { return []; }
-  });
+  // Hydration-clean restore: default empty (matches prerender), saved scenarios
+  // restored in a post-mount effect (one-frame restore; no server layout effect).
+  const [scenarios, setScenarios] = useState([]);
+  useEffect(() => {
+    try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) setScenarios(JSON.parse(saved)); } catch {}
+  }, []);
 
   const [selectedId, setSelectedId] = useState(null);
 
@@ -33,16 +33,6 @@ export function ComparePage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
-      <SEOHead
-        title="Side-by-Side Loan Comparison Tool — Save and Compare Scenarios"
-        description="Save up to 3 loan scenarios and compare them side by side. Different rates, terms, down payments — see the real difference in monthly payment and total cost."
-        path="/compare"
-        schema={webApplicationSchema({
-          title: "Loan Comparison Tool — Mortgage Geek",
-          description: "Save and compare up to 3 mortgage scenarios side by side.",
-          url: "https://mortgagegeek.ai/compare",
-        })}
-      />
       <style>{globalCSS}{`
         .compare-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; align-items: flex-start; padding-top: 14px; }
         .compare-card { width: 320px; flex-shrink: 0; }

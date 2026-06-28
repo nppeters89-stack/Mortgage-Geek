@@ -1,6 +1,5 @@
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { TNLoanLimitsMap } from "../components/TNLoanLimitsMap";
@@ -72,18 +71,6 @@ const LINK_STYLE = { color: P.navy, fontWeight: 600, textDecoration: "underline"
 export function TNLoanLimitsPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title={TITLE}
-        description={DESCRIPTION}
-        path={PATH}
-        schema={articleSchema({
-          title: "Tennessee Loan Limits 2026: Interactive Map by County",
-          description: DESCRIPTION,
-          url: URL,
-          datePublished: PUBLISHED,
-          dateModified: MODIFIED,
-        })}
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>

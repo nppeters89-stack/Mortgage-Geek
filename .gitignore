@@ -17,3 +17,7 @@ dist/
 
 # Agent-local state
 .claude/
+
+# React Router framework mode
+build/
+.react-router/

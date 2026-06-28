@@ -76,16 +76,15 @@ export function ReviewsCarousel() {
   const [active, setActive] = useState(0);
   const timer = useRef(null);
 
-  const reduceMotion = typeof window !== "undefined" && window.matchMedia
-    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
   const go = (i) => setActive((i + cards.length) % cards.length);
 
   useEffect(() => {
+    // Read prefers-reduced-motion after mount (no window access during render).
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!isMobile || reduceMotion || cards.length <= 1) return;
     timer.current = setInterval(() => setActive((a) => (a + 1) % cards.length), 4500);
     return () => clearInterval(timer.current);
-  }, [isMobile, reduceMotion, cards.length, active]);
+  }, [isMobile, cards.length, active]);
 
   const manual = (i) => { if (timer.current) clearInterval(timer.current); go(i); };
 

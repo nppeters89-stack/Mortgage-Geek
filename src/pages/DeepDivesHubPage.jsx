@@ -1,6 +1,5 @@
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 
 export function DeepDivesHubPage() {
   const topics = [
@@ -106,11 +105,6 @@ export function DeepDivesHubPage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title="Mortgage Deep Dives — Detailed Guides for Every Loan Question"
-        description="Comprehensive comparison guides for complex mortgage scenarios. Bankruptcy wait periods, manual underwriting, gift funds — real answers from a 12-year pro."
-        path="/deep-dives"
-      />
       <style>{globalCSS}</style>
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto" }}>

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 import { ShareButton } from "../components/ShareButton";
 import { articleSchema } from "../utils/schema";
 import { StackedTierCardsBranded } from "../components/StackedTierCardsBranded";
@@ -127,18 +126,6 @@ function Bullets({ items }) {
 export function FHAManualUnderwritingPage() {
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title={TITLE}
-        description={DESCRIPTION}
-        path={PATH}
-        schema={articleSchema({
-          title: "FHA Manual Underwriting: HUD 4000.1 Rules, Compensating Factors, and How to Get Approved",
-          description: DESCRIPTION,
-          url: URL,
-          datePublished: PUBLISHED,
-          dateModified: MODIFIED,
-        })}
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top no-print" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>

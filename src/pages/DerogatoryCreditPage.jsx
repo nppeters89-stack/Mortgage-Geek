@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { SEOHead } from "../components/SEOHead";
 import { ShareButton } from "../components/ShareButton";
 import { WaitPeriodRows, Ch13Card } from "../components/WaitPeriodRows";
 import { EVENTS } from "../data/derogatoryCredit";
@@ -90,18 +89,6 @@ export function DerogatoryCreditPage() {
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
-      <SEOHead
-        title="FHA, VA, Conventional Bankruptcy Wait Periods: 2026 Complete Guide"
-        description="Full comparison of mortgage wait periods after bankruptcy, foreclosure, short sale, and late payments. Conventional, FHA, VA, USDA, with handbook citations."
-        path="/deep-dives/derogatory-credit"
-        schema={articleSchema({
-          title: "FHA, VA, Conventional Bankruptcy Wait Periods: 2026 Complete Guide",
-          description: "Full comparison of mortgage wait periods after bankruptcy, foreclosure, short sale, and late payments across all five major loan programs.",
-          url: "https://mortgagegeek.ai/deep-dives/derogatory-credit",
-          datePublished: "2026-04-23",
-          dateModified: "2026-04-23",
-        })}
-      />
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: "#FFFFFF", borderBottom: `1px solid ${P.creamDark}`, padding: "20px 24px", margin: 0 }}>

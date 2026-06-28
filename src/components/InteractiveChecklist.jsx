@@ -38,7 +38,10 @@ export function InteractiveChecklist({
 
   const hasTabs = !!(workflows && workflows.length > 1);
 
-  const [checked, setChecked] = useState(() => loadInitial(id));
+  // Hydration-clean restore: default empty (matches prerender), saved progress
+  // restored in a post-mount effect (one-frame restore; no server layout effect).
+  const [checked, setChecked] = useState({});
+  useEffect(() => { setChecked(loadInitial(id)); }, [id]);
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [activeFlowId, setActiveFlowId] = useState(flowList[0].id);
 

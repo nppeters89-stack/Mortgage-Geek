@@ -1,0 +1,36 @@
+import { index, layout, route } from "@react-router/dev/routes";
+
+// Mirrors the old App.jsx path->page switch exactly. All routes nest under the
+// layout route (global footer + WelcomeToast). The "*" catch-all renders the
+// homepage, matching App.jsx's default (unknown path -> MainSite).
+export default [
+  layout("routes/layout.jsx", [
+    index("routes/home.jsx"),
+    route("learn", "routes/learn.jsx"),
+    route("about", "routes/about.jsx"),
+    route("calculator", "routes/calculator.jsx"),
+    route("prequal", "routes/prequal.jsx"),
+    route("compare", "routes/compare.jsx"),
+    route("cash-to-close", "routes/cash-to-close.jsx"),
+    route("install", "routes/install.jsx"),
+    route("deep-dives", "routes/deep-dives.jsx"),
+    route("deep-dives/derogatory-credit", "routes/dd-derogatory-credit.jsx"),
+    route("deep-dives/fha-manual-underwriting", "routes/dd-fha-manual.jsx"),
+    route("deep-dives/va-manual-underwriting", "routes/dd-va-manual.jsx"),
+    route("deep-dives/usda-manual-underwriting", "routes/dd-usda-manual.jsx"),
+    route("deep-dives/arms-demystified", "routes/dd-arms.jsx"),
+    route("deep-dives/residency-rules", "routes/dd-residency.jsx"),
+    route("deep-dives/self-employed-documentation", "routes/dd-self-employed.jsx"),
+    route("deep-dives/business-assets", "routes/dd-business-assets.jsx"),
+    route("deep-dives/expected-income", "routes/dd-expected-income.jsx"),
+    route("deep-dives/debts-paid-by-others", "routes/dd-debts-paid.jsx"),
+    route("deep-dives/gift-funds", "routes/dd-gift-funds.jsx"),
+    route("deep-dives/hourly-and-part-time-income", "routes/dd-hourly-part-time.jsx"),
+    route("deep-dives/seller-concessions", "routes/dd-seller-concessions.jsx"),
+    route("deep-dives/rate-buydowns", "routes/dd-rate-buydowns.jsx"),
+    route("geek-maps", "routes/geek-maps.jsx"),
+    route("geek-maps/tennessee-loan-limits", "routes/tn-loan-limits.jsx"),
+    route("geek-log", "routes/geek-log.jsx"),
+    route("*", "routes/catch-all.jsx"),
+  ]),
+];

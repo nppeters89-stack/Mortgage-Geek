@@ -16,7 +16,6 @@ import { PreApprovalChecklist } from "../components/homepage/PreApprovalChecklis
 import { NextSteps } from "../components/homepage/NextSteps";
 import { ToolsCTA } from "../components/homepage/ToolsCTA";
 import { JargonDecoder } from "../components/homepage/JargonDecoder";
-import { SEOHead } from "../components/SEOHead";
 
 // The mortgage education hub. This carries the full educational scroll plus the
 // topic/tools sidebar and its IntersectionObserver scroll-spy, moved here from
@@ -258,11 +257,6 @@ export function LearnPage() {
 
   return (
     <div className="app-root" style={{ fontFamily: F.body, color: P.text, display: "flex", minHeight: "100vh", minHeight: "100dvh" }}>
-      <SEOHead
-        title="Learn Mortgages: Plain-English Guides, Tools & Loan Programs | Mortgage Geek"
-        description="The plain-English mortgage education hub. The journey from pre-qualification to closing, how Conventional, FHA, VA, and USDA compare, plus rates, closing costs, and what underwriters look for."
-        path="/learn"
-      />
       <style>{globalCSS}</style>
       <Sidebar activeSection={activeSection === "process" ? "getting-started" : activeSection} onNavigate={handleNavigate} onSubNavigate={handleSubNavigate} mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
       <main className={`main-content ${mobileOpen ? "main-content-open" : ""}`} style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} onClick={(e) => { if (mobileOpen) { e.stopPropagation(); if (navigator.vibrate) navigator.vibrate(10); setMobileOpen(false); } }}>
