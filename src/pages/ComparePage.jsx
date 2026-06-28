@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { fmt } from "../utils/format";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
@@ -7,9 +7,9 @@ import { MobileToolbar } from "../components/MobileToolbar";
 export function ComparePage() {
   const STORAGE_KEY = "mg_compare_scenarios";
   // Hydration-clean restore: default empty (matches prerender), saved scenarios
-  // restored before paint.
+  // restored in a post-mount effect (one-frame restore; no server layout effect).
   const [scenarios, setScenarios] = useState([]);
-  useLayoutEffect(() => {
+  useEffect(() => {
     try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) setScenarios(JSON.parse(saved)); } catch {}
   }, []);
 

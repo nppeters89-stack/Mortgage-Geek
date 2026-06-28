@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useMemo, useId } from "react";
+import { useState, useEffect, useMemo, useId } from "react";
 import { useSearchParams } from "react-router";
 import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
@@ -43,12 +43,12 @@ export function CalculatorPage() {
   const [saveToast, setSaveToast] = useState(null);
   const isCockpit = useIsCockpit();
   const pieDiameter = usePieDiameter();
-  // Hydration-clean restore: prerender/first paint renders the neutral default
-  // (all programs), matching the static HTML; the saved subset is restored before
-  // paint (useLayoutEffect) so returning users see it without a flash and React
-  // never discards the prerendered tree.
+  // Hydration-clean restore: first render is the neutral default (all programs),
+  // matching the prerendered HTML so hydration never mismatches. The saved subset
+  // is restored in a post-mount effect (one-frame restore is the accepted tradeoff
+  // for per-user tool state; keeps this SSR-clean with no layout-effect on server).
   const [visiblePrograms, setVisiblePrograms] = useState(ALL_PROGRAMS);
-  useLayoutEffect(() => {
+  useEffect(() => {
     try {
       const saved = localStorage.getItem("mg_calc_visible_programs");
       if (saved) {

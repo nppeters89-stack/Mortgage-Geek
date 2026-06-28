@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { P, F } from "../theme";
 
 const STORAGE_PREFIX = "mg-checklist-";
@@ -39,9 +39,9 @@ export function InteractiveChecklist({
   const hasTabs = !!(workflows && workflows.length > 1);
 
   // Hydration-clean restore: default empty (matches prerender), saved progress
-  // restored before paint so it survives hydration without a flash.
+  // restored in a post-mount effect (one-frame restore; no server layout effect).
   const [checked, setChecked] = useState({});
-  useLayoutEffect(() => { setChecked(loadInitial(id)); }, [id]);
+  useEffect(() => { setChecked(loadInitial(id)); }, [id]);
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [activeFlowId, setActiveFlowId] = useState(flowList[0].id);
 

@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from "react";
+import { useState, useEffect } from "react";
 import { P, F } from "../../theme";
 import { SectionHeader } from "./SectionHeader";
 
@@ -6,9 +6,9 @@ export function PreApprovalChecklist() {
   const STORAGE_KEY = "mg_checklist";
   const [sectionOpen, setSectionOpen] = useState(false);
   // Hydration-clean restore: default empty (matches prerender), saved checks
-  // restored before paint.
+  // restored in a post-mount effect (one-frame restore; no server layout effect).
   const [checkedItems, setCheckedItems] = useState({});
-  useLayoutEffect(() => {
+  useEffect(() => {
     try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) setCheckedItems(JSON.parse(saved)); } catch {}
   }, []);
   const toggle = (id) => {
