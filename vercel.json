@@ -2,7 +2,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "build/client",
   "rewrites": [
-    { "source": "/learn", "destination": "/" },
     { "source": "/getting-started", "destination": "/" },
     { "source": "/process", "destination": "/" },
     { "source": "/types", "destination": "/" },
@@ -10,18 +9,8 @@
     { "source": "/profile", "destination": "/" },
     { "source": "/structure", "destination": "/" },
     { "source": "/rates", "destination": "/" },
-    { "source": "/calculator", "destination": "/" },
-    { "source": "/prequal", "destination": "/" },
-    { "source": "/about", "destination": "/" },
-    { "source": "/compare", "destination": "/" },
-    { "source": "/cash-to-close", "destination": "/" },
-    { "source": "/install", "destination": "/" },
-    { "source": "/deep-dives", "destination": "/" },
-    { "source": "/deep-dives/:slug*", "destination": "/" },
     { "source": "/tools", "destination": "/" },
     { "source": "/tools/:slug*", "destination": "/" },
-    { "source": "/geek-maps", "destination": "/" },
-    { "source": "/geek-maps/:slug*", "destination": "/" },
     { "source": "/geek-log", "destination": "/" }
   ],
   "headers": [
