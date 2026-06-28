@@ -9,11 +9,15 @@ React + Vite, deployed on Vercel. Owner: Nick Peters, VP of Mortgage Lending at 
 (Guaranteed Rate, Inc.), NMLS #1119524.
 
 ## Architecture (current — do not assume otherwise)
-The app is modular. Routing in src/App.jsx (lazy-loaded routes), pages in src/pages/*, shared
-UI in src/components/*, data in src/data/*, helpers in src/utils/*. It is NOT a single
-monolithic App.jsx; any note that says so is stale. Design tokens live in src/theme.js: the P
-color object, F fonts, PROGRAM_COLORS, the semantic tokens (P.success / P.caution / P.danger),
-and globalCSS.
+The app is modular. Routing uses React Router v7 framework mode (SPA, ssr:false): routes are
+declared in src/routes.js (route()/index() helpers); the document shell is src/root.jsx (head,
+JSON-LD schemas, Meta/Links/Scripts, HelmetProvider); global chrome (SiteFooter with
+route-derived layout/hasSidebar props, plus WelcomeToast) lives in a pathless layout route
+src/routes/layout.jsx that derives props from useLocation(); each route is a thin adapter in
+src/routes/ that default-re-exports its named page component. Pages in src/pages/*, shared UI in
+src/components/*, data in src/data/*, helpers in src/utils/*. Design tokens live in src/theme.js:
+the P color object, F fonts, PROGRAM_COLORS, the semantic tokens (P.success / P.caution /
+P.danger), and globalCSS.
 
 ## Non-negotiable conventions
 - Named exports only. The one default export is the App.jsx lazy-load adapter.
