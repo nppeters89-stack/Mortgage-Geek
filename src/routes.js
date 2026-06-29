@@ -28,6 +28,7 @@ export default [
     route("deep-dives/hourly-and-part-time-income", "routes/dd-hourly-part-time.jsx"),
     route("deep-dives/seller-concessions", "routes/dd-seller-concessions.jsx"),
     route("deep-dives/rate-buydowns", "routes/dd-rate-buydowns.jsx"),
+    route("deep-dives/house-hacking", "routes/dd-house-hacking.jsx"),
     route("geek-maps", "routes/geek-maps.jsx"),
     route("geek-maps/tennessee-loan-limits", "routes/tn-loan-limits.jsx"),
     route("geek-log", "routes/geek-log.jsx"),
