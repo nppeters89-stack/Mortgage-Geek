@@ -9,18 +9,18 @@ React + Vite, deployed on Vercel. Owner: Nick Peters, VP of Mortgage Lending at 
 (Guaranteed Rate, Inc.), NMLS #1119524.
 
 ## Architecture (current — do not assume otherwise)
-The app is modular. Routing uses React Router v7 framework mode (SPA, ssr:false): routes are
-declared in src/routes.js (route()/index() helpers); the document shell is src/root.jsx (head,
-JSON-LD schemas, Meta/Links/Scripts, HelmetProvider); global chrome (SiteFooter with
-route-derived layout/hasSidebar props, plus WelcomeToast) lives in a pathless layout route
-src/routes/layout.jsx that derives props from useLocation(); each route is a thin adapter in
-src/routes/ that default-re-exports its named page component. Pages in src/pages/*, shared UI in
-src/components/*, data in src/data/*, helpers in src/utils/*. Design tokens live in src/theme.js:
-the P color object, F fonts, PROGRAM_COLORS, the semantic tokens (P.success / P.caution /
-P.danger), and globalCSS.
+The app is modular, on React Router v7 framework mode. Routing is defined in src/routes.js. The
+document shell (html head, site-wide Person + FinancialService JSON-LD, Meta/Links/Scripts) is
+src/root.jsx. Global chrome (SiteFooter with route-derived props, WelcomeToast) is a pathless
+layout route in src/routes/layout.jsx, deriving its props from useLocation(). Each route maps to
+a thin adapter in src/routes/ that default-re-exports its page component from src/pages/*. Shared
+UI in src/components/*, data in src/data/*, helpers in src/utils/*. There is no App.jsx (removed
+in the framework-mode migration); any note referencing src/App.jsx is stale. Design tokens live
+in src/theme.js: the P color object, F fonts, PROGRAM_COLORS, the semantic tokens (P.success /
+P.caution / P.danger), and globalCSS.
 
 ## Non-negotiable conventions
-- Named exports only. The one default export is the App.jsx lazy-load adapter.
+- Named exports only. The sole default exports are the framework-mode route modules: src/root.jsx, src/routes/layout.jsx, and the thin per-route adapters in src/routes/ (each re-exports its named page component as default).
 - No barrel/index files. Explicit import paths. Per-file React hook imports.
 - All colors come from theme.js tokens. No hardcoded hex in components.
 - TOKEN NAMES ARE HISTORICAL, NOT SEMANTIC. After the Rate refresh, values were swapped but
@@ -28,9 +28,8 @@ P.danger), and globalCSS.
   a light red. Pick a token by the VISUAL RESULT you want, never by its old color name. Status
   colors use P.success / P.caution / P.danger. The four loan programs use PROGRAM_COLORS. Keep
   these three color systems independent.
-- New routes are lazy-loaded via the App.jsx adapter pattern.
-- Public pages need a <SEOHead> (unique title, description, canonical, schema). Private/gated
-  routes follow the separate rulebook in engineering_standards.md.
+- To add a route: create the page in src/pages/* (named export), add a thin adapter in src/routes/ that default-re-exports it, and register it in src/routes.js. If the route is public and should be indexed, ALSO add its path to the prerender array in react-router.config.js. A public route missing from that array is not prerendered: it returns 404 on a direct hit instead of serving content. Private or gated routes (e.g. /geek-log) are intentionally excluded from the prerender array and fall back to the SPA via a vercel.json rewrite.
+- Public prerendered pages get their metadata from a route meta export (unique title, description, canonical, og/twitter, and JSON-LD as script descriptors) so it lands in the static HTML. Do NOT use <SEOHead> on a prerendered public route: it injects client-side, will not appear in the prerendered HTML, and would duplicate the meta export. <SEOHead> / react-helmet-async is retained ONLY for non-prerendered SPA routes (e.g. /geek-log). Private or gated routes follow the separate rulebook in engineering_standards.md.
 - Images need explicit width and height (CLS).
 - No new npm dependencies without explicit approval.
 
@@ -43,8 +42,7 @@ P.danger), and globalCSS.
 - Inventory first. Read the relevant files and report what you find BEFORE editing. Surface
   decisions; do not assume.
 - One workstream per session. One commit per logical change, descriptive message.
-- Verify before declaring done: `npx vite build` (zero errors), `npm run dev` (clean, no red
-  console errors), and a smoke test of the affected routes.
+- Verify before declaring done: `npm run build` (react-router build, zero errors), `npm run dev` (react-router dev, clean console, no red errors), and a smoke test of the affected routes. For changes touching render-time code, also confirm the prerender build still produces static HTML for all public routes.
 - On any failure: `git checkout .` and retry. Never patch forward.
 - Work on a branch and push a Vercel preview. Never merge to main without explicit review.
 
