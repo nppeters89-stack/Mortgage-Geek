@@ -5,6 +5,7 @@ export function DeepDivesHubPage() {
   const topics = [
     {
       slug: "derogatory-credit",
+      date: "2026-04-23",
       emoji: "⏳",
       title: "Derogatory Credit Wait Periods",
       summary: "How long you have to wait before qualifying for a mortgage after bankruptcy, foreclosure, short sale, deed-in-lieu, or late mortgage payments — compared across all five major loan programs.",
@@ -12,6 +13,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "fha-manual-underwriting",
+      date: "2026-04-24",
       emoji: "📋",
       title: "FHA Manual Underwriting",
       summary: "What happens when FHA's automated system sends your file to a human underwriter. HUD 4000.1 credit rules, the DTI and compensating factors grid, required downgrade triggers, and how to actually get approved.",
@@ -19,6 +21,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "va-manual-underwriting",
+      date: "2026-04-25",
       emoji: "🎖️",
       title: "VA Manual Underwriting",
       summary: "When VA's automated system refers your file to a human underwriter. Residual income tables by region and family size, the DTI and compensating factors framework, the 13 VA comp factors, and what actually gets a manual file approved.",
@@ -26,6 +29,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "usda-manual-underwriting",
+      date: "2026-04-28",
       emoji: "🌾",
       title: "USDA Manual Underwriting",
       summary: "When USDA's GUS system returns Refer or Refer with Caution. The two eligibility gates (income limits and rural property), the 29/41 baseline and 34/44 waiver ceilings, the 680 credit score waiver gate, the five compensating factors (including PN 621's payment shock), and how to actually get approved.",
@@ -33,6 +37,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "arms-demystified",
+      date: "2026-04-26",
       emoji: "📈",
       title: "ARMs Demystified",
       summary: "How adjustable-rate mortgages actually work, with a custom anatomy graphic, a 12-term glossary, and a worked example of what 5/1/5 caps mean in real dollars. When ARMs genuinely make sense and when they put a borrower in a bind.",
@@ -40,6 +45,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "residency-rules",
+      date: "2026-04-26",
       emoji: "🌐",
       title: "Residency and Visa Rules",
       summary: "Which residency status qualifies for which loan program, organized as a 5x5 grid of borrower status by program. Includes the May 25, 2025 FHA rule change that closed the door on H-1Bs, EADs, asylees, and refugees, plus the work visa and EAD codes that still qualify on Conventional and USDA.",
@@ -47,6 +53,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "self-employed-documentation",
+      date: "2026-04-26",
       emoji: "📊",
       title: "Self-Employed Mortgage Documentation",
       summary: "What lenders actually want from self-employed borrowers, by business structure and loan program. The 25% ownership rule, two-year and one-year tax return options, the business returns waiver, and how qualifying income gets calculated (with a worked example showing why $200k revenue often becomes $65k qualifying income).",
@@ -54,6 +61,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "business-assets",
+      date: "2026-04-28",
       emoji: "🏦",
       title: "Business Assets for Down Payment",
       summary: "How to use money from your company to buy a home. The \"won't hurt the business\" cash flow analysis, agency-specific documentation rules (Fannie, Freddie, FHA, VA, USDA), when a CPA letter saves the file, the large deposits rule, and the patterns that cause business asset files to fail. Companion to the Self-Employment Documentation deep dive.",
@@ -61,6 +69,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "expected-income",
+      date: "2026-04-28",
       emoji: "📅",
       title: "Expected Income: Using a New Job Offer to Qualify",
       summary: "How to qualify for a mortgage with an offer letter for a job you haven't started yet. The 60-day vs 90-day window split, Fannie's two options, Freddie's two options, the common professions exception (doctors, teachers, professors), and how reserves work. Includes an interactive matrix mapping three borrower scenarios across all five major loan programs.",
@@ -68,6 +77,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "debts-paid-by-others",
+      date: "2026-04-29",
       emoji: "🤝",
       title: "Debts Paid by Others",
       summary: "When a parent, spouse, or ex pays a debt that's in your name, can you exclude it from your DTI? The agency split is the most important fact: FNMA and FHLMC let anyone pay; FHA, VA, and USDA require the third party to be obligated on the debt. Includes a comparison grid, the 12-month documentation rule, the divorce decree exception, and the bank-account mechanics that catch borrowers off guard.",
@@ -75,6 +85,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "gift-funds",
+      date: "2026-04-29",
       emoji: "🎁",
       title: "Gift Funds for Down Payment",
       summary: "Who can give you cash toward a down payment, by loan program. Family gives across the board; close friends qualify everywhere except FNMA; employers and charities only on FHA, VA, and USDA. Includes a 5x5 donor eligibility matrix, the donor-direct-to-title privacy path, the gift letter requirements, FHA's 8/19/2024 money order rule change, Freddie's wedding-and-graduation exception, and the seven patterns that cause gift fund files to fail.",
@@ -82,6 +93,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "hourly-and-part-time-income",
+      date: "2026-04-30",
       emoji: "⏱️",
       title: "Hourly, Part-Time & Seasonal Income",
       summary: "Mortgage qualifying with non-salary W-2 income across all five major loan programs. The hourly consistency test, FHA's 12-month-at-current-rate exception, the 2-year history standard for part-time and secondary income, the rehire-confirmation requirement for seasonal workers, and the off-season unemployment rule. Includes two interactive comparison grids and worked examples showing how qualifying income shifts by hundreds per month depending on methodology.",
@@ -89,6 +101,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "seller-concessions",
+      date: "2026-06-10",
       emoji: "💰",
       title: "Seller Concessions",
       summary: "What sellers can pay toward your costs on Conventional, FHA, VA, and USDA loans. The tier system, the VA two-bucket rule, and agent commissions after NAR.",
@@ -96,6 +109,7 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "rate-buydowns",
+      date: "2026-06-10",
       emoji: "📉",
       title: "Rate Buydowns",
       summary: "The same $10,000 seller credit run four ways: price cut, closing costs, discount points, and a 2-1 buydown. Exact math and honest tradeoffs.",
@@ -103,12 +117,18 @@ export function DeepDivesHubPage() {
     },
     {
       slug: "house-hacking",
+      date: "2026-06-29",
       emoji: "🏘️",
       title: "House Hacking",
       summary: "Live in part of a property and rent the rest so the income helps you buy and qualify. FHA duplex and 3-4 unit, the single-family-plus-ADU play, VA multi-unit at zero down with second-tier entitlement, plus which strategies actually count toward qualifying and which only help cash flow.",
       lastVerified: "June 2026",
     },
   ];
+
+  // Show the most recently published article at the top. ISO date strings sort
+  // lexically, so a descending compare orders newest first; Array.sort is stable,
+  // so same-date articles keep their authored order.
+  const sortedTopics = [...topics].sort((a, b) => b.date.localeCompare(a.date));
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh", margin: 0 }}>
@@ -136,7 +156,7 @@ export function DeepDivesHubPage() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {topics.map((t) => (
+          {sortedTopics.map((t) => (
             <a key={t.slug} href={`/deep-dives/${t.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <div style={{
                 background: "#fff",
