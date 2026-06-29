@@ -373,7 +373,7 @@ export function GiftFundsPage() {
 
         <H3>Is there a maximum gift amount?</H3>
         <Para>
-          There's no agency-set maximum on gift funds for a primary residence purchase. The IRS has annual gift tax exclusion limits for the donor's tax purposes (currently $19,000 per donor per recipient in 2026, or higher under lifetime exemption rules), but those are tax considerations, not mortgage qualifying limits. From the lender's perspective, the gift can cover the entire down payment and closing costs on a primary residence. Second homes and 2-4 unit principal residences with high LTV may require a 5% borrower contribution from the borrower's own funds.
+          There's no agency-set maximum on gift funds for a primary residence purchase. The IRS has annual gift tax exclusion limits for the donor's tax purposes (currently $19,000 per donor per recipient in 2026, or higher under lifetime exemption rules), but those are tax considerations, not mortgage qualifying limits. From the lender's perspective, the gift can cover the entire down payment and closing costs on a primary residence. Second homes and <a href="/deep-dives/house-hacking" style={LINK_STYLE}>2-4 unit principal residences</a> with high LTV may require a 5% borrower contribution from the borrower's own funds.
         </Para>
 
         <H3>Do I have to pay tax on the gift?</H3>

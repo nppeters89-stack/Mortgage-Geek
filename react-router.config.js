@@ -28,6 +28,7 @@ const PRERENDER_PATHS = [
   "/deep-dives/hourly-and-part-time-income",
   "/deep-dives/seller-concessions",
   "/deep-dives/rate-buydowns",
+  "/deep-dives/house-hacking",
   "/geek-maps",
   "/geek-maps/tennessee-loan-limits",
 ];

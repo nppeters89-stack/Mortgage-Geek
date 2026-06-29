@@ -101,6 +101,13 @@ export function DeepDivesHubPage() {
       summary: "The same $10,000 seller credit run four ways: price cut, closing costs, discount points, and a 2-1 buydown. Exact math and honest tradeoffs.",
       lastVerified: "June 2026",
     },
+    {
+      slug: "house-hacking",
+      emoji: "🏘️",
+      title: "House Hacking",
+      summary: "Live in part of a property and rent the rest so the income helps you buy and qualify. FHA duplex and 3-4 unit, the single-family-plus-ADU play, VA multi-unit at zero down with second-tier entitlement, plus which strategies actually count toward qualifying and which only help cash flow.",
+      lastVerified: "June 2026",
+    },
   ];
 
   return (
