@@ -91,7 +91,10 @@ export const DEEP_DIVES = {
   text: "#16171A",          // = P.text (primary text / titles)
   body: "#3A3D40",          // featured description / body
   muted: "#6F6D69",         // tagline / secondary
-  dim: "#8A8884",           // meta / verified date
+  dim: "#6F6D69",           // meta / verified date. Darkened from the spec's #8A8884
+                            // (~3.5:1 on white) to clear WCAG AA 4.5:1 for this small
+                            // text; AA is the handoff's hard requirement. Hierarchy
+                            // vs the tagline now comes from size/weight, not color.
   accent: "#CF3338",        // = P.gold (Arrow Red: Read, badge fill, focus ring, active)
   badgeText: "#F6F5F3",     // = P.cream (LATEST pill text = deepest bg color)
   tintBg: "#FCEBEB",        // active Topics button fill / selected option bg
