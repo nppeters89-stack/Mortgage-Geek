@@ -77,6 +77,30 @@ export const HOME = {
   redTint4: "#F4B9BB",
 };
 
+// /deep-dives index redesign palette (design handoff; this page ships LIGHT).
+// Scoped like HOME so the rest of the site's tokens are untouched; values that
+// match an existing P token are noted. Colors live here (not in components) per
+// the no-hardcoded-hex rule, and are mapped by visual result, never by name.
+export const DEEP_DIVES = {
+  pageBg: "#F6F5F3",        // = P.cream
+  surface: "#FFFFFF",       // = P.white (featured + library card surfaces)
+  inset: "#EFEDEA",         // search field + emoji tile (sunken)
+  divider: "#E4E2DE",       // hairline / card border
+  dividerStrong: "#CBC9C4", // stronger border (inputs / Topics button)
+  hoverLift: "#FAF8F5",     // featured / card hover background
+  text: "#16171A",          // = P.text (primary text / titles)
+  body: "#3A3D40",          // featured description / body
+  muted: "#6F6D69",         // tagline / secondary
+  dim: "#8A8884",           // meta / verified date
+  accent: "#CF3338",        // = P.gold (Arrow Red: Read, badge fill, focus ring, active)
+  badgeText: "#F6F5F3",     // = P.cream (LATEST pill text = deepest bg color)
+  tintBg: "#FCEBEB",        // active Topics button fill / selected option bg
+  tintBorder: "#E79A9C",    // active Topics button border
+  tintText: "#B02A2E",      // active Topics / selected option text
+  tintDim: "#CF8B8D",       // selected-option count text
+  menuHover: "#F6F5F3",     // = P.cream (popover row hover)
+};
+
 export const globalCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
