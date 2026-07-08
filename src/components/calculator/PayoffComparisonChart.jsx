@@ -27,8 +27,21 @@ export function PayoffComparisonChart({ originalResult, improvedResult, prog, te
     return rows;
   }, [originalResult, improvedResult, term, prog.loan]);
 
-  const swatch = { width: 10, height: 10, borderRadius: 3, flexShrink: 0 };
-  const legendItem = { display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 500, color: P.warmGray };
+  const legendItem = { display: "flex", alignItems: "center", gap: 7, fontSize: 12, fontWeight: 500, color: P.warmGray };
+
+  // "Paid off" reference-line label: render just inside the top of the plot (so
+  // the chart's top margin cannot clip it) and clamp the horizontal text anchor
+  // so it stays in view when payoff lands near the left or right edge.
+  const payoffYear = improvedResult.payoffMonth / 12;
+  const frac = term > 0 ? payoffYear / term : 0;
+  const labelAnchor = frac > 0.85 ? "end" : frac < 0.12 ? "start" : "middle";
+  const labelDx = labelAnchor === "end" ? -6 : labelAnchor === "start" ? 6 : 0;
+  const renderPaidOff = ({ viewBox }) =>
+    viewBox ? (
+      <text x={viewBox.x + labelDx} y={viewBox.y + 12} textAnchor={labelAnchor} fontFamily={F.body} fontSize={10} fontWeight={600} fill={prog.color}>
+        Paid off
+      </text>
+    ) : null;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -63,10 +76,16 @@ export function PayoffComparisonChart({ originalResult, improvedResult, prog, te
     <div>
       <div style={{ display: "flex", gap: 20, marginBottom: 12, flexWrap: "wrap" }}>
         <span style={legendItem}>
-          <span style={{ ...swatch, background: "transparent", border: `2px dashed ${P.warmGray}` }} /> Without extra payments
+          <svg width="24" height="10" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <line x1="1" y1="5" x2="23" y2="5" stroke={P.warmGray} strokeWidth="2" strokeDasharray="5 3" strokeLinecap="round" />
+          </svg>
+          Without extra payments
         </span>
         <span style={legendItem}>
-          <span style={{ ...swatch, background: prog.color }} /> With extra payments
+          <svg width="24" height="10" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <line x1="1" y1="5" x2="23" y2="5" stroke={prog.color} strokeWidth="2.5" strokeLinecap="round" />
+          </svg>
+          With extra payments
         </span>
       </div>
 
@@ -98,11 +117,11 @@ export function PayoffComparisonChart({ originalResult, improvedResult, prog, te
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine
-              x={improvedResult.payoffMonth / 12}
+              x={payoffYear}
               stroke={prog.color}
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: "Paid off", position: "top", fontSize: 10, fill: prog.color, fontFamily: F.body }}
+              label={renderPaidOff}
             />
             <Area
               type="monotone"
