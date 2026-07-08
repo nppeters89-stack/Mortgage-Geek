@@ -148,11 +148,11 @@ export function CashToClosePage() {
   const paramVaUsage = params.get("vaUsage");
   const [vaUsage, setVaUsage] = useState(["first", "subsequent", "exempt"].includes(paramVaUsage) ? paramVaUsage : "first");
   // Editable lender fees — same defaults across all loan programs
-  const [feeUnderwriting, setFeeUnderwriting] = useState(995);
-  const [feeProcessing, setFeeProcessing] = useState(910);
+  const [feeUnderwriting, setFeeUnderwriting] = useState(990);
+  const [feeProcessing, setFeeProcessing] = useState(650);
   const [feeAppraisal, setFeeAppraisal] = useState(800);
-  const [feeVerification, setFeeVerification] = useState(1000);
-  const [feeCreditReport, setFeeCreditReport] = useState(300);
+  const [feeVerification, setFeeVerification] = useState(350);
+  const [feeCreditReport, setFeeCreditReport] = useState(50);
   const [feeFloodCert, setFeeFloodCert] = useState(15);
   const [feeTaxService, setFeeTaxService] = useState(80);
   // Discount points — synced dollar/pct fields
