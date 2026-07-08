@@ -29,6 +29,7 @@ import { fmt, withAlpha } from '../../utils/format';
 import { generateAmortData, formatPayoff } from '../../utils/math';
 import { CompareIcon } from '../icons';
 import { PaymentPieChart } from './PaymentPieChart';
+import { PayoffComparisonChart } from './PayoffComparisonChart';
 
 /**
  * Props
@@ -596,6 +597,15 @@ function PayoffResults({ prog, cfg, term, downPct, homePrice }) {
             <div style={cellRowValueStyle}>{fmt(improvedResult.totalInterest)}</div>
           </div>
         </div>
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <PayoffComparisonChart
+          originalResult={originalResult}
+          improvedResult={improvedResult}
+          prog={prog}
+          term={term}
+        />
       </div>
 
       <div style={youSaveRibbonStyle}>
