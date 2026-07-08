@@ -34,8 +34,11 @@ export function PayoffComparisonChart({ originalResult, improvedResult, prog, te
   // so it stays in view when payoff lands near the left or right edge.
   const payoffYear = improvedResult.payoffMonth / 12;
   const frac = term > 0 ? payoffYear / term : 0;
-  const labelAnchor = frac > 0.85 ? "end" : frac < 0.12 ? "start" : "middle";
-  const labelDx = labelAnchor === "end" ? -6 : labelAnchor === "start" ? 6 : 0;
+  // Sit the label beside the line (to the right by default so it is isolated from
+  // the dashes), flipping to the left only when payoff is near the right edge.
+  const labelOnLeft = frac > 0.82;
+  const labelAnchor = labelOnLeft ? "end" : "start";
+  const labelDx = labelOnLeft ? -6 : 6;
   const renderPaidOff = ({ viewBox }) =>
     viewBox ? (
       <text x={viewBox.x + labelDx} y={viewBox.y + 12} textAnchor={labelAnchor} fontFamily={F.body} fontSize={10} fontWeight={600} fill={prog.color}>
