@@ -824,7 +824,7 @@ export function CalculatorPage() {
                       return [
                         { label: "Principal & Interest", val: prog.pi, color: piColor },
                         ...(prog.mi > 0 ? [{ label: prog.miLabel, val: prog.mi, color: miColor }] : []),
-                        { label: "Taxes", val: taxes, color: P.warmGray },
+                        { label: "Taxes", val: taxes, color: P.caution },
                         { label: "Insurance", val: insurance, color: insuranceColor },
                         ...(hoa > 0 ? [{ label: "HOA Dues", val: hoa, color: P.warmGrayLight }] : []),
                       ];
