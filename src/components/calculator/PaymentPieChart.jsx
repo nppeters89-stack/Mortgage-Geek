@@ -51,9 +51,12 @@ export function PaymentPieChart({
     // also sage (VA) so the slice doesn't collide with P&I. VA has no monthly
     // MI slice, so gold is free on that program.
     const insuranceColor = piColor === P.sage ? P.gold : P.sage;
+    // Taxes uses the caution/amber token (not a grey) so it reads distinctly
+    // against the sage-grey insurance slice; it also stays clear of every
+    // program color, the gold/navy MI slice, and the grey HOA slice.
     const arr = [
       { key: 'pi', label: 'Principal & Interest', value: pi, color: piColor },
-      { key: 'taxes', label: 'Taxes', value: taxes, color: P.warmGray },
+      { key: 'taxes', label: 'Taxes', value: taxes, color: P.caution },
       { key: 'insurance', label: 'Insurance', value: insurance, color: insuranceColor },
     ];
     if (mi > 0 && miLabel) {
