@@ -148,11 +148,11 @@ export function CashToClosePage() {
   const paramVaUsage = params.get("vaUsage");
   const [vaUsage, setVaUsage] = useState(["first", "subsequent", "exempt"].includes(paramVaUsage) ? paramVaUsage : "first");
   // Editable lender fees — same defaults across all loan programs
-  const [feeUnderwriting, setFeeUnderwriting] = useState(995);
-  const [feeProcessing, setFeeProcessing] = useState(910);
+  const [feeUnderwriting, setFeeUnderwriting] = useState(990);
+  const [feeProcessing, setFeeProcessing] = useState(650);
   const [feeAppraisal, setFeeAppraisal] = useState(800);
-  const [feeVerification, setFeeVerification] = useState(1000);
-  const [feeCreditReport, setFeeCreditReport] = useState(300);
+  const [feeVerification, setFeeVerification] = useState(350);
+  const [feeCreditReport, setFeeCreditReport] = useState(50);
   const [feeFloodCert, setFeeFloodCert] = useState(15);
   const [feeTaxService, setFeeTaxService] = useState(80);
   // Discount points — synced dollar/pct fields
@@ -173,10 +173,10 @@ export function CashToClosePage() {
     else                                 setVaRate(v);
   };
 
-  // Round to nearest 0.125%, then add a 0.25% buffer so the starting
+  // Round to nearest 0.125%, then add a 0.125% buffer so the starting
   // auto-populated rate runs conservative (above true market). Users
   // can drag the slider down to match their actual quote.
-  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.25;
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.125;
 
   // Fetch live MND rates on mount. Sets rateLoading=true during fetch,
   // rateLoading=false + ratesLoaded=true + rateSource=date when complete.
@@ -928,7 +928,7 @@ export function CashToClosePage() {
         )}
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, textAlign: "center", marginTop: 24, lineHeight: 1.6 }}>
-          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% so the starting estimate stays conservative. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS #1119524.
+          {ratesLoaded ? `Rates auto-populated from Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.125% so the starting estimate stays conservative. ` : ""}APR estimate calculated per Reg Z Appendix J methodology — actual APR may vary based on final loan terms, points, and lender-specific fee structure. Estimates based on national averages and state-specific transfer tax conventions. Title fees vary by underwriter and county. Actual costs depend on lender, title company, and specific transaction. <strong>This is not a Loan Estimate or commitment to lend.</strong> NMLS #1119524.
         </p>
       </div>
       <MobileToolbar />

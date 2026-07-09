@@ -61,10 +61,10 @@ export function PreQualPage() {
     else setTaxMetro("");
   }, [taxState]);
 
-  // Round to nearest 0.125%, then add a 0.25% buffer so the starting
+  // Round to nearest 0.125%, then add a 0.125% buffer so the starting
   // auto-populated rate runs conservative (above true market). Users
   // can drag the slider down to match their actual quote.
-  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.25;
+  const roundRate = (r) => Math.round(r / 0.125) * 0.125 + 0.125;
   useEffect(() => {
     (async () => {
       try {
@@ -646,8 +646,8 @@ export function PreQualPage() {
         {/* Disclaimer */}
         <p style={{ fontSize: disclaimerSize, color: P.cream, opacity: 0.65, marginBottom: isRail ? 10 : 14, lineHeight: 1.5, position: "relative", zIndex: 1 }}>
           {isRail
-            ? "National averages via Mortgage News Daily, rounded to 0.125% then bumped up 0.25% for a conservative estimate. Adjust to match your quote."
-            : "National averages via Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.25% for a conservative starting estimate. Your actual rate may differ. Adjust below to match your quote."}
+            ? "National averages via Mortgage News Daily, rounded to 0.125% then bumped up 0.125% for a conservative estimate. Adjust to match your quote."
+            : "National averages via Mortgage News Daily, rounded to the nearest 0.125% and bumped up 0.125% for a conservative starting estimate. Your actual rate may differ. Adjust below to match your quote."}
         </p>
 
         {/* Rate pills — RateInput component unchanged, cream pills sit on navy */}
