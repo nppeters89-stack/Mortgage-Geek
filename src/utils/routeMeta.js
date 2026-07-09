@@ -5,16 +5,20 @@
 // and an optional JSON-LD script. Values are relocated verbatim, not rewritten.
 const BASE_URL = "https://mortgagegeek.ai";
 
-export function buildMeta({ title, description, path, schema }) {
+// `shareTitle` (optional) overrides the social/link-preview title (og:title and
+// twitter:title) while leaving the SEO <title> as `title`. Defaults to `title`
+// so routes that don't pass it behave exactly as before.
+export function buildMeta({ title, description, path, schema, shareTitle }) {
   const canonical = `${BASE_URL}${path}`;
+  const ogTitle = shareTitle || title;
   return [
     { title },
     { name: "description", content: description },
     { tagName: "link", rel: "canonical", href: canonical },
-    { property: "og:title", content: title },
+    { property: "og:title", content: ogTitle },
     { property: "og:description", content: description },
     { property: "og:url", content: canonical },
-    { name: "twitter:title", content: title },
+    { name: "twitter:title", content: ogTitle },
     { name: "twitter:description", content: description },
     ...(schema ? [{ "script:ld+json": schema }] : []),
   ];
