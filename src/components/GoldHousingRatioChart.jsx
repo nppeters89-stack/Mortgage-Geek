@@ -143,7 +143,7 @@ export function GoldHousingRatioChart() {
       }
       parts.push(gline(mL, mT + pH, mL + pW, mT + pH, AXIS, 1));
       parts.push(gline(mL, yOf(AVG), mL + pW, yOf(AVG), AVGLINE, 1, "6 5"));
-      parts.push(gtext(mL + 6, yOf(AVG) - 6, "avg " + AVG + " oz", FNT, "start", 11));
+      parts.push(gtext(mL + pW - 6, yOf(AVG) - 6, "avg " + AVG + " oz", FNT, "end", 11));
 
       const pts = ratio.map((v, i) => xOf(i).toFixed(1) + "," + yOf(v).toFixed(1)).join(" ");
       parts.push('<polyline id="line-ratio" points="' + pts + '" fill="none" stroke="' + GOLD + '" stroke-width="2.75" stroke-linejoin="round" stroke-linecap="round"/>');
@@ -172,7 +172,7 @@ export function GoldHousingRatioChart() {
       parts.push('<circle id="pulseNow1" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="pulseNow2" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="dotNow" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="5" fill="' + GOLD + '" stroke="' + NAVY + '" stroke-width="2"/>');
-      parts.push(gtext(xOf(iNow) - 9, yOf(ratio[iNow]) - 12, "124 oz today", GOLD, "end", lblSz, "700", "lblNow"));
+      parts.push(gtext(xOf(iNow) - 9, yOf(ratio[iNow]) + 24, "124 oz today", GOLD, "end", lblSz, "700", "lblNow"));
       parts.push("</g>");
 
       parts.push('<line id="guide" x1="0" y1="' + mT + '" x2="0" y2="' + (mT + pH) + '" stroke="' + GUIDE + '" stroke-width="1" stroke-dasharray="4 4" style="display:none"/>');
