@@ -120,6 +120,13 @@ export function GoldHousingRatioChart() {
       xOf = (i) => mL + (i / (n - 1)) * pW;
       yOf = (v) => mT + pH * (1 - v / YMAX);
 
+      // On narrow (mobile) widths the plot is too tight for the full-size marker
+      // labels and the long tie-connector caption, which overlap. Shrink the
+      // labels and drop the connector caption there (the dashed connector, the
+      // pulsing dots, and the stat card below still convey the 1980/today tie).
+      const narrow = width < 560;
+      const lblSz = narrow ? 10.5 : 12.5;
+
       const parts = [];
       for (let g = 0; g <= YMAX; g += 100) {
         const gy = yOf(g);
@@ -143,27 +150,29 @@ export function GoldHousingRatioChart() {
 
       parts.push('<g id="tieGroup" style="opacity:0;transition:opacity .5s">');
       parts.push(gline(xOf(iLow), yOf(ratio[iLow]), xOf(iNow), yOf(ratio[iNow]), TIE, 1.5, "5 5"));
-      const midX = (xOf(iLow) + xOf(iNow)) / 2;
-      parts.push(gtext(midX, yOf(ratio[iLow]) + 30, "same ratio · 124 oz · 46 years apart", GOLD, "middle", 12.5, "700"));
+      if (!narrow) {
+        const midX = (xOf(iLow) + xOf(iNow)) / 2;
+        parts.push(gtext(midX, yOf(ratio[iLow]) + 30, "same ratio · 124 oz · 46 years apart", GOLD, "middle", 12.5, "700"));
+      }
       parts.push("</g>");
 
       parts.push('<g id="ptPeak" style="opacity:0;transition:opacity .45s">');
       parts.push('<circle cx="' + xOf(iPeak) + '" cy="' + yOf(ratio[iPeak]) + '" r="4.5" fill="' + RED + '" stroke="' + NAVY + '" stroke-width="2"/>');
-      parts.push(gtext(xOf(iPeak), yOf(ratio[iPeak]) - 12, "779 oz · 2001", RED, "middle", 12.5, "700"));
+      parts.push(gtext(xOf(iPeak), yOf(ratio[iPeak]) - 12, "779 oz · 2001", RED, "middle", lblSz, "700"));
       parts.push("</g>");
 
       parts.push('<g id="ptLow" style="opacity:0;transition:opacity .45s">');
       parts.push('<circle id="pulseLow1" cx="' + xOf(iLow) + '" cy="' + yOf(ratio[iLow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="pulseLow2" cx="' + xOf(iLow) + '" cy="' + yOf(ratio[iLow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="dotLow" cx="' + xOf(iLow) + '" cy="' + yOf(ratio[iLow]) + '" r="4.5" fill="' + CREAM + '" stroke="' + NAVY + '" stroke-width="2"/>');
-      parts.push(gtext(xOf(iLow), yOf(ratio[iLow]) + 24, "124 oz · 1980", MUT, "middle", 12.5, "700", "lblLow"));
+      parts.push(gtext(xOf(iLow), yOf(ratio[iLow]) + 24, "124 oz · 1980", MUT, "middle", lblSz, "700", "lblLow"));
       parts.push("</g>");
 
       parts.push('<g id="ptNow" style="opacity:0;transition:opacity .45s">');
       parts.push('<circle id="pulseNow1" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="pulseNow2" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="6" fill="none" stroke="' + GOLD + '" stroke-width="2.5" style="display:none"/>');
       parts.push('<circle id="dotNow" cx="' + xOf(iNow) + '" cy="' + yOf(ratio[iNow]) + '" r="5" fill="' + GOLD + '" stroke="' + NAVY + '" stroke-width="2"/>');
-      parts.push(gtext(xOf(iNow) - 9, yOf(ratio[iNow]) - 12, "124 oz today", GOLD, "end", 12.5, "700", "lblNow"));
+      parts.push(gtext(xOf(iNow) - 9, yOf(ratio[iNow]) - 12, "124 oz today", GOLD, "end", lblSz, "700", "lblNow"));
       parts.push("</g>");
 
       parts.push('<line id="guide" x1="0" y1="' + mT + '" x2="0" y2="' + (mT + pH) + '" stroke="' + GUIDE + '" stroke-width="1" stroke-dasharray="4 4" style="display:none"/>');
