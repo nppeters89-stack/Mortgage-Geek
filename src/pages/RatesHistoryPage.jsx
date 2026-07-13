@@ -64,7 +64,7 @@ export function RatesHistoryPage() {
 
       <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.gold, display: "block", marginBottom: 12 }}>📊 Geek Charts</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.gold, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} />Geek Charts</span>
           <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>The 10-Year Treasury and the 30-Year Mortgage</h1>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
             Seventy years of the benchmark rate that sets mortgage pricing, and the mortgage rate that rides on top of it.
