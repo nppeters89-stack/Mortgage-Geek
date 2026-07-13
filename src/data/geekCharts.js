@@ -11,6 +11,13 @@ export const GEEK_CHARTS = [
     period: "1970 to 2026",
     updated: "2026-07-09",
   },
+  {
+    slug: "treasury-yield-mortgage-rates",
+    title: "The 10-Year Treasury and the 30-Year Mortgage",
+    tagline: "Seventy years of the benchmark rate that sets mortgage pricing, and the mortgage rate riding on top of it. Today sits near the long-run normal.",
+    period: "1953 to 2026",
+    updated: "2026-07-09",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -38,3 +45,35 @@ const gold = [36.02, 40.62, 58.42, 97.39, 154.00, 160.86, 124.74, 147.84, 193.40
   4143.59];
 
 export const GOLD_HOUSING_RATIO = { years, ratio, home, gold };
+
+// The 10-Year Treasury and the 30-Year Mortgage, 1953 to 2026. treasury is the
+// 10-yr constant-maturity annual average (Fed H.15 / FRED GS10; 1953 = Apr-Dec).
+// mortgage is Freddie Mac PMMS 30-yr fixed annual average (FRED MORTGAGE30US),
+// series starts April 1971, so 1953 to 1970 are null (Recharts breaks the line).
+// trend is a trailing 10-year simple moving average of treasury, precomputed
+// (not recomputed at runtime), first value 1962 so 1953 to 1961 are null. 2026
+// values are spot readings as of Jul 9, 2026. Each series aligns to rYears by
+// index with null padding where it has not started.
+const rYears = Array.from({ length: 2026 - 1953 + 1 }, (_, i) => 1953 + i);
+
+const treasury = [2.85, 2.40, 2.82, 3.18, 3.65, 3.32, 4.33, 4.12, 3.88, 3.95, 4.00, 4.19, 4.28, 4.92, 5.07, 5.65, 6.67,
+  7.35, 6.16, 6.21, 6.84, 7.56, 7.99, 7.61, 7.42, 8.41, 9.44, 11.46, 13.91, 13.00, 11.10, 12.44, 10.62,
+  7.68, 8.38, 8.85, 8.50, 8.55, 7.86, 7.01, 5.87, 7.08, 6.58, 6.44, 6.35, 5.26, 5.64, 6.03, 5.02, 4.61,
+  4.01, 4.27, 4.29, 4.79, 4.63, 3.67, 3.26, 3.21, 2.79, 1.80, 2.35, 2.54, 2.14, 1.84, 2.33, 2.91, 2.14,
+  0.89, 1.44, 2.95, 3.96, 4.21, 4.29, 4.55];
+
+// Freddie Mac 30-yr fixed, 1971 to 2026 (56 values); padded with 18 leading nulls (1953-1970).
+const mortgageFrom1971 = [7.54, 7.38, 8.04, 9.19, 9.05, 8.87, 8.85, 9.64, 11.20, 13.74, 16.64, 16.04, 13.24, 13.88, 12.43,
+  10.19, 10.21, 10.34, 10.32, 10.13, 9.25, 8.39, 7.31, 8.38, 7.93, 7.81, 7.60, 6.94, 7.44, 8.05, 6.97,
+  6.54, 5.83, 5.84, 5.87, 6.41, 6.34, 6.03, 5.04, 4.69, 4.45, 3.66, 3.98, 4.17, 3.85, 3.65, 3.99, 4.54,
+  3.94, 3.11, 2.96, 5.34, 6.81, 6.72, 6.47, 6.43];
+const mortgage = [...Array(1971 - 1953).fill(null), ...mortgageFrom1971];
+
+// Trailing 10-yr SMA of treasury, 1962 to 2026 (65 values); padded with 9 leading nulls (1953-1961).
+const trendFrom1962 = [3.45, 3.56, 3.74, 3.89, 4.06, 4.21, 4.44, 4.67, 5.00, 5.22, 5.45, 5.73, 6.07, 6.44, 6.71, 6.95, 7.22,
+  7.50, 7.91, 8.68, 9.36, 9.79, 10.28, 10.54, 10.55, 10.64, 10.69, 10.59, 10.30, 9.70, 9.10, 8.58, 8.04,
+  7.64, 7.51, 7.31, 6.95, 6.66, 6.41, 6.13, 5.89, 5.70, 5.42, 5.19, 5.03, 4.85, 4.70, 4.46, 4.18, 3.95,
+  3.67, 3.51, 3.33, 3.12, 2.82, 2.59, 2.52, 2.41, 2.17, 2.04, 2.15, 2.31, 2.48, 2.70, 2.97];
+const trend = [...Array(1962 - 1953).fill(null), ...trendFrom1962];
+
+export const RATES_HISTORY = { years: rYears, treasury, mortgage, trend };

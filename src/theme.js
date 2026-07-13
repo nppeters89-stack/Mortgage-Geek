@@ -42,6 +42,8 @@ export const CHART_COLORS = {
   accent: "#E2575B",                // emphasis annotations on dark (Lifted Red)
   grid: "rgba(255,254,251,0.07)",   // gridlines on dark
   axis: "rgba(255,254,251,0.20)",   // axis lines / ticks on dark
+  mortgage: "#F0605F",              // 30-year mortgage rate line (4.67:1 on P.navy)
+  trend: "#F0A93B",                 // long-run trend / moving-average line (7.45:1 on P.navy)
 };
 
 export const F = {
