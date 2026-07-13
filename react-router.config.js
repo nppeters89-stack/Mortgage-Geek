@@ -33,6 +33,7 @@ const PRERENDER_PATHS = [
   "/geek-maps/tennessee-loan-limits",
   "/geek-charts",
   "/geek-charts/gold-to-housing-ratio",
+  "/geek-charts/treasury-yield-mortgage-rates",
 ];
 
 export default {

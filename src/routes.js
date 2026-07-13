@@ -33,6 +33,7 @@ export default [
     route("geek-maps/tennessee-loan-limits", "routes/tn-loan-limits.jsx"),
     route("geek-charts", "routes/geek-charts.jsx"),
     route("geek-charts/gold-to-housing-ratio", "routes/gold-housing-ratio.jsx"),
+    route("geek-charts/treasury-yield-mortgage-rates", "routes/rates-history.jsx"),
     route("geek-log", "routes/geek-log.jsx"),
     route("*", "routes/catch-all.jsx"),
   ]),
