@@ -145,6 +145,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://mortgagegeek.ai/geek-charts</loc>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mortgagegeek.ai/geek-charts/gold-to-housing-ratio</loc>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://mortgagegeek.ai/about</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>yearly</changefreq>

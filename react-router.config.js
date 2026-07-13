@@ -31,6 +31,8 @@ const PRERENDER_PATHS = [
   "/deep-dives/house-hacking",
   "/geek-maps",
   "/geek-maps/tennessee-loan-limits",
+  "/geek-charts",
+  "/geek-charts/gold-to-housing-ratio",
 ];
 
 export default {

@@ -31,6 +31,8 @@ export default [
     route("deep-dives/house-hacking", "routes/dd-house-hacking.jsx"),
     route("geek-maps", "routes/geek-maps.jsx"),
     route("geek-maps/tennessee-loan-limits", "routes/tn-loan-limits.jsx"),
+    route("geek-charts", "routes/geek-charts.jsx"),
+    route("geek-charts/gold-to-housing-ratio", "routes/gold-housing-ratio.jsx"),
     route("geek-log", "routes/geek-log.jsx"),
     route("*", "routes/catch-all.jsx"),
   ]),

@@ -32,6 +32,18 @@ export const PROGRAM_COLORS = {
   USDA: "#226257",         // Rate Green
 };
 
+// Data-visualization colors for Geek Charts (dark charcoal canvas). Explicit
+// hexes chosen by visual role, independent of the P chrome palette and
+// PROGRAM_COLORS. Gold and cream pass 3:1 as graphical objects on the dark
+// surface; accent is the Lifted Red already used for red-on-dark elsewhere.
+export const CHART_COLORS = {
+  gold: "#E8C05A",                  // gold data series on dark charcoal
+  line: "#FFFEFB",                  // neutral data series on dark (cream)
+  accent: "#E2575B",                // emphasis annotations on dark (Lifted Red)
+  grid: "rgba(255,254,251,0.07)",   // gridlines on dark
+  axis: "rgba(255,254,251,0.20)",   // axis lines / ticks on dark
+};
+
 export const F = {
   // Rate's web typeface, now site-wide for congruence with the editorial
   // homepage. display/body/sans all resolve to Figtree; the only exceptions are

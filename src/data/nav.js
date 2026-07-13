@@ -54,6 +54,7 @@ export const NAV_TOOLS = [
   { id: "cashtoclose", label: "Cash to Close", icon: "__CASH_ICON__", href: "/cash-to-close" },
   { id: "deepdives", label: "Deep Dives", icon: "🐳", href: "/deep-dives", reference: true },
   { id: "geekmaps", label: "Geek Maps", icon: "🗺", href: "/geek-maps", reference: true },
+  { id: "geekcharts", label: "Geek Charts", icon: "📊", href: "/geek-charts", reference: true },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅" },
   { id: "glossary", label: "Jargon Decoder", icon: "📖" },
 ];
