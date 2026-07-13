@@ -32,7 +32,7 @@ export function GoldHousingRatioChart() {
     );
   };
 
-  const dot = (x, y, color, label) => (
+  const dot = (x, y, color, label, position) => (
     <ReferenceDot
       x={x}
       y={y}
@@ -41,7 +41,7 @@ export function GoldHousingRatioChart() {
       stroke={P.navyDark}
       strokeWidth={2}
       isFront
-      label={{ value: label, position: "top", fill: color, fontSize: 11, fontFamily: F.body, fontWeight: 600 }}
+      label={{ value: label, position, fill: color, fontSize: 11, fontFamily: F.body, fontWeight: 600 }}
     />
   );
 
@@ -92,9 +92,9 @@ export function GoldHousingRatioChart() {
               dot={false}
               isAnimationActive={false}
             />
-            {dot(2001, 778.7, CHART_COLORS.accent, "2001")}
-            {dot(1980, 124.2, CHART_COLORS.line, "1980")}
-            {dot(2026, 124.2, CHART_COLORS.gold, "2026")}
+            {dot(2001, 778.7, CHART_COLORS.accent, "2001", "top")}
+            {dot(1980, 124.2, CHART_COLORS.line, "1980", "bottom")}
+            {dot(2026, 124.2, CHART_COLORS.gold, "2026", "bottom")}
           </LineChart>
         </ResponsiveContainer>
       </div>
