@@ -51,6 +51,11 @@ export function GeekLogPage() {
     <Helmet>
       <title>{state === STATE.AUTHORIZED ? "Geek Log" : "Page not found"}</title>
       <meta name="robots" content="noindex, nofollow" />
+      {/* This route does not inject globalCSS, so load the brand fonts here.
+          The cobrand wordmark (DM Sans + Archivo) and the snapshot card
+          (Figtree) need them, and getFontEmbedCSS() embeds them into the
+          exported PNG. */}
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" />
     </Helmet>
   );
 

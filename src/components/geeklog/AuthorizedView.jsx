@@ -16,12 +16,7 @@ import { ClosingsList } from "./ClosingsList";
 import { SaveToast } from "./SaveToast";
 import { SnapshotCard } from "./SnapshotCard";
 import { SnapshotExportButton } from "./SnapshotExportButton";
-// Imported as a bundled asset so Vite emits a content-hashed URL
-// (e.g. /assets/mortgage-geek-logo-a8c4f2.png). The service worker's
-// fetch handler caches `/icon-512.png` specifically; hashed asset
-// URLs flow through normally without SW interception, which is what
-// the mobile PNG export needs.
-import snapshotLogoUrl from "../../assets/mortgage-geek-logo.png";
+import { GeekLogCobrand } from "./GeekLogCobrand";
 
 const currentYear = () => new Date().getFullYear();
 
@@ -49,13 +44,6 @@ export function AuthorizedView({ apiKey }) {
   const [allEntries, setAllEntries] = useState({});
   const [yearStats, setYearStats] = useState(null);
   const [toast, setToast] = useState(null); // { id, message, variant }
-  // Logo prefetched once as a data URL so the snapshot export bypasses
-  // the service worker (which on iOS Safari can serve a response
-  // html-to-image fails to embed via fetch + canvas). Non-blocking:
-  // the dashboard renders immediately; the visible preview falls back
-  // to the network image until this resolves; the export button's
-  // cold-start guard prevents a logo-less PNG.
-  const [logoDataUrl, setLogoDataUrl] = useState(null);
   // Dashboard-only DotGrid scaling. Below 640px viewport, swap to a
   // 20/10 layout that totals ~280px wide and clears a 320px viewport
   // with padding. This is a CALL-SITE override only — DotGrid's
@@ -96,51 +84,6 @@ export function AuthorizedView({ apiKey }) {
     refreshAll();
   }, [refreshAll]);
 
-  // Non-blocking logo prefetch via canvas pre-rasterization. Loads
-  // the bundled PNG into an <img>, draws it onto an offscreen
-  // <canvas>, then re-encodes via canvas.toDataURL("image/png").
-  //
-  // Earlier attempts (FileReader from fetch / bundled-asset URL /
-  // <img>→<div> background swap) all worked on desktop and all
-  // failed on iOS Safari — the failure was in html-to-image's
-  // <foreignObject> rendering of externally-decoded PNG payloads,
-  // not in the URL or the element type. Canvas pre-rasterization
-  // produces a fresh, browser-encoded PNG with no metadata chunks
-  // and a known-good byte layout, which mobile WebKit's
-  // SVG→canvas→PNG pipeline handles reliably.
-  //
-  // Rendered at the image's natural dimensions so CSS scaling to
-  // the 96x96 display size doesn't lose detail.
-  useEffect(() => {
-    let cancelled = false;
-    const img = new Image();
-    img.onload = () => {
-      if (cancelled) return;
-      try {
-        const w = img.naturalWidth || 512;
-        const h = img.naturalHeight || 512;
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("2D context unavailable");
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL("image/png");
-        if (!cancelled) setLogoDataUrl(dataUrl);
-      } catch (err) {
-        console.warn("[geeklog] logo canvas encode failed:", err);
-      }
-    };
-    img.onerror = () => {
-      console.warn("[geeklog] logo image load failed");
-    };
-    // Same-origin asset (bundled by Vite at /assets/...). No
-    // crossOrigin attribute — same-origin images don't taint the
-    // canvas and don't require CORS headers in the response.
-    img.src = snapshotLogoUrl;
-    return () => { cancelled = true; };
-  }, []);
-
   const closingsCount = yearStats?.closingsCount ?? 0;
   const goalTarget = yearStats?.goal?.target ?? 100;
 
@@ -165,22 +108,15 @@ export function AuthorizedView({ apiKey }) {
         padding: "calc(32px + env(safe-area-inset-top, 0px)) 24px 32px",
       }}>
         <div style={{ maxWidth: 640, margin: "0 auto" }}>
-          <h1 style={{
-            fontFamily: F.display,
-            fontSize: 32,
-            fontWeight: 400,
-            margin: 0,
-            color: P.cream,
-            letterSpacing: 0.5,
-          }}>
-            Geek Log
-          </h1>
+          <div style={{ display: "flex" }}>
+            <GeekLogCobrand markH={30} />
+          </div>
           <p style={{
             fontFamily: F.body,
             fontSize: 13,
             color: P.cream,
             opacity: 0.7,
-            margin: "6px 0 0",
+            margin: "14px 0 0",
             letterSpacing: 0.3,
           }}>
             {todayChicagoHuman()}
@@ -290,10 +226,10 @@ export function AuthorizedView({ apiKey }) {
               width: 1080,
               height: 1350,
             }}>
-              <SnapshotCard data={snapshotData} logoDataUrl={logoDataUrl} />
+              <SnapshotCard data={snapshotData} />
             </div>
           </div>
-          <SnapshotExportButton data={snapshotData} logoDataUrl={logoDataUrl} showToast={showToast} />
+          <SnapshotExportButton data={snapshotData} showToast={showToast} />
         </div>
       </div>
 

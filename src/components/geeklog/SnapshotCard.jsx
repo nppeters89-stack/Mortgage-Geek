@@ -10,6 +10,7 @@
 import { P, F } from "../../theme";
 import { DotGrid } from "./DotGrid";
 import { Sparkbar } from "./Sparkbar";
+import { GeekLogCobrand } from "./GeekLogCobrand";
 
 // Map JS Date.getUTCDay() index (0=Sun) → single-letter label.
 const DAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -62,15 +63,10 @@ function DotSeparator({ color = P.warmGrayLight, mx = 12, mb = 0 }) {
   );
 }
 
-export function SnapshotCard({ data, logoDataUrl = null }) {
+export function SnapshotCard({ data }) {
   const dayLetters = buildDayLetters(data.dateISO);
   const goalTarget = data.goalTarget || 100;
   const headlineText = (data.headline || "").trim();
-  // Visible preview cold-start fallback: if the data URL hasn't
-  // resolved yet, point at the public asset so the preview still
-  // shows a logo. SnapshotExportButton refuses to export until the
-  // data URL is ready, so the captured PNG never falls back.
-  const logoSrc = logoDataUrl || "/favicons/icon-512.png";
 
   return (
     <div style={{
@@ -96,39 +92,10 @@ export function SnapshotCard({ data, logoDataUrl = null }) {
         justifyContent: "space-between",
         boxSizing: "border-box",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-          {/* Logo rendered as an inline SVG <image> with a data URL
-              href. Two prior approaches (HTML <img>, CSS
-              background-image on a <div>) both broke on mobile
-              WebKit's <foreignObject> capture pipeline — the
-              background-image fix from G6 worked at 1080x1080 but
-              dropped the image at the larger 1080x1350 output canvas.
-              SVG <image> is processed as native SVG content during
-              the outer SVG's rasterization (not as foreignObject
-              HTML/CSS), which sidesteps the dimension-related
-              rendering quirks entirely. */}
-          <svg
-            role="img"
-            aria-label="The Mortgage Geek"
-            width="96"
-            height="96"
-            viewBox="0 0 96 96"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ flexShrink: 0, display: "block" }}
-          >
-            <image href={logoSrc} width="96" height="96" preserveAspectRatio="xMidYMid meet" />
-          </svg>
-          <span style={{
-            fontFamily: F.display,
-            fontSize: 34,
-            fontWeight: 400,
-            letterSpacing: "0.14em",
-            color: P.cream,
-            lineHeight: 1,
-          }}>
-            GEEK&nbsp;LOG
-          </span>
-        </div>
+        {/* Mortgage Geek / Rate cobrand lockup, built from inline SVG marks so
+            it rasterizes reliably in the html-to-image capture and always shows
+            the full cobrand (see GeekLogCobrand). */}
+        <GeekLogCobrand markH={52} />
         <span style={{
           fontFamily: F.body,
           fontSize: 20,
