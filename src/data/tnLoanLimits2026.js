@@ -1,7 +1,7 @@
 /**
  * Tennessee Loan Limits 2026 data
  *
- * Single source of truth for the TN Loan Limits Geek Map.
+ * Single source of truth for the TN Loan Limits deep dive.
  *
  * ANNUAL UPDATE PLAYBOOK (each November/December):
  * 1. Download new HUD FHA spreadsheet from entp.hud.gov/idapp/html/hicostlook.cfm

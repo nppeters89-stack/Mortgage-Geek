@@ -5,7 +5,7 @@ import { withAlpha } from "../utils/format";
 
 // Dark-mode Geek Charts hub. Cards are mapped from the GEEK_CHARTS registry, so
 // adding a chart later is one data entry plus one page. Mirrors the structural
-// role of the Deep Dives and Geek Maps hubs. Metadata lives in the route adapter
+// role of the Deep Dives hub. Metadata lives in the route adapter
 // (routes/geek-charts.jsx); like those hubs it carries no collection schema.
 
 const CREAM = CHART_COLORS.line;
