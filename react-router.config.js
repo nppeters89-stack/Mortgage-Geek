@@ -34,6 +34,7 @@ const PRERENDER_PATHS = [
   "/geek-charts",
   "/geek-charts/gold-to-housing-ratio",
   "/geek-charts/treasury-yield-mortgage-rates",
+  "/geek-charts/home-prices-income-inflation",
 ];
 
 export default {
