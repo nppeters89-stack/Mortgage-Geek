@@ -28,7 +28,7 @@ const ROWS = [
   { key: "email", label: "Email", value: LO_EMAIL, href: MAILTO, Icon: MailIcon },
 ];
 
-export function ContactCard({ triggerLabel = "Contact Nick", triggerClassName, triggerStyle }) {
+export function ContactCard({ triggerLabel = "Contact Nick", triggerClassName, triggerStyle, iconOnly = false, ariaLabel }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef(null);
   const dialogRef = useRef(null);
@@ -67,14 +67,19 @@ export function ContactCard({ triggerLabel = "Contact Nick", triggerClassName, t
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        style={triggerClassName ? triggerStyle : {
+        aria-label={iconOnly ? (ariaLabel || "Contact Nick") : ariaLabel}
+        style={triggerClassName ? triggerStyle : iconOnly ? {
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: 40, height: 40, borderRadius: 10, minHeight: 40, boxSizing: "border-box",
+          background: HOME.red, color: "#fff", border: "none", cursor: "pointer", ...triggerStyle,
+        } : {
           display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
           padding: "15px 26px", borderRadius: 10, minHeight: 44, boxSizing: "border-box",
           background: HOME.red, color: "#fff", border: "none",
           fontFamily: F.sans, fontSize: 16, fontWeight: 700, cursor: "pointer", ...triggerStyle,
         }}
       >
-        {triggerLabel}
+        {iconOnly ? <PhoneIcon /> : triggerLabel}
       </button>
 
       {open && (
