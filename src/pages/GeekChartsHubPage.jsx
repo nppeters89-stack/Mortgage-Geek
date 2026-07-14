@@ -25,6 +25,19 @@ export function GeekChartsHubPage() {
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
+      <style>{`
+        .gc-card { display: flex; flex-direction: column; gap: 18px; background: ${SURFACE}; border: 1px solid ${BORDER}; border-left: 3px solid ${CHART_COLORS.gold}; border-radius: 12px; padding: 22px 26px; }
+        .gc-card-row { display: flex; gap: 24px; align-items: center; }
+        .gc-card-text { flex: 1 1 300px; min-width: 0; }
+        .gc-card-preview { flex: 0 0 auto; width: 220px; aspect-ratio: 4 / 3; background: ${P.navyDark}; border: 1px solid ${BORDER}; border-radius: 8px; overflow: hidden; }
+        .gc-card-footer { display: flex; align-items: center; justify-content: space-between; }
+        @media (max-width: 640px) {
+          .gc-card { gap: 16px; padding: 20px 20px; }
+          .gc-card-row { flex-direction: column; align-items: stretch; gap: 16px; }
+          .gc-card-text { flex: 0 0 auto; }
+          .gc-card-preview { width: 100%; aspect-ratio: 3 / 2; }
+        }
+      `}</style>
 
       <div className="pwa-safe-top" style={{ background: SURFACE, borderBottom: `1px solid ${BORDER}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 1100, margin: "0 auto" }}>
@@ -51,20 +64,22 @@ export function GeekChartsHubPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {GEEK_CHARTS.map((c) => (
             <a key={c.slug} href={`/geek-charts/${c.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-              <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center", background: SURFACE, borderRadius: 12, padding: "22px 26px", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${CHART_COLORS.gold}` }}>
-                <div style={{ flex: "1 1 300px", minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
-                    <h2 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: 0 }}>{c.title}</h2>
-                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{c.period}</span>
+              <div className="gc-card">
+                <div className="gc-card-row">
+                  <div className="gc-card-text">
+                    <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+                      <h2 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: 0 }}>{c.title}</h2>
+                      <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{c.period}</span>
+                    </div>
+                    <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, margin: 0 }}>{c.tagline}</p>
                   </div>
-                  <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 14 }}>{c.tagline}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(c.updated)}</span>
-                    <span style={{ fontSize: 13, color: CHART_COLORS.gold, fontWeight: 600 }}>Open →</span>
+                  <div className="gc-card-preview">
+                    <GeekChartPreview slug={c.slug} />
                   </div>
                 </div>
-                <div style={{ flex: "0 0 auto", width: "min(100%, 220px)", aspectRatio: "4 / 3", background: P.navyDark, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: "hidden" }}>
-                  <GeekChartPreview slug={c.slug} />
+                <div className="gc-card-footer">
+                  <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(c.updated)}</span>
+                  <span style={{ fontSize: 13, color: CHART_COLORS.gold, fontWeight: 600 }}>Open →</span>
                 </div>
               </div>
             </a>
