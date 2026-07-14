@@ -110,7 +110,6 @@ export function GuidesCarousel({ showCounts = true, autoplay = true }) {
         .guides-dot { transition: width .35s ease, background .25s ease; }
         @media (max-width: 640px) {
           .guides-section { padding-top: 60px !important; padding-bottom: 68px !important; }
-          .guides-h2 { font-size: 32px !important; }
         }
         @media (prefers-reduced-motion: reduce) {
           .guides-track, .guides-card { transition: none; }
@@ -121,9 +120,9 @@ export function GuidesCarousel({ showCounts = true, autoplay = true }) {
         {/* Header + controls */}
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 32, flexWrap: "wrap", marginBottom: 44 }}>
           <div style={{ maxWidth: 640 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: ACCENT, marginBottom: 16, fontFamily: F.body }}>Guides</div>
-            <h2 className="guides-h2" style={{ fontSize: 44, lineHeight: 1.02, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 16px", color: HEAD, fontFamily: F.display }}>The good stuff, front and center.</h2>
-            <p style={{ fontSize: 17, lineHeight: 1.55, color: BODY, margin: 0, fontFamily: F.body }}>The deeper guides most people never scroll far enough to find. Pulled out of the sidebar and given the room they deserve.</p>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: ACCENT, display: "block", marginBottom: 10, fontFamily: F.body }}>Guides</span>
+            <h2 style={{ fontFamily: F.display, fontSize: "clamp(26px, 3.5vw, 36px)", color: HEAD, marginBottom: 10, lineHeight: 1.15 }}>Go deeper when you're ready.</h2>
+            <p style={{ fontSize: 14, lineHeight: 1.7, color: BODY, margin: 0, fontFamily: F.body }}>Four references worth bookmarking: in-depth answers by loan program, the data behind rates and home prices, a pre-approval checklist, and a plain-language glossary.</p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button type="button" aria-label="Previous guide" onClick={prev} className="guides-navbtn" style={{ width: 52, height: 52, borderRadius: 999, border: `1px solid ${NAV_BORDER}`, background: "transparent", color: HEAD, fontSize: 20, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.body }}>←</button>

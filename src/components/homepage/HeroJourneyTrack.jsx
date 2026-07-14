@@ -27,7 +27,7 @@ function HeaderRow() {
   return (
     <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, marginBottom: 22 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
-        <span style={{ fontFamily: F.body, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: P.goldLight }}>
+        <span style={{ fontFamily: F.body, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", color: P.gold }}>
           The Journey
         </span>
         <span style={{ fontFamily: F.display, fontSize: 22, color: P.cream, fontWeight: 400, lineHeight: 1.2 }}>
