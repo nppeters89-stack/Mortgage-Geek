@@ -2,6 +2,7 @@ import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { GEEK_CHARTS } from "../data/geekCharts";
 import { GeekChartPreview } from "../components/GeekChartPreview";
+import { GeekChartsLockup } from "../components/GeekChartsLockup";
 import { withAlpha } from "../utils/format";
 
 // Dark-mode Geek Charts hub. Cards are mapped from the GEEK_CHARTS registry, so
@@ -51,8 +52,7 @@ export function GeekChartsHubPage() {
 
       <div className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
-          <img src="/assets/geek-charts-glyph.svg" alt="Geek Charts" width={48} height={48} style={{ display: "block", margin: "0 auto 12px", borderRadius: 10 }} />
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.gold, display: "block", marginBottom: 10 }}>Geek Charts</span>
+          <GeekChartsLockup variant="dark" height={104} style={{ margin: "0 auto 20px" }} />
           <h1 style={{ fontFamily: F.display, fontSize: 42, color: CREAM, fontWeight: 400, lineHeight: 1.1, marginBottom: 14 }}>
             Long-run market history, <em style={{ fontStyle: "italic", color: CHART_COLORS.gold }}>charted</em>.
           </h1>
