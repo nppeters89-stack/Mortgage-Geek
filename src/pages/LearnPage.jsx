@@ -14,6 +14,7 @@ import { MortgageStructure } from "../components/homepage/MortgageStructure";
 import { InterestRates } from "../components/homepage/InterestRates";
 import { NextSteps } from "../components/homepage/NextSteps";
 import { ToolsCTA } from "../components/homepage/ToolsCTA";
+import { GuidesCarousel } from "../components/homepage/GuidesCarousel";
 
 // The mortgage education hub. This carries the full educational scroll plus the
 // topic/tools sidebar and its IntersectionObserver scroll-spy, moved here from
@@ -288,6 +289,7 @@ export function LearnPage() {
           <ClosingCosts navTarget={navTarget} />
           <NextSteps />
           <ToolsCTA />
+          <GuidesCarousel />
         </Page>
       </main>
 
