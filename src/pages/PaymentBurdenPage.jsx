@@ -101,7 +101,7 @@ export function PaymentBurdenPage() {
         </div>
 
         <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, marginTop: 32 }}>
-          Related charts: <a href="/geek-charts/treasury-yield-mortgage-rates" style={LINK}>The 10-Year Treasury and the 30-Year Mortgage</a> and <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income</a>.
+          Related charts: <a href="/geek-charts/treasury-yield-mortgage-rates" style={LINK}>The 10-Year Treasury and the 30-Year Mortgage</a>, <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income</a>, and <a href="/geek-charts/rent-vs-home-prices" style={LINK}>The Rent Line</a>.
         </p>
 
         <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
