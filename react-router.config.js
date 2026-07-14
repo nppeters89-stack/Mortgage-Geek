@@ -36,6 +36,7 @@ const PRERENDER_PATHS = [
   "/geek-charts/treasury-yield-mortgage-rates",
   "/geek-charts/mortgage-payment-burden",
   "/geek-charts/home-prices-income-inflation",
+  "/geek-charts/rent-vs-home-prices",
 ];
 
 export default {

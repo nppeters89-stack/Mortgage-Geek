@@ -1,11 +1,11 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { PaymentBurdenChart } from "../components/PaymentBurdenChart";
+import { RentLineChart } from "../components/RentLineChart";
 import { withAlpha } from "../utils/format";
 
 // Dark-mode Geek Charts page. Metadata + Article schema live in the route adapter
-// (routes/payment-burden.jsx). The global SiteFooter (layout route) renders the
-// NMLS / Equal Housing compliance line; the methodology note below is the page's
+// (routes/rent-line.jsx). The global SiteFooter (layout route) renders the NMLS /
+// Equal Housing compliance line; the honest-reading note below is the page's
 // data/education disclosure and is kept verbatim. Mirrors the other Geek Charts
 // pages' structure and tokens.
 
@@ -17,24 +17,24 @@ const SURFACE = P.navy;
 const LINK = { color: CHART_COLORS.gold, textDecoration: "underline", fontWeight: 600 };
 
 const STATS = [
-  { label: "All-time peak", value: "41.3%", sub: "1981 ($770/mo at 16.64%)", color: CHART_COLORS.accent },
-  { label: "All-time low", value: "16.0%", sub: "2020 ($1,122/mo at 3.11%)", color: CREAM },
-  { label: "The recent squeeze", value: "26.5%", sub: "2023, improving every year since", color: CHART_COLORS.gold },
-  { label: "Today (2026)", value: "23.0%", sub: "just below the 23.7% average", color: CREAM },
+  { label: "Years rent declined", value: "0", sub: "out of 56 (1970 to 2026)", color: CHART_COLORS.mortgage },
+  { label: "Years home prices declined", value: "8", sub: "'91, '92, '08, '09, '11, '19, '23, '26", color: CREAM },
+  { label: "Rent's worst year", value: "+0.2%", sub: "2010, still positive in mid-crash", color: CHART_COLORS.gold },
+  { label: "The climb since 1970", value: "9.5x", sub: "rent; homes rose 19.3x in dollars", color: CHART_COLORS.mortgage },
 ];
 
 const MEANS = [
   {
-    title: "If it feels harder than your parents had it",
-    body: "Depends which parents. The 2010s buyer had the easiest payment math in the series and anchored everyone's expectations. The 1981 buyer put 41% of the median income toward the same house, more than double today's burden, and that cohort kept the house and refinanced down the mountain as rates fell for decades. Today's 23% is roughly the average American homebuying experience since 1971.",
+    title: "If you rent, you own this line",
+    body: "Every renter is fully exposed to the red line, and the red line only moves one direction. There is no crash to wait for, no dip to time, no version of history where the rent bill got smaller. Renting is not the safe option. It is a permanent long position in the one housing cost that has never fallen. The question is not whether you pay a housing payment for life. It is whether that payment is frozen or floating.",
   },
   {
-    title: "If you are waiting for affordability to come back",
-    body: "It already started, and nobody sent a press release. The burden peaked at 26.5% in 2023 and has fallen three straight years through the quiet route: flat prices, easing rates, growing incomes. That is how affordability has always repaired itself on this chart, gradually, not through a crash. Waiting for a dramatic moment usually means competing with everyone else who waited.",
+    title: "The fixed-rate mortgage is the exit",
+    body: "A 30-year fixed payment does something no lease renewal ever has. The principal and interest freeze on day one and stay frozen for three decades, while the red line keeps climbing past it. Taxes and insurance still move, but the core payment does not. That is the quiet superpower of owning: not appreciation, not tax breaks, just stepping off a line that only goes up. And one day the payment ends. Rent never does.",
   },
   {
     title: "For referral partners",
-    body: "This is the chart for the frozen client who says they will buy when things get better. Things have been getting better for three years, measurably. The conversation shifts from timing to structure: what payment fits their income today, which program gets them there, and how the payment changes if rates keep easing. That last part is a strategy discussion handled carefully, not a promise.",
+    body: "Send this to the client who says renting is safer while they wait. Waiting has a price, and this chart is the price tag. Rent compounds against them every year they stand still, and it has compounded through every recession, crash, and pandemic since 1970. The financing conversation is about capping their largest monthly cost, and the numbers side of that conversation is handled from here.",
   },
 ];
 
@@ -48,7 +48,7 @@ function StatCard({ label, value, sub, color }) {
   );
 }
 
-export function PaymentBurdenPage() {
+export function RentLinePage() {
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
@@ -66,18 +66,18 @@ export function PaymentBurdenPage() {
       <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.gold, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} />Geek Charts</span>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>The Mortgage Payment Burden</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>The Rent Line</h1>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 660, margin: 0 }}>
-            The mortgage payment on the median new home, at that year's average 30-year rate, as a share of the median family's income. One line that combines prices, rates, and paychecks into the only number a buyer actually lives with.
+            American rent versus American home prices, both set to 100 in 1970. One of these lines has dipped eight times in 56 years. The other has never gone down. Not once.
           </p>
         </header>
 
         <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 16px" }}>
-          <PaymentBurdenChart />
+          <RentLineChart />
         </div>
 
         <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "20px 0 0", maxWidth: 720 }}>
-          After the 2022 rate shock pushed the burden to 26.5% in 2023, it has improved three years running, and today's 23.0% sits slightly below the 56-year average of 23.7%. Prices flattened, rates eased, incomes kept growing. The real outliers on this chart are 1981, when the same payment consumed 41% of the median family's income, and the 2009 to 2021 stretch, when cheap money made housing artificially light.
+          The red line is the point of this chart. In 56 years of data it has declined exactly zero times. Its worst year was 2010, the bottom of the deepest housing crash in modern history, when home prices had fallen for years running. Rent still rose 0.2%. Home prices dipped in 1991, 1992, 2008, 2009, 2011, 2019, 2023, and early 2026. Rent went up through every single one. Hover any year: the home column shows negative numbers here and there; the rent column never does.
         </p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 32 }}>
@@ -96,16 +96,16 @@ export function PaymentBurdenPage() {
 
         <div style={{ background: withAlpha(CHART_COLORS.accent, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.accent, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
           <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, margin: 0 }}>
-            <strong style={{ color: CREAM }}>Methodology.</strong> Principal and interest on the median new home (Census MSPUS) with 20% down, at Freddie Mac's average 30-year rate for that year, divided by median family income. Excludes taxes, insurance, and mortgage insurance, and buyers putting less down carry a higher share. Income data runs through 2024, so 2025 and 2026 hold the latest reading, which if anything overstates today's burden. This measures the median new home against the median family; individual markets and files differ. Education, not a prequalification.
+            <strong style={{ color: CREAM }}>How to read this honestly.</strong> Home prices grew faster than rent over this stretch (19.3x versus 9.5x), so this chart is not claiming renting costs more than owning in every market or every year. It is making a narrower, harder point: rent has no down years. A homeowner's price risk shows up eight times on this chart; a renter's cost has never once moved in their favor. National averages, not any one market. Education, not advice for any individual situation.
           </p>
         </div>
 
         <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, marginTop: 32 }}>
-          Related charts: <a href="/geek-charts/treasury-yield-mortgage-rates" style={LINK}>The 10-Year Treasury and the 30-Year Mortgage</a>, <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income</a>, and <a href="/geek-charts/rent-vs-home-prices" style={LINK}>The Rent Line</a>.
+          Related chart: <a href="/geek-charts/mortgage-payment-burden" style={LINK}>The Mortgage Payment Burden</a>.
         </p>
 
         <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
-          Sources: Home prices are the Census and HUD median sales price of houses sold (MSPUS), annual averages; 2026 uses the Q1 2026 reading ($403,200). Rates are the Freddie Mac Primary Mortgage Market Survey 30-year fixed average, annual averages; 2026 is the July 9, 2026 reading (6.43%). Income is Census median family income (FRED: MEFAINUSA646N) through 2024, with 2025 and 2026 holding the 2024 value ($105,800) as the latest available. Payment is P&I on an 80% loan-to-value 30-year fixed; linear scale from zero.
+          Sources: Rent is BLS CPI for All Urban Consumers, Rent of Primary Residence, U.S. city average, not seasonally adjusted (FRED: CUUR0000SEHA), annual averages of monthly data; the October 2025 reading was not published due to the federal appropriations lapse, so 2025 averages eleven months, and 2026 averages January through May. Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages of quarterly data; 2026 uses the Q1 2026 reading ($514,600). Both series are indexed to 1970 = 100; linear scale from zero.
         </p>
       </article>
 

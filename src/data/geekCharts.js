@@ -32,6 +32,13 @@ export const GEEK_CHARTS = [
     period: "1970 to 2025",
     updated: "2026-07-09",
   },
+  {
+    slug: "rent-vs-home-prices",
+    title: "The Rent Line",
+    tagline: "Rent versus home prices since 1970. Home prices dipped eight times. Rent has never gone down. Not once.",
+    period: "1970 to 2026",
+    updated: "2026-07-09",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -169,3 +176,32 @@ const pbRate = [7.54, 7.38, 8.04, 9.19, 9.05, 8.87, 8.85, 9.64, 11.20, 13.74, 16
 
 export const BURDEN_AVG = 23.7;
 export const PAYMENT_BURDEN = { years: pbYears, ratio: pbRatio, pmt: pbPmt, price: pbPrice, rate: pbRate };
+
+// The Rent Line, 1970 to 2026. rentIdx = CPI rent of primary residence; homeIdx =
+// average home price; both indexed to 1970 = 100. rentYoY / homeYoY are the
+// year-over-year percent changes (first entry null). 2025 rent averages 11 months
+// (Oct 2025 unpublished), 2026 rent averages Jan-May and home is the Q1 reading.
+// Precomputed; not recomputed at runtime.
+const rlYears = Array.from({ length: 2026 - 1970 + 1 }, (_, i) => 1970 + i);
+
+const rentIdx = [100.0, 104.5, 108.2, 112.9, 118.5, 124.7, 131.4, 139.4, 149.0, 159.8, 174.0, 189.0, 203.4, 215.3,
+  226.5, 240.4, 254.4, 264.7, 274.8, 285.6, 297.6, 308.2, 315.9, 323.2, 331.2, 339.4, 348.4, 358.5,
+  370.1, 381.7, 395.5, 413.1, 429.5, 441.9, 453.8, 467.3, 484.1, 504.7, 523.2, 535.1, 536.3, 545.4,
+  560.0, 575.7, 594.0, 615.1, 638.3, 662.6, 686.7, 712.0, 734.4, 750.8, 796.1, 859.4, 903.4, 935.3,
+  954.0];
+
+const rlHomeIdx = [100.0, 105.4, 112.9, 131.7, 145.3, 159.6, 180.3, 203.9, 235.3, 269.8, 286.6, 312.1, 314.6, 336.9,
+  366.0, 378.3, 420.5, 478.7, 520.3, 555.8, 559.4, 552.6, 542.9, 553.4, 578.5, 591.9, 621.1, 656.2,
+  679.7, 730.5, 770.6, 791.9, 850.7, 917.6, 1021.1, 1093.0, 1140.3, 1162.5, 1084.7, 1010.7, 1020.7,
+  992.9, 1081.5, 1206.9, 1296.2, 1315.0, 1349.5, 1430.2, 1435.2, 1425.4, 1455.5, 1698.6, 1937.8,
+  1902.9, 1905.7, 1950.1, 1931.0];
+
+const rentYoY = [null, 4.5, 3.5, 4.4, 5.0, 5.3, 5.3, 6.1, 6.9, 7.2, 8.9, 8.7, 7.6, 5.8, 5.2, 6.2, 5.8, 4.1, 3.8, 3.9, 4.2,
+  3.5, 2.5, 2.3, 2.5, 2.5, 2.7, 2.9, 3.2, 3.1, 3.6, 4.5, 4.0, 2.9, 2.7, 3.0, 3.6, 4.3, 3.7, 2.3, 0.2, 1.7,
+  2.7, 2.8, 3.2, 3.5, 3.8, 3.8, 3.6, 3.7, 3.1, 2.2, 6.0, 7.9, 5.1, 3.5, 2.0];
+
+const homeYoY = [null, 5.4, 7.0, 16.7, 10.3, 9.8, 13.0, 13.1, 15.4, 14.7, 6.2, 8.9, 0.8, 7.1, 8.7, 3.4, 11.2, 13.8, 8.7,
+  6.8, 0.6, -1.2, -1.8, 1.9, 4.5, 2.3, 4.9, 5.6, 3.6, 7.5, 5.5, 2.8, 7.4, 7.9, 11.3, 7.0, 4.3, 1.9, -6.7,
+  -6.8, 1.0, -2.7, 8.9, 11.6, 7.4, 1.4, 2.6, 6.0, 0.3, -0.7, 2.1, 16.7, 14.1, -1.8, 0.1, 2.3, -1.0];
+
+export const RENT_LINE = { years: rlYears, rentIdx, homeIdx: rlHomeIdx, rentYoY, homeYoY };
