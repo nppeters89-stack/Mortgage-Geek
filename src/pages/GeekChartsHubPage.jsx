@@ -1,6 +1,7 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { GEEK_CHARTS } from "../data/geekCharts";
+import { GeekChartPreview } from "../components/GeekChartPreview";
 import { withAlpha } from "../utils/format";
 
 // Dark-mode Geek Charts hub. Cards are mapped from the GEEK_CHARTS registry, so
@@ -55,7 +56,10 @@ export function GeekChartsHubPage() {
                   <h2 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: 0 }}>{c.title}</h2>
                   <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{c.period}</span>
                 </div>
-                <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 12 }}>{c.tagline}</p>
+                <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 14 }}>{c.tagline}</p>
+                <div style={{ background: P.navyDark, border: `1px solid ${BORDER}`, borderRadius: 8, height: 92, marginBottom: 14, overflow: "hidden" }}>
+                  <GeekChartPreview slug={c.slug} />
+                </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(c.updated)}</span>
                   <span style={{ fontSize: 13, color: CHART_COLORS.gold, fontWeight: 600 }}>Open →</span>
