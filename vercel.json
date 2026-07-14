@@ -1,6 +1,10 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "build/client",
+  "redirects": [
+    { "source": "/geek-maps/tennessee-loan-limits", "destination": "/deep-dives/tennessee-loan-limits", "permanent": true },
+    { "source": "/geek-maps", "destination": "/deep-dives", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/getting-started", "destination": "/" },
     { "source": "/process", "destination": "/" },

@@ -6,7 +6,7 @@ import { TNLoanLimitsMap } from "../components/TNLoanLimitsMap";
 
 const TITLE = "Tennessee Loan Limits 2026: Interactive Map by County | Mortgage Geek";
 const DESCRIPTION = "Interactive map of 2026 Tennessee loan limits by county. Conforming, FHA, VA, USDA limits for all 95 TN counties. Updated annually. Real LO insight on what they mean.";
-const PATH = "/geek-maps/tennessee-loan-limits";
+const PATH = "/deep-dives/tennessee-loan-limits";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-30";
 const MODIFIED = "2026-04-30";
@@ -81,7 +81,7 @@ export function TNLoanLimitsPage() {
           </a>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <ShareButton variant="header" headerTone="light" />
-            <a href="/geek-maps" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500 }}>← All Geek Maps</a>
+            <a href="/deep-dives" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500 }}>← All Deep Dives</a>
           </div>
         </div>
       </div>
@@ -90,7 +90,7 @@ export function TNLoanLimitsPage() {
 
         <header style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.gold }}>🗺 Geek Map</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.gold }}>🐳 Deep Dive</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Updated April 2026</span>
           </div>

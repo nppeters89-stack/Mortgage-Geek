@@ -164,7 +164,7 @@ export function HouseHackingPage() {
           "You have plenty of room on the FHA loan amount. In the Nashville metro (the Nashville-Davidson-Murfreesboro-Franklin MSA, which includes Davidson, Williamson, Rutherford, and Wilson counties), FHA will lend up to **$1,317,650** on a duplex. In a lower-cost county like Shelby (Memphis), the duplex cap is **$693,050**. Same loan, same 3.5% down, very different ceiling depending on where you buy.",
         ]} />
         <Para>
-          Your exact ceiling depends on the county. You can look up <a href="/geek-maps/tennessee-loan-limits" style={LINK_STYLE}>your county's limit on the Tennessee loan-limits map</a>.
+          Your exact ceiling depends on the county. You can look up <a href="/deep-dives/tennessee-loan-limits" style={LINK_STYLE}>your county's limit on the Tennessee loan-limits map</a>.
         </Para>
 
         <H3>2. The triplex or fourplex (3-4 units): bigger upside, one big catch</H3>

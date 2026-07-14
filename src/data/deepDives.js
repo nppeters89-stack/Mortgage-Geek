@@ -46,4 +46,5 @@ export const ARTICLES = [
     featured: true,
     desc: "Live in part of a property and rent the rest so the income helps you buy and qualify. FHA duplex and 3-4 unit, the single-family-plus-ADU play, VA multi-unit at zero down with second-tier entitlement, plus which strategies actually count toward qualifying and which only help cash flow.",
   },
+  { slug: "tennessee-loan-limits", emoji: "🗺", title: "Tennessee Loan Limits", tagline: "2026 conforming, FHA, VA, and USDA limits for all 95 TN counties, on an interactive map", verified: "Apr 2026", cat: "Special Situations & Strategy" },
 ];
