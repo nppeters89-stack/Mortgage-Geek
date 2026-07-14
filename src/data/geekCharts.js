@@ -19,6 +19,13 @@ export const GEEK_CHARTS = [
     updated: "2026-07-09",
   },
   {
+    slug: "mortgage-payment-burden",
+    title: "The Mortgage Payment Burden",
+    tagline: "The payment on the median home as a share of the median income, 1971 to today. The surprise: today is almost exactly average.",
+    period: "1971 to 2026",
+    updated: "2026-07-09",
+  },
+  {
     slug: "home-prices-income-inflation",
     title: "Home Prices, Inflation, and Family Income",
     tagline: "Three lines, one race, 55 years. Homes rose 19.5x, incomes 10.7x, inflation 8.3x. The gap is the whole story.",
@@ -133,3 +140,32 @@ export const PRICES_INCOME_INFLATION = {
   cpi: cpiLevel,
   income: piIncome,
 };
+
+// The Mortgage Payment Burden, 1971 to 2026. ratio = annual P&I (median new home,
+// 20% down, that year's average 30-yr rate) as a percent of median family income.
+// pmt / price / rate back the tooltip. Income runs through 2024, so 2025-2026 hold
+// the latest reading. Precomputed; not recomputed at runtime.
+const pbYears = Array.from({ length: 2026 - 1971 + 1 }, (_, i) => 1971 + i);
+
+const pbRatio = [16.5, 16.4, 19.1, 22.0, 22.2, 22.6, 23.3, 25.9, 29.7, 34.4, 41.3, 38.2, 33.1, 34.1, 31.0, 26.7, 29.0,
+  30.2, 30.5, 29.5, 26.4, 24.3, 22.5, 24.6, 23.0, 22.9, 22.1, 20.6, 21.9, 23.4, 21.4, 21.9, 20.6, 22.8,
+  23.9, 25.1, 23.8, 21.5, 18.6, 18.4, 17.8, 17.3, 18.6, 20.1, 18.7, 18.4, 19.4, 20.2, 16.9, 16.0, 17.4,
+  25.0, 26.5, 24.6, 23.7, 23.0];
+
+const pbPmt = [142, 152, 192, 236, 254, 281, 311, 380, 486, 603, 770, 747, 678, 752, 716, 656, 748, 811, 868, 868, 790,
+  739, 694, 793, 778, 808, 819, 804, 890, 988, 919, 945, 905, 1028, 1119, 1221, 1218, 1105, 930, 923, 906,
+  896, 1014, 1114, 1103, 1117, 1230, 1325, 1214, 1122, 1285, 1932, 2227, 2167, 2094, 2024];
+
+const pbPrice = [25225, 27525, 32600, 36050, 39275, 44225, 48900, 55850, 62750, 64750, 68950, 69225, 75375, 79950,
+  84275, 92025, 104700, 112225, 120425, 122300, 119975, 121375, 126500, 130425, 133475, 140250,
+  145000, 151925, 160125, 167550, 173100, 186025, 192125, 218150, 236550, 243750, 244950, 229550,
+  215650, 222700, 224900, 244400, 266225, 285775, 294150, 305125, 322425, 325275, 320250, 328150,
+  383000, 432950, 426525, 418975, 415400, 403200];
+
+const pbRate = [7.54, 7.38, 8.04, 9.19, 9.05, 8.87, 8.85, 9.64, 11.20, 13.74, 16.64, 16.04, 13.24, 13.88, 12.43,
+  10.19, 10.21, 10.34, 10.32, 10.13, 9.25, 8.39, 7.31, 8.38, 7.93, 7.81, 7.60, 6.94, 7.44, 8.05, 6.97,
+  6.54, 5.83, 5.84, 5.87, 6.41, 6.34, 6.03, 5.04, 4.69, 4.45, 3.66, 3.98, 4.17, 3.85, 3.65, 3.99, 4.54,
+  3.94, 3.11, 2.96, 5.34, 6.81, 6.72, 6.47, 6.43];
+
+export const BURDEN_AVG = 23.7;
+export const PAYMENT_BURDEN = { years: pbYears, ratio: pbRatio, pmt: pbPmt, price: pbPrice, rate: pbRate };
