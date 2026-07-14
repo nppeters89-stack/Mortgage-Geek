@@ -51,18 +51,20 @@ export function GeekChartsHubPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {GEEK_CHARTS.map((c) => (
             <a key={c.slug} href={`/geek-charts/${c.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-              <div style={{ background: SURFACE, borderRadius: 12, padding: "24px 28px", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${CHART_COLORS.gold}` }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
-                  <h2 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: 0 }}>{c.title}</h2>
-                  <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{c.period}</span>
+              <div style={{ display: "flex", gap: 24, flexWrap: "wrap", alignItems: "center", background: SURFACE, borderRadius: 12, padding: "22px 26px", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${CHART_COLORS.gold}` }}>
+                <div style={{ flex: "1 1 300px", minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginBottom: 8 }}>
+                    <h2 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: 0 }}>{c.title}</h2>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{c.period}</span>
+                  </div>
+                  <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 14 }}>{c.tagline}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(c.updated)}</span>
+                    <span style={{ fontSize: 13, color: CHART_COLORS.gold, fontWeight: 600 }}>Open →</span>
+                  </div>
                 </div>
-                <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, marginBottom: 14 }}>{c.tagline}</p>
-                <div style={{ background: P.navyDark, border: `1px solid ${BORDER}`, borderRadius: 8, height: 92, marginBottom: 14, overflow: "hidden" }}>
+                <div style={{ flex: "0 0 auto", width: "min(100%, 220px)", aspectRatio: "4 / 3", background: P.navyDark, border: `1px solid ${BORDER}`, borderRadius: 8, overflow: "hidden" }}>
                   <GeekChartPreview slug={c.slug} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(c.updated)}</span>
-                  <span style={{ fontSize: 13, color: CHART_COLORS.gold, fontWeight: 600 }}>Open →</span>
                 </div>
               </div>
             </a>

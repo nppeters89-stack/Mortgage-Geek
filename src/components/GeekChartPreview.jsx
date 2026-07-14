@@ -17,7 +17,9 @@ const PREVIEWS = {
   "rent-vs-home-prices": { data: RENT_LINE, yMax: 2000, lines: [{ key: "homeIdx", color: C.line, w: 1.5 }, { key: "rentIdx", color: C.mortgage, w: 3 }] },
 };
 
-const VW = 600, VH = 150, PAD = 10;
+// Near-square viewBox (4:3) so the preview fills a square-ish card slot without
+// horizontal-stretch distortion.
+const VW = 320, VH = 240, PAD = 12;
 
 // Break a values array into polyline segments at nulls (so gaps do not interpolate).
 function segments(years, values, yMax) {
