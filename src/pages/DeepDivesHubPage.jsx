@@ -52,8 +52,10 @@ export function DeepDivesHubPage() {
         </div>
       </div>
 
-      {/* Eyebrow + H1 + intro: kept exactly as built (copy untouched). */}
-      <div style={{ padding: "48px 24px 0", maxWidth: 900, margin: "0 auto" }}>
+      {/* Eyebrow + H1 + intro: kept exactly as built (copy untouched). The
+          tool-page-content class supplies the mobile top padding that clears the
+          fixed (position:fixed <=900px) header, matching the other hub pages. */}
+      <div className="tool-page-content" style={{ padding: "48px 24px 0", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <span style={{ fontSize: 36, display: "block", marginBottom: 12 }}>🐳</span>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 10 }}>Deep Dives</span>

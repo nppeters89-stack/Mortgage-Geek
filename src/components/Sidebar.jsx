@@ -165,7 +165,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
               </button>
             ))}
             <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "16px 12px" }} />
-            <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>Reference</span>
+            <span style={{ display: "block", fontSize: 10, fontWeight: 700, letterSpacing: 2, color: "rgba(255,255,255,0.25)", padding: "0 12px 10px", textTransform: "uppercase" }}>Guides</span>
             {NAV_TOOLS.filter(item => !item.href || item.reference).map((item) => {
               const iconNode = (
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>

@@ -13,7 +13,11 @@ export function GeekChartsLockup({ variant = "dark", compact = false, height = 9
   const geekFill = variant === "light" ? P.text : P.white;
   const descFill = variant === "light" ? HOME.textMuted : P.warmGrayLight;
   // Compact drops the descriptor, so center the wordmark on the icon's center
-  // (y160) instead of leaving it top-aligned; the viewBox frames the icon tightly.
+  // (icon spans y96-224, center 160). We center via an explicit alphabetic
+  // baseline (y186 = 160 + half the ~52px cap height) rather than
+  // dominant-baseline:central, which WebKit/mobile does not inherit onto the
+  // "Charts" <tspan> (it left Charts on a higher baseline than Geek). The
+  // viewBox frames the icon tightly.
   const viewBox = compact ? "52 92 668 136" : "0 0 720 320";
   const ratio = compact ? 668 / 136 : 720 / 320;
   return (
@@ -37,7 +41,7 @@ export function GeekChartsLockup({ variant = "dark", compact = false, height = 9
         />
         <rect x="97.2" y="35.5" width="14.2" height="14.2" fill={P.gold} />
       </g>
-      <text x="228" y={compact ? 160 : 150} dominantBaseline={compact ? "central" : undefined} fontFamily="Archivo, sans-serif" fontWeight="800" fontSize="72" letterSpacing="-0.7" fill={geekFill}>
+      <text x="228" y={compact ? 186 : 150} fontFamily="Archivo, sans-serif" fontWeight="800" fontSize="72" letterSpacing="-0.7" fill={geekFill}>
         Geek <tspan fill={P.gold}>Charts</tspan>
       </text>
       {!compact && (

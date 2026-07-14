@@ -11,7 +11,7 @@ export function NextSteps() {
         }}>
           <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse at 20% 100%, rgba(207,51,56,0.1) 0%, transparent 50%)" }} />
           <div style={{ position: "relative" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldLight, display: "block", marginBottom: 12 }}>Ready?</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 12 }}>Ready?</span>
             <h2 style={{ fontFamily: F.display, fontSize: "clamp(24px, 3.5vw, 34px)", color: "#fff", marginBottom: 12, lineHeight: 1.2 }}>
               Let's figure out your next move.
             </h2>

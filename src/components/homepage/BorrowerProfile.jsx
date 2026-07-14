@@ -23,7 +23,7 @@ export function BorrowerProfile({ navTarget }) {
                 style={{ background: "none", border: "none", padding: 0, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", fontFamily: F.body, textAlign: "left" }}
               >
                 <span>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: P.gold, display: "block", marginBottom: 5 }}>🤓 Geek Tip</span>
                   <span style={{ fontSize: 14, fontWeight: 600, color: P.text }}>{s.heading}</span>
                 </span>
                 <span style={{ fontSize: 11, color: P.gold, transition: "transform 0.2s", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", marginLeft: 12 }}>▼</span>
