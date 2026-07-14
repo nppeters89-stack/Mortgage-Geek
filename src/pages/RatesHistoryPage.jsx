@@ -99,7 +99,11 @@ export function RatesHistoryPage() {
           </p>
         </div>
 
-        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
+        <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, marginTop: 40 }}>
+          Related chart: <a href="/geek-charts/mortgage-payment-burden" style={{ color: CHART_COLORS.gold, textDecoration: "underline", fontWeight: 600 }}>The Mortgage Payment Burden</a>.
+        </p>
+
+        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
           Sources: Treasury is the Federal Reserve H.15 market yield on U.S. Treasury securities at 10-year constant maturity (FRED: GS10), annual averages of monthly data; 1953 covers April to December, the series start. Mortgage is the Freddie Mac Primary Mortgage Market Survey 30-year fixed rate average (FRED: MORTGAGE30US), annual averages of weekly data, series begins April 1971. The 2026 points are spot readings as of July 9, 2026. The trend line is a trailing 10-year simple moving average of the Treasury series, first plotted in 1962. Linear scale from zero.
         </p>
       </article>

@@ -163,6 +163,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://mortgagegeek.ai/geek-charts/mortgage-payment-burden</loc>
+    <lastmod>2026-07-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://mortgagegeek.ai/geek-charts/home-prices-income-inflation</loc>
     <lastmod>2026-07-09</lastmod>
     <changefreq>monthly</changefreq>

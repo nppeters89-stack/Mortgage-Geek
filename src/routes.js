@@ -34,6 +34,7 @@ export default [
     route("geek-charts", "routes/geek-charts.jsx"),
     route("geek-charts/gold-to-housing-ratio", "routes/gold-housing-ratio.jsx"),
     route("geek-charts/treasury-yield-mortgage-rates", "routes/rates-history.jsx"),
+    route("geek-charts/mortgage-payment-burden", "routes/payment-burden.jsx"),
     route("geek-charts/home-prices-income-inflation", "routes/prices-income-inflation.jsx"),
     route("geek-log", "routes/geek-log.jsx"),
     route("*", "routes/catch-all.jsx"),

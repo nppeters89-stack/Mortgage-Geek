@@ -99,7 +99,11 @@ export function PricesIncomeInflationPage() {
           </p>
         </div>
 
-        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
+        <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, marginTop: 40 }}>
+          Related chart: <a href="/geek-charts/mortgage-payment-burden" style={{ color: CHART_COLORS.gold, textDecoration: "underline", fontWeight: 600 }}>The Mortgage Payment Burden</a>.
+        </p>
+
+        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
           Sources: Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages of quarterly data, 1970 to 2025. Inflation is BLS CPI-U, all items, U.S. city average, annual averages (FRED: CPIAUCSL). Income is Census median family income in current dollars (FRED: MEFAINUSA646N), through 2024. All series are indexed to 1970 = 100; linear scale from zero.
         </p>
       </article>
