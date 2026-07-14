@@ -452,7 +452,7 @@ export function PreQualPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span className="btn-label-mobile-hide">Text</span>
           </a>
-          <a href="/" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500, marginLeft: 8 }}>← Back</a>
+          <a href="/learn" style={{ fontSize: 13, color: P.textLight, textDecoration: "none", fontWeight: 500, marginLeft: 8, display: "inline-flex", alignItems: "center", gap: 6 }}><span aria-hidden="true">←</span><img src="/assets/learning-hub-mark-sm.svg" alt="" width={20} height={16} style={{ display: "block" }} />Learning Hub</a>
         </div>
       </div>
     </div>

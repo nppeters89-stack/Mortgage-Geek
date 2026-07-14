@@ -46,7 +46,7 @@ export function GeekChartsHubPage() {
             <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-white-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: BORDER, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--dark" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" />
             <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
-          <a href="/" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500 }}>← Back</a>
+          <a href="/learn" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}><span aria-hidden="true">←</span><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" width={20} height={16} style={{ display: "block" }} />Learning Hub</a>
         </div>
       </div>
 
