@@ -12,10 +12,8 @@ import { ClosingCosts } from "../components/homepage/ClosingCosts";
 import { BorrowerProfile } from "../components/homepage/BorrowerProfile";
 import { MortgageStructure } from "../components/homepage/MortgageStructure";
 import { InterestRates } from "../components/homepage/InterestRates";
-import { PreApprovalChecklist } from "../components/homepage/PreApprovalChecklist";
 import { NextSteps } from "../components/homepage/NextSteps";
 import { ToolsCTA } from "../components/homepage/ToolsCTA";
-import { JargonDecoder } from "../components/homepage/JargonDecoder";
 
 // The mortgage education hub. This carries the full educational scroll plus the
 // topic/tools sidebar and its IntersectionObserver scroll-spy, moved here from
@@ -290,8 +288,6 @@ export function LearnPage() {
           <ClosingCosts navTarget={navTarget} />
           <NextSteps />
           <ToolsCTA />
-          <PreApprovalChecklist />
-          <JargonDecoder />
         </Page>
       </main>
 

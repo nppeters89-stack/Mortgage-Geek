@@ -2,10 +2,12 @@ import { useState } from "react";
 import { P, F } from "../../theme";
 import { SectionHeader } from "./SectionHeader";
 
-export function JargonDecoder() {
+export function JargonDecoder({ standalone = false }) {
   const [search, setSearch] = useState("");
   const [openTerm, setOpenTerm] = useState(null);
-  const [sectionOpen, setSectionOpen] = useState(false);
+  // On a dedicated page (standalone) the glossary renders expanded with no
+  // collapse toggle; inside the Learning Hub it starts collapsed and toggles.
+  const [sectionOpen, setSectionOpen] = useState(standalone);
 
   const terms = [
     { term: "1003", def: "The industry name for the Uniform Residential Loan Application — the official mortgage application form. Now technically called the URLA (Uniform Residential Loan Application) after being redesigned in 2021, but most loan originators still call it the '1003' (pronounced 'ten-oh-three'). It captures everything: income, assets, debts, property details, declarations. You'll sign multiple versions throughout the process as the file updates." },
@@ -50,8 +52,8 @@ export function JargonDecoder() {
 
   return (
     <section id="glossary" className="section-bleed" style={{ padding: "64px 40px", background: P.creamDark }}>
-      <div onClick={() => setSectionOpen(!sectionOpen)} style={{ cursor: "pointer" }}>
-        <SectionHeader eyebrow="Speak the Language" title={`Jargon Decoder ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." : `Click to reveal ${terms.length} mortgage terms explained in plain language.`} />
+      <div onClick={standalone ? undefined : () => setSectionOpen(!sectionOpen)} style={{ cursor: standalone ? "default" : "pointer" }}>
+        <SectionHeader eyebrow="Speak the Language" title={standalone ? "Jargon Decoder" : `Jargon Decoder ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Mortgages come with their own vocabulary. Here's every term you'll encounter, explained in plain language." : `Click to reveal ${terms.length} mortgage terms explained in plain language.`} />
       </div>
       {sectionOpen && (
       <div style={{ maxWidth: 720 }}>

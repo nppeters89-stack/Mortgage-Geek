@@ -12,6 +12,8 @@ const PRERENDER_PATHS = [
   "/prequal",
   "/compare",
   "/cash-to-close",
+  "/pre-approval-checklist",
+  "/jargon-decoder",
   "/install",
   "/deep-dives",
   "/deep-dives/derogatory-credit",

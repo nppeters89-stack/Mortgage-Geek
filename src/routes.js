@@ -12,6 +12,8 @@ export default [
     route("prequal", "routes/prequal.jsx"),
     route("compare", "routes/compare.jsx"),
     route("cash-to-close", "routes/cash-to-close.jsx"),
+    route("pre-approval-checklist", "routes/pre-approval-checklist.jsx"),
+    route("jargon-decoder", "routes/jargon-decoder.jsx"),
     route("install", "routes/install.jsx"),
     route("deep-dives", "routes/deep-dives.jsx"),
     route("deep-dives/derogatory-credit", "routes/dd-derogatory-credit.jsx"),
