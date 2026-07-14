@@ -1,13 +1,13 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
-import { RatesHistoryChart } from "../components/RatesHistoryChart";
+import { PricesIncomeInflationChart } from "../components/PricesIncomeInflationChart";
 import { withAlpha } from "../utils/format";
 
-// Dark-mode Geek Charts page. Metadata + Article schema live in the route
-// adapter (routes/rates-history.jsx). The global SiteFooter (layout route)
+// Dark-mode Geek Charts page. Metadata + Article schema live in the route adapter
+// (routes/prices-income-inflation.jsx). The global SiteFooter (layout route)
 // renders the NMLS / Equal Housing compliance line, so this page carries only
-// data-source attribution and the provided educational caveat, not new
-// regulatory disclosure. Mirrors GoldHousingRatioPage's structure and tokens.
+// data-source attribution and the provided educational note, not new regulatory
+// disclosure. Mirrors the other Geek Charts pages' structure and tokens.
 
 const CREAM = CHART_COLORS.line;
 const BODY = withAlpha(CHART_COLORS.line, 0.72);
@@ -16,24 +16,24 @@ const BORDER = withAlpha(CHART_COLORS.line, 0.1);
 const SURFACE = P.navy;
 
 const STATS = [
-  { label: "The 1981 peak", value: "16.64%", sub: "mortgage; 13.91% Treasury (weekly high 18.63% in Oct 1981)", color: CHART_COLORS.accent },
-  { label: "Record lows", value: "2.96%", sub: "mortgage (2021); 0.89% Treasury (2020)", color: CREAM },
-  { label: "Today (Jul 9, 2026)", value: "6.43%", sub: "mortgage; 4.55% Treasury", color: CHART_COLORS.mortgage },
-  { label: "The spread", value: "1.88 pts", sub: "today, against a historical norm near 1.7 points", color: CHART_COLORS.trend },
+  { label: "Average home price, 1970 to 2025", value: "19.5x", sub: "$26,650 to $519,700", color: CHART_COLORS.mortgage },
+  { label: "Median family income, 1970 to 2024", value: "10.7x", sub: "$9,867 to $105,800", color: CHART_COLORS.income },
+  { label: "Inflation (CPI), 1970 to 2025", value: "8.3x", sub: "index 38.8 to 322.2", color: CREAM },
+  { label: "The gap", value: "1.8x", sub: "homes rose about 1.8x faster than incomes", color: CHART_COLORS.accent },
 ];
 
 const MEANS = [
   {
-    title: "Today's rate is not the anomaly, the 3% era was",
-    body: "The full-history average for the 30-year fixed is near 7.7%. A 6 handle sits below that average. Buyers waiting for a return to 2021 are waiting on the most unusual moment in the series, not on a normal one.",
+    title: "Why the goalposts keep moving",
+    body: "If home prices grow faster than your income, the down payment target is not standing still while you save toward it. A buyer saving 10% of income toward a 5% down payment is chasing a number that has historically outrun the savings rate. That is not a reason to panic. It is the reason strategy beats patience: low down payment programs, down payment assistance, and gift funds exist precisely because of this chart.",
   },
   {
-    title: "Watch the spread, not just the Fed",
-    body: "Mortgages price off the 10-year Treasury plus a spread, not off the Fed funds rate. The spread widened to roughly 2.9 points in 2023 and has been grinding back toward its 1.7 point norm. That means mortgage rates can improve even in a week when the 10-year does not move, which is why rate watching and rate locking are two different disciplines.",
+    title: "The honest version of the squeeze",
+    body: "This chart is real, and it is also smaller than social media says. Homes beat incomes by roughly 1.8x over 55 years, not 10x. Incomes genuinely outran inflation. The right conclusion is not that homeownership is impossible. It is that it takes more structure than it took in 1970, which is a solvable problem, not a verdict.",
   },
   {
     title: "For referral partners",
-    body: "This is the chart to send a buyer who is frozen on rate. It reframes 6% from historically terrible to historically ordinary, and it shifts the conversation from timing the market to structuring the loan. Refinancing later is a strategy, not a promise, and I will not pretend otherwise on a call.",
+    body: "This is the chart behind the phrase “my clients feel priced out.” The feeling is grounded in 55 years of arithmetic, and the answer lives on the financing side: program selection, assistance layering, and payment structuring. Send the feeling, and the numbers conversation is handled from there.",
   },
 ];
 
@@ -47,7 +47,7 @@ function StatCard({ label, value, sub, color }) {
   );
 }
 
-export function RatesHistoryPage() {
+export function PricesIncomeInflationPage() {
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
@@ -65,18 +65,18 @@ export function RatesHistoryPage() {
       <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.gold, display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}><img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} />Geek Charts</span>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>The 10-Year Treasury and the 30-Year Mortgage</h1>
-          <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 640, margin: 0 }}>
-            Seventy years of the benchmark rate that sets mortgage pricing, and the mortgage rate that rides on top of it.
+          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>Home Prices, Inflation, and Family Income</h1>
+          <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 660, margin: 0 }}>
+            Three lines set to 100 in 1970 and left to run for 55 years. The vertical gaps are the whole story: what homes did, what paychecks did, and what the dollar itself did.
           </p>
         </header>
 
         <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 16px" }}>
-          <RatesHistoryChart />
+          <PricesIncomeInflationChart />
         </div>
 
         <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "20px 0 0", maxWidth: 720 }}>
-          The thick trend line turns the noise into one arc: a three-decade climb to a 10.69% peak in 1988, a long glide down to 2.04% in 2021, and five straight years of rising trend since, the first sustained upturn since the 1980s. The mortgage line shadows the Treasury line the whole way, shifted up by the spread. Freddie Mac's survey begins in April 1971, so the mortgage line starts there. The trend line begins in 1962 because it needs ten years of data. The 2026 point is the July 9, 2026 reading, with the 10-year at 4.55% and the 30-year fixed at 6.43%.
+          All three lines are nominal, so this is a true apples-to-apples race. There are two gaps to read. Home prices (red) pulling above income (blue) is the affordability squeeze: homes rose about 1.8 times faster than family incomes over the full stretch. Income sitting above inflation (cream) means paychecks did beat the cost of living, just nowhere near as fast as housing. The income series runs through 2024, the latest the Census has published.
         </p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 32 }}>
@@ -93,9 +93,9 @@ export function RatesHistoryPage() {
           ))}
         </div>
 
-        <div style={{ background: withAlpha(CHART_COLORS.accent, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.accent, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
+        <div style={{ background: withAlpha(CHART_COLORS.income, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.income, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
           <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, margin: 0 }}>
-            <strong style={{ color: CREAM }}>A note on reading this.</strong> The rates shown are historical averages, not offers, and nobody can predict where rates go next. A trailing 10-year average will keep drifting up for a few years purely because the 2020 lows are rolling out of the window, which is not itself a forecast. This is educational content only, not a commitment to lend and not a rate quote.
+            <strong style={{ color: CREAM }}>A note on the data.</strong> All three series are nominal, which is what makes the comparison fair. Home prices are the average new home sold (Census ASPUS), used because it is the longest consistent dollar series; the median home shows the same shape at a slightly smaller multiple. Income is median family income, which reflects households adding second earners over these decades; individual wages grew slower. One line on this chart describes no individual market or file. Education only.
           </p>
         </div>
 
@@ -104,7 +104,7 @@ export function RatesHistoryPage() {
         </p>
 
         <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
-          Sources: Treasury is the Federal Reserve H.15 market yield on U.S. Treasury securities at 10-year constant maturity (FRED: GS10), annual averages of monthly data; 1953 covers April to December, the series start. Mortgage is the Freddie Mac Primary Mortgage Market Survey 30-year fixed rate average (FRED: MORTGAGE30US), annual averages of weekly data, series begins April 1971. The 2026 points are spot readings as of July 9, 2026. The trend line is a trailing 10-year simple moving average of the Treasury series, first plotted in 1962. Linear scale from zero.
+          Sources: Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages of quarterly data, 1970 to 2025. Inflation is BLS CPI-U, all items, U.S. city average, annual averages (FRED: CPIAUCSL). Income is Census median family income in current dollars (FRED: MEFAINUSA646N), through 2024. All series are indexed to 1970 = 100; linear scale from zero.
         </p>
       </article>
 
