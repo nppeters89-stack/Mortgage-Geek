@@ -9,19 +9,12 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { P, F } from "../../theme";
 import { SnapshotCard } from "./SnapshotCard";
 
-export function SnapshotExportButton({ data, logoDataUrl = null, showToast }) {
+export function SnapshotExportButton({ data, showToast }) {
   const hiddenRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     if (isExporting) return;
-    // Cold-start guard: the prefetch is non-blocking so on the very
-    // first dashboard load the logo data URL might not be ready yet.
-    // Better to ask the user to retry than to capture a logo-less PNG.
-    if (!logoDataUrl) {
-      showToast?.({ message: "Logo loading, try again in a moment", variant: "error" });
-      return;
-    }
     const node = hiddenRef.current;
     if (!node) {
       showToast?.({ message: "Export node not ready", variant: "error" });
@@ -100,7 +93,7 @@ export function SnapshotExportButton({ data, logoDataUrl = null, showToast }) {
         }}
       >
         <div ref={hiddenRef}>
-          <SnapshotCard data={data} logoDataUrl={logoDataUrl} />
+          <SnapshotCard data={data} />
         </div>
       </div>
     </>
