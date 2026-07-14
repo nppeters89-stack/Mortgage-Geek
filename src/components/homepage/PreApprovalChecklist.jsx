@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { P, F } from "../../theme";
 import { SectionHeader } from "./SectionHeader";
 
-export function PreApprovalChecklist() {
+export function PreApprovalChecklist({ standalone = false }) {
   const STORAGE_KEY = "mg_checklist";
-  const [sectionOpen, setSectionOpen] = useState(false);
+  // On a dedicated page (standalone) the section renders expanded with no
+  // collapse toggle; inside the Learning Hub it starts collapsed and toggles.
+  const [sectionOpen, setSectionOpen] = useState(standalone);
   // Hydration-clean restore: default empty (matches prerender), saved checks
   // restored in a post-mount effect (one-frame restore; no server layout effect).
   const [checkedItems, setCheckedItems] = useState({});
@@ -61,8 +63,8 @@ export function PreApprovalChecklist() {
 
   return (
     <section id="checklist" style={{ padding: "64px 40px" }}>
-      <div onClick={() => setSectionOpen(!sectionOpen)} style={{ cursor: "pointer" }}>
-        <SectionHeader eyebrow="Get Organized" title={`Pre-Approval Checklist ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Gathering these documents before you apply will speed up your approval and reduce back-and-forth. Check them off as you go." : (checkedCount > 0 ? `Click to expand — you've checked off ${checkedCount} of ${totalItems} items.` : `Click to reveal ${totalItems} documents to gather before you apply.`)} />
+      <div onClick={standalone ? undefined : () => setSectionOpen(!sectionOpen)} style={{ cursor: standalone ? "default" : "pointer" }}>
+        <SectionHeader eyebrow="Get Organized" title={standalone ? "Pre-Approval Checklist" : `Pre-Approval Checklist ${sectionOpen ? "−" : "+"}`} subtitle={sectionOpen ? "Gathering these documents before you apply will speed up your approval and reduce back-and-forth. Check them off as you go." : (checkedCount > 0 ? `Click to expand — you've checked off ${checkedCount} of ${totalItems} items.` : `Click to reveal ${totalItems} documents to gather before you apply.`)} />
       </div>
       {sectionOpen && (
       <div style={{ maxWidth: 720 }}>

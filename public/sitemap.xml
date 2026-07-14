@@ -37,6 +37,18 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://mortgagegeek.ai/pre-approval-checklist</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://mortgagegeek.ai/jargon-decoder</loc>
+    <lastmod>2026-07-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://mortgagegeek.ai/deep-dives</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>monthly</changefreq>
