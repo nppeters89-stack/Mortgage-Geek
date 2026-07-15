@@ -39,6 +39,13 @@ export const GEEK_CHARTS = [
     period: "1970 to 2026",
     updated: "2026-07-09",
   },
+  {
+    slug: "homes-priced-in-sp500",
+    title: "Homes Priced in the S&P 500",
+    tagline: "Stocks beat houses for four decades. So why did houses build the middle class? One word: leverage. Two charts, one answer.",
+    period: "1970 to 2026",
+    updated: "2026-07-13",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -205,3 +212,72 @@ const homeYoY = [null, 5.4, 7.0, 16.7, 10.3, 9.8, 13.0, 13.1, 15.4, 14.7, 6.2, 8
   -6.8, 1.0, -2.7, 8.9, 11.6, 7.4, 1.4, 2.6, 6.0, 0.3, -0.7, 2.1, 16.7, 14.1, -1.8, 0.1, 2.3, -1.0];
 
 export const RENT_LINE = { years: rlYears, rentIdx, homeIdx: rlHomeIdx, rentYoY, homeYoY };
+
+// Homes Priced in the S&P 500, a two-part page. Group 1 (ratio series) is the
+// historical chart: sp500Ratio = home price / index level (how many S&P units
+// buy the average home), with home (ASPUS average price) and sp (S&P 500 annual
+// average of monthly averages; 2026 = spot as of Jul 13) backing the tooltip.
+// All three align to spYears by index, 1970 to 2026 (57 entries). Group 2
+// (projection series) is the 30-year wealth illustration: a $500,000 purchase,
+// $25,000 down, $475,000 30-yr fixed at 6.43%, 5.4% annual appreciation, and a
+// 10% annual total return on the same $25,000 invested in the index. equity =
+// homeVal - loanBal. All four align to projYears by index, year 0 to 30 (31
+// entries). Every array is precomputed and canonical; nothing is recomputed at
+// runtime. SP_RATIO_AVG is the long-run average of the ratio series.
+const spYears = Array.from({ length: 2026 - 1970 + 1 }, (_, i) => 1970 + i);
+
+const sp500Ratio = [320.2, 285.9, 275.4, 326.8, 469.1, 493.6, 471.0, 553.4, 653.0, 697.9, 643.0, 649.6,
+  700.3, 559.6, 607.9, 539.6, 474.2, 444.8, 521.7, 458.8, 445.5, 391.5, 348.0, 326.7, 334.9, 291.2,
+  246.7, 200.4, 167.1, 146.8, 143.9, 177.0, 227.7, 253.8, 240.7, 241.3, 231.9, 209.8, 236.8, 284.5,
+  238.8, 208.5, 208.9, 195.8, 178.9, 170.0, 171.9, 155.7, 139.4, 130.4, 120.5, 106.1, 125.9, 118.5,
+  93.6, 83.7, 68.0];
+
+const spHome = [26650, 28100, 30075, 35100, 38725, 42525, 48050, 54350, 62700, 71900, 76375, 83175, 83850,
+  89775, 97550, 100825, 112075, 127575, 138650, 148125, 149075, 147275, 144675, 147475, 154175,
+  157750, 165525, 174875, 181150, 194675, 205375, 211050, 226700, 244550, 272125, 291275, 303900,
+  309800, 289075, 269350, 272025, 264600, 288225, 321650, 345450, 350450, 359650, 381150, 382475,
+  379875, 387900, 452675, 516425, 507125, 507875, 519700, 514600];
+
+const sp = [83.22, 98.28, 109.21, 107.42, 82.55, 86.16, 102.02, 98.21, 96.02, 103.02, 118.78, 128.04,
+  119.73, 160.42, 160.47, 186.85, 236.36, 286.84, 265.78, 322.83, 334.59, 376.18, 415.74, 451.41,
+  460.33, 541.64, 670.83, 872.67, 1084.31, 1326.06, 1427.01, 1192.08, 995.63, 963.69, 1130.55,
+  1207.06, 1310.67, 1476.63, 1220.89, 946.74, 1139.31, 1268.89, 1379.56, 1642.51, 1930.67, 2061.2,
+  2091.84, 2448.22, 2744.68, 2912.5, 3218.5, 4266.8, 4100.7, 4280.78, 5428.1, 6210.97, 7570.03];
+
+export const SP_RATIO_AVG = 312;
+
+// Group 2: the 30-year projection. See header note above for assumptions.
+const projYears = Array.from({ length: 31 }, (_, i) => i);
+
+const projEquity = [25000, 57380, 91575, 127686, 165821, 206096, 248631, 293554, 340998, 391108, 444034,
+  499935, 558980, 621346, 687222, 756807, 830310, 907955, 989977, 1076623, 1168157, 1264857, 1367015,
+  1474943, 1588969, 1709440, 1836722, 1971205, 2113299, 2263437, 2422079];
+
+const projSpPath = [25000, 27500, 30250, 33275, 36603, 40263, 44289, 48718, 53590, 58949, 64844, 71328,
+  78461, 86307, 94937, 104431, 114874, 126362, 138998, 152898, 168187, 185006, 203507, 223858, 246243,
+  270868, 297954, 327750, 360525, 396577, 436235];
+
+const projHomeVal = [500000, 527000, 555458, 585453, 617067, 650389, 685510, 722527, 761544, 802667,
+  846011, 891696, 939847, 990599, 1044091, 1100472, 1159898, 1222532, 1288549, 1358131, 1431470,
+  1508769, 1590243, 1676116, 1766626, 1862024, 1962573, 2068552, 2180254, 2297988, 2422079];
+
+const projLoanBal = [475000, 469620, 463883, 457767, 451246, 444292, 436879, 428974, 420545, 411559,
+  401977, 391761, 380868, 369253, 356870, 343666, 329588, 314577, 298572, 281507, 263312, 243912,
+  223228, 201173, 177657, 152584, 125851, 97347, 66955, 34551, 0];
+
+// One named export, two groups. Group 1 (ratio series) backs the historical
+// chart; group 2 (projection series) backs the 30-year wealth chart. Field
+// names do not collide, so both groups live on one object per the phase spec.
+export const HOMES_IN_SP500 = {
+  // Group 1: ratio series (1970 to 2026, 57 entries).
+  years: spYears,
+  ratio: sp500Ratio,
+  home: spHome,
+  sp,
+  // Group 2: projection series (year 0 to 30, 31 entries).
+  projYears,
+  equity: projEquity,
+  spPath: projSpPath,
+  homeVal: projHomeVal,
+  loanBal: projLoanBal,
+};
