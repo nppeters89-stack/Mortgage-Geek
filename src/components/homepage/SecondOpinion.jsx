@@ -101,8 +101,12 @@ const css = `
     .so-btn { width: 100%; padding: 0; }
     .so-cardwrap { width: 302px; }
     .so-card { width: 302px; padding: 22px 24px; box-shadow: 0 18px 38px rgba(0,0,0,.45); border-radius: 11px; }
-    .so-ellipse { width: 142px; height: 42px; left: 50%; margin-left: -71px; top: 122px; }
-    .so-underline { display: none; }
+    /* Keep the annotations LEFT-anchored to the card (as on desktop) so they stay
+       over the rows they mark. Centering the ellipse (left:50%) pulled it off the
+       value; hiding the underline dropped the strike-through entirely. Both are
+       re-anchored and scaled to the 302px card here. */
+    .so-ellipse { width: 142px; height: 42px; left: 5px; top: 122px; }
+    .so-underline { top: 258px; left: 18px; width: 122px; }
     .so-arrow { font-size: 26px; left: -22px; top: 108px; }
     .so-steptitle { font-size: 17px; }
     .so-stepbody { font-size: 15px; line-height: 1.5; }
