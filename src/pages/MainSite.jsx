@@ -6,6 +6,7 @@ import { ValueProps } from "../components/homepage/ValueProps";
 import { LoanProducts } from "../components/homepage/LoanProducts";
 import { AgentAdvantage } from "../components/homepage/AgentAdvantage";
 import { Education } from "../components/homepage/Education";
+import { SecondOpinion } from "../components/homepage/SecondOpinion";
 import { ReviewsCarousel } from "../components/homepage/ReviewsCarousel";
 import { ContactCTA } from "../components/homepage/ContactCTA";
 
@@ -24,6 +25,7 @@ export function MainSite({ showStats = true, showAgentSection = true, enableMoti
       <LoanProducts />
       {showAgentSection && <AgentAdvantage />}
       <Education />
+      <SecondOpinion />
       <ReviewsCarousel />
       <ContactCTA />
       <MobileToolbar />
