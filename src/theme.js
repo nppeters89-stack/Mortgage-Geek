@@ -45,6 +45,7 @@ export const CHART_COLORS = {
   mortgage: "#F0605F",              // 30-year mortgage rate line (4.67:1 on P.navy)
   trend: "#F0A93B",                 // long-run trend / moving-average line (7.45:1 on P.navy)
   income: "#3B9EFF",                // income data series (5.39:1 on P.navy)
+  sp500: "#3B9EFF",                 // equity-market data series on dark charcoal (same hex as income; distinct role)
 };
 
 export const F = {

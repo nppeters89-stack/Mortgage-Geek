@@ -1,5 +1,5 @@
 import { CHART_COLORS } from "../theme";
-import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE } from "../data/geekCharts";
+import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500 } from "../data/geekCharts";
 
 // Static sneak-peek sparkline for a Geek Charts hub card. Draws each chart's
 // line(s) straight from the data, so it always shows the fully rendered shape,
@@ -15,6 +15,7 @@ const PREVIEWS = {
   "mortgage-payment-burden": { data: PAYMENT_BURDEN, yMax: 45, lines: [{ key: "ratio", color: C.line, w: 2.5 }] },
   "home-prices-income-inflation": { data: PRICES_INCOME_INFLATION, yMax: 2000, lines: [{ key: "cpiIdx", color: C.line, w: 1.75 }, { key: "incomeIdx", color: C.income, w: 1.75 }, { key: "homeIdx", color: C.mortgage, w: 1.75 }] },
   "rent-vs-home-prices": { data: RENT_LINE, yMax: 2000, lines: [{ key: "homeIdx", color: C.line, w: 1.5 }, { key: "rentIdx", color: C.mortgage, w: 3 }] },
+  "homes-priced-in-sp500": { data: HOMES_IN_SP500, yMax: 800, lines: [{ key: "ratio", color: C.sp500, w: 2.5 }] },
 };
 
 // Near-square viewBox (4:3) so the preview fills a square-ish card slot without

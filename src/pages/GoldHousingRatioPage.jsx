@@ -14,6 +14,7 @@ const BODY = withAlpha(CHART_COLORS.line, 0.72);
 const MUTED = withAlpha(CHART_COLORS.line, 0.5);
 const BORDER = withAlpha(CHART_COLORS.line, 0.1);
 const SURFACE = P.navy;
+const LINK = { color: CHART_COLORS.gold, textDecoration: "underline", fontWeight: 600 };
 
 const STATS = [
   { label: "All-time high", value: "779 oz", sub: "2001", color: CHART_COLORS.accent },
@@ -99,7 +100,11 @@ export function GoldHousingRatioPage() {
           </p>
         </div>
 
-        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
+        <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, marginTop: 32 }}>
+          Related chart: <a href="/geek-charts/homes-priced-in-sp500" style={LINK}>Homes Priced in the S&P 500</a>.
+        </p>
+
+        <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
           Sources: Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages, with Q1 2026 as the latest reading. Gold is the London PM fix annual average, compiled by NMA from World Gold Council, Kitco, and LBMA data, with the 2025 LBMA average at $3,431.54 and Jul 9 2026 spot near $4,144. The ratio is average home price divided by gold price per ounce. Gold was pegged near $35 an ounce until August 1971.
         </p>
       </article>
