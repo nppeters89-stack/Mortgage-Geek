@@ -418,14 +418,14 @@ function PayoffControl({
     <div style={{ marginBottom: 14 }}>
       <button
         type="button"
+        className={`pay-faster${cfg.enabled ? ' is-open' : ''}`}
+        style={{ '--program-color': prog.color }}
+        aria-expanded={cfg.enabled}
         onClick={() => updateExtraConfig(prog.name, { enabled: !cfg.enabled })}
-        style={payoffToggleStyle(cfg.enabled, prog.color)}
       >
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 14 }}>⚡</span>
-          <span>Pay it off faster</span>
-        </span>
-        <span style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 14, opacity: 0.7 }}>{cfg.enabled ? '▾' : '▸'}</span>
+        <span className="bolt" aria-hidden="true">⚡</span>
+        <span>Pay it off faster</span>
+        <span className="arrow" aria-hidden="true">▸</span>
       </button>
 
       {cfg.enabled && (
@@ -720,24 +720,6 @@ const loanRowStyle = {
 };
 
 /* ---------- Payoff styles ---------- */
-
-const payoffToggleStyle = (enabled, programColor) => ({
-  width: '100%',
-  background: enabled ? programColor : P.cream,
-  color: enabled ? '#fff' : P.text,
-  border: `1px solid ${enabled ? programColor : P.creamDark}`,
-  borderRadius: 8,
-  padding: '10px 14px',
-  fontSize: 13,
-  fontWeight: 600,
-  fontFamily: F.body,
-  cursor: 'pointer',
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  transition: 'background 0.15s, color 0.15s, border-color 0.15s',
-});
 
 const payoffPanelStyle = {
   marginTop: 10,
