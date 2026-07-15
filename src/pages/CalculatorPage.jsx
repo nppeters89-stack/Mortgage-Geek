@@ -871,29 +871,15 @@ export function CalculatorPage() {
                     return (
                       <div style={{ marginTop: 12 }}>
                         <button
+                          type="button"
+                          className={`pay-faster${cfg.enabled ? " is-open" : ""}`}
+                          style={{ "--program-color": prog.color }}
+                          aria-expanded={cfg.enabled}
                           onClick={(e) => { e.stopPropagation(); updateExtraConfig(prog.name, { enabled: !cfg.enabled }); }}
-                          style={{
-                            width: "100%",
-                            background: cfg.enabled ? prog.color : P.cream,
-                            color: cfg.enabled ? "#fff" : P.text,
-                            border: `1px solid ${cfg.enabled ? prog.color : P.creamDark}`,
-                            borderRadius: 8,
-                            padding: "10px 12px",
-                            fontSize: 12,
-                            fontWeight: 600,
-                            fontFamily: F.body,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            transition: "background 0.15s, color 0.15s, border-color 0.15s",
-                          }}
                         >
-                          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 14 }}>⚡</span>
-                            <span>Pay it off faster</span>
-                          </span>
-                          <span style={{ fontSize: 14, opacity: 0.7 }}>{cfg.enabled ? "▾" : "▸"}</span>
+                          <span className="bolt" aria-hidden="true">⚡</span>
+                          <span>Pay it off faster</span>
+                          <span className="arrow" aria-hidden="true">▸</span>
                         </button>
 
                         {cfg.enabled && (
