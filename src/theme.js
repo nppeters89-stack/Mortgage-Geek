@@ -312,4 +312,24 @@ export const globalCSS = `
   .mg--light .mg-cobrand__divider { background: #C7C4BC; }
   .mg--dark .mg-lockup__top { color: #E8E6E1; }
   .mg--dark .mg-cobrand__divider { background: #4A4B4E; }
+
+  /* "Pay it off faster" toggle (animation handoff 4a). Idle: Ravenswood Gray
+     (#24272A = P.navy) with a white sheen sweeping every 3s while the payoff
+     panel is collapsed. Open (.is-open, driven by the panel's own state): takes
+     the loan-program color (--program-color, set inline per card), sheen off,
+     arrow rotated to point down. Sheen is disabled for reduced-motion users. */
+  .pay-faster { position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 15px; border: 1px solid #33363a; border-radius: 10px; background: #24272A; color: #f4f4f2; font: 600 14.5px/1 inherit; cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease; }
+  .pay-faster > * { position: relative; z-index: 1; }
+  .pay-faster .bolt { color: #ef8f3c; }
+  .pay-faster .arrow { margin-left: auto; color: #b6b8bb; transition: transform .2s ease, color .15s ease; }
+  .pay-faster::after { content: ""; position: absolute; top: 0; left: 0; width: 34%; height: 100%; z-index: 0; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent); animation: pay-faster-sheen 3s ease-in-out infinite; }
+  @keyframes pay-faster-sheen {
+    0%   { transform: translateX(-140%) skewX(-18deg); }
+    100% { transform: translateX(340%)  skewX(-18deg); }
+  }
+  .pay-faster.is-open { background: var(--program-color, #24272A); border-color: var(--program-color, #24272A); color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+  .pay-faster.is-open::after { animation: none; content: none; }
+  .pay-faster.is-open .bolt { color: #fff; }
+  .pay-faster.is-open .arrow { color: #fff; transform: rotate(90deg); }
+  @media (prefers-reduced-motion: reduce) { .pay-faster::after { animation: none; } }
 `;
