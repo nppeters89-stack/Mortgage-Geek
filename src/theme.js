@@ -76,6 +76,8 @@ export const HOME = {
   textMuted: "#82858A",
   textMuted2: "#9A9DA2",
   textOnDark: "#C9CBCE",
+  stepBodyDark: "#B9B9B7",   // Second Opinion step body on dark (AA on darkStage)
+  finePrintDark: "#8F8F8D",  // Second Opinion fine print on dark (AA on darkStage)
   footerMuted: "#6E7176",
   borderLight: "#E0DDD6",  // = P.creamDark
   borderCard: "#E4E5E7",
