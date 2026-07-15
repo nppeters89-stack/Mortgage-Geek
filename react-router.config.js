@@ -38,6 +38,7 @@ const PRERENDER_PATHS = [
   "/geek-charts/mortgage-payment-burden",
   "/geek-charts/home-prices-income-inflation",
   "/geek-charts/rent-vs-home-prices",
+  "/geek-charts/homes-priced-in-sp500",
 ];
 
 export default {
