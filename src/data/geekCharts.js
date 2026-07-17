@@ -274,10 +274,23 @@ export const HOMES_IN_SP500 = {
   ratio: sp500Ratio,
   home: spHome,
   sp,
-  // Group 2: projection series (year 0 to 30, 31 entries).
+  // Group 2: projection series (year 0 to 30, 31 entries). As of Phase 6B, Part 2
+  // is an interactive tool whose equity/profit/balance/side-fund series are
+  // simulated client-side (see components/buyVsInvestSim.js). homeVal and spPath
+  // stay canonical inputs. equity and loanBal are now VERIFICATION FIXTURES: the
+  // tool's base case (6.43%, no extra, no reinvest) must reproduce them (equity
+  // within the same +/-1 rounding it shipped with). Do not edit to "fix" the tool.
   projYears,
   equity: projEquity,
   spPath: projSpPath,
   homeVal: projHomeVal,
   loanBal: projLoanBal,
 };
+
+// Base-case (6.43%, no extra payment, no reinvest) net profit by year, the
+// previously implied "profit" fixture for Part 2. The Phase 6B simulation must
+// reproduce this exactly; it also backs the static sr-only table. Net profit =
+// equity + side fund - down payment - loan payments - taxes/insurance - MI.
+export const SP500_PART2_NET_PROFIT_BASE = [0, -10651, -19488, -26408, -31304, -34060, -34557,
+  -32666, -28252, -21174, -11280, 1590, 19067, 40160, 64762, 93073, 125303, 161674, 202422,
+  247795, 298055, 353480, 414365, 481019, 553770, 632967, 718976, 812185, 913005, 1021869, 1139237];
