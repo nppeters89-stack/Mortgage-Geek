@@ -80,21 +80,27 @@ export function RentVsOwnPage() {
               tile reading as a distinct shape rather than vanishing into the
               background. Arrow Red stays true per the guidelines: at 40px/800
               it clears WCAG AA for large text on this surface. */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 14 }}>
+          {/* Scale matches the Geek Charts hub lockup, which renders at
+              height 104 in a 720x320 viewBox (a 0.325 factor): a 41.6px tile at
+              9.1px radius, a 23.4px Archivo wordmark, a 7.2px DM Sans descriptor
+              tracked at 0.227em, and 13px between tile and text. Those figures
+              are measured off the live lockup, not estimated, so the two tools
+              read at the same weight. */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 13, marginBottom: 20 }}>
             <span
               aria-hidden="true"
-              style={{ width: 62, height: 62, borderRadius: 14, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+              style={{ width: 42, height: 42, borderRadius: 9, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
             >
-              <RentVsOwnIcon size={38} variant="cream" />
+              <RentVsOwnIcon size={26} variant="cream" />
             </span>
             <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 40, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM, margin: 0 }}>
+              <h1 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM, margin: 0 }}>
                 Rent vs <span style={{ color: P.gold }}>Own</span>
               </h1>
               {/* Descriptor per the package: DM Sans, uppercase, widely tracked.
                   Sits outside the h1 so the heading reads "Rent vs Own" to search
                   engines and screen readers, with this as its visual subtitle. */}
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.24em", textTransform: "uppercase", color: MUTED, margin: "7px 0 0" }}>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 7.2, letterSpacing: "0.227em", textTransform: "uppercase", color: P.warmGrayLight, margin: "4px 0 0" }}>
                 Cost Comparison
               </p>
             </div>
