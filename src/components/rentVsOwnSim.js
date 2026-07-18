@@ -1,22 +1,22 @@
-// Monthly symmetric rent-vs-buy simulation for the Rent vs. Buy tool. Pure and
+// Monthly symmetric rent-vs-own simulation for the Rent vs. Own tool. Pure and
 // SSR-safe: no window, no fetch, no Date, so the prerender renders the base case
 // with no network. Colocated with the component that owns it rather than added
 // to utils/math.js, matching buyVsInvestSim.js.
 //
-// The model charges both sides for everything and scores the buyer as if selling
+// The model charges both sides for everything and scores the owner as if selling
 // that year, with selling costs off the top, the strictest honest test:
-//   - The renter's portfolio starts with the buyer's down payment plus closing
+//   - The renter's portfolio starts with the owner's down payment plus closing
 //     costs invested on day one.
 //   - Each month the full cost of owning (P&I, taxes, insurance, MI) is compared
 //     against that month's rent, and whichever side pays less invests the
 //     difference at the selected return.
-//   - Buyer wealth in any year = home value net of selling costs, minus the loan
-//     balance, plus the buyer's side fund. Renter wealth = the portfolio.
+//   - Owner wealth in any year = home value net of selling costs, minus the loan
+//     balance, plus the owner's side fund. Renter wealth = the portfolio.
 //
 // Provenance: at a 6% selling cost the model reproduces the verified reference
 // fixtures exactly (advantage +$118,714 at year 10, breakeven year 4, owning
-// $2,868/mo, buyer $314,658, renter $195,944). The shipped selling-cost default
-// is 7%, so the base case below reads +$111,946 at year 10 and buyer $307,890,
+// $2,868/mo, owner $314,658, renter $195,944). The shipped selling-cost default
+// is 7%, so the base case below reads +$111,946 at year 10 and owner $307,890,
 // with breakeven still year 4 and the monthly cost of owning unchanged. Any
 // change here should be checked against both.
 import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
@@ -88,7 +88,7 @@ export function rentInYear(rent0, rentG, year) {
   return rent0 * Math.pow(1 + rentG / 100, Math.max(0, year - 1));
 }
 
-export function simulateRentVsBuy(input = {}) {
+export function simulateRentVsOwn(input = {}) {
   const s = { ...DEFAULTS, ...input };
 
   const price = s.price;
@@ -119,7 +119,7 @@ export function simulateRentVsBuy(input = {}) {
   for (let y = 0; y <= YEARS; y++) homeVal.push(price * Math.pow(HOME_GROWTH, y));
 
   let balance = loan;
-  let buyerFund = 0;
+  let ownerFund = 0;
   let renterFund = down + closing;
   let miDropMonth = 0;
   let flipMonth = 0; // first month owning costs less than rent
@@ -127,11 +127,11 @@ export function simulateRentVsBuy(input = {}) {
   const years = [
     {
       year: 0,
-      buyerWealth: homeVal[0] * (1 - sell) - loan,
+      ownerWealth: homeVal[0] * (1 - sell) - loan,
       renterWealth: renterFund,
       homeVal: homeVal[0],
       balance: loan,
-      buyerFund: 0,
+      ownerFund: 0,
     },
   ];
 
@@ -166,24 +166,24 @@ export function simulateRentVsBuy(input = {}) {
 
     // Whichever side pays less this month invests the difference.
     renterFund = renterFund * (1 + invM) + Math.max(0, diff);
-    buyerFund = buyerFund * (1 + invM) + Math.max(0, -diff);
+    ownerFund = ownerFund * (1 + invM) + Math.max(0, -diff);
 
     if (m % 12 === 0) {
       const y = m / 12;
       years.push({
         year: y,
-        buyerWealth: homeVal[y] * (1 - sell) - balance + buyerFund,
+        ownerWealth: homeVal[y] * (1 - sell) - balance + ownerFund,
         renterWealth: renterFund,
         homeVal: homeVal[y],
         balance,
-        buyerFund,
+        ownerFund,
       });
     }
   }
 
-  for (const row of years) row.advantage = row.buyerWealth - row.renterWealth;
+  for (const row of years) row.advantage = row.ownerWealth - row.renterWealth;
 
-  // First year the buyer reaches the renter. The lines can cross more than once,
+  // First year the owner reaches the renter. The lines can cross more than once,
   // so the verdict at the selected horizon is read separately.
   let breakevenYear = null;
   for (let y = 0; y <= YEARS; y++) {
@@ -211,4 +211,4 @@ export function simulateRentVsBuy(input = {}) {
 
 // Computed once at module load. Deterministic and SSR-safe, so it backs the
 // static sr-only table without reacting to inputs.
-export const BASE_CASE = simulateRentVsBuy();
+export const BASE_CASE = simulateRentVsOwn();

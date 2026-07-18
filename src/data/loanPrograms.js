@@ -3,7 +3,7 @@
 //
 // These rates are ported verbatim from the calculator (CalculatorPage.jsx,
 // which currently derives them inline). Kept pure and data-only so the
-// rent-vs-buy simulation can project them over 360 months. If the calculator is
+// rent-vs-own simulation can project them over 360 months. If the calculator is
 // ever refactored to import from here, the two tools stay in sync by
 // construction; until then, a rate change must be made in both places.
 

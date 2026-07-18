@@ -2,11 +2,11 @@ import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { ContactCard } from "../components/homepage/ContactCard";
 import { RentVsOwnIcon } from "../components/icons";
-import { RentVsBuyChart } from "../components/RentVsBuyChart";
+import { RentVsOwnChart } from "../components/RentVsOwnChart";
 import { withAlpha } from "../utils/format";
 
 // Dark-mode top-level tool page. Metadata + WebApplication schema live in the
-// route adapter's meta export (routes/rent-vs-buy.jsx), not here. The global
+// route adapter's meta export (routes/rent-vs-own.jsx), not here. The global
 // SiteFooter (layout route) renders the NMLS / Equal Housing compliance line;
 // the honest-reading note below is this page's education disclosure and is the
 // compliance load-bearing wall, kept verbatim. Every number in the prose that
@@ -52,7 +52,7 @@ function StatCard({ label, value, sub, color }) {
   );
 }
 
-export function RentVsBuyPage() {
+export function RentVsOwnPage() {
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
@@ -80,26 +80,34 @@ export function RentVsBuyPage() {
               tile reading as a distinct shape rather than vanishing into the
               background. Arrow Red stays true per the guidelines: at 40px/800
               it clears WCAG AA for large text on this surface. */}
-          <h1 style={{ display: "flex", alignItems: "center", gap: 16, margin: "0 0 14px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
             <span
               aria-hidden="true"
-              style={{ width: 52, height: 52, borderRadius: 11, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+              style={{ width: 62, height: 62, borderRadius: 14, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
             >
-              <RentVsOwnIcon size={32} variant="cream" />
+              <RentVsOwnIcon size={38} variant="cream" />
             </span>
-            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 40, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM }}>
-              Rent vs <span style={{ color: P.gold }}>Buy</span>
-            </span>
-          </h1>
+            <div style={{ minWidth: 0 }}>
+              <h1 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 40, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM, margin: 0 }}>
+                Rent vs <span style={{ color: P.gold }}>Own</span>
+              </h1>
+              {/* Descriptor per the package: DM Sans, uppercase, widely tracked.
+                  Sits outside the h1 so the heading reads "Rent vs Own" to search
+                  engines and screen readers, with this as its visual subtitle. */}
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.24em", textTransform: "uppercase", color: MUTED, margin: "7px 0 0" }}>
+                Cost Comparison
+              </p>
+            </div>
+          </div>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: 0 }}>
-            Most rent vs. buy calculators are sales tools in disguise. This one charges both sides for everything. The buyer pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the buyer put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
+            Most rent vs. own calculators are sales tools in disguise. This one charges both sides for everything. The owner pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the owner put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>
         </header>
       </div>
 
       {/* The tool renders full-bleed: on desktop it becomes the cockpit
           (sticky inputs rail + results canvas) and needs the wider frame. */}
-      <RentVsBuyChart />
+      <RentVsOwnChart />
 
       <article style={{ padding: "0 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 32 }}>
@@ -122,7 +130,7 @@ export function RentVsBuyPage() {
 
         <div style={{ background: withAlpha(CHART_COLORS.accent, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.accent, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
           <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, margin: 0 }}>
-            <strong style={{ color: CREAM }}>Read it honestly.</strong> This model leans against the buyer in some places and for the buyer in others, and both lists matter. Against the buyer: they are charged closing costs going in, full selling costs every single year as if liquidating, and every dollar of payment, taxes, insurance, and mortgage insurance. For the buyer: maintenance, repairs, and HOA dues are not charged, and they are real. For the renter: the model assumes every surplus dollar is invested immediately with perfect discipline, compounds untaxed, and rent rises smoothly at the average rather than in the lumps real leases deliver. Steady average growth every year, on homes, rent, and investments alike, is a simplification no real decade will match. Every figure is a national average and a historical one; past performance does not predict future results. Education, not investment advice.
+            <strong style={{ color: CREAM }}>Read it honestly.</strong> This model leans against the owner in some places and for the owner in others, and both lists matter. Against the owner: they are charged closing costs going in, full selling costs every single year as if liquidating, and every dollar of payment, taxes, insurance, and mortgage insurance. For the owner: maintenance, repairs, and HOA dues are not charged, and they are real. For the renter: the model assumes every surplus dollar is invested immediately with perfect discipline, compounds untaxed, and rent rises smoothly at the average rather than in the lumps real leases deliver. Steady average growth every year, on homes, rent, and investments alike, is a simplification no real decade will match. Every figure is a national average and a historical one; past performance does not predict future results. Education, not investment advice.
           </p>
         </div>
 
@@ -131,7 +139,7 @@ export function RentVsBuyPage() {
         </p>
 
         <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
-          Sources and model: rent growth default of 4.1% per year is the compound annual growth of the CPI Rent of Primary Residence index, 1970 to 2026 (FRED: CUUR0000SEHA), a series with zero annual declines in 56 years; its worst year was +0.24% in 2010. Home value compounds at 5.4% annually, the compound annual growth of the Average Sales Price of Houses Sold (FRED: ASPUS), 1970 to 2026. The 10% investment return default is the long-run S&P 500 total-return average; both the renter's portfolio and the buyer's side fund compound at the selected rate, applied monthly. The mortgage payment comes from the standard amortization formula at the selected rate over 30 years; the rate defaults to the site's live 30-year average when available (Mortgage News Daily via the calculator's source, rounded to 0.125 and bumped 0.125 as the conservative case), with 6.43% as the fallback. Carrying costs charged to the buyer: property taxes set from the selected state and county (defaulting to the Tennessee state average of 0.75% of price per year) and homeowner's insurance defaulting to 0.35%, enterable as either a percentage or a dollar amount and held flat for the full period. Mortgage insurance follows the selected loan program, using the same terms as the payment calculator: Conventional PMI by down payment tier (0.52%, 0.37%, or 0.27% of the original loan per year), charged until the balance amortizes to 78% of the original purchase price, the automatic termination standard; FHA at 1.75% upfront financed into the loan plus an annual 0.55% or 0.50%, which runs for the life of the loan under 10% down and 11 years at or above it; VA at a funding fee of 1.25% to 3.30% financed by usage type and down payment, with no monthly mortgage insurance and no fee when exempt; USDA at a 1.00% guarantee fee financed plus a 0.35% annual fee for the life of the loan. Borrower-requested earlier PMI removal exists in practice; the model uses the automatic rule as the conservative case. The renter's portfolio begins with the buyer's down payment plus closing costs (defaulting to 3% of price) invested on day one. Each month the model compares the full cost of owning against that month's rent, and whichever side pays less invests the difference at the selected return; rent steps up once per year at the selected growth rate. Buyer wealth in any year equals the home's value net of selling costs (defaulting to 7%), minus the loan balance, plus the buyer's side fund; renter wealth equals the portfolio. The breakeven year is the first year buyer wealth reaches renter wealth; the verdict is read at the selected horizon, and the two can differ when the lines cross more than once. Maintenance, repairs, HOA dues, tax effects, and rent deposits are excluded on both sides. Both growth rates are long-run historical averages applied smoothly and are not predictions.
+          Sources and model: rent growth default of 4.1% per year is the compound annual growth of the CPI Rent of Primary Residence index, 1970 to 2026 (FRED: CUUR0000SEHA), a series with zero annual declines in 56 years; its worst year was +0.24% in 2010. Home value compounds at 5.4% annually, the compound annual growth of the Average Sales Price of Houses Sold (FRED: ASPUS), 1970 to 2026. The 10% investment return default is the long-run S&P 500 total-return average; both the renter's portfolio and the owner's side fund compound at the selected rate, applied monthly. The mortgage payment comes from the standard amortization formula at the selected rate over 30 years; the rate defaults to the site's live 30-year average when available (Mortgage News Daily via the calculator's source, rounded to 0.125 and bumped 0.125 as the conservative case), with 6.43% as the fallback. Carrying costs charged to the owner: property taxes set from the selected state and county (defaulting to the Tennessee state average of 0.75% of price per year) and homeowner's insurance defaulting to 0.35%, enterable as either a percentage or a dollar amount and held flat for the full period. Mortgage insurance follows the selected loan program, using the same terms as the payment calculator: Conventional PMI by down payment tier (0.52%, 0.37%, or 0.27% of the original loan per year), charged until the balance amortizes to 78% of the original purchase price, the automatic termination standard; FHA at 1.75% upfront financed into the loan plus an annual 0.55% or 0.50%, which runs for the life of the loan under 10% down and 11 years at or above it; VA at a funding fee of 1.25% to 3.30% financed by usage type and down payment, with no monthly mortgage insurance and no fee when exempt; USDA at a 1.00% guarantee fee financed plus a 0.35% annual fee for the life of the loan. Borrower-requested earlier PMI removal exists in practice; the model uses the automatic rule as the conservative case. The renter's portfolio begins with the owner's down payment plus closing costs (defaulting to 3% of price) invested on day one. Each month the model compares the full cost of owning against that month's rent, and whichever side pays less invests the difference at the selected return; rent steps up once per year at the selected growth rate. Owner wealth in any year equals the home's value net of selling costs (defaulting to 7%), minus the loan balance, plus the owner's side fund; renter wealth equals the portfolio. The breakeven year is the first year owner wealth reaches renter wealth; the verdict is read at the selected horizon, and the two can differ when the lines cross more than once. Maintenance, repairs, HOA dues, tax effects, and rent deposits are excluded on both sides. Both growth rates are long-run historical averages applied smoothly and are not predictions.
         </p>
       </article>
 
