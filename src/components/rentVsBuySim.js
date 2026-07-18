@@ -13,9 +13,12 @@
 //   - Buyer wealth in any year = home value net of selling costs, minus the loan
 //     balance, plus the buyer's side fund. Renter wealth = the portfolio.
 //
-// The default scenario reproduces the verified reference fixtures exactly:
-// advantage +$118,714 at year 10, breakeven year 4, owning $2,868/mo, buyer
-// $314,658, renter $195,944. See BASE_CASE below.
+// Provenance: at a 6% selling cost the model reproduces the verified reference
+// fixtures exactly (advantage +$118,714 at year 10, breakeven year 4, owning
+// $2,868/mo, buyer $314,658, renter $195,944). The shipped selling-cost default
+// is 7%, so the base case below reads +$111,946 at year 10 and buyer $307,890,
+// with breakeven still year 4 and the monthly cost of owning unchanged. Any
+// change here should be checked against both.
 import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
 
 // Home value compound annual growth: 5.4%, the 1970-2026 CAGR of the Census/HUD
@@ -38,7 +41,7 @@ export const DEFAULTS = {
   taxPct: 0.75,
   insPct: 0.35,
   ccPct: 3,
-  sellPct: 6,
+  sellPct: 7,
 };
 
 // Input bounds. Shared by the sim clamp and the control min/max so a slider and
@@ -50,7 +53,7 @@ export const LIMITS = {
   rate: [3, 10],
   rentG: [0, 8],
   inv: [4, 12],
-  hz: [5, 30],
+  hz: [1, 30],
   taxPct: [0, 4],
   insPct: [0, 2],
   ccPct: [0, 8],

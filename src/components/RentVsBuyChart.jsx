@@ -156,6 +156,42 @@ function NumField({ id, label, field, value, step, onCommit }) {
   );
 }
 
+// Dollar twin of a percentage field. Holds its own text while focused so typing
+// "1" on the way to "1400" doesn't drive the percentage to a rounding artifact,
+// and re-syncs from the incoming value whenever the user is not editing it
+// (which is what keeps it in step when the percentage or home price changes).
+function LinkedDollarField({ id, label, value, max, onCommit }) {
+  const [text, setText] = useState(String(value));
+  const focused = useRef(false);
+  useEffect(() => { if (!focused.current) setText(String(value)); }, [value]);
+  const commit = (raw) => {
+    const n = parseFloat(raw);
+    if (!Number.isFinite(n)) return null;
+    return Math.min(max, Math.max(0, n));
+  };
+  return (
+    <div className="rvb-field">
+      <label className="rvb-flabel" htmlFor={id}>{label}</label>
+      <input
+        id={id} type="number" min={0} max={max} step={25} value={text}
+        onFocus={() => { focused.current = true; }}
+        onChange={(e) => {
+          setText(e.target.value);
+          const n = parseFloat(e.target.value);
+          if (Number.isFinite(n) && n >= 0 && n <= max) onCommit(n);
+        }}
+        onBlur={(e) => {
+          focused.current = false;
+          const next = commit(e.target.value);
+          if (next === null) { setText(String(value)); return; }
+          onCommit(next);
+          setText(String(next));
+        }}
+      />
+    </div>
+  );
+}
+
 function Slider({ id, label, field, value, step, display, hint, onCommit }) {
   const [min, max] = LIMITS[field];
   return (
@@ -406,7 +442,7 @@ export function RentVsBuyChart() {
         />
         <Slider
           id="rvb-hz" label="How long you'll stay" field="hz" value={inputs.hz} step={1}
-          display={`${inputs.hz} yrs`}
+          display={inputs.hz === 1 ? "1 yr" : `${inputs.hz} yrs`}
           hint="The verdict is read at this year. This is the question that decides most rent vs. buy math."
           onCommit={(v) => set("hz", v)}
         />
@@ -414,13 +450,31 @@ export function RentVsBuyChart() {
         <details className="rvb-adv">
           <summary>Advanced assumptions</summary>
           <div className="rvb-adv-inner">
-            <div className="rvb-row">
-              <NumField id="rvb-tax" label="Property tax %/yr" field="taxPct" value={inputs.taxPct} step={0.05} onCommit={(v) => set("taxPct", v)} />
-              <NumField id="rvb-ins" label="Insurance %/yr" field="insPct" value={inputs.insPct} step={0.05} onCommit={(v) => set("insPct", v)} />
+            {/* Homeowner's insurance, entered either way. The percentage is the
+                stored value; the dollar figure is the same number expressed
+                against the current home price, and editing either updates the
+                other. */}
+            <span className="rvb-flabel">Homeowner's insurance</span>
+            <div className="rvb-row" style={{ marginTop: 6 }}>
+              <NumField
+                id="rvb-ins" label="Percent of price / yr" field="insPct" value={inputs.insPct} step={0.05}
+                onCommit={(v) => set("insPct", v)}
+              />
+              <LinkedDollarField
+                id="rvb-ins-dollar" label="Dollars / yr"
+                value={Math.round((inputs.price * inputs.insPct) / 100)}
+                max={Math.round((inputs.price * LIMITS.insPct[1]) / 100)}
+                onCommit={(dollars) => set("insPct", Math.round(((dollars / inputs.price) * 100) * 1000) / 1000)}
+              />
+            </div>
+            <p className="rvb-adv-note">Insurance defaults to 0.35% of the price a year. Enter it either way: the two fields are the same number and stay in step.</p>
+
+            <div className="rvb-row" style={{ marginTop: 14 }}>
               <NumField id="rvb-cc" label="Closing costs %" field="ccPct" value={inputs.ccPct} step={0.25} onCommit={(v) => set("ccPct", v)} />
               <NumField id="rvb-sell" label="Selling costs %" field="sellPct" value={inputs.sellPct} step={0.25} onCommit={(v) => set("sellPct", v)} />
             </div>
-            <p className="rvb-adv-note">Mortgage insurance is automatic: 0.37% of the original loan per year when the down payment is under 20%, charged until the balance amortizes to 78% of the original price, the automatic termination standard. Property tax defaults to the Tennessee state average (0.75%). Insurance defaults to 0.35%. Both are held flat, a simplification the footnotes disclose.</p>
+            <p className="rvb-adv-note">Closing costs are what you pay going in, when you buy the home ({fmt(Math.round((inputs.price * inputs.ccPct) / 100))} here), and the renter invests that same cash on day one instead. Selling costs are what comes off the top coming out, when you sell, and the buyer is charged them in every year of the chart.</p>
+            <p className="rvb-adv-note">Property tax is set by the state and county above, not here. Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Taxes and insurance are held flat, a simplification the footnotes disclose.</p>
           </div>
         </details>
       </div>

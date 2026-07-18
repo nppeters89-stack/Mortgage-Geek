@@ -111,7 +111,9 @@ export function programTerms({ program, price, downPct, vaUsage = "first" }) {
         miRate: rate,
         miLabel: rate > 0 ? `PMI (${rate}%)` : null,
         miMode: rate > 0 ? "ltv78" : "none",
-        miNote: downPct >= 20 ? "No PMI required" : "PMI est. based on 740+ FICO, under 43% DTI",
+        // Phrased without repeating the acronym, since callers pair this with
+        // miLabel ("PMI (0.37%)").
+        miNote: downPct >= 20 ? "No mortgage insurance required" : "Estimated at 740+ FICO, under 43% DTI",
         minDown: 3,
         eligible: downPct >= 3,
         ineligibleReason: downPct < 3 ? "Conventional loans require a minimum down payment of 3%." : null,
