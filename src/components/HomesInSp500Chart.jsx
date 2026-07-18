@@ -4,7 +4,7 @@ import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { HOMES_IN_SP500, SP_RATIO_AVG } from "../data/geekCharts";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
-import { useStaticCharts } from "../utils/hooks";
+import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 
 // Homes Priced in the S&P 500, part 1: how many units of the index it takes to
@@ -19,8 +19,8 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 //
 // The line draws itself on click as a narration aid for screen recordings:
 // one advance draws the blue line, then the three markers cascade in and the
-// today marker settles into a slow pulse. Phones and prefers-reduced-motion
-// render the finished chart directly (useStaticCharts) with no controls.
+// today marker settles into a slow pulse. Touch devices get it too; only
+// prefers-reduced-motion renders the finished chart directly with no controls.
 
 // Index level formatted with two decimals and thousands separators (7,570.03).
 const spFmt = (v) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -33,6 +33,7 @@ const SETTLE_DELAY = 2300;
 export function HomesInSp500Chart() {
   const { years, ratio, home, sp } = HOMES_IN_SP500;
   const staticCharts = useStaticCharts();
+  const hasHover = useHasHover();
 
   // idle → drawing → points → done. `reveal` counts markers shown (0..3).
   const [phase, setPhase] = useState("idle");
@@ -215,7 +216,7 @@ export function HomesInSp500Chart() {
           onDuration={setDuration}
           drawing={phase === "drawing"}
           onKeyDown={onKeyDown}
-          hint="Click the chart or press the button to draw. R replays."
+          hint={hasHover ? "Click the chart or press the button to draw. R replays." : "Tap the chart or the button to draw."}
         />
       )}
 

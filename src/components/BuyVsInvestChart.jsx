@@ -4,7 +4,7 @@ import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { simulateBuyVsInvest, interestSavedAt, roundDefaultRate, BASE_CASE } from "./buyVsInvestSim";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
-import { useStaticCharts } from "../utils/hooks";
+import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 import { BuyVsInvestBreakdown, breakdownCss } from "./BuyVsInvestBreakdown";
 
@@ -22,7 +22,8 @@ import { BuyVsInvestBreakdown, breakdownCss } from "./BuyVsInvestBreakdown";
 // the strategy to bi-weekly with reinvest ON and redraws net profit in green,
 // which is the whole point of the chart: same $25K, different outcome. The
 // manual controls stay locked until the sequence finishes so the author cannot
-// desync the narration. Phones and prefers-reduced-motion skip all of it.
+// desync the narration. Touch devices get the sequence too; only
+// prefers-reduced-motion skips it.
 
 const CREAM = CHART_COLORS.line;
 const MUT = withAlpha(CHART_COLORS.line, 0.55);
@@ -129,6 +130,7 @@ export function BuyVsInvestChart() {
   const userTouchedRate = useRef(false);
 
   const staticCharts = useStaticCharts();
+  const hasHover = useHasHover();
   // Lines finished so far (0-4). `drawingStep` is the one currently drawing,
   // null when idle. Step 4 redraws the profit line green after flipping the
   // strategy, so it targets the same path element as step 3.
@@ -462,7 +464,9 @@ export function BuyVsInvestChart() {
           onDuration={setDuration}
           drawing={drawingStep != null}
           onKeyDown={onKeyDown}
-          hint="Four clicks: the S&P path, home equity, net profit, then the faster payoff. R resets."
+          hint={hasHover
+            ? "Four clicks: the S&P path, home equity, net profit, then the faster payoff. R resets."
+            : "Four taps: the S&P path, home equity, net profit, then the faster payoff."}
         />
       )}
 
@@ -514,7 +518,7 @@ export function BuyVsInvestChart() {
         sim={sim}
         activeReinvest={activeReinvest}
         profitColor={profitColor}
-        hint={finished ? "hover the chart to change the year" : null}
+        hint={finished ? (hasHover ? "hover the chart to change the year" : "drag across the chart to change the year") : null}
       />
 
       {/* Crawler / no-JS / screen-reader fallback: the static base-case scenario (6.43%). */}
