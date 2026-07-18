@@ -12,6 +12,7 @@ const PRERENDER_PATHS = [
   "/prequal",
   "/compare",
   "/cash-to-close",
+  "/rent-vs-buy",
   "/pre-approval-checklist",
   "/jargon-decoder",
   "/install",
