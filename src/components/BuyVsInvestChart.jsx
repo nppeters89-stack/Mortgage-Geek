@@ -1,17 +1,28 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot, ReferenceLine, Customized } from "recharts";
 import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { simulateBuyVsInvest, interestSavedAt, roundDefaultRate, BASE_CASE } from "./buyVsInvestSim";
+import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
+import { useStaticCharts } from "../utils/hooks";
+import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
+import { BuyVsInvestBreakdown, breakdownCss } from "./BuyVsInvestBreakdown";
 
 // Homes Priced in the S&P 500, part 2: now an interactive projection tool. The
 // buyer's equity, net profit, loan balance, and reinvest side fund are computed
 // by a 360-month simulation (buyVsInvestSim.js) that reacts to an adjustable
 // rate, an early-payoff strategy, and a reinvest toggle. This is the scoped
 // runtime-math exception; homeVal and spPath stay canonical. Colors from tokens;
-// no hardcoded hex; no animation on the data lines. Labels sit in the right
+// no hardcoded hex. Labels sit in the right
 // gutter and the top margin per the text-overlay rule (no boxes). The sr-only
 // table stays the static base-case scenario for crawlers.
+//
+// The four lines draw themselves on click as a narration aid. Steps 1-3 draw
+// the S&P path, home equity, and the monthly-baseline net profit. Step 4 flips
+// the strategy to bi-weekly with reinvest ON and redraws net profit in green,
+// which is the whole point of the chart: same $25K, different outcome. The
+// manual controls stay locked until the sequence finishes so the author cannot
+// desync the narration. Phones and prefers-reduced-motion skip all of it.
 
 const CREAM = CHART_COLORS.line;
 const MUT = withAlpha(CHART_COLORS.line, 0.55);
@@ -45,6 +56,8 @@ const STRATEGIES = [
 ];
 
 const css = `
+  ${drawControlsCss}
+  ${breakdownCss}
   .bvi { width: 100%; --green: ${GREEN}; }
   .bvi-controls { display: grid; gap: 14px; margin-bottom: 18px; }
   .bvi-rate { background: ${INSET}; border: 1px solid ${BORDER}; border-radius: 12px; padding: 14px 16px; }
@@ -88,14 +101,22 @@ const css = `
   .bvi-plot { width: 100%; height: 420px; min-height: 300px; }
   @media (max-width: 640px) { .bvi-plot { height: 340px; } }
 
-  .bvi-breakdown { margin-top: 18px; border: 1px solid ${BORDER}; border-radius: 12px; padding: 14px 16px; background: ${INSET}; }
-  .bvi-bd-title { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: ${MUT}; margin-bottom: 12px; }
-  .bvi-bd-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
-  .bvi-bd-op { display: flex; align-items: center; font-family: ${F.display}; font-size: 18px; color: ${DIM}; padding: 0 1px; }
-  .bvi-bd-cell { min-width: 96px; background: ${P.navyDark}; border: 1px solid ${BORDER}; border-radius: 8px; padding: 8px 10px; }
-  .bvi-bd-l { font-size: 9.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: ${MUT}; margin-bottom: 4px; white-space: nowrap; }
-  .bvi-bd-v { font-family: ${F.display}; font-size: 15px; color: ${CREAM}; }
-  .bvi-bd-foot { font-size: 11px; line-height: 1.5; color: ${withAlpha(CHART_COLORS.line, 0.55)}; margin: 12px 0 0; }
+
+  .bvi-plot.is-live { cursor: pointer; }
+  .bvi-tab:disabled, .bvi-amt input:disabled, .bvi-rate input:disabled { cursor: not-allowed; opacity: 0.45; }
+
+  /* Endpoint dot + gutter value fade in as each line lands. */
+  .bvi-ep { opacity: 0; transition: opacity .4s ease; }
+  .bvi-plot[data-steps="1"] .bvi-ep-sp,
+  .bvi-plot[data-steps="2"] .bvi-ep-sp,
+  .bvi-plot[data-steps="3"] .bvi-ep-sp,
+  .bvi-plot[data-steps="4"] .bvi-ep-sp,
+  .bvi-plot[data-steps="2"] .bvi-ep-eq,
+  .bvi-plot[data-steps="3"] .bvi-ep-eq,
+  .bvi-plot[data-steps="4"] .bvi-ep-eq,
+  .bvi-plot[data-steps="3"] .bvi-ep-pf,
+  .bvi-plot[data-steps="4"] .bvi-ep-pf { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .bvi-ep { transition: none; } }
 
   .bvi-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 `;
@@ -105,8 +126,23 @@ export function BuyVsInvestChart() {
   const [strategy, setStrategy] = useState("monthly");
   const [amount, setAmount] = useState(0);
   const [reinvest, setReinvest] = useState(false);
-  const [hoveredYear, setHoveredYear] = useState(30);
   const userTouchedRate = useRef(false);
+
+  const staticCharts = useStaticCharts();
+  // Lines finished so far (0-4). `drawingStep` is the one currently drawing,
+  // null when idle. Step 4 redraws the profit line green after flipping the
+  // strategy, so it targets the same path element as step 3.
+  const [animSteps, setAnimSteps] = useState(0);
+  const [drawingStep, setDrawingStep] = useState(null);
+  const [duration, setDuration] = useState(4000);
+
+  const plotRef = useRef(null);
+  const stripRef = useRef(null);
+  const cancelDraw = useRef(null);
+
+  const shownSteps = staticCharts ? 4 : animSteps;
+  const finished = shownSteps >= 4;
+  const locked = !staticCharts && !finished;
 
   // Live conventional rate from the same source as the calculator (client-only;
   // never runs during prerender). Falls back silently to the 6.43 default.
@@ -159,9 +195,9 @@ export function BuyVsInvestChart() {
   }, [sim]);
 
   const endpoints = [
-    { v: data[30].equity, color: REDLINE },
-    { v: data[30].profit, color: profitColor },
-    { v: data[30].spPath, color: BLUE },
+    { v: data[30].equity, color: REDLINE, cls: "bvi-ep-eq" },
+    { v: data[30].profit, color: profitColor, cls: "bvi-ep-pf" },
+    { v: data[30].spPath, color: BLUE, cls: "bvi-ep-sp" },
   ];
 
   // Endpoint labels drawn in the right gutter, anchored start, de-collided so no
@@ -181,7 +217,7 @@ export function BuyVsInvestChart() {
     return (
       <g>
         {items.map((it, i) => (
-          <text key={i} x={gx} y={it.y + 4} textAnchor="start" fontFamily={F.body} fontSize={12} fontWeight={700} fill={it.color}>{it.label}</text>
+          <text key={i} className={`bvi-ep ${it.cls}`} x={gx} y={it.y + 4} textAnchor="start" fontFamily={F.body} fontSize={12} fontWeight={700} fill={it.color}>{it.label}</text>
         ))}
       </g>
     );
@@ -222,10 +258,111 @@ export function BuyVsInvestChart() {
 
   const payoffYear = sim.paidOffMonth != null && sim.paidOffMonth < 360 ? sim.paidOffMonth / 12 : null;
 
-  // Breakdown strip cells for the hovered year (defaults to 30, persists on leave).
-  const hy = Math.max(0, Math.min(30, hoveredYear));
-  const b = sim.years[hy];
-  const netColor = b.netProfit < 0 ? CHART_COLORS.accent : profitColor;
+  // Which path element each step draws. Steps 3 and 4 share the profit line.
+  const STEP_SELECTOR = { 1: ".bvi-line-sp", 2: ".bvi-line-eq", 3: ".bvi-line-pf", 4: ".bvi-line-pf" };
+  const STEP_COLOR = { 1: BLUE, 2: REDLINE, 3: GOLD, 4: GREEN };
+
+  const pathFor = (step) =>
+    plotRef.current?.querySelector(`${STEP_SELECTOR[step]} .recharts-line-curve`);
+
+  // Recharts wipes inline styles on every render, so undrawn lines have to be
+  // re-hidden after each one. The line currently drawing is skipped: the draw
+  // effect owns its styles and re-hiding it here would kill the transition.
+  useEffect(() => {
+    for (const step of [1, 2, 3]) {
+      if (drawingStep != null && (step === 3 ? drawingStep >= 3 : drawingStep === step)) continue;
+      const el = pathFor(step);
+      if (!el) continue;
+      if (shownSteps >= step) clearDrawState(el);
+      else hidePath(el);
+    }
+  });
+
+  // Same reason as chart 1: the draw must start after the render that set the
+  // step, or we would style a path node React is about to throw away.
+  useEffect(() => {
+    if (drawingStep == null) return;
+    const step = drawingStep;
+    const path = pathFor(step);
+    const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
+    if (!path) {
+      setAnimSteps(step);
+      setDrawingStep(null);
+      return;
+    }
+    if (tracer) {
+      tracer.setAttribute("fill", STEP_COLOR[step]);
+      tracer.setAttribute("opacity", "1");
+    }
+
+    cancelDraw.current = drawPath(path, {
+      duration,
+      onTick: (t, pt) => {
+        if (tracer) {
+          tracer.setAttribute("cx", pt.x);
+          tracer.setAttribute("cy", pt.y);
+        }
+        // Imperative on purpose. See BuyVsInvestBreakdown.
+        stripRef.current?.setYear(Math.round(t * 30));
+      },
+      onDone: () => {
+        if (tracer) tracer.setAttribute("opacity", "0");
+        stripRef.current?.setYear(30);
+        setAnimSteps(step);
+        setDrawingStep(null);
+      },
+    });
+    // Duration is captured once per draw; the speed control is disabled while
+    // a draw is in flight, so it is deliberately not a dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawingStep]);
+
+  useEffect(() => () => cancelDraw.current?.(), []);
+
+  const advance = useCallback(() => {
+    if (staticCharts || drawingStep != null || animSteps >= 4) return;
+    const next = animSteps + 1;
+    // Step 4 is the reveal: same starting $25K, but bi-weekly payments with the
+    // freed payment reinvested after payoff. Flip the controls first so the
+    // line that draws is already the green one.
+    if (next === 4) {
+      setStrategy("biweekly");
+      setAmount(0);
+      setReinvest(true);
+    }
+    setDrawingStep(next);
+  }, [staticCharts, drawingStep, animSteps]);
+
+  const replay = useCallback(() => {
+    if (staticCharts) return;
+    cancelDraw.current?.();
+    cancelDraw.current = null;
+    const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
+    if (tracer) tracer.setAttribute("opacity", "0");
+    setDrawingStep(null);
+    setAnimSteps(0);
+    setStrategy("monthly");
+    setAmount(0);
+    setReinvest(false);
+    stripRef.current?.setYear(0);
+  }, [staticCharts]);
+
+  // See chart 1: the plot is aria-hidden, so shortcuts live on the control bar.
+  // Space/Enter activate the focused Draw button natively; R resets.
+  const onKeyDown = (e) => {
+    if (e.key === "r" || e.key === "R") {
+      e.preventDefault();
+      replay();
+    }
+  };
+
+  const ADVANCE_LABELS = [
+    "Draw $25K in the S&P",
+    "Draw home equity",
+    "Draw net profit",
+    "Now pay it off faster",
+  ];
+  const advanceLabel = drawingStep != null ? "Drawing…" : finished ? "Drawn" : ADVANCE_LABELS[animSteps];
 
   const legend = [
     { label: "Home equity (gross)", color: REDLINE, h: 4 },
@@ -246,7 +383,7 @@ export function BuyVsInvestChart() {
           </div>
           <input
             type="range" min="3" max="10" step="0.125" value={rate}
-            aria-label="Interest rate"
+            aria-label="Interest rate" disabled={locked}
             onChange={(e) => { userTouchedRate.current = true; setRate(parseFloat(e.target.value)); }}
           />
           <div className="bvi-rate-scale"><span>3.00%</span><span>10.00%</span></div>
@@ -257,7 +394,7 @@ export function BuyVsInvestChart() {
             <span className="bvi-flabel">Early payoff strategy</span>
             <div className="bvi-tabs" role="group" aria-label="Early payoff strategy">
               {STRATEGIES.map((s) => (
-                <button key={s.key} type="button" className={`bvi-tab${strategy === s.key ? " is-active" : ""}`} onClick={() => setStrategy(s.key)}>{s.label}</button>
+                <button key={s.key} type="button" className={`bvi-tab${strategy === s.key ? " is-active" : ""}`} disabled={locked} onClick={() => setStrategy(s.key)}>{s.label}</button>
               ))}
             </div>
           </div>
@@ -272,7 +409,7 @@ export function BuyVsInvestChart() {
               <label className="bvi-flabel" htmlFor="bvi-extra">{strategy === "annual" ? "Extra per year" : "Extra per month"}</label>
               <div className="bvi-amt">
                 <span className="bvi-amt-prefix">$</span>
-                <input id="bvi-extra" type="number" min="0" max="100000" value={amount || ""} placeholder="0" onChange={(e) => setAmt(e.target.value)} />
+                <input id="bvi-extra" type="number" min="0" max="100000" value={amount || ""} placeholder="0" disabled={locked} onChange={(e) => setAmt(e.target.value)} />
               </div>
             </div>
           )}
@@ -281,11 +418,11 @@ export function BuyVsInvestChart() {
         <div>
           <button
             type="button"
-            className={`bvi-reinvest${activeReinvest ? " is-on" : ""}${!canReinvest ? " is-disabled" : ""}`}
-            disabled={!canReinvest}
-            title={!canReinvest ? "Add an extra payment first" : undefined}
+            className={`bvi-reinvest${activeReinvest ? " is-on" : ""}${!canReinvest || locked ? " is-disabled" : ""}`}
+            disabled={!canReinvest || locked}
+            title={locked ? "Finish the walkthrough first" : !canReinvest ? "Add an extra payment first" : undefined}
             aria-pressed={activeReinvest}
-            onClick={() => canReinvest && setReinvest((v) => !v)}
+            onClick={() => canReinvest && !locked && setReinvest((v) => !v)}
           >
             <span className="bvi-reinvest-label">Reinvest payment after payoff: {activeReinvest ? "ON" : "OFF"}</span>
             <span className="shimmer" aria-hidden="true" />
@@ -314,12 +451,33 @@ export function BuyVsInvestChart() {
       </div>
 
       {/* Chart */}
-      <div className="bvi-plot" aria-hidden="true">
+      {!staticCharts && (
+        <ChartDrawControls
+          advanceLabel={advanceLabel}
+          onAdvance={advance}
+          onReplay={replay}
+          canAdvance={!finished}
+          canReplay={animSteps > 0 || drawingStep != null}
+          duration={duration}
+          onDuration={setDuration}
+          drawing={drawingStep != null}
+          onKeyDown={onKeyDown}
+          hint="Four clicks: the S&P path, home equity, net profit, then the faster payoff. R resets."
+        />
+      )}
+
+      <div
+        className={`bvi-plot${staticCharts ? "" : " is-live"}`}
+        data-steps={shownSteps}
+        aria-hidden="true"
+        onClick={staticCharts ? undefined : advance}
+        ref={plotRef}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
             margin={{ top: 24, right: 84, left: 14, bottom: 4 }}
-            onMouseMove={(s) => { if (s && s.activeLabel != null) setHoveredYear(Number(s.activeLabel)); }}
+            onMouseMove={(s) => { if (finished && s && s.activeLabel != null) stripRef.current?.setYear(Number(s.activeLabel)); }}
           >
             <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
             <XAxis
@@ -331,39 +489,33 @@ export function BuyVsInvestChart() {
               domain={[yMin, yMax]} ticks={yTicks} tick={{ fill: MUT, fontSize: 11 }}
               tickLine={false} axisLine={false} tickFormatter={mFmt} width={52}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />
+            {finished && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
             {yMin < 0 && <ReferenceLine y={0} stroke={withAlpha(CHART_COLORS.line, 0.28)} />}
             {payoffYear != null && (
               <ReferenceLine x={payoffYear} stroke={GREEN} strokeDasharray="5 5" strokeOpacity={0.9}
                 label={{ value: "paid off", position: "top", fill: GREEN, fontSize: 11, fontFamily: F.body, fontWeight: 700 }} />
             )}
-            <Line type="monotone" dataKey="spPath" stroke={BLUE} strokeWidth={2.75} dot={false} isAnimationActive={false} />
-            <Line type="monotone" dataKey="profit" stroke={profitColor} strokeWidth={2.75} dot={false} isAnimationActive={false} />
-            <Line type="monotone" dataKey="equity" stroke={REDLINE} strokeWidth={3.25} dot={false} isAnimationActive={false} />
-            <ReferenceDot x={30} y={data[30].equity} r={4} fill={REDLINE} stroke={P.navyDark} strokeWidth={2} isFront />
-            <ReferenceDot x={30} y={data[30].profit} r={4} fill={profitColor} stroke={P.navyDark} strokeWidth={2} isFront />
-            <ReferenceDot x={30} y={data[30].spPath} r={4} fill={BLUE} stroke={P.navyDark} strokeWidth={2} isFront />
+            <Line className="bvi-line-sp" type="monotone" dataKey="spPath" stroke={BLUE} strokeWidth={2.75} dot={false} isAnimationActive={false} />
+            <Line className="bvi-line-pf" type="monotone" dataKey="profit" stroke={profitColor} strokeWidth={2.75} dot={false} isAnimationActive={false} />
+            <Line className="bvi-line-eq" type="monotone" dataKey="equity" stroke={REDLINE} strokeWidth={3.25} dot={false} isAnimationActive={false} />
+            <ReferenceDot className="bvi-ep bvi-ep-eq" x={30} y={data[30].equity} r={4} fill={REDLINE} stroke={P.navyDark} strokeWidth={2} isFront />
+            <ReferenceDot className="bvi-ep bvi-ep-pf" x={30} y={data[30].profit} r={4} fill={profitColor} stroke={P.navyDark} strokeWidth={2} isFront />
+            <ReferenceDot className="bvi-ep bvi-ep-sp" x={30} y={data[30].spPath} r={4} fill={BLUE} stroke={P.navyDark} strokeWidth={2} isFront />
             <Customized component={EndpointLabels} />
+            {!staticCharts && <Customized component={Tracer} />}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Calculation breakdown strip */}
-      <div className="bvi-breakdown" aria-live="polite">
-        <div className="bvi-bd-title">How the net profit is built · Year {hy} (hover the chart to change the year)</div>
-        <div className="bvi-bd-row">
-          <BdCell label="Home value" value={fmt(b.homeVal)} />
-          <Op>−</Op><BdCell label="Loan balance" value={fmt(b.balance)} />
-          <Op>=</Op><BdCell label="Equity" value={fmt(b.equity)} />
-          {activeReinvest && (<><Op>+</Op><BdCell label="Side fund" value={fmt(b.fund)} /></>)}
-          <Op>−</Op><BdCell label="Down payment" value={fmt(25000)} />
-          <Op>−</Op><BdCell label="Loan payments" value={fmt(b.loanPayments)} />
-          <Op>−</Op><BdCell label="Taxes + insurance" value={fmt(b.taxesIns)} />
-          <Op>−</Op><BdCell label="Mortgage insurance" value={fmt(b.mi)} />
-          <Op>=</Op><BdCell label="Net profit" value={fmt(b.netProfit)} valueColor={netColor} />
-        </div>
-        <p className="bvi-bd-foot">Loan payments include principal, interest, any extra payments, and, when reinvest is on, the contributions flowing into the side fund after payoff.</p>
-      </div>
+      {/* Calculation breakdown strip. Year is driven imperatively: by the
+          tracer during a draw, by hover once the sequence is done. */}
+      <BuyVsInvestBreakdown
+        ref={stripRef}
+        sim={sim}
+        activeReinvest={activeReinvest}
+        profitColor={profitColor}
+        hint={finished ? "hover the chart to change the year" : null}
+      />
 
       {/* Crawler / no-JS / screen-reader fallback: the static base-case scenario (6.43%). */}
       <div className="bvi-sr-only">
@@ -406,19 +558,6 @@ function Cell({ label, value, color }) {
     <div className="bvi-cell">
       <div className="bvi-cell-l">{label}</div>
       <div className="bvi-cell-v" style={{ color }}>{value}</div>
-    </div>
-  );
-}
-
-function Op({ children }) {
-  return <span className="bvi-bd-op" aria-hidden="true">{children}</span>;
-}
-
-function BdCell({ label, value, valueColor }) {
-  return (
-    <div className="bvi-bd-cell">
-      <div className="bvi-bd-l">{label}</div>
-      <div className="bvi-bd-v" style={valueColor ? { color: valueColor } : undefined}>{value}</div>
     </div>
   );
 }

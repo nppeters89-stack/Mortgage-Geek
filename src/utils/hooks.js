@@ -77,3 +77,33 @@ export function usePieDiameter() {
   }, []);
   return d;
 }
+
+// Geek Charts draw-animation gate — true when the click-to-draw sequence
+// should be skipped and the charts should render fully drawn on load.
+//
+// Two reasons to skip. Phones can't hover and an empty-until-tapped chart
+// reads as broken, so ≤700px opts out (the design handoff's breakpoint, which
+// is deliberately narrower than the site's 820px layout breakpoint: this is
+// about touch, not layout). And prefers-reduced-motion opts out because a
+// 4-second self-drawing line is exactly the kind of motion that setting is
+// asking us not to run.
+//
+// Starts true so the server render and the first client paint agree on the
+// fully-drawn markup, then re-evaluates on mount. Getting this backwards
+// would hydrate a prerendered page into an empty chart.
+export function useStaticCharts() {
+  const [staticCharts, setStaticCharts] = useState(true);
+  useEffect(() => {
+    const small = window.matchMedia('(max-width: 700px)');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setStaticCharts(small.matches || reduced.matches);
+    update();
+    small.addEventListener('change', update);
+    reduced.addEventListener('change', update);
+    return () => {
+      small.removeEventListener('change', update);
+      reduced.removeEventListener('change', update);
+    };
+  }, []);
+  return staticCharts;
+}
