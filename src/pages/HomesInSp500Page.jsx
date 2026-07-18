@@ -122,7 +122,7 @@ export function HomesInSp500Page() {
             four-cell grid), not a standard takeaway card. */}
         <div style={{ background: withAlpha(CHART_COLORS.sp500, 0.06), border: `1px solid ${withAlpha(CHART_COLORS.sp500, 0.32)}`, borderRadius: 16, padding: "26px 24px" }}>
           <h3 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.25, margin: "0 0 20px" }}>The part the chart cannot show: nobody buys a house unlevered.</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 14 }}>
             {LEVERAGE.map((c) => (
               <div key={c.label} style={{ background: P.navyDark, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "18px 20px" }}>
                 <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: MUTED, marginBottom: 8 }}>{c.label}</div>
