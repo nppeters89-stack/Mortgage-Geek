@@ -52,6 +52,9 @@ export const NAV_TOOLS = [
   { id: "prequal", label: "Pre-Qual Simulator", icon: "__PREQUAL_ICON__", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "__CASH_ICON__", href: "/cash-to-close" },
+  // Emoji placeholder. Swap for a __RENTVSBUY_ICON__ sentinel and a component in
+  // ./icons when the custom glyph is built, matching the other tools above.
+  { id: "rentvsbuy", label: "Rent vs. Buy", icon: "⚖️", href: "/rent-vs-buy" },
   { id: "deepdives", label: "Deep Dives", icon: "🐳", href: "/deep-dives", reference: true },
   { id: "geekcharts", label: "Geek Charts", icon: "__GEEKCHARTS_ICON__", href: "/geek-charts", reference: true },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅", href: "/pre-approval-checklist", reference: true },
