@@ -80,7 +80,7 @@ export function RentVsOwnPage() {
               tile reading as a distinct shape rather than vanishing into the
               background. Arrow Red stays true per the guidelines: at 40px/800
               it clears WCAG AA for large text on this surface. */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 14 }}>
             <span
               aria-hidden="true"
               style={{ width: 62, height: 62, borderRadius: 14, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
@@ -99,7 +99,7 @@ export function RentVsOwnPage() {
               </p>
             </div>
           </div>
-          <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: 0 }}>
+          <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
             Most rent vs. own calculators are sales tools in disguise. This one charges both sides for everything. The owner pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the owner put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>
         </header>
