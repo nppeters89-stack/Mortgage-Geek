@@ -72,13 +72,24 @@ export function RentVsBuyPage() {
 
       <div className="tool-page-content" style={{ padding: "48px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
-          <p style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.accent, margin: "0 0 16px" }}>
-            <span aria-hidden="true" style={{ width: 32, height: 2, background: CHART_COLORS.accent, flexShrink: 0 }} />
-            Geek Tools
-          </p>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-            <RentVsOwnIcon size={38} variant="cream" />
-            Rent vs. Buy, honestly
+          {/* Brand lockup from the Rent vs Own package: the mark in a squircle,
+              then the wordmark in Archivo Extra-Bold with the second word in
+              Arrow Red. The package tiles on charcoal with a near-black square,
+              but this page sits on P.navyDark, the darkest surface, so the
+              squircle uses the spec's primary Ravenswood (P.navy) to keep the
+              tile reading as a distinct shape rather than vanishing into the
+              background. Arrow Red stays true per the guidelines: at 40px/800
+              it clears WCAG AA for large text on this surface. */}
+          <h1 style={{ display: "flex", alignItems: "center", gap: 16, margin: "0 0 14px", flexWrap: "wrap" }}>
+            <span
+              aria-hidden="true"
+              style={{ width: 52, height: 52, borderRadius: 11, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+            >
+              <RentVsOwnIcon size={32} variant="cream" />
+            </span>
+            <span style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 40, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM }}>
+              Rent vs <span style={{ color: P.gold }}>Buy</span>
+            </span>
           </h1>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: 0 }}>
             Most rent vs. buy calculators are sales tools in disguise. This one charges both sides for everything. The buyer pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the buyer put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
