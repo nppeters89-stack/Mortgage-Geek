@@ -1,6 +1,7 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { ContactCard } from "../components/homepage/ContactCard";
+import { RentVsOwnIcon } from "../components/icons";
 import { RentVsBuyChart } from "../components/RentVsBuyChart";
 import { withAlpha } from "../utils/format";
 
@@ -75,7 +76,10 @@ export function RentVsBuyPage() {
             <span aria-hidden="true" style={{ width: 32, height: 2, background: CHART_COLORS.accent, flexShrink: 0 }} />
             Geek Tools
           </p>
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>Rent vs. Buy, honestly</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px", display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+            <RentVsOwnIcon size={38} variant="cream" />
+            Rent vs. Buy, honestly
+          </h1>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: 0 }}>
             Most rent vs. buy calculators are sales tools in disguise. This one charges both sides for everything. The buyer pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the buyer put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>

@@ -1,6 +1,6 @@
 import { P } from "../theme";
 
-// All four custom icons share a prop contract: { size = 24, variant = "navy", style = {} }
+// All custom icons share a prop contract: { size = 24, variant = "navy", style = {} }
 // "navy" variant is for light backgrounds (cream/white cards). "cream" variant is for dark
 // backgrounds (navy sidebar, mobile toolbar). Each icon keeps its accent constant across
 // variants — the navy/cream flip is the structural color, Arrow Red (P.gold) is the accent.
@@ -180,3 +180,54 @@ export function CashToCloseIcon({ size = 24, variant = "navy", dollarColor: doll
   );
 }
 
+
+// Rent vs Own — two-dwellings outline mark: an apartment block (rent, read by
+// its window units) beside a gabled house (own, read by its single door), on a
+// shared baseline. From the Rent vs Own handoff package.
+//
+// Geometry is the delivered 24x24 grid at 1.75 stroke, rounded caps and joins.
+// Per the guidelines the box scales, not the stroke, so strokeWidth stays 1.75
+// at every size. The door is drawn with butt caps behind the baseline so it
+// stops flush at the line, and the building walls stop just above it so no
+// round-cap bumps show below.
+//
+// Colors map to tokens: the handoff's Arrow Red #CF3338 is P.gold and its
+// Ravenswood ink #24272A is P.navy, both exact. The reverse outline (#F4F5F6 in
+// the package) uses P.cream, the system's off-white, matching the other icons'
+// cream variant. The accent stays P.gold on dark surfaces too: the guidelines
+// explicitly say not to substitute the lifted red (P.goldReverse) for it.
+export function RentVsOwnIcon({ size = 24, variant = "navy", style = {} }) {
+  const outlineColor = variant === "cream" ? P.cream : P.navy;
+  const accentColor = P.gold;
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}
+      aria-hidden="true"
+    >
+      {/* Door, behind the baseline */}
+      <g stroke={accentColor} strokeLinecap="butt">
+        <path d="M14.7 21v-4.2h4v4.2" />
+      </g>
+      {/* Apartment block, gabled house, shared baseline */}
+      <g stroke={outlineColor}>
+        <path d="M2 20.5V8.4h6.4V20.5" />
+        <path d="M11.4 20.5V11.6l5.3-4.6 5.3 4.6V20.5" />
+        <path d="M2 21h20" />
+      </g>
+      {/* Window units */}
+      <g fill={accentColor}>
+        <rect x="3.85" y="11.1" width="1.8" height="1.8" rx=".3" />
+        <rect x="3.85" y="14.7" width="1.8" height="1.8" rx=".3" />
+      </g>
+    </svg>
+  );
+}
