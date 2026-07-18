@@ -46,6 +46,7 @@ export const CHART_COLORS = {
   trend: "#F0A93B",                 // long-run trend / moving-average line (7.45:1 on P.navy)
   income: "#3B9EFF",                // income data series (5.39:1 on P.navy)
   sp500: "#3B9EFF",                 // equity-market data series on dark charcoal (same hex as income; distinct role)
+  reinvest: "#5FBF8F",              // reinvest-mode data series and accents on dark charcoal (5.09:1 on P.navy)
 };
 
 export const F = {
