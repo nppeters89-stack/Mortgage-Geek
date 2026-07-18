@@ -4,7 +4,7 @@ import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { simulateBuyVsInvest, interestSavedAt, roundDefaultRate, BASE_CASE } from "./buyVsInvestSim";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
-import { useStaticCharts, useHasHover } from "../utils/hooks";
+import { useStaticCharts, useHasHover, useIsMobile } from "../utils/hooks";
 import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 import { BuyVsInvestBreakdown, breakdownCss } from "./BuyVsInvestBreakdown";
 
@@ -36,9 +36,9 @@ const BLUE = CHART_COLORS.sp500;
 const REDLINE = CHART_COLORS.mortgage;
 
 // $X.XXM / $XXXK for gutter endpoint labels.
-const compact = (v) => {
+const compact = (v, short = false) => {
   const a = Math.abs(v);
-  const s = a >= 1e6 ? `$${(a / 1e6).toFixed(2)}M` : a >= 1e3 ? `$${Math.round(a / 1e3)}K` : `$${Math.round(a)}`;
+  const s = a >= 1e6 ? `$${(a / 1e6).toFixed(short ? 1 : 2)}M` : a >= 1e3 ? `$${Math.round(a / 1e3)}K` : `$${Math.round(a)}`;
   return v < 0 ? `-${s}` : s;
 };
 // Y-axis tick: whole millions as $1M, half-millions as $0.5M, zero as $0.
@@ -100,7 +100,9 @@ const css = `
   .bvi-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: ${withAlpha(CHART_COLORS.line, 0.75)}; }
   .bvi-swatch { display: inline-block; width: 18px; border-radius: 999px; flex-shrink: 0; }
   .bvi-plot { width: 100%; height: 420px; min-height: 300px; }
-  @media (max-width: 640px) { .bvi-plot { height: 340px; } }
+  /* Phones: pull the plot out into the panel's padding so the drawable area
+     gets every pixel available, and go a little taller now that it is wider. */
+  @media (max-width: 700px) { .bvi-plot { height: 370px; margin-left: -10px; margin-right: -10px; width: calc(100% + 20px); } }
 
 
   .bvi-plot.is-live { cursor: pointer; }
@@ -131,6 +133,14 @@ export function BuyVsInvestChart() {
 
   const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
+  // Phone layout. The desktop chart spends 84px of right gutter on endpoint
+  // value labels and 52px on the axis, which on a phone left only ~246px of
+  // actual plot. Narrow trims all of that back and shortens the labels to
+  // match, so the drawable area roughly matches the ratio chart above it.
+  const narrow = useIsMobile(700);
+  const mR = narrow ? 46 : 84;
+  const mL = narrow ? 0 : 14;
+  const yAxisW = narrow ? 38 : 52;
   // Lines finished so far (0-4). `drawingStep` is the one currently drawing,
   // null when idle. Step 4 redraws the profit line green after flipping the
   // strategy, so it targets the same path element as step 3.
@@ -209,9 +219,9 @@ export function BuyVsInvestChart() {
     if (!yAxisMap || !xAxisMap || !offset) return null;
     const yScale = yAxisMap[Object.keys(yAxisMap)[0]]?.scale;
     if (!yScale) return null;
-    const gx = offset.left + offset.width + 8;
+    const gx = offset.left + offset.width + (narrow ? 4 : 8);
     const items = endpoints
-      .map((it) => ({ ...it, y: yScale(it.v), label: compact(it.v) }))
+      .map((it) => ({ ...it, y: yScale(it.v), label: compact(it.v, narrow) }))
       .sort((a, b) => a.y - b.y);
     for (let i = 1; i < items.length; i++) {
       if (items[i].y - items[i - 1].y < 16) items[i].y = items[i - 1].y + 16;
@@ -219,7 +229,7 @@ export function BuyVsInvestChart() {
     return (
       <g>
         {items.map((it, i) => (
-          <text key={i} className={`bvi-ep ${it.cls}`} x={gx} y={it.y + 4} textAnchor="start" fontFamily={F.body} fontSize={12} fontWeight={700} fill={it.color}>{it.label}</text>
+          <text key={i} className={`bvi-ep ${it.cls}`} x={gx} y={it.y + 4} textAnchor="start" fontFamily={F.body} fontSize={narrow ? 11 : 12} fontWeight={700} fill={it.color}>{it.label}</text>
         ))}
       </g>
     );
@@ -480,7 +490,7 @@ export function BuyVsInvestChart() {
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            margin={{ top: 24, right: 84, left: 14, bottom: 4 }}
+            margin={{ top: 24, right: mR, left: mL, bottom: 4 }}
             onMouseMove={(s) => { if (finished && s && s.activeLabel != null) stripRef.current?.setYear(Number(s.activeLabel)); }}
           >
             <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
@@ -491,7 +501,7 @@ export function BuyVsInvestChart() {
             />
             <YAxis
               domain={[yMin, yMax]} ticks={yTicks} tick={{ fill: MUT, fontSize: 11 }}
-              tickLine={false} axisLine={false} tickFormatter={mFmt} width={52}
+              tickLine={false} axisLine={false} tickFormatter={mFmt} width={yAxisW}
             />
             {finished && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
             {yMin < 0 && <ReferenceLine y={0} stroke={withAlpha(CHART_COLORS.line, 0.28)} />}
