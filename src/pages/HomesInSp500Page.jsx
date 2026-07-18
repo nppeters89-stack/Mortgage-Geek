@@ -136,9 +136,13 @@ export function HomesInSp500Page() {
           </p>
         </div>
 
-        {/* Part 2 panel: the projection. */}
-        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "26px 24px", marginTop: 32 }}>
-          <h3 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.25, margin: "0 0 12px" }}>Part 2: the same $25,000, two different futures.</h3>
+        {/* Part 2 panel: the projection. Carries an Arrow Red top rule and a
+            red heading so the interactive half of the article reads as its own
+            act rather than another paragraph. The rule is the true Arrow Red
+            (P.gold); the heading uses the lighter tint (P.goldLight), which
+            clears AA on this panel where the full-strength red would not. */}
+        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderTop: `4px solid ${P.gold}`, borderRadius: 16, padding: "26px 24px", marginTop: 32 }}>
+          <h3 style={{ fontFamily: F.display, fontSize: 25, color: P.goldLight, fontWeight: 400, lineHeight: 1.25, margin: "0 0 12px" }}>Part 2: the same $25,000, two different futures.</h3>
           <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "0 0 24px", maxWidth: 720 }}>
             Take the down payment from the panel above and run both paths forward for 30 years using each asset's own historical average: the house at 5.4% appreciation, the index at a 10% total return. Same starting cash, and this version charges the buyer the full carrying cost: taxes, insurance, and mortgage insurance until it drops at 20% equity via the automatic 78% rule. Set the rate, pick an early payoff strategy, enter your own extra amount, and watch the interest shrink and the profit line move. Flip on reinvest to keep the freed payment flowing into the index after the loan is gone.
           </p>

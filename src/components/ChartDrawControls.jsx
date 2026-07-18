@@ -20,9 +20,20 @@ const SPEEDS = [3000, 4000, 5000];
 
 export const drawControlsCss = `
   .cdc { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; }
-  .cdc-btn { font-family: ${F.body}; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 999px; cursor: pointer; color: ${CREAM}; background: ${withAlpha(CHART_COLORS.sp500, 0.16)}; border: 1px solid ${withAlpha(CHART_COLORS.sp500, 0.6)}; transition: background .15s, opacity .15s; }
+  .cdc-btn { position: relative; overflow: hidden; font-family: ${F.body}; font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 999px; cursor: pointer; color: ${CREAM}; background: ${withAlpha(CHART_COLORS.sp500, 0.16)}; border: 1px solid ${withAlpha(CHART_COLORS.sp500, 0.6)}; transition: background .15s, opacity .15s; }
   .cdc-btn:hover:not(:disabled) { background: ${withAlpha(CHART_COLORS.sp500, 0.28)}; }
   .cdc-btn:disabled { cursor: default; opacity: 0.45; }
+
+  /* A slow highlight sweeps the advance button so the eye lands on the thing
+     to click. Same idiom as the reinvest button on the projection chart.
+     It runs only while the button is actually waiting on a click: once a draw
+     is in flight or the sequence is finished, a moving highlight would be
+     pointing at nothing. */
+  .cdc-btn-label { position: relative; z-index: 2; }
+  .cdc-shimmer { position: absolute; z-index: 1; top: 0; bottom: 0; left: -45%; width: 45%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent 0%, ${withAlpha(CHART_COLORS.sp500, 0.5)} 50%, transparent 100%); animation: cdcShimmer 2.6s linear infinite; pointer-events: none; }
+  .cdc-btn:disabled .cdc-shimmer, .cdc-btn.is-drawing .cdc-shimmer { display: none; animation: none; }
+  @keyframes cdcShimmer { 0% { left: -45%; } 100% { left: 130%; } }
+  @media (prefers-reduced-motion: reduce) { .cdc-shimmer { display: none; animation: none; } }
   .cdc-ghost { font-family: ${F.body}; font-size: 13px; font-weight: 500; padding: 9px 14px; border-radius: 999px; cursor: pointer; color: ${MUT}; background: transparent; border: 1px solid ${BORDER}; transition: color .15s, border-color .15s; }
   .cdc-ghost:hover:not(:disabled) { color: ${CREAM}; border-color: ${withAlpha(CHART_COLORS.line, 0.3)}; }
   .cdc-ghost:disabled { cursor: default; opacity: 0.4; }
@@ -54,8 +65,14 @@ export function ChartDrawControls({
   // Enter come free from the focused button; this only adds R to replay.
   return (
     <div className="cdc" onKeyDown={onKeyDown}>
-      <button type="button" className="cdc-btn" onClick={onAdvance} disabled={!canAdvance}>
-        {advanceLabel}
+      <button
+        type="button"
+        className={`cdc-btn${drawing ? " is-drawing" : ""}`}
+        onClick={onAdvance}
+        disabled={!canAdvance}
+      >
+        <span className="cdc-btn-label">{advanceLabel}</span>
+        <span className="cdc-shimmer" aria-hidden="true" />
       </button>
       <button type="button" className="cdc-ghost" onClick={onReplay} disabled={!canReplay}>
         Replay
