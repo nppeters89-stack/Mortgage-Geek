@@ -2,6 +2,7 @@ import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { ContactCard } from "../components/homepage/ContactCard";
 import { RentVsOwnIcon } from "../components/icons";
+import { ToolLockup } from "../components/ToolLockup";
 import { RentVsOwnChart } from "../components/RentVsOwnChart";
 import { withAlpha } from "../utils/format";
 
@@ -70,42 +71,23 @@ export function RentVsOwnPage() {
         </div>
       </div>
 
-      <div className="tool-page-content" style={{ padding: "48px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
+      {/* Hero: the block is centered on the page, its contents left-aligned.
+          The lockup identifies the tool, the h1 carries the editorial line, and
+          the paragraph explains, the same three-beat the Geek Charts hub uses. */}
+      <div className="tool-page-content" style={{ padding: "48px 24px 0", maxWidth: 720, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
-          {/* Brand lockup from the Rent vs Own package: the mark in a squircle,
-              then the wordmark in Archivo Extra-Bold with the second word in
-              Arrow Red. The package tiles on charcoal with a near-black square,
-              but this page sits on P.navyDark, the darkest surface, so the
-              squircle uses the spec's primary Ravenswood (P.navy) to keep the
-              tile reading as a distinct shape rather than vanishing into the
-              background. Arrow Red stays true per the guidelines: at 40px/800
-              it clears WCAG AA for large text on this surface. */}
-          {/* Scale matches the Geek Charts hub lockup, which renders at
-              height 104 in a 720x320 viewBox (a 0.325 factor): a 41.6px tile at
-              9.1px radius, a 23.4px Archivo wordmark, a 7.2px DM Sans descriptor
-              tracked at 0.227em, and 13px between tile and text. Those figures
-              are measured off the live lockup, not estimated, so the two tools
-              read at the same weight. */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 13, marginBottom: 20 }}>
-            <span
-              aria-hidden="true"
-              style={{ width: 42, height: 42, borderRadius: 9, background: P.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-            >
-              <RentVsOwnIcon size={26} variant="cream" />
-            </span>
-            <div style={{ minWidth: 0 }}>
-              <h1 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1, color: CREAM, margin: 0 }}>
-                Rent vs <span style={{ color: P.gold }}>Own</span>
-              </h1>
-              {/* Descriptor per the package: DM Sans, uppercase, widely tracked.
-                  Sits outside the h1 so the heading reads "Rent vs Own" to search
-                  engines and screen readers, with this as its visual subtitle. */}
-              <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 7.2, letterSpacing: "0.227em", textTransform: "uppercase", color: P.warmGrayLight, margin: "4px 0 0" }}>
-                Cost Comparison
-              </p>
-            </div>
-          </div>
-          <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+          <ToolLockup
+            Icon={RentVsOwnIcon}
+            title="Rent vs"
+            accent="Own"
+            descriptor="Cost Comparison"
+            variant="dark"
+            style={{ marginBottom: 20 }}
+          />
+          <h1 style={{ fontFamily: F.display, fontSize: 42, color: CREAM, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px" }}>
+            What renting actually costs you, <em style={{ fontStyle: "italic", color: CHART_COLORS.gold }}>honestly</em>.
+          </h1>
+          <p style={{ fontSize: 15, color: BODY, lineHeight: 1.65, margin: 0 }}>
             Most rent vs. own calculators are sales tools in disguise. This one charges both sides for everything. The owner pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the owner put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>
         </header>

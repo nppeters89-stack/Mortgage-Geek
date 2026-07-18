@@ -6,6 +6,7 @@ import { CASH_STATE_DEFAULT_TAX_RATES, CASH_STATE_METROS, ALL_STATES_LIST } from
 import { fmt, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { CashToCloseIcon } from "../components/icons";
+import { ToolLockup } from "../components/ToolLockup";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
@@ -569,13 +570,12 @@ export function CashToClosePage() {
       </div>
 
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 760, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>The Bottom Line</span>
-          <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, flexWrap: "wrap" }}>
-            Cash to Close Simulator
-            <CashToCloseIcon size={38} variant="navy" />
+        <div style={{ maxWidth: 720, margin: "0 auto 32px" }}>
+          <ToolLockup Icon={CashToCloseIcon} title="Cash to" accent="Close" descriptor="Upfront Costs" variant="light" style={{ marginBottom: 20 }} />
+          <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px" }}>
+            What you actually bring to the table, <em style={{ fontStyle: "italic", color: P.gold }}>itemized</em>.
           </h1>
-          <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 520, margin: "0 auto" }}>Estimate exactly how much money you'll need at the closing table — down payment, closing costs, prepaids, reserves, and credits.</p>
+          <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>Estimate exactly how much money you'll need at the closing table: down payment, closing costs, prepaids, reserves, and credits.</p>
         </div>
 
         {/* Inputs */}
