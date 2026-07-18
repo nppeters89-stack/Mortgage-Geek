@@ -1,5 +1,6 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
+import { ContactCard } from "../components/homepage/ContactCard";
 import { RentVsBuyChart } from "../components/RentVsBuyChart";
 import { withAlpha } from "../utils/format";
 
@@ -56,16 +57,19 @@ export function RentVsBuyPage() {
       <style>{globalCSS}</style>
 
       <div className="pwa-safe-top" style={{ background: SURFACE, borderBottom: `1px solid ${BORDER}`, padding: "20px 24px", margin: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-white-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: BORDER, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--dark" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" />
             <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
-          <a href="/calculator" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500 }}>Payment calculator →</a>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <ContactCard iconOnly ariaLabel="Contact Nick" />
+            <a href="/learn" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500, marginLeft: 8, display: "inline-flex", alignItems: "center", gap: 6 }}><span aria-hidden="true">←</span><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" width={20} height={16} style={{ display: "block" }} />Learning Hub</a>
+          </div>
         </div>
       </div>
 
-      <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
+      <div className="tool-page-content" style={{ padding: "48px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
           <p style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: CHART_COLORS.accent, margin: "0 0 16px" }}>
             <span aria-hidden="true" style={{ width: 32, height: 2, background: CHART_COLORS.accent, flexShrink: 0 }} />
@@ -76,11 +80,13 @@ export function RentVsBuyPage() {
             Most rent vs. buy calculators are sales tools in disguise. This one charges both sides for everything. The buyer pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the buyer put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>
         </header>
+      </div>
 
-        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 20px" }}>
-          <RentVsBuyChart />
-        </div>
+      {/* The tool renders full-bleed: on desktop it becomes the cockpit
+          (sticky inputs rail + results canvas) and needs the wider frame. */}
+      <RentVsBuyChart />
 
+      <article style={{ padding: "0 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 32 }}>
           {STATS.map((s) => <StatCard key={s.label} {...s} />)}
         </div>

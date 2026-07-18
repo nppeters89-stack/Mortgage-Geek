@@ -1,7 +1,11 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot, ReferenceLine, Customized } from "recharts";
-import { P, F, CHART_COLORS } from "../theme";
+import { P, F, CHART_COLORS, PROGRAM_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
+import { useIsCockpit } from "../utils/hooks";
+import { CockpitShell } from "./cockpit/CockpitShell";
+import { SHARED_STATE_TAX_RATES } from "../data/taxRates";
+import { LOAN_PROGRAMS, VA_USAGE_LABELS } from "../data/loanPrograms.js";
 import { simulateRentVsBuy, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE } from "./rentVsBuySim";
 
 // The interactive Rent vs. Buy tool. All series come from the 360-month
@@ -86,8 +90,39 @@ const css = `
   .rvb-bd-v { font-family: ${F.display}; font-size: 16.5px; color: ${CREAM}; white-space: nowrap; }
   .rvb-bd-foot { font-size: 11.5px; line-height: 1.5; color: ${DIM}; margin: 9px 0 0; }
 
+  /* Program tabs. Single-select: a rent-vs-buy projection plots one buying
+     scenario against the renter, unlike the calculator's multi-select compare. */
+  .rvb-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .rvb-tab { font-family: ${F.body}; font-size: 12.5px; font-weight: 700; padding: 9px 6px; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid ${BORDER}; color: ${MUT}; transition: color .15s, background .15s, border-color .15s; }
+  .rvb-tab:hover:not(:disabled) { color: ${CREAM}; }
+  .rvb-tab:disabled { cursor: not-allowed; opacity: 0.38; }
+  .rvb-tab.is-active { color: ${CREAM}; }
+  .rvb-note { font-size: 11.5px; line-height: 1.5; color: ${DIM}; margin: 8px 0 0; }
+  .rvb-warn { font-size: 11.5px; line-height: 1.5; color: ${CHART_COLORS.accent}; margin: 8px 0 0; }
+
+  .rvb-select { font-family: ${F.body}; font-size: 14px; font-weight: 600; color: ${CREAM}; background: ${withAlpha(P.navyDark, 0.6)}; border: 1px solid ${BORDER}; border-radius: 9px; padding: 9px 10px; width: 100%; }
+  .rvb-select:focus { outline: 2px solid ${withAlpha(BUY, 0.7)}; outline-offset: 1px; }
+  .rvb-select option { background: ${P.navy}; color: ${CREAM}; }
+  .rvb-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
   .rvb-caption { font-size: 13px; line-height: 1.65; color: ${withAlpha(CHART_COLORS.line, 0.72)}; margin: 16px 4px 0; max-width: 80ch; }
   .rvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+  /* Narrow viewports. The slider row's label + value + track exceed a 375px
+     screen at their desktop minimums, so drop the minimums and let the track
+     take a full row under its label. Number fields go fluid for the same
+     reason. */
+  @media (max-width: 560px) {
+    .rvb-slider { gap: 6px 10px; padding: 11px 13px; }
+    .rvb-slider-l { min-width: 0; flex: 1 1 auto; }
+    .rvb-slider-v { min-width: 0; font-size: 18px; }
+    .rvb-slider input[type=range] { flex-basis: 100%; min-width: 0; }
+    .rvb-field input[type=number] { width: 100%; }
+    .rvb-row > .rvb-field { flex: 1 1 140px; }
+    .rvb-grid2 { grid-template-columns: 1fr; }
+    .rvb-tab { padding: 9px 4px; font-size: 12px; }
+    .rvb-bd-cell { min-width: 0; flex: 1 1 128px; }
+  }
 `;
 
 // Number field that keeps its own text while you type. It commits only when the
@@ -153,8 +188,27 @@ export function RentVsBuyChart() {
   const [inputs, setInputs] = useState(DEFAULTS);
   const [hoveredYear, setHoveredYear] = useState(null);
   const userTouchedRate = useRef(false);
+  const isCockpit = useIsCockpit();
+
+  // Property tax location, same source and shape as the calculator. The metro
+  // defaults to the state average, which for Tennessee is the 0.75% the base
+  // case documents.
+  const [taxState, setTaxState] = useState("TN");
+  const [taxMetro, setTaxMetro] = useState("");
 
   const set = (field, value) => setInputs((prev) => ({ ...prev, [field]: clampInput(field, value) }));
+
+  const stateData = SHARED_STATE_TAX_RATES[taxState];
+  const metroList = stateData?.metros || [];
+  const selectedMetro = metroList.find((m) => m.name === taxMetro);
+  const taxRate = selectedMetro ? selectedMetro.rate : stateData?.rate ?? DEFAULTS.taxPct;
+  // Reads naturally in "from {countyLabel}": "from Nashville/Davidson" or
+  // "from the Tennessee average".
+  const countyLabel = selectedMetro ? selectedMetro.name : stateData ? `the ${stateData.name} average` : "your county";
+
+  // Location drives the tax rate. Kept as an effect (not derived at sim time) so
+  // the Advanced panel's tax field stays a real, overridable input.
+  useEffect(() => { set("taxPct", taxRate); }, [taxRate]);
 
   // Live 30-year rate from the same source as the calculator (client-only, so it
   // never runs during prerender). Falls back silently to the 6.43 default.
@@ -177,6 +231,7 @@ export function RentVsBuyChart() {
   }, []);
 
   const sim = useMemo(() => simulateRentVsBuy(inputs), [inputs]);
+  const terms = sim.terms;
   const data = sim.years;
   const hz = inputs.hz;
   const atHorizon = data[hz];
@@ -265,17 +320,71 @@ export function RentVsBuyChart() {
 
   const caption = `At these inputs, owning starts at about ${fmt(sim.owningMonthOne)} a month against ${fmt(inputs.rent0)} rent, so the renter banks the difference early and starts ahead: on day one the renter holds the invested down payment and closing costs while an immediate sale would cost the buyer both sets of transaction costs. Rent compounds at ${inputs.rentG.toFixed(1)}% a year while the mortgage payment stays fixed. Rent passes the full cost of owning ${flipYear ? `around year ${flipYear}` : "never, within this window"}, and from there the flow reverses and the buyer banks the surplus. The buyer ${be === null ? "never catches the renter inside 30 years" : `first catches the renter in year ${be}`}. Read at your year-${hz} horizon, ${buyingAhead ? "buying" : "renting"} walks away ahead by ${fmt(Math.abs(adv))}. Hover any year to watch the calculation strip rebuild the number in front of you.`;
 
-  return (
-    <div className="rvb">
-      <style>{css}</style>
-
+  // The inputs rail. On desktop this is the sticky left column; on mobile it
+  // stacks above the results, matching the calculator.
+  const rail = (
+    <>
       {/* Inputs */}
       <div className="rvb-panel">
+        {/* Loan program: single-select, since the projection plots one buying
+            scenario against the renter. */}
+        <div className="rvb-field" style={{ marginBottom: 12 }}>
+          <span className="rvb-flabel">Loan program</span>
+          <div className="rvb-tabs" role="group" aria-label="Loan program">
+            {LOAN_PROGRAMS.map((name) => {
+              const active = inputs.program === name;
+              const color = PROGRAM_COLORS[name];
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  className={`rvb-tab${active ? " is-active" : ""}`}
+                  aria-pressed={active}
+                  onClick={() => set("program", name)}
+                  style={active ? { background: withAlpha(color, 0.18), borderColor: withAlpha(color, 0.75) } : undefined}
+                >
+                  {name === "Conventional" ? "Conv" : name}
+                </button>
+              );
+            })}
+          </div>
+          {terms.ineligibleReason
+            ? <p className="rvb-warn">{terms.ineligibleReason} The projection still runs, but this program would not be available at this down payment.</p>
+            : <p className="rvb-note">{terms.miNote}{terms.upfrontLabel ? `. ${terms.upfrontLabel} financed into the loan.` : ""}</p>}
+        </div>
+
+        {inputs.program === "VA" && (
+          <div className="rvb-field" style={{ marginBottom: 12 }}>
+            <label className="rvb-flabel" htmlFor="rvb-vausage">VA funding fee usage</label>
+            <select id="rvb-vausage" className="rvb-select" value={inputs.vaUsage} onChange={(e) => set("vaUsage", e.target.value)}>
+              {Object.entries(VA_USAGE_LABELS).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+            </select>
+          </div>
+        )}
+
         <div className="rvb-row">
           <NumField id="rvb-price" label="Home price" field="price" value={inputs.price} step={5000} onCommit={(v) => set("price", v)} />
           <NumField id="rvb-down" label="Down payment %" field="downPct" value={inputs.downPct} step={0.5} onCommit={(v) => set("downPct", v)} />
           <NumField id="rvb-rent" label="Monthly rent today" field="rent0" value={inputs.rent0} step={50} onCommit={(v) => set("rent0", v)} />
         </div>
+
+        {/* Property tax location, same tables the calculator uses. */}
+        <div className="rvb-grid2" style={{ marginTop: 12 }}>
+          <div className="rvb-field">
+            <label className="rvb-flabel" htmlFor="rvb-state">State</label>
+            <select id="rvb-state" className="rvb-select" value={taxState} onChange={(e) => { setTaxState(e.target.value); setTaxMetro(""); }}>
+              {Object.entries(SHARED_STATE_TAX_RATES).map(([code, d]) => <option key={code} value={code}>{d.name}</option>)}
+            </select>
+          </div>
+          <div className="rvb-field">
+            <label className="rvb-flabel" htmlFor="rvb-metro">County / metro</label>
+            <select id="rvb-metro" className="rvb-select" value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} disabled={!metroList.length}>
+              <option value="">State Avg ({stateData?.rate}%)</option>
+              {metroList.map((m) => <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>)}
+            </select>
+          </div>
+        </div>
+        <p className="rvb-note">Property tax set to {taxRate}% a year from {countyLabel}. Override it under Advanced.</p>
 
         <Slider
           id="rvb-rate" label="Mortgage rate" field="rate" value={inputs.rate} step={0.125}
@@ -315,7 +424,12 @@ export function RentVsBuyChart() {
           </div>
         </details>
       </div>
+    </>
+  );
 
+  // The results canvas.
+  const canvas = (
+    <>
       {/* Verdict */}
       <div className="rvb-verdict" aria-live="polite">
         <div className="rvb-verdict-k">The verdict at your horizon</div>
@@ -420,6 +534,25 @@ export function RentVsBuyChart() {
           </tbody>
         </table>
       </div>
+    </>
+  );
+
+  // Desktop (>=1100px) gets the cockpit: sticky inputs rail on the left, results
+  // canvas on the right. Below that, the same two blocks stack.
+  if (isCockpit) {
+    return (
+      <div className="rvb">
+        <style>{css}</style>
+        <CockpitShell rail={rail} canvas={canvas} dividerColor={HAIR} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="rvb" style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
+      <style>{css}</style>
+      {rail}
+      <div style={{ marginTop: 22 }}>{canvas}</div>
     </div>
   );
 }

@@ -16,22 +16,18 @@
 // The default scenario reproduces the verified reference fixtures exactly:
 // advantage +$118,714 at year 10, breakeven year 4, owning $2,868/mo, buyer
 // $314,658, renter $195,944. See BASE_CASE below.
+import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
 
 // Home value compound annual growth: 5.4%, the 1970-2026 CAGR of the Census/HUD
 // average sales price of houses sold (FRED: ASPUS). Not user-adjustable.
 export const HOME_GROWTH = 1.054;
 
-// Mortgage insurance: 0.37% of the original loan per year, charged while the
-// down payment is under 20%, until the balance amortizes to 78% of the original
-// purchase price (the automatic termination standard).
-const MI_ANNUAL_RATE = 0.0037;
-const MI_DROP_RATIO = 0.78;
-const MAX_LTV_WITHOUT_MI = 0.8;
-
 const TERM_MONTHS = 360;
 const YEARS = 30;
 
 export const DEFAULTS = {
+  program: "Conventional",
+  vaUsage: "first",
   price: 400000,
   downPct: 5,
   rent0: 2000,
@@ -61,9 +57,12 @@ export const LIMITS = {
   sellPct: [0, 12],
 };
 
+// Numeric fields are clamped to their bounds. Non-numeric fields (program,
+// vaUsage) have no bounds and pass through untouched.
 export function clampInput(key, value) {
   const bounds = LIMITS[key];
-  if (!bounds || !Number.isFinite(value)) return DEFAULTS[key];
+  if (!bounds) return value;
+  if (!Number.isFinite(value)) return DEFAULTS[key];
   return Math.min(bounds[1], Math.max(bounds[0], value));
 }
 
@@ -90,9 +89,14 @@ export function simulateRentVsBuy(input = {}) {
   const s = { ...DEFAULTS, ...input };
 
   const price = s.price;
-  const down = (price * s.downPct) / 100;
   const closing = (price * s.ccPct) / 100;
-  const loan = price - down;
+
+  // Program terms decide the financed upfront fee, the mortgage insurance rate,
+  // and how long that insurance is charged. Conventional at under 20% down
+  // resolves to PMI dropping at 78% of the original price, which is the
+  // scenario the verified fixtures were built on.
+  const terms = programTerms({ program: s.program, price, downPct: s.downPct, vaUsage: s.vaUsage });
+  const { down, baseLoan, upfront, loan, miMode } = terms;
 
   const r = s.rate / 100 / 12;
   const invM = s.inv / 100 / 12;
@@ -101,9 +105,10 @@ export function simulateRentVsBuy(input = {}) {
 
   const taxM = (price * s.taxPct) / 100 / 12;
   const insM = (price * s.insPct) / 100 / 12;
-  const miM = (loan * MI_ANNUAL_RATE) / 12;
-  const miDropBal = MI_DROP_RATIO * price;
-  const chargesMI = loan / price > MAX_LTV_WITHOUT_MI;
+  // Mortgage insurance accrues on the base loan (before any financed upfront
+  // fee), matching the calculator.
+  const miM = (baseLoan * (terms.miRate / 100)) / 12;
+  const chargesMI = terms.miRate > 0;
 
   const payment = monthlyPayment(loan, s.rate);
 
@@ -130,12 +135,13 @@ export function simulateRentVsBuy(input = {}) {
   for (let m = 1; m <= TERM_MONTHS; m++) {
     const rent = s.rent0 * Math.pow(1 + g, Math.floor((m - 1) / 12));
 
-    // MI is assessed on the start-of-month balance, and stops for good the first
-    // month the balance has amortized to 78% of the original price.
+    // MI is assessed on the start-of-month balance. When it stops depends on the
+    // program: PMI at 78% of the original price, FHA for the life of the loan
+    // (or 132 months at 10% or more down), USDA for the life of the loan.
     let mi = 0;
     if (chargesMI && miDropMonth === 0) {
-      if (balance <= miDropBal) miDropMonth = m;
-      else mi = miM;
+      if (miChargedThisMonth({ miMode, balance, price, month: m })) mi = miM;
+      else miDropMonth = m;
     }
 
     let pi = 0;
@@ -196,6 +202,7 @@ export function simulateRentVsBuy(input = {}) {
     miDropMonth: miDropMonth || null,
     flipMonth: flipMonth || null,
     chargesMI,
+    terms,
   };
 }
 
