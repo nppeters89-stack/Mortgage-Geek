@@ -58,10 +58,7 @@ export function RentVsOwnPage() {
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
 
-      {/* The red rule under the header and its twin above the stats bracket the
-          interactive area: everything between them is the tool. Both are
-          full-bleed so they read as a matched pair rather than as page trim. */}
-      <div className="pwa-safe-top" style={{ background: SURFACE, borderBottom: `3px solid ${CHART_COLORS.accent}`, padding: "20px 24px", margin: 0 }}>
+      <div className="pwa-safe-top" style={{ background: SURFACE, borderBottom: `1px solid ${BORDER}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, maxWidth: 1100, margin: "0 auto" }}>
           <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
             <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-white-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: BORDER, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--dark" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" />
@@ -96,12 +93,17 @@ export function RentVsOwnPage() {
         </header>
       </div>
 
+      {/* These two Arrow Red rules bracket the interactive area. The first
+          closes the intro copy, the second opens the editorial section below,
+          so everything between them is the tool and its chart. Both are 3px and
+          full-bleed so they read as a matched pair. */}
+      <div aria-hidden="true" style={{ height: 3, background: P.gold }} />
+
       {/* The tool renders full-bleed: on desktop it becomes the cockpit
           (sticky inputs rail + results canvas) and needs the wider frame. */}
       <RentVsOwnChart />
 
-      {/* Closes the bracket opened by the header rule. */}
-      <div aria-hidden="true" style={{ height: 3, background: CHART_COLORS.accent, marginTop: 24 }} />
+      <div aria-hidden="true" style={{ height: 3, background: P.gold, marginTop: 24 }} />
 
       <article style={{ padding: "40px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>
