@@ -1,5 +1,6 @@
 import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
+import { ShareButton } from "../components/ShareButton";
 import { GEEK_CHARTS } from "../data/geekCharts";
 import { GeekChartPreview } from "../components/GeekChartPreview";
 import { GeekChartsLockup } from "../components/GeekChartsLockup";
@@ -22,6 +23,14 @@ function formatUpdated(iso) {
   return `${MONTHS[Number(m) - 1]} ${y}`;
 }
 
+// Newest first. ISO dates compare correctly as strings, and Array.sort is
+// stable, so charts sharing an `updated` date keep their registry order rather
+// than shuffling between builds. Most of the registry currently shares one
+// date, so in practice this puts the newest chart on top and leaves the rest
+// in the curated order until they get distinct dates.
+const BY_NEWEST = [...GEEK_CHARTS].sort((a, b) => (a.updated < b.updated ? 1 : a.updated > b.updated ? -1 : 0));
+const [FEATURED, ...REST] = BY_NEWEST;
+
 export function GeekChartsHubPage() {
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
@@ -32,11 +41,34 @@ export function GeekChartsHubPage() {
         .gc-card-text { flex: 1 1 300px; min-width: 0; }
         .gc-card-preview { flex: 0 0 auto; width: 220px; aspect-ratio: 4 / 3; background: ${P.navyDark}; border: 1px solid ${BORDER}; border-radius: 8px; overflow: hidden; }
         .gc-card-footer { display: flex; align-items: center; justify-content: space-between; }
+
+        /* The newest chart. Same gold vocabulary as the rest of the hub, just
+           turned up: a wash of gold across the top-left, a brighter border, a
+           lifted shadow, and a preview roughly half again as large. It reads as
+           the same family of card rather than a different component. */
+        .gc-featured { position: relative; display: flex; flex-direction: column; gap: 20px; border: 1px solid ${withAlpha(CHART_COLORS.gold, 0.42)}; border-left: 3px solid ${CHART_COLORS.gold}; border-radius: 14px; padding: 26px 28px; background: linear-gradient(155deg, ${withAlpha(CHART_COLORS.gold, 0.09)} 0%, ${withAlpha(CHART_COLORS.gold, 0.02)} 38%, ${SURFACE} 70%), ${SURFACE}; box-shadow: 0 16px 40px rgba(0,0,0,0.34); transition: border-color .18s ease, box-shadow .18s ease; }
+        .gc-featured:hover { border-color: ${withAlpha(CHART_COLORS.gold, 0.7)}; box-shadow: 0 18px 46px rgba(0,0,0,0.42); }
+        .gc-featured-row { display: flex; gap: 28px; align-items: center; }
+        .gc-featured-text { flex: 1 1 320px; min-width: 0; }
+        .gc-featured-preview { flex: 0 0 auto; width: 330px; aspect-ratio: 4 / 3; background: ${P.navyDark}; border: 1px solid ${withAlpha(CHART_COLORS.gold, 0.22)}; border-radius: 10px; overflow: hidden; }
+        .gc-eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: ${CHART_COLORS.gold}; background: ${withAlpha(CHART_COLORS.gold, 0.12)}; border: 1px solid ${withAlpha(CHART_COLORS.gold, 0.35)}; border-radius: 999px; padding: 4px 11px; margin-bottom: 14px; }
+        .gc-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: ${CHART_COLORS.gold}; box-shadow: 0 0 0 0 ${withAlpha(CHART_COLORS.gold, 0.65)}; animation: gcPulse 2.4s ease-out infinite; }
+        @keyframes gcPulse {
+          0%   { box-shadow: 0 0 0 0 ${withAlpha(CHART_COLORS.gold, 0.65)}; }
+          70%  { box-shadow: 0 0 0 7px ${withAlpha(CHART_COLORS.gold, 0)}; }
+          100% { box-shadow: 0 0 0 0 ${withAlpha(CHART_COLORS.gold, 0)}; }
+        }
+        @media (prefers-reduced-motion: reduce) { .gc-eyebrow-dot { animation: none; } }
+
         @media (max-width: 640px) {
           .gc-card { gap: 16px; padding: 20px 20px; }
           .gc-card-row { flex-direction: column; align-items: stretch; gap: 16px; }
           .gc-card-text { flex: 0 0 auto; }
           .gc-card-preview { width: 100%; aspect-ratio: 3 / 2; }
+          .gc-featured { gap: 18px; padding: 22px 20px; }
+          .gc-featured-row { flex-direction: column; align-items: stretch; gap: 18px; }
+          .gc-featured-text { flex: 0 0 auto; }
+          .gc-featured-preview { width: 100%; aspect-ratio: 3 / 2; }
         }
       `}</style>
 
@@ -46,7 +78,10 @@ export function GeekChartsHubPage() {
             <span className="cobrand-rate" style={{ display: "inline-flex", alignItems: "center" }}><img src="/rate-2color-white-tight.svg" alt="Rate" width={63} height={26} style={{ display: "block", flexShrink: 0 }} /><span aria-hidden="true" style={{ width: 1, height: 26, background: BORDER, flexShrink: 0, margin: "0 14px" }} /></span><span className="mg-lockup mg--dark" style={{ "--mg-h": "28px" }}><img className="mg-lockup__mark" src="/assets/mg-mark-cream-truered-sm.svg" alt="" aria-hidden="true" />
             <span className="mg-lockup__words"><span className="mg-lockup__top">Mortgage</span><span className="mg-lockup__geek">Geek</span></span></span>
           </a>
-          <a href="/learn" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}><span aria-hidden="true">←</span><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" width={20} height={16} style={{ display: "block" }} />Learning Hub</a>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <ShareButton variant="header" />
+            <a href="/learn" style={{ fontSize: 13, color: MUTED, textDecoration: "none", fontWeight: 500, display: "inline-flex", alignItems: "center", gap: 6 }}><span aria-hidden="true">←</span><img src="/assets/learning-hub-mark-cream-sm.svg" alt="" width={20} height={16} style={{ display: "block" }} />Learning Hub</a>
+          </div>
         </div>
       </div>
 
@@ -62,7 +97,30 @@ export function GeekChartsHubPage() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {GEEK_CHARTS.map((c) => (
+          {/* Newest chart, given its own larger treatment at the top. */}
+          <a href={`/geek-charts/${FEATURED.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+            <div className="gc-featured">
+              <div className="gc-featured-row">
+                <div className="gc-featured-text">
+                  <span className="gc-eyebrow"><span className="gc-eyebrow-dot" aria-hidden="true" />Newest chart</span>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
+                    <h2 style={{ fontFamily: F.display, fontSize: 30, color: CREAM, fontWeight: 400, lineHeight: 1.15, margin: 0 }}>{FEATURED.title}</h2>
+                    <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, color: CHART_COLORS.gold, border: `1px solid ${withAlpha(CHART_COLORS.gold, 0.4)}`, borderRadius: 999, padding: "2px 9px" }}>{FEATURED.period}</span>
+                  </div>
+                  <p style={{ fontSize: 15, color: BODY, lineHeight: 1.65, margin: 0 }}>{FEATURED.tagline}</p>
+                </div>
+                <div className="gc-featured-preview">
+                  <GeekChartPreview slug={FEATURED.slug} />
+                </div>
+              </div>
+              <div className="gc-card-footer">
+                <span style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>Updated · {formatUpdated(FEATURED.updated)}</span>
+                <span style={{ fontSize: 14, color: CHART_COLORS.gold, fontWeight: 700 }}>Open →</span>
+              </div>
+            </div>
+          </a>
+
+          {REST.map((c) => (
             <a key={c.slug} href={`/geek-charts/${c.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <div className="gc-card">
                 <div className="gc-card-row">
