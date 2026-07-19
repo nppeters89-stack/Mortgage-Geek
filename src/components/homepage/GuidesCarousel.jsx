@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from "react";
 import { P, F } from "../../theme";
 import { withAlpha } from "../../utils/format";
+import { useCarousel, CAROUSEL_GAP } from "./useCarousel";
 
 // "Guides" carousel for the bottom of the Learning Hub. Surfaces the four deep
 // references (Deep Dives, Geek Charts, Pre-Approval Checklist, Jargon Decoder)
@@ -23,8 +23,6 @@ const TILE = withAlpha(P.white, 0.06);
 const DOT_OFF = withAlpha(P.white, 0.22);
 const NAV_BORDER = withAlpha(P.white, 0.16);
 
-const GAP = 24;
-
 // Icons come from our existing set: the nav emojis for three cards, and the
 // built geek-charts glyph SVG for Geek Charts (rendered in the 60x60 tile).
 const CARDS = [
@@ -35,68 +33,9 @@ const CARDS = [
 ];
 
 export function GuidesCarousel({ showCounts = true, autoplay = true }) {
-  const rootRef = useRef(null);
-  const perViewRef = useRef(3);
-  const timerRef = useRef(null);
-  const [perView, setPerView] = useState(3);
-  const [index, setIndex] = useState(0);
-  // Autoplay stops permanently on the first manual interaction (per spec).
-  const [autoplayOn, setAutoplayOn] = useState(autoplay);
-
-  const step = useCallback((delta) => {
-    setIndex((prev) => {
-      const max = Math.max(0, CARDS.length - perViewRef.current);
-      let idx = prev + delta;
-      if (idx > max) idx = 0;
-      if (idx < 0) idx = max;
-      return idx;
-    });
-  }, []);
-
-  const jump = useCallback((i) => {
-    const max = Math.max(0, CARDS.length - perViewRef.current);
-    setIndex(Math.min(Math.max(0, i), max));
-  }, []);
-
-  const stopAutoplay = useCallback(() => {
-    setAutoplayOn(false);
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-  }, []);
-
-  // Responsive perView from the carousel's own container width. Thresholds are
-  // tuned to our container, not the raw viewport: on the Learning Hub the 280px
-  // sidebar keeps this content column at ~960-990px, so 3-up uses a 940 cutoff
-  // (rather than the handoff's 1000, which the column never clears) to keep the
-  // design's 3-card desktop hero. Tablet -> 2, phone -> 1. Reset to the first
-  // slide on a breakpoint change. Client-only (no window access during render).
-  useEffect(() => {
-    const measure = () => {
-      const w = rootRef.current?.clientWidth || window.innerWidth;
-      const pv = w < 640 ? 1 : w < 940 ? 2 : 3;
-      if (pv !== perViewRef.current) { perViewRef.current = pv; setPerView(pv); setIndex(0); }
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
-
-  // Autoplay: advance every 5s. Skipped for reduced-motion users. Cleared on
-  // unmount and on any manual interaction (autoplayOn flips false).
-  useEffect(() => {
-    if (!autoplayOn) return undefined;
-    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
-    timerRef.current = setInterval(() => step(1), 5000);
-    return () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
-  }, [autoplayOn, step]);
-
-  const next = () => { stopAutoplay(); step(1); };
-  const prev = () => { stopAutoplay(); step(-1); };
-  const goTo = (i) => { stopAutoplay(); jump(i); };
-
-  const maxIndex = Math.max(0, CARDS.length - perView);
-  const cardBasis = `calc((100% - ${GAP * (perView - 1)}px) / ${perView})`;
-  const trackTransform = `translateX(calc(-${index * (100 / perView)}% - ${index * (GAP / perView)}px))`;
-  const dots = Array.from({ length: maxIndex + 1 }, (_, i) => i);
+  // Mechanics live in useCarousel, shared with the Your Toolkit rail above.
+  const { rootRef, index, next, prev, goTo, cardBasis, trackTransform, dots } =
+    useCarousel({ count: CARDS.length, autoplay });
 
   return (
     <section id="guides" className="section-bleed guides-section" style={{ background: BAND, color: HEAD, padding: "88px 40px 96px" }}>
@@ -132,7 +71,7 @@ export function GuidesCarousel({ showCounts = true, autoplay = true }) {
 
         {/* Viewport + track */}
         <div style={{ overflow: "hidden" }}>
-          <div className="guides-track" style={{ display: "flex", gap: GAP, transform: trackTransform }}>
+          <div className="guides-track" style={{ display: "flex", gap: CAROUSEL_GAP, transform: trackTransform }}>
             {CARDS.map((c) => (
               <a
                 key={c.title}
