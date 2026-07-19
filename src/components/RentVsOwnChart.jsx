@@ -425,7 +425,7 @@ export function RentVsOwnChart() {
         <Slider
           id="rvo-rate" label="Mortgage rate" field="rate" value={inputs.rate} step={0.125}
           display={`${inputs.rate.toFixed(2)}%`}
-          hint="Defaults to today's 30-year average when it loads. 6.43% is the fallback."
+          hint="Defaults to today's 30-year average when it loads."
           onCommit={(v) => { userTouchedRate.current = true; set("rate", v); }}
         />
         <Slider
