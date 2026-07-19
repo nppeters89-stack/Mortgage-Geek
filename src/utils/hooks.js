@@ -77,3 +77,46 @@ export function usePieDiameter() {
   }, []);
   return d;
 }
+
+// Geek Charts draw-animation gate — true when the click-to-draw sequence
+// should be skipped and the charts should render fully drawn on load.
+//
+// Only prefers-reduced-motion opts out. A 4-second self-drawing line is
+// exactly the motion that setting asks us not to run, and it is a deliberate
+// user choice rather than an assumption about their device.
+//
+// Screen size deliberately does NOT gate this. An earlier version skipped the
+// animation at ≤700px on the theory that an empty-until-tapped chart reads as
+// broken on a phone, but the charts ship with a labelled draw button, so
+// there is always something visible telling you what to tap. Phones get the
+// animation.
+//
+// Starts true so the server render and the first client paint agree on the
+// fully-drawn markup, then re-evaluates on mount. Getting this backwards
+// would hydrate a prerendered page into an empty chart.
+export function useStaticCharts() {
+  const [staticCharts, setStaticCharts] = useState(true);
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setStaticCharts(reduced.matches);
+    update();
+    reduced.addEventListener('change', update);
+    return () => reduced.removeEventListener('change', update);
+  }, []);
+  return staticCharts;
+}
+
+// True when the device has a real hovering pointer (a mouse or trackpad).
+// Used only to word the chart hints correctly: "hover" is meaningless on a
+// touchscreen, where the same read-out is driven by dragging a finger.
+export function useHasHover() {
+  const [hasHover, setHasHover] = useState(true);
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover)');
+    const update = () => setHasHover(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return hasHover;
+}

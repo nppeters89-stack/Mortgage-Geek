@@ -4,6 +4,7 @@ import { HomesInSp500Chart } from "../components/HomesInSp500Chart";
 import { BuyVsInvestChart } from "../components/BuyVsInvestChart";
 import { withAlpha } from "../utils/format";
 import { GeekChartsLockup } from "../components/GeekChartsLockup";
+import { useHasHover } from "../utils/hooks";
 
 // Dark-mode Geek Charts page, the first with two charts. Metadata + Article
 // schema live in the route adapter's meta export (routes/homes-in-sp500.jsx),
@@ -81,9 +82,19 @@ function StatCard({ label, value, sub, color }) {
 }
 
 export function HomesInSp500Page() {
+  const hasHover = useHasHover();
   return (
     <main style={{ fontFamily: F.body, color: CREAM, background: P.navyDark, minHeight: "100dvh", margin: 0 }}>
       <style>{globalCSS}</style>
+      <style>{`
+        /* Phones: trim the Part 2 panel's side padding so the projection chart
+           inside it has room to breathe. Paired with the negative margin on
+           .bvi-plot, the chart spans nearly the full panel width. */
+        @media (max-width: 700px) {
+          .sp500-part2 { padding-left: 14px !important; padding-right: 14px !important; }
+          .sp500-steps li { margin-bottom: 10px; }
+        }
+      `}</style>
 
       <div className="pwa-safe-top" style={{ background: SURFACE, borderBottom: `1px solid ${BORDER}`, padding: "20px 24px", margin: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", maxWidth: 900, margin: "0 auto" }}>
@@ -136,12 +147,37 @@ export function HomesInSp500Page() {
           </p>
         </div>
 
-        {/* Part 2 panel: the projection. */}
-        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "26px 24px", marginTop: 32 }}>
-          <h3 style={{ fontFamily: F.display, fontSize: 22, color: CREAM, fontWeight: 400, lineHeight: 1.25, margin: "0 0 12px" }}>Part 2: the same $25,000, two different futures.</h3>
-          <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "0 0 24px", maxWidth: 720 }}>
-            Take the down payment from the panel above and run both paths forward for 30 years using each asset's own historical average: the house at 5.4% appreciation, the index at a 10% total return. Same starting cash, and this version charges the buyer the full carrying cost: taxes, insurance, and mortgage insurance until it drops at 20% equity via the automatic 78% rule. Set the rate, pick an early payoff strategy, enter your own extra amount, and watch the interest shrink and the profit line move. Flip on reinvest to keep the freed payment flowing into the index after the loan is gone.
+        {/* Part 2 panel: the projection. Carries an Arrow Red top rule and a
+            red heading so the interactive half of the article reads as its own
+            act rather than another paragraph. The rule is the true Arrow Red
+            (P.gold); the heading uses the lighter tint (P.goldLight), which
+            clears AA on this panel where the full-strength red would not. */}
+        <div className="sp500-part2" style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderTop: `4px solid ${P.gold}`, borderRadius: 16, padding: "26px 24px", marginTop: 32 }}>
+          <h3 style={{ fontFamily: F.display, fontSize: 25, color: P.goldLight, fontWeight: 400, lineHeight: 1.25, margin: "0 0 12px" }}>Part 2: the same $25,000, two different futures.</h3>
+          <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "0 0 18px", maxWidth: 720 }}>
+            Take the down payment from the panel above and run both paths forward for 30 years using each asset's own historical average: the house at 5.4% appreciation, the index at a 10% total return. Same starting cash, and this version charges the buyer the full carrying cost: taxes, insurance, and mortgage insurance until it drops at 20% equity via the automatic 78% rule.
           </p>
+          {/* Step 1 is called out in red because the controls are locked until
+              the four lines are drawn. Without this, the rate slider and the
+              strategy pills read as broken rather than as not-yet-unlocked. */}
+          <ol className="sp500-steps" style={{ margin: "0 0 24px", padding: 0, listStyle: "none", maxWidth: 720 }}>
+            <li style={{ fontSize: 14, color: BODY, lineHeight: 1.7, marginBottom: 8 }}>
+              <strong style={{ color: P.goldLight, fontWeight: 700 }}>Step 1: draw the chart.</strong>{" "}
+              {hasHover ? "Click" : "Tap"} the draw button four times to lay down the lines one at a time: the index path, home equity, net profit, then the faster payoff. The controls below stay locked until all four are drawn.
+            </li>
+            <li style={{ fontSize: 14, color: BODY, lineHeight: 1.7, marginBottom: 8 }}>
+              <strong style={{ color: CREAM, fontWeight: 700 }}>Step 2: set the rate.</strong>{" "}
+              It defaults to today's conventional rate. Move it and every figure recomputes.
+            </li>
+            <li style={{ fontSize: 14, color: BODY, lineHeight: 1.7, marginBottom: 8 }}>
+              <strong style={{ color: CREAM, fontWeight: 700 }}>Step 3: pick an early payoff strategy.</strong>{" "}
+              Monthly, annual, or bi-weekly, and enter your own extra amount. Watch the interest shrink and the profit line move.
+            </li>
+            <li style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: 0 }}>
+              <strong style={{ color: CREAM, fontWeight: 700 }}>Step 4: flip on reinvest.</strong>{" "}
+              That keeps the freed payment flowing into the index after the loan is gone.
+            </li>
+          </ol>
           <BuyVsInvestChart />
           <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "20px 0 0", maxWidth: 720 }}>
             The red line is gross equity: roughly $2.42 million by year 30, against $436,000 in the index, from identical starting dollars. The gold line is the strictest test: net profit after charging the buyer for everything. Principal and interest total about $1,073,000 over 30 years at the default rate, including about $598,000 of interest; property taxes and insurance add about $165,000 more; mortgage insurance runs about $146 a month until the loan amortizes down to 78% of the original price ($390,000), which takes 11 years 3 months on the standard schedule and totals about $19,600. Extra payments attack that directly: $500 a month cuts the MI period nearly in half. Charge all of it, and the buyer is underwater on paper for a decade (bottoming near minus $35,000 around year six), breaks even in year eleven, and still finishes at about $1.14 million, roughly 2.8 times the index path's $411,000 gain. The costs are real, and the leverage pays for all of them. Hover any year to watch the calculation strip below rebuild the number in front of you.
