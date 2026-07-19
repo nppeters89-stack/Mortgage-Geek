@@ -22,12 +22,16 @@ import { P, HOME } from "../theme";
 const TILE = 42;
 const ICON = 26;
 
-export function ToolLockup({ Icon, title, accent, descriptor, variant = "dark", style }) {
+// `iconScale` trims the glyph inside the tile without changing the tile. The
+// calculator mark is a solid filled body that spans its whole viewBox, where the
+// others are outline strokes carrying their own padding, so it reads far heavier
+// at the same nominal size and takes a 0.5.
+export function ToolLockup({ Icon, title, accent, descriptor, variant = "dark", iconScale = 1, style }) {
   const titleColor = variant === "light" ? P.text : P.white;
   const descriptorColor = variant === "light" ? HOME.textMuted : P.warmGrayLight;
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 13, ...style }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 13, ...style }}>
       <span
         aria-hidden="true"
         style={{
@@ -35,7 +39,7 @@ export function ToolLockup({ Icon, title, accent, descriptor, variant = "dark", 
           display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
         }}
       >
-        <Icon size={ICON} variant="cream" />
+        <Icon size={ICON * iconScale} variant="cream" />
       </span>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1, color: titleColor }}>

@@ -456,7 +456,7 @@ export function PreQualPage() {
   const introJsx = (
     <div style={{ maxWidth: 720, margin: "0 auto 36px" }}>
       <ToolLockup Icon={PreQualIcon} title="Pre-Qual" accent="Simulator" descriptor="Approval Odds" variant="light" style={{ marginBottom: 20 }} />
-      <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px" }}>
+      <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
         What you can actually qualify for, <em style={{ fontStyle: "italic", color: P.gold }}>before you shop</em>.
       </h1>
       <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>Enter your income and debts. See what you qualify for under each loan program, with their real DTI limits and mortgage insurance rules.</p>

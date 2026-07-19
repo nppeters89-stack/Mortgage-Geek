@@ -84,7 +84,7 @@ export function RentVsOwnPage() {
             variant="dark"
             style={{ marginBottom: 20 }}
           />
-          <h1 style={{ fontFamily: F.display, fontSize: 42, color: CREAM, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px" }}>
+          <h1 style={{ fontFamily: F.display, fontSize: 42, color: CREAM, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
             What renting actually costs you, <em style={{ fontStyle: "italic", color: CHART_COLORS.gold }}>honestly</em>.
           </h1>
           <p style={{ fontSize: 15, color: BODY, lineHeight: 1.65, margin: 0 }}>
