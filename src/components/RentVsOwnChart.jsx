@@ -220,6 +220,18 @@ function BdCell({ label, value, color }) {
   );
 }
 
+// Caption for the sr-only base-case table, built from the same DEFAULTS the
+// table's rows are simulated from (BASE_CASE = simulateRentVsOwn()). Spelled
+// out by hand it silently disagreed with the table the moment any default
+// changed, and it pinned a specific rate into copy meant to stay current.
+// Derived, it cannot drift from the data it describes.
+const BASE_CASE_CAPTION =
+  `Rent vs. own comparison at the default assumptions (${fmt(DEFAULTS.price)} home, ` +
+  `${DEFAULTS.downPct}% down, ${fmt(DEFAULTS.rent0)} rent, ${DEFAULTS.rate}% rate, ` +
+  `${DEFAULTS.rentG}% rent growth, ${DEFAULTS.inv}% investment return): owner walk-away ` +
+  `wealth versus renter portfolio by year. Owner wealth is the home value net of selling ` +
+  `costs, minus the loan balance, plus the owner's side fund.`;
+
 export function RentVsOwnChart() {
   const [inputs, setInputs] = useState(DEFAULTS);
   const [hoveredYear, setHoveredYear] = useState(null);
@@ -567,7 +579,7 @@ export function RentVsOwnChart() {
       {/* Crawler / no-JS / screen-reader fallback: the static base-case scenario. */}
       <div className="rvo-sr-only">
         <table>
-          <caption>Rent vs. own comparison at the default assumptions ($400,000 home, 5% down, $2,000 rent, 6.43% rate, 4.1% rent growth, 10% investment return): owner walk-away wealth versus renter portfolio by year. Owner wealth is the home value net of selling costs, minus the loan balance, plus the owner's side fund.</caption>
+          <caption>{BASE_CASE_CAPTION}</caption>
           <thead>
             <tr>
               <th scope="col">Year</th>
