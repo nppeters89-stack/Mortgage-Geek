@@ -101,9 +101,6 @@ export function RentVsOwnPage() {
             variant="dark"
             style={{ marginBottom: 20 }}
           />
-          <h1 style={{ fontFamily: F.display, fontSize: 42, color: CREAM, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
-            What renting actually costs you, <em style={{ fontStyle: "italic", color: CHART_COLORS.gold }}>honestly</em>.
-          </h1>
           <p style={{ fontSize: 15, color: BODY, lineHeight: 1.65, margin: 0 }}>
             Most rent vs. own calculators are sales tools in disguise. This one charges both sides for everything. The owner pays the down payment, closing costs, the full mortgage payment, taxes, insurance, and mortgage insurance, and is scored as if selling, with selling costs off the top. The renter invests the same starting cash the owner put in, and every month one side spends less than the other, that side banks the difference into the market. Then we compare what each would actually walk away with.
           </p>

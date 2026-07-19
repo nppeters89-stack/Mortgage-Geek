@@ -15,9 +15,11 @@ import { P, HOME } from "../theme";
 // handoff: only the title and descriptor colors flip. Arrow Red holds true on
 // dark rather than switching to the lifted red, which the guidelines call out.
 //
-// The title renders as a div, not a heading: these pages carry a separate
-// editorial h1 below the lockup, and two competing headings would muddy the
-// document outline.
+// The title renders as the page's h1. It carried a div while these pages had a
+// separate editorial headline below the lockup; with that headline gone, the
+// lockup is the only heading, so the tool name is the h1 again. Each page mounts
+// exactly one ToolLockup at a time (the Calculator's two are behind mutually
+// exclusive cockpit branches), so there is no duplicate heading.
 
 const TILE = 42;
 const ICON = 26;
@@ -42,9 +44,9 @@ export function ToolLockup({ Icon, title, accent, descriptor, variant = "dark", 
         <Icon size={ICON * iconScale} variant="cream" />
       </span>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1, color: titleColor }}>
+        <h1 style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: 23, letterSpacing: "-0.02em", lineHeight: 1, color: titleColor, margin: 0 }}>
           {title} <span style={{ color: P.gold }}>{accent}</span>
-        </div>
+        </h1>
         {descriptor && (
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: 7.2, letterSpacing: "0.227em", textTransform: "uppercase", color: descriptorColor, margin: "4px 0 0" }}>
             {descriptor}

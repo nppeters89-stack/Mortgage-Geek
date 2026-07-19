@@ -572,9 +572,6 @@ export function CashToClosePage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 64px", maxWidth: 760, margin: "0 auto" }}>
         <div style={{ maxWidth: 720, margin: "0 auto 32px" }}>
           <ToolLockup Icon={CashToCloseIcon} title="Cash to" accent="Close" descriptor="Upfront Costs" variant="light" style={{ marginBottom: 20 }} />
-          <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
-            What you actually bring to the table, <em style={{ fontStyle: "italic", color: P.gold }}>itemized</em>.
-          </h1>
           <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>Estimate exactly how much money you'll need at the closing table: down payment, closing costs, prepaids, reserves, and credits.</p>
         </div>
 

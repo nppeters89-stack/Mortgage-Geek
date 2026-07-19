@@ -116,9 +116,6 @@ export function ComparePage() {
 
         <div className="no-print" style={{ maxWidth: 720, margin: "0 auto 36px" }}>
           <ToolLockup Icon={CompareIcon} title="Loan" accent="Comparison" descriptor="Side by Side" variant="light" style={{ marginBottom: 20 }} />
-          <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
-            Three scenarios, one <em style={{ fontStyle: "italic", color: P.gold }}>straight answer</em>.
-          </h1>
           <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>Save up to 3 scenarios from the calculator and compare them side by side. Your scenarios are saved on this device.</p>
         </div>
 

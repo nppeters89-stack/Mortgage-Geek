@@ -451,9 +451,6 @@ export function CalculatorPage() {
       <div className="tool-page-content" style={{ padding: "40px 24px 0", maxWidth: 1100, margin: "0 auto" }}>
         <div style={{ maxWidth: 720, margin: "0 auto 36px" }}>
           <ToolLockup Icon={MortgageCalcIcon} iconScale={0.6} title="Mortgage" accent="Calculator" descriptor="Payment Estimate" variant="light" style={{ marginBottom: 20 }} />
-          <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
-            What the payment actually is, <em style={{ fontStyle: "italic", color: P.gold }}>program by program</em>.
-          </h1>
           <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
         </div>
 
@@ -1172,9 +1169,6 @@ export function CalculatorPage() {
         <div className="tool-page-content" style={{ padding: "32px 24px 8px", maxWidth: 1320, margin: "0 auto" }}>
           <div style={{ maxWidth: 720, margin: "0 auto" }}>
             <ToolLockup Icon={MortgageCalcIcon} iconScale={0.6} title="Mortgage" accent="Calculator" descriptor="Payment Estimate" variant="light" style={{ marginBottom: 20 }} />
-            <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
-              What the payment actually is, <em style={{ fontStyle: "italic", color: P.gold }}>program by program</em>.
-            </h1>
             <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>One set of inputs, four loan programs. See how Conventional, FHA, VA, and USDA stack up for the same home.</p>
           </div>
         </div>
