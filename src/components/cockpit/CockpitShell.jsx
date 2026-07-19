@@ -32,8 +32,11 @@ const COCKPIT_GAP = 32;
  *  - dividerColor: string — optional override for the rail/canvas rule. Defaults
  *    to P.creamDark (the light-surface value used by CalculatorPage and
  *    PreQualPage). Dark-surface tools pass a cream-alpha hairline instead.
+ *  - paddingBottom: number — optional override for the shell's bottom padding.
+ *    Defaults to 64. Tools that draw their own boundary immediately below the
+ *    canvas pass a smaller value so the rule sits against the content.
  */
-export function CockpitShell({ rail, canvas, dividerColor = P.creamDark }) {
+export function CockpitShell({ rail, canvas, dividerColor = P.creamDark, paddingBottom = 64 }) {
   return (
     <div
       className="cockpit-shell"
@@ -42,7 +45,7 @@ export function CockpitShell({ rail, canvas, dividerColor = P.creamDark }) {
         gap: COCKPIT_GAP,
         maxWidth: 1320,
         margin: '0 auto',
-        padding: '24px 24px 64px',
+        padding: `24px 24px ${paddingBottom}px`,
         alignItems: 'flex-start',
       }}
     >

@@ -43,6 +43,23 @@ const MEANS = [
   },
 ];
 
+// Bracket rule. A pair of these fences the interactive area: one closing the
+// intro copy, one opening the editorial section below. Arrow Red at the center
+// fading out to the page on both sides, so it separates without the hard edge a
+// solid rule cuts across a dark page.
+function BracketRule({ style }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        height: 2,
+        background: `linear-gradient(90deg, transparent 0%, ${withAlpha(P.gold, 0.35)} 18%, ${P.gold} 50%, ${withAlpha(P.gold, 0.35)} 82%, transparent 100%)`,
+        ...style,
+      }}
+    />
+  );
+}
+
 function StatCard({ label, value, sub, color }) {
   return (
     <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 12, padding: "18px 20px" }}>
@@ -93,17 +110,13 @@ export function RentVsOwnPage() {
         </header>
       </div>
 
-      {/* These two Arrow Red rules bracket the interactive area. The first
-          closes the intro copy, the second opens the editorial section below,
-          so everything between them is the tool and its chart. Both are 3px and
-          full-bleed so they read as a matched pair. */}
-      <div aria-hidden="true" style={{ height: 3, background: P.gold }} />
+      <BracketRule />
 
       {/* The tool renders full-bleed: on desktop it becomes the cockpit
           (sticky inputs rail + results canvas) and needs the wider frame. */}
       <RentVsOwnChart />
 
-      <div aria-hidden="true" style={{ height: 3, background: P.gold, marginTop: 24 }} />
+      <BracketRule style={{ marginTop: 4 }} />
 
       <article style={{ padding: "40px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14 }}>

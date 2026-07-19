@@ -597,13 +597,18 @@ export function RentVsOwnChart() {
     return (
       <div className="rvo">
         <style>{css}</style>
-        <CockpitShell rail={rail} canvas={canvas} dividerColor={HAIR} />
+        {/* Small bottom padding: the page draws its closing rule immediately
+            below this, and the default 64 left it floating well under the
+            caption. */}
+        <CockpitShell rail={rail} canvas={canvas} dividerColor={HAIR} paddingBottom={16} />
       </div>
     );
   }
 
   return (
-    <div className="rvo" style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px" }}>
+    // Bottom padding mirrors the cockpit's, so the page's closing rule sits the
+    // same distance off the caption in both layouts.
+    <div className="rvo" style={{ maxWidth: 900, margin: "0 auto", padding: "0 24px 16px" }}>
       <style>{css}</style>
       {rail}
       <div style={{ marginTop: 22 }}>{canvas}</div>
