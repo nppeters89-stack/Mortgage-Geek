@@ -7,6 +7,7 @@ import { fmt, pctCap, withAlpha } from "../utils/format";
 import { calculateAPR } from "../utils/math";
 import { useIsCockpit } from "../utils/hooks";
 import { MortgageCalcIcon, PreQualIcon } from "../components/icons";
+import { ToolLockup } from "../components/ToolLockup";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { CalcInput } from "../components/CalcInput";
 import { RateInput } from "../components/RateInput";
@@ -453,13 +454,12 @@ export function PreQualPage() {
   );
 
   const introJsx = (
-    <div style={{ textAlign: "center", marginBottom: 36 }}>
-      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2.5, textTransform: "uppercase", color: P.goldMuted, display: "block", marginBottom: 8 }}>What Can You Afford?</span>
-      <h1 style={{ fontFamily: F.display, fontSize: "clamp(26px, 4vw, 38px)", color: P.navy, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
-        Pre-Qual Simulator
-        <PreQualIcon size={32} variant="navy" />
+    <div style={{ maxWidth: 720, margin: "0 auto 36px" }}>
+      <ToolLockup Icon={PreQualIcon} title="Pre-Qual" accent="Simulator" descriptor="Approval Odds" variant="light" style={{ marginBottom: 20 }} />
+      <h1 style={{ fontFamily: F.display, fontSize: 42, color: P.navy, fontWeight: 400, lineHeight: 1.1, margin: "0 0 14px", textAlign: "center" }}>
+        What you can actually qualify for, <em style={{ fontStyle: "italic", color: P.gold }}>before you shop</em>.
       </h1>
-      <p style={{ fontSize: 14, color: P.warmGray, maxWidth: 560, margin: "0 auto" }}>Enter your income and debts. See what you qualify for under each loan program — with their real DTI limits and mortgage insurance rules.</p>
+      <p style={{ fontSize: 15, color: P.warmGray, lineHeight: 1.65, margin: 0 }}>Enter your income and debts. See what you qualify for under each loan program, with their real DTI limits and mortgage insurance rules.</p>
     </div>
   );
 

@@ -3,7 +3,7 @@ import { P, F } from "../theme";
 import { NAV_TOPICS, NAV_TOOLS } from "../data/nav.js";
 import { HEADSHOT } from "../data/headshot.js";
 import { useIsMobile, useIsStandalone } from "../utils/hooks";
-import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon } from "./icons";
+import { MortgageCalcIcon, CompareIcon, PreQualIcon, CashToCloseIcon, RentVsOwnIcon } from "./icons";
 
 export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, setMobileOpen }) {
   const [expandedNav, setExpandedNav] = useState(null);
@@ -109,7 +109,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                 >
                   <span style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
+                      {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__RENTVSOWN_ICON__" ? <RentVsOwnIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
                     </span>
                     <span>{item.label}</span>
                   </span>
@@ -159,7 +159,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
                 className={`nav-btn ${activeSection === item.id ? "nav-btn-active" : ""}`}
               >
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__RENTVSOWN_ICON__" ? <RentVsOwnIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
                 </span>
                 <span>{item.label}</span>
               </button>
@@ -169,7 +169,7 @@ export function Sidebar({ activeSection, onNavigate, onSubNavigate, mobileOpen, 
             {NAV_TOOLS.filter(item => !item.href || item.reference).map((item) => {
               const iconNode = (
                 <span style={{ fontSize: 16, width: 22, textAlign: "center", flexShrink: 0, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
+                  {item.icon === "__CALC_ICON__" ? <MortgageCalcIcon size={16} variant="cream" /> : item.icon === "__COMPARE_ICON__" ? <CompareIcon size={18} variant="cream" /> : item.icon === "__PREQUAL_ICON__" ? <PreQualIcon size={18} variant="cream" /> : item.icon === "__CASH_ICON__" ? <CashToCloseIcon size={18} variant="cream" /> : item.icon === "__RENTVSOWN_ICON__" ? <RentVsOwnIcon size={18} variant="cream" /> : item.icon === "__GEEKCHARTS_ICON__" ? <img src="/assets/geek-charts-glyph.svg" alt="" width={18} height={18} style={{ display: "block", borderRadius: 4 }} /> : item.icon}
                 </span>
               );
               if (item.href) {

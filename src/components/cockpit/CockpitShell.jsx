@@ -29,8 +29,14 @@ const COCKPIT_GAP = 32;
  * Props
  *  - rail:   ReactNode — the inputs column (sticky)
  *  - canvas: ReactNode — the right-side stack (rate strip + cards + detail panel + insight)
+ *  - dividerColor: string — optional override for the rail/canvas rule. Defaults
+ *    to P.creamDark (the light-surface value used by CalculatorPage and
+ *    PreQualPage). Dark-surface tools pass a cream-alpha hairline instead.
+ *  - paddingBottom: number — optional override for the shell's bottom padding.
+ *    Defaults to 64. Tools that draw their own boundary immediately below the
+ *    canvas pass a smaller value so the rule sits against the content.
  */
-export function CockpitShell({ rail, canvas }) {
+export function CockpitShell({ rail, canvas, dividerColor = P.creamDark, paddingBottom = 64 }) {
   return (
     <div
       className="cockpit-shell"
@@ -39,7 +45,7 @@ export function CockpitShell({ rail, canvas }) {
         gap: COCKPIT_GAP,
         maxWidth: 1320,
         margin: '0 auto',
-        padding: '24px 24px 64px',
+        padding: `24px 24px ${paddingBottom}px`,
         alignItems: 'flex-start',
       }}
     >
@@ -62,7 +68,7 @@ export function CockpitShell({ rail, canvas }) {
           paddingBottom: 24,
           // Subtle right-side rule to separate the rail from the canvas.
           // Implemented as a border so it scrolls with the page bg.
-          borderRight: `1px solid ${P.creamDark}`,
+          borderRight: `1px solid ${dividerColor}`,
           paddingRight: COCKPIT_GAP / 2,
         }}
       >

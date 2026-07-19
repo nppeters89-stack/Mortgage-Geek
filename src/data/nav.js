@@ -52,6 +52,7 @@ export const NAV_TOOLS = [
   { id: "prequal", label: "Pre-Qual Simulator", icon: "__PREQUAL_ICON__", href: "/prequal" },
   { id: "compare", label: "Loan Comparison", icon: "__COMPARE_ICON__", href: "/compare" },
   { id: "cashtoclose", label: "Cash to Close", icon: "__CASH_ICON__", href: "/cash-to-close" },
+  { id: "rentvsown", label: "Rent vs. Own", icon: "__RENTVSOWN_ICON__", href: "/rent-vs-own" },
   { id: "deepdives", label: "Deep Dives", icon: "🐳", href: "/deep-dives", reference: true },
   { id: "geekcharts", label: "Geek Charts", icon: "__GEEKCHARTS_ICON__", href: "/geek-charts", reference: true },
   { id: "checklist", label: "Pre-Approval Checklist", icon: "✅", href: "/pre-approval-checklist", reference: true },
