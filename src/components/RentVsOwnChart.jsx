@@ -499,7 +499,7 @@ export function RentVsOwnChart() {
 
         <Slider
           id="rvo-rate" label="Mortgage rate" field="rate" value={inputs.rate} step={0.125}
-          display={`${inputs.rate.toFixed(2)}%`}
+          display={`${inputs.rate.toFixed(3)}%`}
           hint="Defaults to today's average for the selected loan program when it loads."
           onCommit={(v) => {
             const rate = clampInput("rate", v);
