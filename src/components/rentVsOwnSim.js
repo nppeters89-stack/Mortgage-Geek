@@ -214,7 +214,11 @@ export function simulateRentVsOwn(input = {}) {
     breakevenYear,
     leadChangesLater,
     payment,
-    owningMonthOne: payment + taxM + insM + (chargesMI ? miM : 0),
+    // Rounds taxes and insurance to whole dollars the way the payment calculator
+    // does, so this readout equals the calculator's total to the dollar. The
+    // month-by-month simulation above keeps the precise values, so the chart and
+    // verdict are unaffected.
+    owningMonthOne: payment + Math.round(taxM) + Math.round(insM) + (chargesMI ? miM : 0),
     sellCostRate: sell,
     miDropMonth: miDropMonth || null,
     flipMonth: flipMonth || null,
