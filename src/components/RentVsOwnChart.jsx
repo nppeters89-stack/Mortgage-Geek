@@ -235,8 +235,17 @@ const BASE_CASE_CAPTION =
 export function RentVsOwnChart() {
   const [inputs, setInputs] = useState(DEFAULTS);
   const [hoveredYear, setHoveredYear] = useState(null);
-  const userTouchedRate = useRef(false);
   const isCockpit = useIsCockpit();
+
+  // Each program keeps its own rate, the same way the payment calculator does,
+  // so switching tabs shows that program's live default (or whatever the user
+  // last dragged it to) rather than carrying the Conventional rate across.
+  // Seeded with the shared fallback until the API resolves. touchedRates marks
+  // a program whose rate the user set by hand, so the API never overwrites it.
+  const [programRates, setProgramRates] = useState(() =>
+    Object.fromEntries(LOAN_PROGRAMS.map((p) => [p, DEFAULTS.rate]))
+  );
+  const touchedRates = useRef({});
 
   // Property tax location, same source and shape as the calculator. The metro
   // defaults to the state average, which for Tennessee is the 0.75% the base
@@ -258,22 +267,46 @@ export function RentVsOwnChart() {
   // the Advanced panel's tax field stays a real, overridable input.
   useEffect(() => { set("taxPct", taxRate); }, [taxRate]);
 
-  // Live 30-year rate from the same source as the calculator (client-only, so it
-  // never runs during prerender). Falls back silently to the 6.43 default.
+  // Live per-program rates from the same source and with the same conservative
+  // rounding as the calculator (client-only, so it never runs during prerender).
+  // Conventional takes the 30-year fixed, FHA and VA their own quotes, and USDA
+  // follows the FHA rate, exactly as the calculator does (the feed carries no
+  // separate USDA quote). Falls back silently to the shared default.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const res = await fetch("/api/rates");
         const data = await res.json();
-        if (cancelled || userTouchedRate.current || !data.success || !data.rates) return;
-        const conv = data.rates.find((r) => r.label.toLowerCase().includes("30-year fixed"));
-        if (!conv) return;
-        const r = roundDefaultRate(parseFloat(conv.rate));
-        if (r >= LIMITS.rate[0] && r <= LIMITS.rate[1]) {
-          setInputs((prev) => (userTouchedRate.current ? prev : { ...prev, rate: Math.round(r / 0.125) * 0.125 }));
-        }
-      } catch { /* keep the 6.43 fallback */ }
+        if (cancelled || !data.success || !data.rates) return;
+        const find = (label) => data.rates.find((r) => r.label.toLowerCase().includes(label));
+        const parse = (entry) => {
+          if (!entry) return null;
+          const r = roundDefaultRate(parseFloat(entry.rate));
+          return r >= LIMITS.rate[0] && r <= LIMITS.rate[1] ? r : null;
+        };
+        const fha = parse(find("fha"));
+        const apiRates = {
+          Conventional: parse(find("30-year fixed")),
+          FHA: fha,
+          VA: parse(find("va")),
+          USDA: fha,
+        };
+        const touched = touchedRates.current;
+        setProgramRates((prev) => {
+          const next = { ...prev };
+          for (const p of LOAN_PROGRAMS) {
+            if (apiRates[p] != null && !touched[p]) next[p] = apiRates[p];
+          }
+          return next;
+        });
+        // Keep the active, untouched program's slider in step with its baseline.
+        setInputs((prev) =>
+          apiRates[prev.program] != null && !touched[prev.program]
+            ? { ...prev, rate: apiRates[prev.program] }
+            : prev
+        );
+      } catch { /* keep the fallback default */ }
     })();
     return () => { cancelled = true; };
   }, []);
@@ -388,7 +421,7 @@ export function RentVsOwnChart() {
                   type="button"
                   className={`rvo-tab${active ? " is-active" : ""}`}
                   aria-pressed={active}
-                  onClick={() => set("program", name)}
+                  onClick={() => setInputs((prev) => ({ ...prev, program: name, rate: programRates[name] }))}
                   style={active ? { background: withAlpha(color, 0.18), borderColor: withAlpha(color, 0.75) } : undefined}
                 >
                   {name === "Conventional" ? "Conv" : name}
@@ -437,8 +470,13 @@ export function RentVsOwnChart() {
         <Slider
           id="rvo-rate" label="Mortgage rate" field="rate" value={inputs.rate} step={0.125}
           display={`${inputs.rate.toFixed(2)}%`}
-          hint="Defaults to today's 30-year average when it loads."
-          onCommit={(v) => { userTouchedRate.current = true; set("rate", v); }}
+          hint="Defaults to today's average for the selected loan program when it loads."
+          onCommit={(v) => {
+            const rate = clampInput("rate", v);
+            touchedRates.current[inputs.program] = true;
+            setProgramRates((prev) => ({ ...prev, [inputs.program]: rate }));
+            setInputs((prev) => ({ ...prev, rate }));
+          }}
         />
         <Slider
           id="rvo-rentg" label="Rent growth / yr" field="rentG" value={inputs.rentG} step={0.1}
