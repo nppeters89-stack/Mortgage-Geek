@@ -110,7 +110,7 @@ export function CalculatorPage() {
     if (homePrice > 0) setDownPct(Math.round((v / homePrice) * 10000) / 100);
   };
   const [taxState, setTaxState] = useState("TN");
-  const [taxMetro, setTaxMetro] = useState("Nashville");
+  const [taxMetro, setTaxMetro] = useState("Nashville/Davidson");
   const [vaUsage, setVaUsage] = useState("first");
   const paramHoa = parseFloat(params.get("hoa"));
   const [showHoa, setShowHoa] = useState(paramHoa > 0);
@@ -128,12 +128,14 @@ export function CalculatorPage() {
   const taxStateSelectId = useId();
   const vaUsageSelectId = useId();
   useEffect(() => { setTaxes(Math.round((homePrice * (taxRate / 100)) / 12)); }, [taxState, taxMetro, homePrice]);
-  // Reset metro when state changes
-  useEffect(() => {
-    const newMetros = SHARED_STATE_TAX_RATES[taxState]?.metros;
-    if (newMetros && newMetros.length > 0) setTaxMetro(newMetros[0].name);
-    else setTaxMetro("");
-  }, [taxState]);
+  // Changing the state resets the county to that state's first entry. Done in the
+  // select's onChange (see changeTaxState), not an effect, so it never fires on
+  // mount and the default (Nashville/Davidson) is honored.
+  const changeTaxState = (code) => {
+    setTaxState(code);
+    const newMetros = SHARED_STATE_TAX_RATES[code]?.metros;
+    setTaxMetro(newMetros && newMetros.length > 0 ? newMetros[0].name : "");
+  };
 
   const [insurance, setInsurance] = useState(Math.round((350000 * 0.0035) / 12));
   useEffect(() => { setInsurance(Math.round((homePrice * 0.0035) / 12)); }, [homePrice]);
@@ -554,7 +556,7 @@ export function CalculatorPage() {
                   <select
                     id={taxStateSelectId}
                     value={taxState}
-                    onChange={(e) => setTaxState(e.target.value)}
+                    onChange={(e) => changeTaxState(e.target.value)}
                     style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                   >
                     {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (
@@ -1274,7 +1276,7 @@ export function CalculatorPage() {
                       <select
                         id={taxStateSelectId}
                         value={taxState}
-                        onChange={(e) => setTaxState(e.target.value)}
+                        onChange={(e) => changeTaxState(e.target.value)}
                         style={{ border: `1px solid ${P.creamDark}`, borderRadius: 8, background: "#fff", padding: "9px 12px", fontSize: 14, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", cursor: "pointer", appearance: "none", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236F6860' d='M6 8L1 3h10z'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                       >
                         {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, s]) => (

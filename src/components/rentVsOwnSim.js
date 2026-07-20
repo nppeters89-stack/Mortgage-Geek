@@ -19,9 +19,9 @@
 // the math, not the shipped default.
 //
 // The shipped default matches the payment calculator's opening scenario
-// ($350,000, 3.5% down, Conventional at 6.75%, the calculator's default 0.70%
-// property tax, 0.35% insurance, 7% selling cost): owning is ahead $137,870 at
-// year 10, breakeven year 3, owning $2,643/mo, which equals the calculator's
+// ($350,000, 3.5% down, Conventional at 6.75%, Nashville/Davidson's 0.95%
+// property tax, 0.35% insurance, 7% selling cost): owning is ahead $122,934 at
+// year 10, breakeven year 4, owning $2,716/mo, which equals the calculator's
 // Conventional payment for the same inputs. Any change should be checked against
 // both.
 //
@@ -52,7 +52,7 @@ export const DEFAULTS = {
   rentG: 4.1,
   inv: 10,
   hz: 10,
-  taxPct: 0.7,
+  taxPct: 0.95,
   insPct: 0.35,
   ccPct: 3,
   sellPct: 7,

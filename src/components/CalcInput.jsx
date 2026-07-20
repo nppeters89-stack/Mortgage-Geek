@@ -1,7 +1,10 @@
 import { useState, useEffect, useId } from "react";
 import { P, F } from "../theme";
 
-export function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999, comma, labelColor }) {
+// Colors default to the light calculator surface. Dark-surface consumers (the
+// Rent vs Own tool) pass overrides so the field shape stays identical while the
+// palette fits their background.
+export function CalcInput({ label, value, onChange, prefix, suffix, step = 1, min = 0, max = 99999999, comma, labelColor, bg = P.cream, textColor = P.text, borderColor = P.creamDark, affixColor = P.warmGray }) {
   const isEmpty = value === "" || value === null || value === undefined;
   const fmtComma = (v) => (v === "" || v === null || v === undefined) ? "" : comma ? Number(v).toLocaleString("en-US") : String(v);
   const [localVal, setLocalVal] = useState(fmtComma(value));
@@ -36,11 +39,11 @@ export function CalcInput({ label, value, onChange, prefix, suffix, step = 1, mi
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
       <label htmlFor={inputId} style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: labelColor || P.warmGrayLight }}>{label}</label>
-      <div style={{ display: "flex", alignItems: "center", border: `1px solid ${P.creamDark}`, borderRadius: 8, overflow: "hidden", background: P.cream }}>
-        {prefix && <span style={{ padding: "9px 0 9px 12px", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{prefix}</span>}
+      <div style={{ display: "flex", alignItems: "center", border: `1px solid ${borderColor}`, borderRadius: 8, overflow: "hidden", background: bg }}>
+        {prefix && <span style={{ padding: "9px 0 9px 12px", fontSize: 14, fontWeight: 600, color: affixColor }}>{prefix}</span>}
         <input id={inputId} type={comma ? "text" : "number"} inputMode="decimal" value={localVal} onChange={handleChange} onFocus={handleFocus} onBlur={handleBlur} step={step}
-          style={{ flex: 1, border: "none", background: "transparent", padding: "9px 12px", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: P.text, outline: "none", width: "100%" }} />
-        {suffix && <span style={{ padding: "9px 12px 9px 0", fontSize: 14, fontWeight: 600, color: P.warmGray }}>{suffix}</span>}
+          style={{ flex: 1, border: "none", background: "transparent", padding: "9px 12px", fontSize: 15, fontFamily: F.body, fontWeight: 600, color: textColor, outline: "none", width: "100%" }} />
+        {suffix && <span style={{ padding: "9px 12px 9px 0", fontSize: 14, fontWeight: 600, color: affixColor }}>{suffix}</span>}
       </div>
     </div>
   );

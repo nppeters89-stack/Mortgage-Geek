@@ -4,6 +4,7 @@ import { P, F, CHART_COLORS, PROGRAM_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { useIsCockpit } from "../utils/hooks";
 import { CockpitShell } from "./cockpit/CockpitShell";
+import { CalcInput } from "./CalcInput";
 import { SHARED_STATE_TAX_RATES } from "../data/taxRates";
 import { LOAN_PROGRAMS, VA_USAGE_LABELS } from "../data/loanPrograms.js";
 import { simulateRentVsOwn, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE } from "./rentVsOwnSim";
@@ -24,6 +25,10 @@ const INSET = withAlpha(CHART_COLORS.line, 0.04);
 const OWN = CHART_COLORS.accent;
 const RENT = CHART_COLORS.sp500;
 const GOLD = CHART_COLORS.gold;
+
+// Dark-surface palette for the reused calculator input (CalcInput), so its shape
+// matches the calculator while the colors fit this tool's background.
+const FIELD_DARK = { labelColor: MUT, bg: withAlpha(P.navyDark, 0.6), textColor: CREAM, borderColor: BORDER, affixColor: MUT };
 
 // $X.XXM / $XXXK for the gutter endpoint labels.
 const compact = (v) => {
@@ -105,6 +110,15 @@ const css = `
   .rvo-select option { background: ${P.navy}; color: ${CREAM}; }
   .rvo-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+  /* Section headers and the calculator-style mortgage input blocks. */
+  .rvo-section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: ${GOLD}; margin-bottom: 12px; }
+  .rvo-dp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rvo-baseloan { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 14px; background: ${withAlpha(P.navyDark, 0.6)}; border: 1px solid ${BORDER}; border-radius: 8px; text-align: center; }
+  .rvo-baseloan-l { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: ${MUT}; }
+  .rvo-baseloan-v { font-family: ${F.display}; font-size: 20px; color: ${CREAM}; }
+  .rvo-tax-group { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: ${withAlpha(P.navyDark, 0.35)}; border: 1px solid ${withAlpha(OWN, 0.25)}; border-radius: 10px; }
+  .rvo-tax-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: ${MUT}; }
+
   .rvo-caption { font-size: 13px; line-height: 1.65; color: ${withAlpha(CHART_COLORS.line, 0.72)}; margin: 16px 4px 0; max-width: 80ch; }
   .rvo-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
@@ -148,42 +162,6 @@ function NumField({ id, label, field, value, step, onCommit }) {
           focused.current = false;
           const n = parseFloat(e.target.value);
           const next = clampInput(field, n);
-          onCommit(next);
-          setText(String(next));
-        }}
-      />
-    </div>
-  );
-}
-
-// Dollar twin of a percentage field. Holds its own text while focused so typing
-// "1" on the way to "1400" doesn't drive the percentage to a rounding artifact,
-// and re-syncs from the incoming value whenever the user is not editing it
-// (which is what keeps it in step when the percentage or home price changes).
-function LinkedDollarField({ id, label, value, max, onCommit }) {
-  const [text, setText] = useState(String(value));
-  const focused = useRef(false);
-  useEffect(() => { if (!focused.current) setText(String(value)); }, [value]);
-  const commit = (raw) => {
-    const n = parseFloat(raw);
-    if (!Number.isFinite(n)) return null;
-    return Math.min(max, Math.max(0, n));
-  };
-  return (
-    <div className="rvo-field">
-      <label className="rvo-flabel" htmlFor={id}>{label}</label>
-      <input
-        id={id} type="number" min={0} max={max} step={25} value={text}
-        onFocus={() => { focused.current = true; }}
-        onChange={(e) => {
-          setText(e.target.value);
-          const n = parseFloat(e.target.value);
-          if (Number.isFinite(n) && n >= 0 && n <= max) onCommit(n);
-        }}
-        onBlur={(e) => {
-          focused.current = false;
-          const next = commit(e.target.value);
-          if (next === null) { setText(String(value)); return; }
           onCommit(next);
           setText(String(next));
         }}
@@ -252,9 +230,24 @@ export function RentVsOwnChart() {
   // changes (see the effect below), which for Tennessee is the 0.70% the base
   // case documents.
   const [taxState, setTaxState] = useState("TN");
-  const [taxMetro, setTaxMetro] = useState("");
+  const [taxMetro, setTaxMetro] = useState("Nashville/Davidson");
 
   const set = (field, value) => setInputs((prev) => ({ ...prev, [field]: clampInput(field, value) }));
+
+  // Down payment as a dollar amount, and handlers that keep the % and $ fields in
+  // step, mirroring the calculator. Editing the dollar field derives the percent.
+  const downAmt = Math.round((inputs.price * inputs.downPct) / 100);
+  const handleDownPct = (v) => set("downPct", v);
+  const handleDownDollar = (v) => { if (inputs.price > 0) set("downPct", Math.round((v / inputs.price) * 10000) / 100); };
+  const baseLoan = inputs.price - (inputs.price * inputs.downPct) / 100;
+
+  // Insurance shown as a monthly dollar figure like the calculator; stored as an
+  // annual percent. Property tax likewise: the county selector or a typed monthly
+  // dollar both resolve to taxPct.
+  const insMonthly = Math.round((inputs.price * inputs.insPct) / 100 / 12);
+  const setInsMonthly = (dollars) => set("insPct", inputs.price > 0 ? Math.round(((dollars * 12) / inputs.price) * 100 * 1000) / 1000 : 0);
+  const taxMonthly = Math.round((inputs.price * inputs.taxPct) / 100 / 12);
+  const setTaxMonthly = (dollars) => set("taxPct", inputs.price > 0 ? Math.round(((dollars * 12) / inputs.price) * 100 * 1000) / 1000 : 0);
 
   const stateData = SHARED_STATE_TAX_RATES[taxState];
   const metroList = stateData?.metros || [];
@@ -264,16 +257,17 @@ export function RentVsOwnChart() {
   // "from the Tennessee average".
   const countyLabel = selectedMetro ? selectedMetro.name : stateData ? `the ${stateData.name} average` : "your county";
 
-  // Reset the metro to the state's first county when the state changes, matching
-  // the calculator. This also runs on mount, so Tennessee opens on its first
-  // county (the calculator's default), keeping the two tools' opening tax equal.
-  useEffect(() => {
-    const metros = SHARED_STATE_TAX_RATES[taxState]?.metros;
+  // Changing the state resets the county to that state's first entry. Done in the
+  // select's onChange, not an effect, so it never fires on mount and the default
+  // (Nashville/Davidson) is honored.
+  const changeState = (code) => {
+    setTaxState(code);
+    const metros = SHARED_STATE_TAX_RATES[code]?.metros;
     setTaxMetro(metros && metros.length > 0 ? metros[0].name : "");
-  }, [taxState]);
+  };
 
   // Location drives the tax rate. Kept as an effect (not derived at sim time) so
-  // the Advanced panel's tax field stays a real, overridable input.
+  // the tax field stays a real, overridable input.
   useEffect(() => { set("taxPct", taxRate); }, [taxRate]);
 
   // Live per-program rates from the same source and with the same conservative
@@ -414,8 +408,24 @@ export function RentVsOwnChart() {
   // stacks above the results, matching the calculator.
   const rail = (
     <>
-      {/* Inputs */}
+      {/* Rent diagnostics — the two questions that frame the whole comparison. */}
       <div className="rvo-panel">
+        <div className="rvo-section-label">Your rent</div>
+        <CalcInput label="Monthly rent today" value={inputs.rent0} onChange={(v) => set("rent0", v)} prefix="$" step={50} comma min={LIMITS.rent0[0]} max={LIMITS.rent0[1]} {...FIELD_DARK} />
+        <div style={{ marginTop: 12 }}>
+          <Slider
+            id="rvo-hz" label="How long you'll stay" field="hz" value={inputs.hz} step={1}
+            display={inputs.hz === 1 ? "1 yr" : `${inputs.hz} yrs`}
+            hint="The verdict is read at this year. This is the question that decides most rent vs. own math."
+            onCommit={(v) => set("hz", v)}
+          />
+        </div>
+      </div>
+
+      {/* Mortgage inputs — same controls and layout as the payment calculator. */}
+      <div className="rvo-panel" style={{ marginTop: 12 }}>
+        <div className="rvo-section-label">If you own</div>
+
         {/* Loan program: single-select, since the projection plots one owning
             scenario against the renter. */}
         <div className="rvo-field" style={{ marginBottom: 12 }}>
@@ -452,29 +462,40 @@ export function RentVsOwnChart() {
           </div>
         )}
 
-        <div className="rvo-row">
-          <NumField id="rvo-price" label="Home price" field="price" value={inputs.price} step={5000} onCommit={(v) => set("price", v)} />
-          <NumField id="rvo-down" label="Down payment %" field="downPct" value={inputs.downPct} step={0.5} onCommit={(v) => set("downPct", v)} />
-          <NumField id="rvo-rent" label="Monthly rent today" field="rent0" value={inputs.rent0} step={50} onCommit={(v) => set("rent0", v)} />
-        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <CalcInput label="Home price" value={inputs.price} onChange={(v) => set("price", v)} prefix="$" step={5000} comma min={LIMITS.price[0]} max={LIMITS.price[1]} {...FIELD_DARK} />
 
-        {/* Property tax location, same tables the calculator uses. */}
-        <div className="rvo-grid2" style={{ marginTop: 12 }}>
-          <div className="rvo-field">
-            <label className="rvo-flabel" htmlFor="rvo-state">State</label>
-            <select id="rvo-state" className="rvo-select" value={taxState} onChange={(e) => { setTaxState(e.target.value); setTaxMetro(""); }}>
-              {Object.entries(SHARED_STATE_TAX_RATES).map(([code, d]) => <option key={code} value={code}>{d.name}</option>)}
-            </select>
+          <div className="rvo-dp-row">
+            <CalcInput label="Down payment %" value={inputs.downPct} onChange={handleDownPct} suffix="%" step={0.5} min={LIMITS.downPct[0]} max={LIMITS.downPct[1]} {...FIELD_DARK} />
+            <CalcInput label="Down payment $" value={downAmt} onChange={handleDownDollar} prefix="$" step={1000} comma min={0} max={Math.round((inputs.price * LIMITS.downPct[1]) / 100)} {...FIELD_DARK} />
           </div>
-          <div className="rvo-field">
-            <label className="rvo-flabel" htmlFor="rvo-metro">County / metro</label>
-            <select id="rvo-metro" className="rvo-select" value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)} disabled={!metroList.length}>
-              <option value="">State Avg ({stateData?.rate}%)</option>
-              {metroList.map((m) => <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>)}
-            </select>
+
+          <div className="rvo-baseloan">
+            <span className="rvo-baseloan-l">Base Loan Amount</span>
+            <span className="rvo-baseloan-v">{fmt(Math.round(baseLoan))}</span>
+          </div>
+
+          <CalcInput label="Homeowners Ins. (est.)" value={insMonthly} onChange={setInsMonthly} prefix="$" suffix="/mo" step={5} min={0} max={9999} {...FIELD_DARK} />
+
+          {/* Property tax — state, county, and an editable monthly amount, the
+              same layout the calculator uses. */}
+          <div className="rvo-tax-group">
+            <div className="rvo-tax-label">Property Tax</div>
+            <div className="rvo-field">
+              <label className="rvo-flabel" htmlFor="rvo-state">Location</label>
+              <select id="rvo-state" className="rvo-select" value={taxState} onChange={(e) => changeState(e.target.value)}>
+                {Object.entries(SHARED_STATE_TAX_RATES).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, d]) => <option key={code} value={code}>{d.name}</option>)}
+              </select>
+              {metroList.length > 0 && (
+                <select aria-label="County or metro tax area" className="rvo-select" style={{ marginTop: 6 }} value={taxMetro} onChange={(e) => setTaxMetro(e.target.value)}>
+                  <option value="">State Avg ({stateData?.rate}%)</option>
+                  {metroList.map((m) => <option key={m.name} value={m.name}>{m.name} ({m.rate}%)</option>)}
+                </select>
+              )}
+            </div>
+            <CalcInput label="Monthly Amount" value={taxMonthly} onChange={setTaxMonthly} prefix="$" step={5} min={0} max={99999} {...FIELD_DARK} />
           </div>
         </div>
-        <p className="rvo-note">Property tax set to {taxRate}% a year from {countyLabel}. Override it under Advanced.</p>
 
         <Slider
           id="rvo-rate" label="Mortgage rate" field="rate" value={inputs.rate} step={0.125}
@@ -487,53 +508,29 @@ export function RentVsOwnChart() {
             setInputs((prev) => ({ ...prev, rate }));
           }}
         />
-        <Slider
-          id="rvo-rentg" label="Rent growth / yr" field="rentG" value={inputs.rentG} step={0.1}
-          display={`${inputs.rentG.toFixed(1)}%`}
-          hint="4.1% is the 56-year national average (1970 to 2026). Rent has never had a down year."
-          onCommit={(v) => set("rentG", v)}
-        />
-        <Slider
-          id="rvo-inv" label="Investment return / yr" field="inv" value={inputs.inv} step={0.5}
-          display={`${inputs.inv.toFixed(1)}%`}
-          hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."
-          onCommit={(v) => set("inv", v)}
-        />
-        <Slider
-          id="rvo-hz" label="How long you'll stay" field="hz" value={inputs.hz} step={1}
-          display={inputs.hz === 1 ? "1 yr" : `${inputs.hz} yrs`}
-          hint="The verdict is read at this year. This is the question that decides most rent vs. own math."
-          onCommit={(v) => set("hz", v)}
-        />
 
         <details className="rvo-adv">
           <summary>Advanced assumptions</summary>
           <div className="rvo-adv-inner">
-            {/* Homeowner's insurance, entered either way. The percentage is the
-                stored value; the dollar figure is the same number expressed
-                against the current home price, and editing either updates the
-                other. */}
-            <span className="rvo-flabel">Homeowner's insurance</span>
-            <div className="rvo-row" style={{ marginTop: 6 }}>
-              <NumField
-                id="rvo-ins" label="Percent of price / yr" field="insPct" value={inputs.insPct} step={0.05}
-                onCommit={(v) => set("insPct", v)}
-              />
-              <LinkedDollarField
-                id="rvo-ins-dollar" label="Dollars / yr"
-                value={Math.round((inputs.price * inputs.insPct) / 100)}
-                max={Math.round((inputs.price * LIMITS.insPct[1]) / 100)}
-                onCommit={(dollars) => set("insPct", Math.round(((dollars / inputs.price) * 100) * 1000) / 1000)}
-              />
-            </div>
-            <p className="rvo-adv-note">Insurance defaults to 0.35% of the price a year. Enter it either way: the two fields are the same number and stay in step.</p>
+            <Slider
+              id="rvo-rentg" label="Rent growth / yr" field="rentG" value={inputs.rentG} step={0.1}
+              display={`${inputs.rentG.toFixed(1)}%`}
+              hint="4.1% is the 56-year national average (1970 to 2026). Rent has never had a down year."
+              onCommit={(v) => set("rentG", v)}
+            />
+            <Slider
+              id="rvo-inv" label="Investment return / yr" field="inv" value={inputs.inv} step={0.5}
+              display={`${inputs.inv.toFixed(1)}%`}
+              hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."
+              onCommit={(v) => set("inv", v)}
+            />
 
             <div className="rvo-row" style={{ marginTop: 14 }}>
               <NumField id="rvo-cc" label="Closing costs %" field="ccPct" value={inputs.ccPct} step={0.25} onCommit={(v) => set("ccPct", v)} />
               <NumField id="rvo-sell" label="Selling costs %" field="sellPct" value={inputs.sellPct} step={0.25} onCommit={(v) => set("sellPct", v)} />
             </div>
             <p className="rvo-adv-note">Closing costs are what you pay going in, when you buy the home ({fmt(Math.round((inputs.price * inputs.ccPct) / 100))} here), and the renter invests that same cash on day one instead. Selling costs are what comes off the top coming out, when you sell, and the owner is charged them in every year of the chart.</p>
-            <p className="rvo-adv-note">Property tax is set by the state and county above, not here. Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Taxes and insurance are held flat, a simplification the footnotes disclose.</p>
+            <p className="rvo-adv-note">Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Property taxes and insurance are set with the mortgage inputs above and held flat, a simplification the footnotes disclose.</p>
           </div>
         </details>
       </div>
