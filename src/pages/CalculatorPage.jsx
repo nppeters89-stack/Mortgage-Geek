@@ -5,6 +5,7 @@ import { ContactCard } from "../components/homepage/ContactCard";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
 import { generateAmortData, formatPayoff, calculateAPR } from "../utils/math";
+import { resolveProgram, monthlyMI, vaFeeRate as computeVaFeeRate } from "../utils/mortgageMath.js";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { ToolLockup } from "../components/ToolLockup";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -200,31 +201,33 @@ export function CalculatorPage() {
   const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
   const baseLoan = homePrice - downAmt;
 
+  // Per-program loan structure and mortgage insurance come from the shared
+  // mortgageMath module, the same source the Rent vs Own tool uses, so the two
+  // tools cannot drift. The amortized P&I, APR, and card assembly stay here.
+  const convT = resolveProgram({ program: "Conventional", price: homePrice, downPct, downAmt });
+  const fhaT = resolveProgram({ program: "FHA", price: homePrice, downPct, downAmt });
+  const vaT = resolveProgram({ program: "VA", price: homePrice, downPct, downAmt, vaUsage });
+  const usdaT = resolveProgram({ program: "USDA", price: homePrice, downPct, downAmt });
+
   // Conventional
-  const convLoan = baseLoan;
-  const convMiRate = downPct < 5 ? 0.52 : downPct < 10 ? 0.37 : downPct < 20 ? 0.27 : 0;
-  const convMI = (baseLoan * (convMiRate / 100)) / 12;
+  const convLoan = convT.loan;
+  const convMiRate = convT.miRate;
+  const convMI = monthlyMI(convT.baseLoan, convMiRate);
   const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
   const convTotal = convPI + convMI + taxes + insurance + hoa;
 
   // FHA
-  const fhaUpfront = baseLoan * 0.0175;
-  const fhaLoan = baseLoan + fhaUpfront;
-  const fhaMiRate = downPct < 5 ? 0.55 : 0.50;
-  const fhaMI = (baseLoan * (fhaMiRate / 100)) / 12;
+  const fhaUpfront = fhaT.upfront;
+  const fhaLoan = fhaT.loan;
+  const fhaMiRate = fhaT.miRate;
+  const fhaMI = monthlyMI(fhaT.baseLoan, fhaMiRate);
   const { monthly: fhaPI } = useMemo(() => generateAmortData(fhaLoan, fhaRate, term), [fhaLoan, fhaRate, term]);
   const fhaTotal = fhaPI + fhaMI + taxes + insurance + hoa;
 
   // VA - Funding fee varies by usage type and down payment
-  const vaFeeRate = useMemo(() => {
-    if (vaUsage === "exempt") return 0;
-    if (downPct >= 10) return 1.25;
-    if (downPct >= 5) return 1.50;
-    // Less than 5% down
-    return vaUsage === "first" ? 2.15 : 3.30;
-  }, [vaUsage, downPct]);
-  const vaFee = baseLoan * (vaFeeRate / 100);
-  const vaLoan = baseLoan + vaFee;
+  const vaFeeRate = computeVaFeeRate(vaUsage, downPct);
+  const vaFee = vaT.upfront;
+  const vaLoan = vaT.loan;
   const { monthly: vaPI } = useMemo(() => generateAmortData(vaLoan, vaRate, term), [vaLoan, vaRate, term]);
   const vaTotal = vaPI + taxes + insurance + hoa;
 
@@ -248,10 +251,10 @@ export function CalculatorPage() {
   const vaAPR = calculateAPR(vaLoan, vaAprCharges, vaRate, term, 0, 0);
 
   // USDA — Rural Development guaranteed loan (FY2026 fees)
-  const usdaUpfront = baseLoan * 0.01;
-  const usdaLoan = baseLoan + usdaUpfront;
-  const usdaMiRate = 0.35;
-  const usdaMI = (baseLoan * (usdaMiRate / 100)) / 12;
+  const usdaUpfront = usdaT.upfront;
+  const usdaLoan = usdaT.loan;
+  const usdaMiRate = usdaT.miRate;
+  const usdaMI = monthlyMI(usdaT.baseLoan, usdaMiRate);
   const { monthly: usdaPI } = useMemo(
     () => generateAmortData(usdaLoan, usdaRate, term),
     [usdaLoan, usdaRate, term]

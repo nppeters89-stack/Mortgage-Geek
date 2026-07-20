@@ -13,13 +13,23 @@
 //   - Owner wealth in any year = home value net of selling costs, minus the loan
 //     balance, plus the owner's side fund. Renter wealth = the portfolio.
 //
-// Provenance: at a 6% selling cost the model reproduces the verified reference
-// fixtures exactly (advantage +$118,714 at year 10, breakeven year 4, owning
-// $2,868/mo, owner $314,658, renter $195,944). The shipped selling-cost default
-// is 7%, so the base case below reads +$111,946 at year 10 and owner $307,890,
-// with breakeven still year 4 and the monthly cost of owning unchanged. Any
-// change here should be checked against both.
+// Model-correctness anchor: at $400,000, 5% down, 6.43%, 6% selling cost, the
+// model reproduces the verified Python reference exactly (advantage +$118,714 at
+// year 10, breakeven year 4, owning $2,868/mo). That scenario is a fixture for
+// the math, not the shipped default.
+//
+// The shipped default matches the payment calculator's opening scenario
+// ($350,000, 3.5% down, Conventional at 6.75%, the calculator's default 0.70%
+// property tax, 0.35% insurance, 7% selling cost): owning is ahead $137,870 at
+// year 10, breakeven year 3, owning $2,643/mo, which equals the calculator's
+// Conventional payment for the same inputs. Any change should be checked against
+// both.
+//
+// The per-program loan, mortgage insurance, and payment come from the shared
+// mortgageMath module (via loanPrograms), so this tool and the calculator cannot
+// diverge on the mortgage math.
 import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
+import { monthlyPI } from "../utils/mortgageMath.js";
 
 // Home value compound annual growth: 5.4%, the 1970-2026 CAGR of the Census/HUD
 // average sales price of houses sold (FRED: ASPUS). Not user-adjustable.
@@ -28,17 +38,21 @@ export const HOME_GROWTH = 1.054;
 const TERM_MONTHS = 360;
 const YEARS = 30;
 
+// Defaults match the payment calculator's opening scenario so the two tools
+// agree out of the box: $350k, 3.5% down, Conventional, the calculator's
+// fallback rate, and its default 0.70% Tennessee property tax. The live tool
+// overwrites rate (per-program API) and taxPct (state/county selector) on mount.
 export const DEFAULTS = {
   program: "Conventional",
   vaUsage: "first",
-  price: 400000,
-  downPct: 5,
+  price: 350000,
+  downPct: 3.5,
   rent0: 2000,
-  rate: 6.43,
+  rate: 6.75,
   rentG: 4.1,
   inv: 10,
   hz: 10,
-  taxPct: 0.75,
+  taxPct: 0.7,
   insPct: 0.35,
   ccPct: 3,
   sellPct: 7,
@@ -69,11 +83,11 @@ export function clampInput(key, value) {
   return Math.min(bounds[1], Math.max(bounds[0], value));
 }
 
-// Standard amortized monthly payment on the loan at the given annual rate.
+// Standard amortized monthly payment, over the same 30-year amortization the
+// calculator uses (via the shared mortgageMath helper) so the payment is
+// identical across both tools.
 export function monthlyPayment(loan, rate) {
-  const i = rate / 100 / 12;
-  if (i === 0) return loan / TERM_MONTHS;
-  return (loan * i * Math.pow(1 + i, TERM_MONTHS)) / (Math.pow(1 + i, TERM_MONTHS) - 1);
+  return monthlyPI(loan, rate, TERM_MONTHS / 12);
 }
 
 // The calculator's conservative default: round the live rate to the nearest

@@ -1,19 +1,21 @@
-// Loan program terms: minimum down, financed upfront fees, and mortgage
-// insurance rate and duration for the four programs.
-//
-// These rates are ported verbatim from the calculator (CalculatorPage.jsx,
-// which currently derives them inline). Kept pure and data-only so the
-// rent-vs-own simulation can project them over 360 months. If the calculator is
-// ever refactored to import from here, the two tools stay in sync by
-// construction; until then, a rate change must be made in both places.
+// Rent vs Own program terms. The numeric core (loan structure, MI rate,
+// financed fees, eligibility) comes from the shared mortgageMath module, the
+// same one the payment calculator uses, so the two tools cannot drift. What
+// stays here is Rent vs Own's own layer: the plain-language notes and the
+// mortgage-insurance drop-off schedule its 360-month simulation needs.
 
-export const LOAN_PROGRAMS = ["Conventional", "FHA", "VA", "USDA"];
+import { resolveProgram } from "../utils/mortgageMath.js";
 
-export const VA_USAGE_LABELS = {
-  first: "First-Time Use",
-  subsequent: "Subsequent Use",
-  exempt: "Exempt (Disability)",
-};
+// Re-exported so existing Rent vs Own imports (LOAN_PROGRAMS, VA_USAGE_LABELS,
+// the rate helpers) keep resolving from one place.
+export {
+  LOAN_PROGRAMS,
+  VA_USAGE_LABELS,
+  conventionalMiRate,
+  fhaMiRate,
+  USDA_MI_RATE,
+  vaFeeRate,
+} from "../utils/mortgageMath.js";
 
 // How long mortgage insurance is charged:
 //   "ltv78" — until the balance amortizes to 78% of the original price
@@ -23,103 +25,37 @@ export const VA_USAGE_LABELS = {
 const MI_DROP_RATIO = 0.78;
 const FHA_11YR_MONTHS = 132;
 
-// Conventional PMI, by down payment tier. 0 at 20% or more down.
-export function conventionalMiRate(downPct) {
-  if (downPct >= 20) return 0;
-  if (downPct >= 10) return 0.27;
-  if (downPct >= 5) return 0.37;
-  return 0.52;
-}
-
-// FHA annual MIP.
-export function fhaMiRate(downPct) {
-  return downPct < 5 ? 0.55 : 0.5;
-}
-
-// USDA annual guarantee fee.
-export const USDA_MI_RATE = 0.35;
-
-// VA funding fee, by usage type and down payment.
-export function vaFeeRate(vaUsage, downPct) {
-  if (vaUsage === "exempt") return 0;
-  if (downPct >= 10) return 1.25;
-  if (downPct >= 5) return 1.5;
-  return vaUsage === "first" ? 2.15 : 3.3;
-}
-
-// Resolve a program into the terms the simulation needs.
-//
-// `baseLoan` is price minus down payment. `loan` adds any financed upfront fee
-// (FHA UFMIP, VA funding fee, USDA guarantee fee), which is what the payment
-// amortizes on. Mortgage insurance is charged against `baseLoan`, matching the
-// calculator.
+// Program terms for the simulation: the shared loan/MI/fee numbers plus the
+// Rent vs Own presentation layer (drop-off mode, note, ineligibility wording).
 export function programTerms({ program, price, downPct, vaUsage = "first" }) {
-  const down = (price * downPct) / 100;
-  const baseLoan = price - down;
+  const t = resolveProgram({ program, price, downPct, vaUsage });
 
-  switch (program) {
-    case "FHA": {
-      const upfront = baseLoan * 0.0175;
-      return {
-        program, baseLoan, down, upfront, loan: baseLoan + upfront,
-        upfrontLabel: "UFMIP (1.75%)",
-        miRate: fhaMiRate(downPct),
-        miLabel: `MIP (${fhaMiRate(downPct)}%)`,
-        miMode: downPct < 10 ? "life" : "11yr",
-        miNote: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
-        minDown: 3.5,
-        eligible: downPct >= 3.5,
-        ineligibleReason: downPct < 3.5 ? "FHA loans require a minimum down payment of 3.5%." : null,
-      };
-    }
-    case "VA": {
-      const rate = vaFeeRate(vaUsage, downPct);
-      const upfront = baseLoan * (rate / 100);
-      return {
-        program, baseLoan, down, upfront, loan: baseLoan + upfront,
-        upfrontLabel: rate > 0 ? `Funding Fee (${rate}%)` : null,
-        miRate: 0,
-        miLabel: null,
-        miMode: "none",
-        miNote: vaUsage === "exempt"
-          ? "Funding fee waived, service-connected disability"
-          : "No monthly mortgage insurance",
-        minDown: 0,
-        eligible: true,
-        ineligibleReason: null,
-      };
-    }
-    case "USDA": {
-      const upfront = baseLoan * 0.01;
-      return {
-        program, baseLoan, down, upfront, loan: baseLoan + upfront,
-        upfrontLabel: "Guarantee Fee (1.00%)",
-        miRate: USDA_MI_RATE,
-        miLabel: `Annual Fee (${USDA_MI_RATE}%)`,
-        miMode: "life",
-        miNote: "Annual fee for life of loan, subject to property and income eligibility",
-        minDown: 0,
-        eligible: true,
-        ineligibleReason: null,
-      };
-    }
-    default: {
-      const rate = conventionalMiRate(downPct);
-      return {
-        program: "Conventional", baseLoan, down, upfront: 0, loan: baseLoan,
-        upfrontLabel: null,
-        miRate: rate,
-        miLabel: rate > 0 ? `PMI (${rate}%)` : null,
-        miMode: rate > 0 ? "ltv78" : "none",
-        // Phrased without repeating the acronym, since callers pair this with
-        // miLabel ("PMI (0.37%)").
-        miNote: downPct >= 20 ? "No mortgage insurance required" : "Estimated at 740+ FICO, under 43% DTI",
-        minDown: 3,
-        eligible: downPct >= 3,
-        ineligibleReason: downPct < 3 ? "Conventional loans require a minimum down payment of 3%." : null,
-      };
-    }
-  }
+  const extra = {
+    Conventional: {
+      miMode: t.miRate > 0 ? "ltv78" : "none",
+      miNote: downPct >= 20 ? "No mortgage insurance required" : "Estimated at 740+ FICO, under 43% DTI",
+      ineligibleReason: t.eligible ? null : "Conventional loans require a minimum down payment of 3%.",
+    },
+    FHA: {
+      miMode: downPct < 10 ? "life" : "11yr",
+      miNote: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
+      ineligibleReason: t.eligible ? null : "FHA loans require a minimum down payment of 3.5%.",
+    },
+    VA: {
+      miMode: "none",
+      miNote: vaUsage === "exempt"
+        ? "Funding fee waived, service-connected disability"
+        : "No monthly mortgage insurance",
+      ineligibleReason: null,
+    },
+    USDA: {
+      miMode: "life",
+      miNote: "Annual fee for life of loan, subject to property and income eligibility",
+      ineligibleReason: null,
+    },
+  }[t.program];
+
+  return { ...t, ...extra };
 }
 
 // Whether mortgage insurance is charged in a given month, given the

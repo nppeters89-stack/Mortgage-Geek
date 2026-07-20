@@ -247,8 +247,9 @@ export function RentVsOwnChart() {
   );
   const touchedRates = useRef({});
 
-  // Property tax location, same source and shape as the calculator. The metro
-  // defaults to the state average, which for Tennessee is the 0.75% the base
+  // Property tax location, same source, shape, and default behavior as the
+  // calculator: the metro resets to the state's first county whenever the state
+  // changes (see the effect below), which for Tennessee is the 0.70% the base
   // case documents.
   const [taxState, setTaxState] = useState("TN");
   const [taxMetro, setTaxMetro] = useState("");
@@ -262,6 +263,14 @@ export function RentVsOwnChart() {
   // Reads naturally in "from {countyLabel}": "from Nashville/Davidson" or
   // "from the Tennessee average".
   const countyLabel = selectedMetro ? selectedMetro.name : stateData ? `the ${stateData.name} average` : "your county";
+
+  // Reset the metro to the state's first county when the state changes, matching
+  // the calculator. This also runs on mount, so Tennessee opens on its first
+  // county (the calculator's default), keeping the two tools' opening tax equal.
+  useEffect(() => {
+    const metros = SHARED_STATE_TAX_RATES[taxState]?.metros;
+    setTaxMetro(metros && metros.length > 0 ? metros[0].name : "");
+  }, [taxState]);
 
   // Location drives the tax rate. Kept as an effect (not derived at sim time) so
   // the Advanced panel's tax field stays a real, overridable input.
