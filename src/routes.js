@@ -40,6 +40,7 @@ export default [
     route("geek-charts/home-prices-income-inflation", "routes/prices-income-inflation.jsx"),
     route("geek-charts/rent-vs-home-prices", "routes/rent-line.jsx"),
     route("geek-charts/homes-priced-in-sp500", "routes/homes-in-sp500.jsx"),
+    route("geek-charts/first-time-homebuyer-age", "routes/fthb-age.jsx"),
     route("geek-log", "routes/geek-log.jsx"),
     route("*", "routes/catch-all.jsx"),
   ]),
