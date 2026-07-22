@@ -46,6 +46,13 @@ export const GEEK_CHARTS = [
     period: "1970 to 2026",
     updated: "2026-07-13",
   },
+  {
+    slug: "first-time-homebuyer-age",
+    title: "The Age of the First-Time Homebuyer",
+    tagline: "For forty years the answer was about 30. It is now 40, the oldest ever recorded, and the reason is not the monthly payment.",
+    period: "1981 to 2025",
+    updated: "2026-07-17",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -294,3 +301,22 @@ export const HOMES_IN_SP500 = {
 export const SP500_PART2_NET_PROFIT_BASE = [0, -10651, -19488, -26408, -31304, -34060, -34557,
   -32666, -28252, -21174, -11280, 1590, 19067, 40160, 64762, 93073, 125303, 161674, 202422,
   247795, 298055, 353480, 414365, 481019, 553770, 632967, 718976, 812185, 913005, 1021869, 1139237];
+
+// Chart 7: the median age of the first-time homebuyer, from NAR's Profile of
+// Home Buyers and Sellers. Survey observations only, no interpolation: NAR did
+// not run the survey every year in the 1980s and 1990s, so surveyYears/surveyAges
+// are paired and the chart connects the years that exist. BAND_LOW/BAND_HIGH are
+// the 1981 to 2020 range (28 to 33), the band the line held for forty years
+// before breaking out.
+const fthbSurveyYears = [1981, 1985, 1987, 1989, 1991, 1993, 1995, 1997, 2000, 2002, 2003, 2004, 2005,
+  2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
+  2022, 2023, 2024, 2025];
+const fthbSurveyAges = [29, 29, 29, 30, 28, 32, 31, 32, 32, 31, 32, 32, 32, 32, 31, 30, 30, 30, 31, 31,
+  31, 31, 31, 32, 32, 32, 33, 33, 33, 36, 35, 38, 40];
+
+export const FTHB_AGE = {
+  surveyYears: fthbSurveyYears,
+  surveyAges: fthbSurveyAges,
+  BAND_LOW: 28,
+  BAND_HIGH: 33,
+};
