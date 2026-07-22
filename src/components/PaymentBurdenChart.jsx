@@ -4,7 +4,7 @@ import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { PAYMENT_BURDEN, BURDEN_AVG } from "../data/geekCharts";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
-import { useStaticCharts, useHasHover, useIsMobile } from "../utils/hooks";
+import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 
 // The Mortgage Payment Burden: P&I on the median new home (20% down, that year's
@@ -16,9 +16,8 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 // The line draws itself on click as a narration aid for screen recordings: one
 // advance draws the cream line, then four markers cascade in (1981 peak, 2020
 // low, 2023 squeeze, today) and the today marker settles into a slow pulse.
-// Unlike the other Geek Charts, this one renders finished on phones (<=700px)
-// as well as under reduced motion: it has no hover on a phone, and an
-// empty-until-tapped chart there reads as broken.
+// Phones get the controls and the tap-to-draw too, like the other Geek Charts;
+// only prefers-reduced-motion renders the finished chart directly.
 
 // Marker cascade offsets from the moment the line finishes, then the settle into
 // the pulse. From the design handoff: peak +150, low +800, squeeze +1450, today
@@ -30,11 +29,9 @@ const CREAM = CHART_COLORS.line;
 
 export function PaymentBurdenChart() {
   const { years, ratio, pmt, price, rate } = PAYMENT_BURDEN;
-  // Both hooks must run every render (never short-circuit a hook call). Static
-  // on reduced motion OR on narrow (<=700px) viewports, per the handoff.
-  const reducedMotion = useStaticCharts();
-  const isNarrow = useIsMobile(700);
-  const staticCharts = reducedMotion || isNarrow;
+  // Static (drawn, no controls) only under reduced motion. On phones the
+  // controls show and the line draws on tap, matching the other Geek Charts.
+  const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
 
   // idle → drawing → points → done. `reveal` counts markers shown (0..4).
