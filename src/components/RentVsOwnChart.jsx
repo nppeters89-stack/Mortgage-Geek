@@ -519,6 +519,12 @@ export function RentVsOwnChart() {
               onCommit={(v) => set("rentG", v)}
             />
             <Slider
+              id="rvo-homeg" label="Real estate return / yr" field="homeG" value={inputs.homeG} step={0.1}
+              display={`${inputs.homeG.toFixed(1)}%`}
+              hint="5.4% is the 56-year national average (1970 to 2026): the compound annual growth of the average U.S. home sale price (FRED: ASPUS). This is the home's appreciation before costs."
+              onCommit={(v) => set("homeG", v)}
+            />
+            <Slider
               id="rvo-inv" label="Investment return / yr" field="inv" value={inputs.inv} step={0.5}
               display={`${inputs.inv.toFixed(1)}%`}
               hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."

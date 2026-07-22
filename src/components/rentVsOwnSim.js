@@ -31,8 +31,9 @@
 import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
 import { monthlyPI } from "../utils/mortgageMath.js";
 
-// Home value compound annual growth: 5.4%, the 1970-2026 CAGR of the Census/HUD
-// average sales price of houses sold (FRED: ASPUS). Not user-adjustable.
+// Default home value compound annual growth: 5.4%, the 1970-2026 CAGR of the
+// Census/HUD average sales price of houses sold (FRED: ASPUS). Adjustable via
+// the homeG input; DEFAULTS.homeG holds this as a percent.
 export const HOME_GROWTH = 1.054;
 
 const TERM_MONTHS = 360;
@@ -50,6 +51,7 @@ export const DEFAULTS = {
   rent0: 2000,
   rate: 6.75,
   rentG: 4.1,
+  homeG: 5.4,
   inv: 10,
   hz: 10,
   taxPct: 0.95,
@@ -66,6 +68,7 @@ export const LIMITS = {
   rent0: [100, 20000],
   rate: [3, 10],
   rentG: [0, 8],
+  homeG: [0, 10],
   inv: [4, 12],
   hz: [1, 30],
   taxPct: [0, 4],
@@ -130,7 +133,8 @@ export function simulateRentVsOwn(input = {}) {
   const payment = monthlyPayment(loan, s.rate);
 
   const homeVal = [];
-  for (let y = 0; y <= YEARS; y++) homeVal.push(price * Math.pow(HOME_GROWTH, y));
+  const homeGrowth = 1 + s.homeG / 100;
+  for (let y = 0; y <= YEARS; y++) homeVal.push(price * Math.pow(homeGrowth, y));
 
   let balance = loan;
   let ownerFund = 0;
