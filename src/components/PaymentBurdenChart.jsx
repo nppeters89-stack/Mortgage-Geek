@@ -1,16 +1,54 @@
-import { useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceDot } from "recharts";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceDot, Customized } from "recharts";
 import { P, F, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { PAYMENT_BURDEN, BURDEN_AVG } from "../data/geekCharts";
+import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
+import { useStaticCharts, useHasHover, useIsMobile } from "../utils/hooks";
+import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 
 // The Mortgage Payment Burden: P&I on the median new home (20% down, that year's
 // average 30-yr rate) as a percent of median family income, 1971 to 2026, on a
 // dark charcoal canvas. Single cream line against the 56-year average. Colors
-// from CHART_COLORS / P via withAlpha; no hardcoded hex. No animation. sr-only
-// table mirrors the series for crawlers.
+// from CHART_COLORS / P via withAlpha; no hardcoded hex. sr-only table mirrors
+// the series for crawlers.
+//
+// The line draws itself on click as a narration aid for screen recordings: one
+// advance draws the cream line, then four markers cascade in (1981 peak, 2020
+// low, 2023 squeeze, today) and the today marker settles into a slow pulse.
+// Unlike the other Geek Charts, this one renders finished on phones (<=700px)
+// as well as under reduced motion: it has no hover on a phone, and an
+// empty-until-tapped chart there reads as broken.
+
+// Marker cascade offsets from the moment the line finishes, then the settle into
+// the pulse. From the design handoff: peak +150, low +800, squeeze +1450, today
+// +2100, done +2800.
+const MARKER_DELAYS = [150, 800, 1450, 2100];
+const SETTLE_DELAY = 2800;
+
+const CREAM = CHART_COLORS.line;
+
 export function PaymentBurdenChart() {
   const { years, ratio, pmt, price, rate } = PAYMENT_BURDEN;
+  // Both hooks must run every render (never short-circuit a hook call). Static
+  // on reduced motion OR on narrow (<=700px) viewports, per the handoff.
+  const reducedMotion = useStaticCharts();
+  const isNarrow = useIsMobile(700);
+  const staticCharts = reducedMotion || isNarrow;
+  const hasHover = useHasHover();
+
+  // idle → drawing → points → done. `reveal` counts markers shown (0..4).
+  const [phase, setPhase] = useState("idle");
+  const [reveal, setReveal] = useState(0);
+  const [duration, setDuration] = useState(4000);
+
+  const plotRef = useRef(null);
+  const timers = useRef([]);
+  const cancelDraw = useRef(null);
+
+  // On phones and under reduced motion the chart is simply finished.
+  const shown = staticCharts ? "done" : phase;
+  const shownReveal = staticCharts ? 4 : reveal;
 
   const data = useMemo(
     () => years.map((year, i) => ({ year, ratio: ratio[i], pmt: pmt[i], price: price[i], rate: rate[i] })),
@@ -18,6 +56,84 @@ export function PaymentBurdenChart() {
   );
 
   const tickColor = withAlpha(CHART_COLORS.line, 0.55);
+  const yAt = (yr) => ratio[years.indexOf(yr)];
+
+  const clearTimers = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    cancelDraw.current?.();
+    cancelDraw.current = null;
+  }, []);
+
+  useEffect(() => clearTimers, [clearTimers]);
+
+  const linePath = () => plotRef.current?.querySelector(".recharts-line-curve");
+
+  // Recharts rebuilds the SVG on every render and on resize, which wipes the
+  // inline dash styles. Re-hide the line whenever it should not be visible yet.
+  useEffect(() => {
+    const path = linePath();
+    if (!path) return;
+    if (shown === "idle") hidePath(path);
+    else if (shown === "done" || shown === "points") clearDrawState(path);
+  });
+
+  const advance = useCallback(() => {
+    if (staticCharts || phase !== "idle") return;
+    setPhase("drawing");
+  }, [staticCharts, phase]);
+
+  // The draw has to start AFTER the render that sets the phase, not inside the
+  // click handler: Recharts rebuilds its SVG on every render, so a path styled
+  // during the handler is a detached node by the time the browser paints.
+  useEffect(() => {
+    if (phase !== "drawing") return;
+    const path = linePath();
+    const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
+    if (!path) {
+      setPhase("points");
+      return;
+    }
+    if (tracer) tracer.setAttribute("opacity", "1");
+
+    cancelDraw.current = drawPath(path, {
+      duration,
+      onTick: (_t, pt) => {
+        if (!tracer) return;
+        tracer.setAttribute("cx", pt.x);
+        tracer.setAttribute("cy", pt.y);
+      },
+      onDone: () => {
+        if (tracer) tracer.setAttribute("opacity", "0");
+        setPhase("points");
+        MARKER_DELAYS.forEach((ms, i) => {
+          timers.current.push(setTimeout(() => setReveal(i + 1), ms));
+        });
+        timers.current.push(setTimeout(() => setPhase("done"), SETTLE_DELAY));
+      },
+    });
+    // Duration is read once at the start of a draw; changing speed mid-draw is
+    // blocked in the controls, so it is intentionally not a dependency here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  const replay = useCallback(() => {
+    if (staticCharts) return;
+    clearTimers();
+    const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
+    if (tracer) tracer.setAttribute("opacity", "0");
+    setReveal(0);
+    setPhase("idle");
+  }, [staticCharts, clearTimers]);
+
+  // Space and Enter already activate the focused Draw button natively; the only
+  // shortcut worth adding is R to replay, scoped to the control bar.
+  const onKeyDown = (e) => {
+    if (e.key === "r" || e.key === "R") {
+      e.preventDefault();
+      replay();
+    }
+  };
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -33,29 +149,125 @@ export function PaymentBurdenChart() {
     );
   };
 
-  const dot = (x, y, color, label, position) => (
-    <ReferenceDot
-      x={x}
-      y={y}
-      r={5}
-      fill={color}
-      stroke={P.navyDark}
-      strokeWidth={2}
-      isFront
-      label={label ? { value: label, position, fill: color, fontSize: 12, fontFamily: F.body, fontWeight: 700 } : undefined}
-    />
-  );
+  // Pulse ring on the today marker, drawn through Recharts' own scales so it
+  // tracks the point on resize. Only mounted once the cascade has settled.
+  const TodayPulse = (props) => {
+    const { xAxisMap, yAxisMap } = props;
+    if (shown !== "done" || shownReveal < 4) return null;
+    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!xScale || !yScale) return null;
+    return (
+      <circle
+        className="pbn-pulse"
+        cx={xScale(2026)}
+        cy={yScale(yAt(2026))}
+        fill="none"
+        stroke={CREAM}
+        strokeWidth={2}
+        style={{ pointerEvents: "none" }}
+      />
+    );
+  };
+
+  // The "23.0% today" label. Rendered as its own SVG text, not the ReferenceDot
+  // label, so it can sit ~44px BELOW the dot and anchor at its end: below clears
+  // the descending line and the pulse ring, and end-anchoring keeps it off the
+  // right edge (the today point is the last on the axis). Fades in with the
+  // marker via the same data-reveal step.
+  const TodayLabel = (props) => {
+    const { xAxisMap, yAxisMap } = props;
+    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!xScale || !yScale) return null;
+    return (
+      <text
+        className="pbn-lbl-today"
+        x={xScale(2026) - 8}
+        y={yScale(yAt(2026)) + 44}
+        textAnchor="end"
+        fill={CREAM}
+        fontSize={12}
+        fontFamily={F.body}
+        fontWeight={700}
+        style={{ pointerEvents: "none" }}
+      >
+        23.0% today
+      </text>
+    );
+  };
+
+  const advanceLabel = phase === "idle" ? "Draw the line" : phase === "drawing" ? "Drawing…" : "Drawn";
 
   return (
     <div className="pbn-chart">
       <style>{`
+        ${drawControlsCss}
         .pbn-chart { width: 100%; }
-        .pbn-plot { width: 100%; height: 400px; }
+        .pbn-plot { width: 100%; height: 400px; min-height: 320px; }
         @media (max-width: 640px) { .pbn-plot { height: 340px; } }
         .pbn-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+        .pbn-plot.is-live { cursor: pointer; }
+        /* Markers start hidden and fade in on their reveal step. */
+        .pbn-mk { opacity: 0; transition: opacity .45s ease; }
+        .pbn-plot[data-reveal="1"] .pbn-mk-peak,
+        .pbn-plot[data-reveal="2"] .pbn-mk-peak,
+        .pbn-plot[data-reveal="3"] .pbn-mk-peak,
+        .pbn-plot[data-reveal="4"] .pbn-mk-peak,
+        .pbn-plot[data-reveal="2"] .pbn-mk-low,
+        .pbn-plot[data-reveal="3"] .pbn-mk-low,
+        .pbn-plot[data-reveal="4"] .pbn-mk-low,
+        .pbn-plot[data-reveal="3"] .pbn-mk-squeeze,
+        .pbn-plot[data-reveal="4"] .pbn-mk-squeeze,
+        .pbn-plot[data-reveal="4"] .pbn-mk-today { opacity: 1; }
+
+        /* The separately-rendered today label fades in with its marker. */
+        .pbn-lbl-today { opacity: 0; transition: opacity .45s ease; }
+        .pbn-plot[data-reveal="4"] .pbn-lbl-today { opacity: 1; }
+        @media (prefers-reduced-motion: reduce) { .pbn-lbl-today { transition: none; } }
+
+        /* Today marker: expanding ring plus a soft dot glow, both once done. */
+        .pbn-pulse { animation: pbnPulse 1.8s ease-out infinite; }
+        @keyframes pbnPulse {
+          0%   { r: 6px;  opacity: .9; }
+          100% { r: 26px; opacity: 0; }
+        }
+        .pbn-plot[data-phase="done"] .pbn-mk-today { animation: pbnGlow 1.8s ease-in-out infinite; }
+        @keyframes pbnGlow {
+          0%, 100% { filter: drop-shadow(0 0 1px ${withAlpha(CHART_COLORS.line, 0.5)}); }
+          50%      { filter: drop-shadow(0 0 6px ${withAlpha(CHART_COLORS.line, 0.9)}); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .pbn-mk { transition: none; }
+          .pbn-pulse { display: none; }
+          .pbn-plot[data-phase="done"] .pbn-mk-today { animation: none; }
+        }
       `}</style>
 
-      <div className="pbn-plot" aria-hidden="true">
+      {!staticCharts && (
+        <ChartDrawControls
+          advanceLabel={advanceLabel}
+          onAdvance={advance}
+          onReplay={replay}
+          canAdvance={phase === "idle" || phase === "drawing"}
+          canReplay={phase !== "idle"}
+          duration={duration}
+          onDuration={setDuration}
+          drawing={phase === "drawing"}
+          onKeyDown={onKeyDown}
+          hint={hasHover ? "Click the chart or press the button to draw. R replays." : "Tap the chart or the button to draw."}
+        />
+      )}
+
+      <div
+        className={`pbn-plot${staticCharts ? "" : " is-live"}`}
+        data-reveal={shownReveal}
+        data-phase={shown}
+        aria-hidden="true"
+        onClick={staticCharts ? undefined : advance}
+        ref={plotRef}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 20, right: 24, left: 4, bottom: 4 }}>
             <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
@@ -78,7 +290,8 @@ export function PaymentBurdenChart() {
               tickFormatter={(v) => `${v}%`}
               width={44}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />
+            {/* Hover read-out only once the sequence has settled. */}
+            {shown === "done" && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
             <ReferenceLine
               y={BURDEN_AVG}
               stroke={CHART_COLORS.axis}
@@ -86,10 +299,19 @@ export function PaymentBurdenChart() {
               label={{ value: `avg ${BURDEN_AVG}%`, position: "insideTopLeft", fill: tickColor, fontSize: 10, fontFamily: F.body }}
             />
             <Line type="monotone" dataKey="ratio" stroke={CHART_COLORS.line} strokeWidth={2.75} dot={false} isAnimationActive={false} />
-            {dot(1981, 41.3, CHART_COLORS.accent, "41.3% 1981", "top")}
-            {dot(2020, 16.0, CHART_COLORS.line, null)}
-            {dot(2023, 26.5, CHART_COLORS.gold, null)}
-            {dot(2026, 23.0, CHART_COLORS.line, "23.0% today", "left")}
+            {/* 1981 peak: red dot, label above. */}
+            <ReferenceDot className="pbn-mk pbn-mk-peak" x={1981} y={yAt(1981)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} isFront
+              label={{ value: "41.3% 1981", position: "top", fill: CHART_COLORS.accent, fontSize: 12, fontFamily: F.body, fontWeight: 700 }} />
+            {/* 2020 low: unlabeled cream dot. */}
+            <ReferenceDot className="pbn-mk pbn-mk-low" x={2020} y={yAt(2020)} r={4.5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
+            {/* 2023 squeeze: unlabeled gold dot. */}
+            <ReferenceDot className="pbn-mk pbn-mk-squeeze" x={2023} y={yAt(2023)} r={4.5} fill={CHART_COLORS.gold} stroke={P.navyDark} strokeWidth={2} isFront />
+            {/* Today: cream dot. Its label is rendered separately (TodayLabel) so
+                it can sit below the dot, anchored end, clear of the pulse ring. */}
+            <ReferenceDot className="pbn-mk pbn-mk-today" x={2026} y={yAt(2026)} r={5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
+            <Customized component={TodayLabel} />
+            <Customized component={TodayPulse} />
+            {!staticCharts && <Customized component={() => <Tracer fill={CREAM} />} />}
           </LineChart>
         </ResponsiveContainer>
       </div>

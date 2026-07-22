@@ -111,12 +111,14 @@ export function ChartDrawControls({
 // frame at 60fps, stuttering the very draw it decorates.
 export const TRACER_CLASS = "chart-tracer";
 
-export function Tracer() {
+// `fill` defaults to the equity-market blue used by the S&P chart; charts whose
+// line is a different color (the cream payment-burden line) pass their own.
+export function Tracer({ fill = BLUE } = {}) {
   return (
     <circle
       className={TRACER_CLASS}
       r={6.5}
-      fill={BLUE}
+      fill={fill}
       stroke={P.navyDark}
       strokeWidth={2}
       opacity={0}
