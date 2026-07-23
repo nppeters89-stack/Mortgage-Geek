@@ -53,6 +53,13 @@ export const GEEK_CHARTS = [
     period: "1981 to 2025",
     updated: "2026-07-17",
   },
+  {
+    slug: "price-to-income-ratio",
+    title: "The Payment Was Never the Problem",
+    tagline: "The worst mortgage payment in history produced the youngest buyers ever. Today's ordinary payment is producing the oldest. One ratio explains it.",
+    period: "1971 to 2026",
+    updated: "2026-07-23",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -320,3 +327,29 @@ export const FTHB_AGE = {
   BAND_LOW: 28,
   BAND_HIGH: 33,
 };
+
+// The Price-to-Income Ratio, 1971 to 2026. ratio = median new home sales price
+// (Census/HUD, same source as the payment burden chart's price series) over
+// median family income (Census). Income runs through 2024; 2025-2026 hold the
+// latest reading, same convention as the payment burden chart. price / income
+// back the tooltip. Precomputed; not recomputed at runtime.
+const ptiYears = Array.from({ length: 2026 - 1971 + 1 }, (_, i) => 1971 + i);
+
+const ptiRatio = [2.45, 2.48, 2.71, 2.79, 2.86, 2.96, 3.05, 3.17, 3.2, 3.08, 3.08, 2.95, 3.07, 3.02, 3.04, 3.12,
+  3.38, 3.49, 3.52, 3.46, 3.34, 3.32, 3.42, 3.36, 3.29, 3.32, 3.25, 3.25, 3.28, 3.3, 3.37, 3.6,
+  3.65, 4.04, 4.21, 4.17, 3.99, 3.73, 3.59, 3.7, 3.69, 3.93, 4.07, 4.29, 4.16, 4.2, 4.23, 4.14,
+  3.72, 3.89, 4.32, 4.67, 4.23, 3.96, 3.93, 3.81];
+
+const ptiPrice = [25225, 27525, 32600, 36050, 39275, 44225, 48900, 55850, 62750, 64750, 68950, 69225, 75375, 79950,
+  84275, 92025, 104700, 112225, 120425, 122300, 119975, 121375, 126500, 130425, 133475, 140250,
+  145000, 151925, 160125, 167550, 173100, 186025, 192125, 218150, 236550, 243750, 244950, 229550,
+  215650, 222700, 224900, 244400, 266225, 285775, 294150, 305125, 322425, 325275, 320250, 328150,
+  383000, 432950, 426525, 418975, 415400, 403200];
+
+const ptiIncome = [10290, 11120, 12050, 12900, 13720, 14960, 16010, 17640, 19590, 21020, 22390, 23430, 24580, 26430,
+  27740, 29460, 30970, 32190, 34210, 35350, 35940, 36570, 36960, 38780, 40610, 42300, 44570, 46740,
+  48830, 50730, 51410, 51680, 52680, 54060, 56190, 58410, 61360, 61520, 60090, 60240, 60970, 62240,
+  65470, 66630, 70700, 72710, 76140, 78650, 86010, 84350, 88590, 92750, 100800, 105800, 105800, 105800];
+
+export const PTI_AVG = 3.52;
+export const PRICE_TO_INCOME = { years: ptiYears, ratio: ptiRatio, price: ptiPrice, income: ptiIncome };
