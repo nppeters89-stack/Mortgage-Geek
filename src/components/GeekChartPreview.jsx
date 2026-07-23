@@ -1,5 +1,5 @@
 import { CHART_COLORS } from "../theme";
-import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500 } from "../data/geekCharts";
+import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500, FTHB_AGE } from "../data/geekCharts";
 
 // Static sneak-peek sparkline for a Geek Charts hub card. Draws each chart's
 // line(s) straight from the data, so it always shows the fully rendered shape,
@@ -16,6 +16,11 @@ const PREVIEWS = {
   "home-prices-income-inflation": { data: PRICES_INCOME_INFLATION, yMax: 2000, lines: [{ key: "cpiIdx", color: C.line, w: 1.75 }, { key: "incomeIdx", color: C.income, w: 1.75 }, { key: "homeIdx", color: C.mortgage, w: 1.75 }] },
   "rent-vs-home-prices": { data: RENT_LINE, yMax: 2000, lines: [{ key: "homeIdx", color: C.line, w: 1.5 }, { key: "rentIdx", color: C.mortgage, w: 3 }] },
   "homes-priced-in-sp500": { data: HOMES_IN_SP500, yMax: 800, lines: [{ key: "ratio", color: C.sp500, w: 2.5 }] },
+  // Survey series sits at 28 to 40, far above zero, so this preview floors at
+  // 18 (yMin) to match the chart's y-axis and show the real breakout shape
+  // instead of a flat line pinned to the top. Adapter object gives it the
+  // {years, key} shape the renderer expects without aliasing the data export.
+  "first-time-homebuyer-age": { data: { years: FTHB_AGE.surveyYears, age: FTHB_AGE.surveyAges }, yMin: 18, yMax: 44, lines: [{ key: "age", color: C.line, w: 2.5 }] },
 };
 
 // Near-square viewBox (4:3) so the preview fills a square-ish card slot without
@@ -23,10 +28,13 @@ const PREVIEWS = {
 const VW = 320, VH = 240, PAD = 12;
 
 // Break a values array into polyline segments at nulls (so gaps do not interpolate).
-function segments(years, values, yMax) {
+// yMin defaults to 0 so the existing zero-floored previews are unchanged; a
+// chart whose series sits well above zero passes its real floor so the shape
+// matches the full chart rather than hugging the top of the box.
+function segments(years, values, yMax, yMin = 0) {
   const n = years.length;
   const xOf = (i) => PAD + (i / (n - 1)) * (VW - 2 * PAD);
-  const yOf = (v) => PAD + (1 - v / yMax) * (VH - 2 * PAD);
+  const yOf = (v) => PAD + (1 - (v - yMin) / (yMax - yMin)) * (VH - 2 * PAD);
   const segs = [];
   let cur = [];
   for (let i = 0; i < n; i++) {
@@ -44,11 +52,11 @@ function segments(years, values, yMax) {
 export function GeekChartPreview({ slug }) {
   const cfg = PREVIEWS[slug];
   if (!cfg) return null;
-  const { data, yMax, lines } = cfg;
+  const { data, yMax, yMin, lines } = cfg;
   return (
     <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true" style={{ display: "block" }}>
       {lines.flatMap((ln) =>
-        segments(data.years, data[ln.key], yMax).map((seg, si) => (
+        segments(data.years, data[ln.key], yMax, yMin).map((seg, si) => (
           <polyline
             key={`${ln.key}-${si}`}
             points={seg.join(" ")}
