@@ -16,13 +16,14 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 // sits well clear above the line per the text-overlay rule. sr-only table
 // mirrors the series for crawlers.
 //
-// The chart renders fully drawn by default; one click (Replay, or R) re-runs
-// the animation as a narration aid, same structure as the payment burden and
-// buyer-age charts. The sequence: the cream ratio line draws, a pulse ring
-// blooms on the 2022 peak, then a thicker gold 10-year moving average draws in
-// behind it and settles into a slow glow, so the smoothed trend reads as the
-// story under the volatile ratio. Only prefers-reduced-motion hides the
-// controls and the pulses.
+// The chart renders fully drawn by default. Replaying is a two-step click, the
+// same toggle as the Rent Line chart: the first click (Replay) blanks the chart
+// and arms it, the second (Draw, or R) starts the sequence. Phases:
+// done -> armed -> line -> ma -> done. The sequence: the cream ratio line
+// draws, a pulse ring blooms on the 2022 peak, then a thicker gold 10-year
+// moving average draws in on top and settles into a slow glow, so the smoothed
+// trend reads as the story under the volatile ratio. Only prefers-reduced-motion
+// hides the controls and the pulses.
 
 const CREAM = CHART_COLORS.line;
 const GOLD = CHART_COLORS.gold;
@@ -79,15 +80,23 @@ export function PriceToIncomeChart() {
   const maPath = () => plotRef.current?.querySelector(".pti-line-ma .recharts-line-curve");
 
   // Recharts rebuilds the SVG on every render, wiping inline dash styles. Keep
-  // each line in the right state for lines the draw effect is not touching: the
-  // cream line is hidden only while it is drawing; the gold line stays hidden
-  // until its turn (phase "ma"), then shown.
+  // each line in the right state. When settled, both are shown. When armed, both
+  // are blanked (the first click clears the chart). While the cream line draws,
+  // the gold line stays hidden until its turn; while the gold line draws, the
+  // cream line is already shown. Lines the draw effect owns are left alone.
   useEffect(() => {
     const w = whitePath(), m = maPath();
-    if (w && shown !== "line") clearDrawState(w);
-    if (m) {
-      if (shown === "line") hidePath(m);
-      else if (shown === "done") clearDrawState(m);
+    if (!w || !m) return;
+    if (shown === "done") {
+      clearDrawState(w);
+      clearDrawState(m);
+    } else if (shown === "armed") {
+      hidePath(w);
+      hidePath(m);
+    } else if (shown === "line") {
+      hidePath(m); // cream draws (draw effect owns it); gold waits
+    } else if (shown === "ma") {
+      clearDrawState(w); // cream already drawn; gold draws (draw effect owns it)
     }
   });
 
@@ -125,26 +134,33 @@ export function PriceToIncomeChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Re-run the whole sequence from the drawn state. Ignored while a draw runs.
-  const replay = useCallback(() => {
+  // The control is a two-step toggle. From the drawn state, the first click
+  // (Replay) arms the chart: blank both lines and clear the pulse. The second
+  // click (Draw) starts the sequence. A click mid-draw is ignored.
+  const advance = useCallback(() => {
     if (staticCharts || phase === "line" || phase === "ma") return;
+    if (phase === "armed") {
+      setPhase("line");
+      return;
+    }
+    // phase "done": arm it.
     clearTimers();
     const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
     if (tracer) tracer.setAttribute("opacity", "0");
-    setPhase("line");
+    setPhase("armed");
   }, [staticCharts, phase, clearTimers]);
 
-  // Space and Enter already activate the focused Replay button natively; R adds
-  // a replay shortcut, scoped to the control bar.
+  // Space and Enter already activate the focused button natively; R advances the
+  // two-step toggle, scoped to the control bar.
   const onKeyDown = (e) => {
     if (e.key === "r" || e.key === "R") {
       e.preventDefault();
-      replay();
+      advance();
     }
   };
 
   const drawing = phase === "line" || phase === "ma";
-  const replayLabel = drawing ? "Drawing…" : "Replay";
+  const replayLabel = drawing ? "Drawing…" : phase === "armed" ? "Draw" : "Replay";
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -220,13 +236,15 @@ export function PriceToIncomeChart() {
       {!staticCharts && (
         <ChartDrawControls
           label={replayLabel}
-          onClick={replay}
+          onClick={advance}
           disabled={drawing}
           duration={duration}
           onDuration={setDuration}
           speedDisabled={drawing}
           onKeyDown={onKeyDown}
-          hint={hasHover ? "Press Replay to redraw the ratio, then the 10-year trend. R also replays." : "Tap Replay to redraw the ratio and the 10-year trend."}
+          hint={phase === "armed"
+            ? "Click Draw to start."
+            : (hasHover ? "Press Replay, then Draw to redraw the ratio and the 10-year trend. R advances." : "Tap Replay, then Draw to redraw the ratio and the 10-year trend.")}
         />
       )}
 
