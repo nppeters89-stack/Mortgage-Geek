@@ -3,7 +3,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { P, F, CHART_COLORS } from "../theme";
 import { withAlpha } from "../utils/format";
 import { RENT_LINE } from "../data/geekCharts";
-import { drawPath, clearDrawState } from "../utils/lineDraw";
+import { drawPath, clearDrawState, hidePath } from "../utils/lineDraw";
 import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, drawControlsCss } from "./ChartDrawControls";
 
@@ -12,11 +12,12 @@ import { ChartDrawControls, drawControlsCss } from "./ChartDrawControls";
 // point of the chart: it has no down years. Colors from CHART_COLORS / P via
 // withAlpha; no hardcoded hex.
 //
-// The chart renders drawn by default; Replay re-runs the animation. One click
-// draws BOTH lines at once (each with its own tracer), then the markers fade in
-// and the 2010 gold dot pulses. The "down years" counts that used to sit on the
-// line ends are dropped: the stat cards right below the chart already carry
-// them, so the line ends are just their current-value dots now. Only
+// The chart renders drawn by default. Replaying takes two clicks: the first
+// (Replay) blanks both lines and arms the chart, the second (Draw) draws BOTH
+// lines at once (each with its own tracer), then the markers fade in and the
+// 2010 gold dot pulses. The "down years" counts that used to sit on the line
+// ends are dropped: the stat cards right below the chart already carry them, so
+// the line ends are just their current-value dots now. Only
 // prefers-reduced-motion hides the controls and shows the finished chart.
 
 const RENT = CHART_COLORS.mortgage;
@@ -28,8 +29,8 @@ export function RentLineChart() {
   const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
 
-  // The chart starts drawn (phase "done", markers shown); Replay re-runs it.
-  // Phases while running: drawing → points → done.
+  // The chart starts drawn (phase "done", markers shown); replaying is a two-
+  // step click: done → armed (lines blanked) → drawing → points → done.
   const [phase, setPhase] = useState("done");
   const [reveal, setReveal] = useState(1);
   const [duration, setDuration] = useState(4000);
@@ -62,7 +63,8 @@ export function RentLineChart() {
   const rentPath = () => plotRef.current?.querySelector(".rl-rent .recharts-line-curve");
 
   // Recharts wipes inline dash styles on every render and on resize. Keep both
-  // lines visible whenever they should be (they only hide mid-draw).
+  // lines in the right state: visible when settled, blanked while armed (they
+  // only self-hide mid-draw).
   useEffect(() => {
     const home = homePath();
     const rent = rentPath();
@@ -70,6 +72,9 @@ export function RentLineChart() {
     if (shown === "done" || shown === "points") {
       clearDrawState(home);
       clearDrawState(rent);
+    } else if (shown === "armed") {
+      hidePath(home);
+      hidePath(rent);
     }
   });
 
@@ -116,22 +121,29 @@ export function RentLineChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Re-run from the drawn state: hide the markers, then redraw both lines.
-  const replay = useCallback(() => {
+  // The control is a two-step toggle. From the drawn state, the first click
+  // arms it: hide the markers and blank both lines. The second click starts the
+  // draw. A click mid-draw is ignored.
+  const advance = useCallback(() => {
     if (staticCharts || phase === "drawing") return;
+    if (phase === "armed") {
+      setPhase("drawing");
+      return;
+    }
+    // phase "done": arm it.
     clearTimers();
     [".rl-tracer-home", ".rl-tracer-rent"].forEach((c) => {
       const t = plotRef.current?.querySelector(c);
       if (t) t.setAttribute("opacity", "0");
     });
     setReveal(0);
-    setPhase("drawing");
+    setPhase("armed");
   }, [staticCharts, phase, clearTimers]);
 
   const onKeyDown = (e) => {
     if (e.key === "r" || e.key === "R") {
       e.preventDefault();
-      replay();
+      advance();
     }
   };
 
@@ -174,7 +186,8 @@ export function RentLineChart() {
   const HomeTracer = () => <circle className="rl-tracer-home" r={6} fill={HOME} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
   const RentTracer = () => <circle className="rl-tracer-rent" r={6.5} fill={RENT} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
 
-  const replayLabel = phase === "drawing" ? "Drawing…" : "Replay";
+  const replayLabel =
+    phase === "drawing" ? "Drawing…" : phase === "armed" ? "Draw" : "Replay";
 
   return (
     <div className="rl-chart">
@@ -211,13 +224,17 @@ export function RentLineChart() {
       {!staticCharts && (
         <ChartDrawControls
           label={replayLabel}
-          onClick={replay}
+          onClick={advance}
           disabled={phase === "drawing"}
           duration={duration}
           onDuration={setDuration}
           speedDisabled={phase === "drawing"}
           onKeyDown={onKeyDown}
-          hint={hasHover ? "Press Replay to redraw both lines. R also replays." : "Tap Replay to redraw both lines."}
+          hint={
+            phase === "armed"
+              ? (hasHover ? "Press Draw to draw both lines." : "Tap Draw to draw both lines.")
+              : (hasHover ? "Press Replay, then Draw to redraw both lines. R advances." : "Tap Replay, then Draw to redraw both lines.")
+          }
         />
       )}
 
