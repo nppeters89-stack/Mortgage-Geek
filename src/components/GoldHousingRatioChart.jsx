@@ -3,11 +3,11 @@ import { P, CHART_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { GOLD_HOUSING_RATIO, LONG_RUN_AVG } from "../data/geekCharts";
 
-// Click-triggered animated Gold-to-Housing Ratio chart (ported from a
-// self-contained vanilla-JS/SVG prototype into this React component). One click
-// draws the gold line, cascades in the 2001/1980/today markers, then pulses the
-// 1980 and today points with a dashed connector (the same 124 oz, 46 years
-// apart). Hover read-out appears only after the sequence finishes.
+// Animated Gold-to-Housing Ratio chart (ported from a self-contained
+// vanilla-JS/SVG prototype into this React component). It renders drawn by
+// default; Replay re-runs it: the gold line draws, the 2001/1980/today markers
+// cascade in, then the 1980 and today points pulse with a dashed connector (the
+// same 124 oz, 46 years apart). Hover read-out appears only once it is drawn.
 //
 // The prototype's IIFE runs inside a useEffect, scoped to the component root via
 // a ref (no document-wide queries, no global :root vars, keyframes namespaced).
@@ -47,8 +47,7 @@ const CSS = `
   .ghr-anim .speed button { border: 0; background: transparent; color: ${FAINT}; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; padding: 7px 11px; border-radius: 6px; cursor: pointer; }
   .ghr-anim .speed button.active { background: ${withAlpha(CHART_COLORS.line, 0.1)}; color: ${C}; }
 
-  .ghr-anim .chartbox { position: relative; width: 100%; cursor: pointer; }
-  .ghr-anim .chartbox.done { cursor: default; }
+  .ghr-anim .chartbox { position: relative; width: 100%; }
   .ghr-anim .plot svg { display: block; width: 100%; }
   .ghr-anim svg text { font-family: 'DM Sans', sans-serif; }
 
@@ -72,6 +71,14 @@ const CSS = `
 
   @keyframes ghr-tieRing { 0% { r: 6px; opacity: .9; } 100% { r: 30px; opacity: 0; } }
   @keyframes ghr-tieGlow { 0%, 100% { filter: drop-shadow(0 0 3px ${withAlpha(CHART_COLORS.gold, 0.6)}); } 50% { filter: drop-shadow(0 0 12px ${withAlpha(CHART_COLORS.gold, 1)}); } }
+
+  /* Reduced motion: keep the chart drawn but hide the controls and the tie
+     pulse, matching the other Geek Charts. */
+  @media (prefers-reduced-motion: reduce) {
+    .ghr-anim .controls { display: none; }
+    .ghr-anim #pulseLow1, .ghr-anim #pulseLow2, .ghr-anim #pulseNow1, .ghr-anim #pulseNow2 { display: none !important; animation: none !important; }
+    .ghr-anim #dotLow, .ghr-anim #dotNow { animation: none !important; }
+  }
 `;
 
 export function GoldHousingRatioChart() {
@@ -97,7 +104,9 @@ export function GoldHousingRatioChart() {
 
     let D = {};
     let xOf, yOf;
-    let phase = "idle";
+    // Starts finished (drawn, markers shown, the 1980/today tie pulsing); Replay
+    // re-runs it, matching the other Geek Charts.
+    let phase = "tie";
     let drawDur = 4000;
     let timers = [];
     const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
@@ -261,43 +270,34 @@ export function GoldHousingRatioChart() {
       later(() => { phase = "tie"; setOpacity("tieGroup", 1); startTiePulse(); updateUI(); }, 2500);
     }
 
-    function resetAnim() {
+    // Re-run from the drawn state: reset to empty, then draw again. Ignored
+    // while a run is in progress.
+    function replay() {
+      if (phase === "drawing" || phase === "points") return;
       clearTimers();
-      phase = "idle";
       stopTiePulse();
       const tr = $("#tracer"); if (tr) tr.style.display = "none";
       hideHover();
+      phase = "idle";
       applyPhase();
       updateUI();
+      requestAnimationFrame(() => play());
     }
 
     function updateUI() {
       const btn = $("#btnPlay");
       const status = $("#status");
-      const hint = $("#hint");
-      const box = $("#chartbox");
-      box.classList.toggle("done", phase !== "idle");
-      if (phase === "idle") {
-        btn.disabled = false;
-        btn.textContent = "▶ Play animation";
-        status.innerHTML = "Ready. Click the chart (or <b>Play</b>) to draw the line.";
-        hint.className = "hint";
-        hint.innerHTML = '<span class="dotc"></span>Click to draw the ratio';
-      } else if (phase === "drawing") {
-        btn.disabled = true;
+      const busy = phase === "drawing" || phase === "points";
+      btn.disabled = busy;
+      if (phase === "drawing") {
         btn.textContent = "Drawing…";
         status.innerHTML = "Drawing the <b>gold-to-housing ratio</b>…";
-        hint.className = "hint hidden";
       } else if (phase === "points") {
-        btn.disabled = true;
         btn.textContent = "Marking extremes…";
         status.innerHTML = "Marking the <b>2001 high</b>, the <b>1980 low</b>, and <b>today</b>…";
-        hint.className = "hint hidden";
       } else {
-        btn.disabled = true;
-        btn.textContent = "Playing ✓";
+        btn.textContent = "Replay";
         status.innerHTML = "<b>1980</b> and <b>today</b>, the same 124 oz, 46 years apart. Press <b>Replay</b> to run it again.";
-        hint.className = "hint hidden";
       }
     }
 
@@ -330,22 +330,16 @@ export function GoldHousingRatioChart() {
       tip.style.top = (D.mT + 6) + "px";
     }
 
+    // The plot is hover-only now (no click-to-draw); Replay lives on the button.
     const cb = $("#chartbox");
-    const onClick = () => play();
-    const onKey = (e) => {
-      if (e.key === "Enter" || e.key === " " || e.code === "Space") { e.preventDefault(); play(); }
-      else if (e.key === "r" || e.key === "R") { resetAnim(); }
-    };
     cb.addEventListener("pointermove", onMove);
     cb.addEventListener("pointerleave", hideHover);
-    cb.addEventListener("click", onClick);
-    cb.addEventListener("keydown", onKey);
 
-    const playBtn = $("#btnPlay"), resetBtn = $("#btnReset");
-    const onPlayBtn = (e) => { e.stopPropagation(); play(); };
-    const onResetBtn = (e) => { e.stopPropagation(); resetAnim(); };
+    const playBtn = $("#btnPlay");
+    const onPlayBtn = (e) => { e.stopPropagation(); replay(); };
+    const onBtnKey = (e) => { if (e.key === "r" || e.key === "R") { e.preventDefault(); replay(); } };
     playBtn.addEventListener("click", onPlayBtn);
-    resetBtn.addEventListener("click", onResetBtn);
+    playBtn.addEventListener("keydown", onBtnKey);
 
     const speedBtns = root.querySelectorAll(".speed button");
     const speedHandlers = [];
@@ -368,10 +362,8 @@ export function GoldHousingRatioChart() {
       window.removeEventListener("resize", onResize);
       cb.removeEventListener("pointermove", onMove);
       cb.removeEventListener("pointerleave", hideHover);
-      cb.removeEventListener("click", onClick);
-      cb.removeEventListener("keydown", onKey);
       playBtn.removeEventListener("click", onPlayBtn);
-      resetBtn.removeEventListener("click", onResetBtn);
+      playBtn.removeEventListener("keydown", onBtnKey);
       speedHandlers.forEach(([b, h]) => b.removeEventListener("click", h));
     };
   }, [years, ratio, home, gold]);
@@ -386,8 +378,7 @@ export function GoldHousingRatioChart() {
       </div>
 
       <div className="controls">
-        <button id="btnPlay" type="button" className="btnDraw">▶ Play animation</button>
-        <button id="btnReset" type="button" className="btnDraw btnGhost">Replay</button>
+        <button id="btnPlay" type="button" className="btnDraw">Replay</button>
         <span id="status" className="status" />
         <span className="speed" aria-label="Draw speed">
           <span className="lbl">SPEED</span>
@@ -397,9 +388,8 @@ export function GoldHousingRatioChart() {
         </span>
       </div>
 
-      <div id="chartbox" className="chartbox" role="button" tabIndex={0} aria-label="Play the gold-to-housing ratio animation">
+      <div id="chartbox" className="chartbox">
         <div id="plot" className="plot" aria-hidden="true" />
-        <div id="hint" className="hint" />
         <div id="tip" className="tip" />
       </div>
 
