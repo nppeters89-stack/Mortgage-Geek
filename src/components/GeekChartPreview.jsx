@@ -1,5 +1,5 @@
 import { CHART_COLORS } from "../theme";
-import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500, FTHB_AGE } from "../data/geekCharts";
+import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500, FTHB_AGE, PRICE_TO_INCOME } from "../data/geekCharts";
 
 // Static sneak-peek sparkline for a Geek Charts hub card. Draws each chart's
 // line(s) straight from the data, so it always shows the fully rendered shape,
@@ -21,6 +21,9 @@ const PREVIEWS = {
   // instead of a flat line pinned to the top. Adapter object gives it the
   // {years, key} shape the renderer expects without aliasing the data export.
   "first-time-homebuyer-age": { data: { years: FTHB_AGE.surveyYears, age: FTHB_AGE.surveyAges }, yMin: 18, yMax: 44, lines: [{ key: "age", color: C.line, w: 2.5 }] },
+  // Ratio sits 2.45 to 4.67, floored at 2 (matching the chart) so the
+  // sparkline shows the real shape instead of a flat line near the top.
+  "price-to-income-ratio": { data: PRICE_TO_INCOME, yMin: 2, yMax: 5, lines: [{ key: "ratio", color: C.line, w: 2.5 }] },
 };
 
 // Near-square viewBox (4:3) so the preview fills a square-ish card slot without
