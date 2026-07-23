@@ -41,6 +41,7 @@ const PRERENDER_PATHS = [
   "/geek-charts/rent-vs-home-prices",
   "/geek-charts/homes-priced-in-sp500",
   "/geek-charts/first-time-homebuyer-age",
+  "/geek-charts/price-to-income-ratio",
 ];
 
 export default {
