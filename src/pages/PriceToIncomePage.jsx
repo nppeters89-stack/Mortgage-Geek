@@ -139,12 +139,12 @@ export function PriceToIncomePage() {
 
         <Section>Today: a normal payment behind a hard door</Section>
         <Para>Now run the same numbers for today. The payment burden is 23.0 percent, a hair under the long-run average of 23.7. By monthly cost, and I will not pretend otherwise, this market is ordinary.</Para>
-        <Para>But look at the hero chart. The median home now runs about 3.8 times the median family income, still well above the 3.5 long-run average even after three years of easing. At the 2022 peak it hit 4.67, the worst entry ratio in the entire series. A 20 percent down payment today is about 78 percent of a year's pay, up from 62 percent in 1981.</Para>
+        <Para>But look at the chart at the top of this page. The median home now runs about 3.8 times the median family income, still well above the 3.5 long-run average even after three years of easing. At the 2022 peak it hit 4.67, the worst entry ratio in the entire series. A 20 percent down payment today is about 78 percent of a year's pay, up from 62 percent in 1981.</Para>
         <Para>Why did the door move? Since 1970, home prices are up 19.5x while incomes are up 10.7x. Homes rose roughly 1.8 times faster than the paychecks trying to buy them. The gap is the door.</Para>
         <EmbedCard href="/geek-charts/home-prices-income-inflation" label="View the full Home Prices, Inflation, and Family Income chart">
           <PricesIncomeInflationChart />
         </EmbedCard>
-        <Para>And here is the detail that convinces me this is the right diagnosis. The first-time buyer age line did not drift upward slowly. It sat in a band between 28 and 33 for forty years, from 1981 through 2020. Then it jumped from 33 to 36 between 2021 and 2022, exactly the window when the hero chart spiked from 3.89 to its all-time worst 4.67. The payment squeeze of 2023 came and partly went. The age line kept climbing: 38 in 2024, 40 in 2025.</Para>
+        <Para>And here is the detail that convinces me this is the right diagnosis. The first-time buyer age line did not drift upward slowly. It sat in a band between 28 and 33 for forty years, from 1981 through 2020. Then it jumped from 33 to 36 between 2021 and 2022, exactly the window when the price-to-income ratio spiked from 3.89 to its all-time worst 4.67. The payment squeeze of 2023 came and partly went. The age line kept climbing: 38 in 2024, 40 in 2025.</Para>
         <Para>A rate problem is temporary because you can refinance the rate. A price problem is permanent because you cannot refinance the principal. Whatever you pay for the house, you pay for the house. The 1981 buyer's problem melted every time rates fell. Today's buyer's problem is baked into the purchase price on day one.</Para>
 
         <Section>The door is also crowded</Section>
@@ -183,7 +183,7 @@ export function PriceToIncomePage() {
         </div>
 
         <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, marginTop: 24 }}>
-          Run your entry math with Nick directly: <a href="mailto:nick@mortgagegeek.ai" style={LINK}>nick@mortgagegeek.ai</a> or <a href="tel:+16156560737" style={LINK}>(615) 656-0737</a>.
+          Run your entry math with Nick directly: <a href="mailto:nick.peters@rate.com" style={LINK}>nick.peters@rate.com</a> or <a href="tel:+16156560737" style={LINK}>(615) 656-0737</a>.
         </p>
 
         <div style={{ background: withAlpha(CHART_COLORS.accent, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.accent, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
