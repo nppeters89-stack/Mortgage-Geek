@@ -13,11 +13,10 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 // from CHART_COLORS / P via withAlpha; no hardcoded hex. sr-only table mirrors
 // the series for crawlers.
 //
-// The line draws itself on click as a narration aid for screen recordings: one
-// advance draws the cream line, then four markers cascade in (1981 peak, 2020
-// low, 2023 squeeze, today) and the today marker settles into a slow pulse.
-// Phones get the controls and the tap-to-draw too, like the other Geek Charts;
-// only prefers-reduced-motion renders the finished chart directly.
+// The chart renders drawn by default; Replay re-runs the animation as a
+// narration aid for screen recordings: the cream line draws, then four markers
+// cascade in (1981 peak, 2020 low, 2023 squeeze, today) and the today marker
+// settles into a slow pulse. Only prefers-reduced-motion hides the controls.
 
 // Marker cascade offsets from the moment the line finishes, then the settle into
 // the pulse. From the design handoff: peak +150, low +800, squeeze +1450, today
@@ -34,9 +33,10 @@ export function PaymentBurdenChart() {
   const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
 
-  // idle → drawing → points → done. `reveal` counts markers shown (0..4).
-  const [phase, setPhase] = useState("idle");
-  const [reveal, setReveal] = useState(0);
+  // The chart starts drawn (phase "done", all four markers revealed); Replay
+  // re-runs the animation. Phases while running: drawing → points → done.
+  const [phase, setPhase] = useState("done");
+  const [reveal, setReveal] = useState(4);
   const [duration, setDuration] = useState(4000);
 
   const plotRef = useRef(null);
@@ -75,11 +75,6 @@ export function PaymentBurdenChart() {
     else if (shown === "done" || shown === "points") clearDrawState(path);
   });
 
-  const advance = useCallback(() => {
-    if (staticCharts || phase !== "idle") return;
-    setPhase("drawing");
-  }, [staticCharts, phase]);
-
   // The draw has to start AFTER the render that sets the phase, not inside the
   // click handler: Recharts rebuilds its SVG on every render, so a path styled
   // during the handler is a detached node by the time the browser paints.
@@ -114,17 +109,20 @@ export function PaymentBurdenChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  // Re-run the animation from the drawn state: reset the markers, then draw. The
+  // drawing effect above re-hides the line and redraws it, and the cascade runs
+  // again on completion. Ignored while a run is in progress.
   const replay = useCallback(() => {
-    if (staticCharts) return;
+    if (staticCharts || phase === "drawing") return;
     clearTimers();
     const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
     if (tracer) tracer.setAttribute("opacity", "0");
     setReveal(0);
-    setPhase("idle");
-  }, [staticCharts, clearTimers]);
+    setPhase("drawing");
+  }, [staticCharts, phase, clearTimers]);
 
-  // Space and Enter already activate the focused Draw button natively; the only
-  // shortcut worth adding is R to replay, scoped to the control bar.
+  // Space and Enter already activate the focused Replay button natively; the
+  // only shortcut worth adding is R to replay, scoped to the control bar.
   const onKeyDown = (e) => {
     if (e.key === "r" || e.key === "R") {
       e.preventDefault();
@@ -194,7 +192,7 @@ export function PaymentBurdenChart() {
     );
   };
 
-  const advanceLabel = phase === "idle" ? "Draw the line" : phase === "drawing" ? "Drawing…" : "Drawn";
+  const replayLabel = phase === "drawing" ? "Drawing…" : "Replay";
 
   return (
     <div className="pbn-chart">
@@ -205,7 +203,6 @@ export function PaymentBurdenChart() {
         @media (max-width: 640px) { .pbn-plot { height: 340px; } }
         .pbn-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        .pbn-plot.is-live { cursor: pointer; }
         /* Markers start hidden and fade in on their reveal step. */
         .pbn-mk { opacity: 0; transition: opacity .45s ease; }
         .pbn-plot[data-reveal="1"] .pbn-mk-peak,
@@ -244,25 +241,22 @@ export function PaymentBurdenChart() {
 
       {!staticCharts && (
         <ChartDrawControls
-          advanceLabel={advanceLabel}
-          onAdvance={advance}
-          onReplay={replay}
-          canAdvance={phase === "idle" || phase === "drawing"}
-          canReplay={phase !== "idle"}
+          label={replayLabel}
+          onClick={replay}
+          disabled={phase === "drawing"}
           duration={duration}
           onDuration={setDuration}
-          drawing={phase === "drawing"}
+          speedDisabled={phase === "drawing"}
           onKeyDown={onKeyDown}
-          hint={hasHover ? "Click the chart or press the button to draw. R replays." : "Tap the chart or the button to draw."}
+          hint={hasHover ? "Press Replay to redraw the line. R also replays." : "Tap Replay to redraw the line."}
         />
       )}
 
       <div
-        className={`pbn-plot${staticCharts ? "" : " is-live"}`}
+        className="pbn-plot"
         data-reveal={shownReveal}
         data-phase={shown}
         aria-hidden="true"
-        onClick={staticCharts ? undefined : advance}
         ref={plotRef}
       >
         <ResponsiveContainer width="100%" height="100%">

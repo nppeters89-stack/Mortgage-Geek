@@ -47,15 +47,17 @@ export const drawControlsCss = `
   .cdc-hint { font-size: 11px; color: ${withAlpha(CHART_COLORS.line, 0.45)}; flex-basis: 100%; margin: 0; }
 `;
 
+// The charts render drawn by default and this one button re-runs the animation,
+// so it is a single primary control (label + action supplied by the chart)
+// rather than a draw/replay pair. `disabled` covers the in-progress state, when
+// a re-run must be ignored. Speed can only change between runs.
 export function ChartDrawControls({
-  advanceLabel,
-  onAdvance,
-  onReplay,
-  canAdvance,
-  canReplay,
+  label,
+  onClick,
+  disabled,
   duration,
   onDuration,
-  drawing,
+  speedDisabled,
   hint,
   onKeyDown,
 }) {
@@ -67,15 +69,12 @@ export function ChartDrawControls({
     <div className="cdc" onKeyDown={onKeyDown}>
       <button
         type="button"
-        className={`cdc-btn${drawing ? " is-drawing" : ""}`}
-        onClick={onAdvance}
-        disabled={!canAdvance}
+        className={`cdc-btn${disabled ? " is-drawing" : ""}`}
+        onClick={onClick}
+        disabled={disabled}
       >
-        <span className="cdc-btn-label">{advanceLabel}</span>
+        <span className="cdc-btn-label">{label}</span>
         <span className="cdc-shimmer" aria-hidden="true" />
-      </button>
-      <button type="button" className="cdc-ghost" onClick={onReplay} disabled={!canReplay}>
-        Replay
       </button>
 
       <div className="cdc-speed">
@@ -87,7 +86,7 @@ export function ChartDrawControls({
               type="button"
               className={duration === ms ? "is-active" : ""}
               aria-pressed={duration === ms}
-              disabled={drawing}
+              disabled={speedDisabled}
               onClick={() => onDuration(ms)}
             >
               {ms / 1000}s

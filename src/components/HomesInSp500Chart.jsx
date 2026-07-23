@@ -17,10 +17,10 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 // line dives into the bottom-right corner), never on the line, and with no
 // background boxes. sr-only table mirrors the series for crawlers.
 //
-// The line draws itself on click as a narration aid for screen recordings:
-// one advance draws the blue line, then the three markers cascade in and the
-// today marker settles into a slow pulse. Touch devices get it too; only
-// prefers-reduced-motion renders the finished chart directly with no controls.
+// The chart renders drawn by default; Replay re-runs the animation as a
+// narration aid for screen recordings: the blue line draws, then the three
+// markers cascade in and the today marker settles into a slow pulse. Only
+// prefers-reduced-motion hides the controls.
 
 // Index level formatted with two decimals and thousands separators (7,570.03).
 const spFmt = (v) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -35,9 +35,10 @@ export function HomesInSp500Chart() {
   const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
 
-  // idle → drawing → points → done. `reveal` counts markers shown (0..3).
-  const [phase, setPhase] = useState("idle");
-  const [reveal, setReveal] = useState(0);
+  // The chart starts drawn (phase "done", all three markers revealed); Replay
+  // re-runs the animation. Phases while running: drawing → points → done.
+  const [phase, setPhase] = useState("done");
+  const [reveal, setReveal] = useState(3);
   const [duration, setDuration] = useState(4000);
 
   const plotRef = useRef(null);
@@ -76,11 +77,6 @@ export function HomesInSp500Chart() {
     else if (shown === "done" || shown === "points") clearDrawState(path);
   });
 
-  const advance = useCallback(() => {
-    if (staticCharts || phase !== "idle") return;
-    setPhase("drawing");
-  }, [staticCharts, phase]);
-
   // The draw has to start AFTER the render that sets the phase, not inside the
   // click handler. Recharts rebuilds its SVG on every render, so a path styled
   // during the handler is a detached node by the time the browser paints and
@@ -117,16 +113,19 @@ export function HomesInSp500Chart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
+  // Re-run the animation from the drawn state: reset the markers, then draw. The
+  // drawing effect above re-hides the line and redraws it, and the cascade runs
+  // again on completion. Ignored while a run is in progress.
   const replay = useCallback(() => {
-    if (staticCharts) return;
+    if (staticCharts || phase === "drawing") return;
     clearTimers();
     const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
     if (tracer) tracer.setAttribute("opacity", "0");
     setReveal(0);
-    setPhase("idle");
-  }, [staticCharts, clearTimers]);
+    setPhase("drawing");
+  }, [staticCharts, phase, clearTimers]);
 
-  // Space and Enter already activate the focused Draw button natively, so the
+  // Space and Enter already activate the focused Replay button natively, so the
   // only shortcut worth adding is R to replay. Scoped to the control bar so it
   // never hijacks typing elsewhere on the page.
   const onKeyDown = (e) => {
@@ -174,7 +173,7 @@ export function HomesInSp500Chart() {
     );
   };
 
-  const advanceLabel = phase === "idle" ? "Draw the line" : phase === "drawing" ? "Drawing…" : "Drawn";
+  const replayLabel = phase === "drawing" ? "Drawing…" : "Replay";
 
   return (
     <div className="hsp-chart">
@@ -185,7 +184,6 @@ export function HomesInSp500Chart() {
         @media (max-width: 640px) { .hsp-plot { height: 340px; } }
         .hsp-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        .hsp-plot.is-live { cursor: pointer; }
         .hsp-mk { opacity: 0; transition: opacity .45s ease; }
         .hsp-plot[data-reveal="1"] .hsp-mk-peak,
         .hsp-plot[data-reveal="2"] .hsp-mk-peak,
@@ -207,24 +205,21 @@ export function HomesInSp500Chart() {
 
       {!staticCharts && (
         <ChartDrawControls
-          advanceLabel={advanceLabel}
-          onAdvance={advance}
-          onReplay={replay}
-          canAdvance={phase === "idle" || phase === "drawing"}
-          canReplay={phase !== "idle"}
+          label={replayLabel}
+          onClick={replay}
+          disabled={phase === "drawing"}
           duration={duration}
           onDuration={setDuration}
-          drawing={phase === "drawing"}
+          speedDisabled={phase === "drawing"}
           onKeyDown={onKeyDown}
-          hint={hasHover ? "Click the chart or press the button to draw. R replays." : "Tap the chart or the button to draw."}
+          hint={hasHover ? "Press Replay to redraw the line. R also replays." : "Tap Replay to redraw the line."}
         />
       )}
 
       <div
-        className={`hsp-plot${staticCharts ? "" : " is-live"}`}
+        className="hsp-plot"
         data-reveal={shownReveal}
         aria-hidden="true"
-        onClick={staticCharts ? undefined : advance}
         ref={plotRef}
       >
         <ResponsiveContainer width="100%" height="100%">

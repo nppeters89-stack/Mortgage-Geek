@@ -144,7 +144,9 @@ export function BuyVsInvestChart() {
   // Lines finished so far (0-4). `drawingStep` is the one currently drawing,
   // null when idle. Step 4 redraws the profit line green after flipping the
   // strategy, so it targets the same path element as step 3.
-  const [animSteps, setAnimSteps] = useState(0);
+  // Starts finished: all lines drawn at the default (monthly) scenario, like the
+  // reduced-motion view. Replay resets to 0 and the author steps through again.
+  const [animSteps, setAnimSteps] = useState(4);
   const [drawingStep, setDrawingStep] = useState(null);
   const [duration, setDuration] = useState(4000);
 
@@ -374,7 +376,10 @@ export function BuyVsInvestChart() {
     "Draw net profit",
     "Now pay it off faster",
   ];
-  const advanceLabel = drawingStep != null ? "Drawing…" : finished ? "Drawn" : ADVANCE_LABELS[animSteps];
+  // One button: while finished it resets (Replay); mid-sequence it advances the
+  // next step; and it is disabled while a line is drawing.
+  const primaryLabel = drawingStep != null ? "Drawing…" : finished ? "Replay" : ADVANCE_LABELS[animSteps];
+  const primaryAction = finished ? replay : advance;
 
   const legend = [
     { label: "Home equity (gross)", color: REDLINE, h: 4 },
@@ -465,18 +470,16 @@ export function BuyVsInvestChart() {
       {/* Chart */}
       {!staticCharts && (
         <ChartDrawControls
-          advanceLabel={advanceLabel}
-          onAdvance={advance}
-          onReplay={replay}
-          canAdvance={!finished}
-          canReplay={animSteps > 0 || drawingStep != null}
+          label={primaryLabel}
+          onClick={primaryAction}
+          disabled={drawingStep != null}
           duration={duration}
           onDuration={setDuration}
-          drawing={drawingStep != null}
+          speedDisabled={drawingStep != null}
           onKeyDown={onKeyDown}
           hint={hasHover
-            ? "Four clicks: the S&P path, home equity, net profit, then the faster payoff. R resets."
-            : "Four taps: the S&P path, home equity, net profit, then the faster payoff."}
+            ? "Replay resets it, then step through: the S&P path, home equity, net profit, then the faster payoff. R replays."
+            : "Tap Replay to reset, then tap through: the S&P path, home equity, net profit, then the faster payoff."}
         />
       )}
 
@@ -484,7 +487,7 @@ export function BuyVsInvestChart() {
         className={`bvi-plot${staticCharts ? "" : " is-live"}`}
         data-steps={shownSteps}
         aria-hidden="true"
-        onClick={staticCharts ? undefined : advance}
+        onClick={staticCharts ? undefined : primaryAction}
         ref={plotRef}
       >
         <ResponsiveContainer width="100%" height="100%">
