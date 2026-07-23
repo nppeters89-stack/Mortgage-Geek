@@ -42,7 +42,11 @@ const MEANS = [
   },
   {
     title: "Wait, wasn't 1981 worse?",
-    body: "Sharp catch. The mortgage payment in 1981 ate 41% of the median income, the worst ever, and buyers were still 29. Here is the reconciliation: 1981 was a payment crisis with a cheap door. The median home cost 3.1 times income and 20% down was about 62% of a year's pay, so people bought young, suffered the rate, and refinanced down for decades. A rate problem is temporary. Today is the reverse: a normal payment behind a hard door. Homes run 3.9 times income, 20% down is 78% of a year's pay, and rent compounds while you save. The bottleneck moved from the monthly payment to the entry, and entry is a financing problem with financing solutions.",
+    body: (
+      <>
+        Sharp catch. The mortgage payment in 1981 ate 41% of the median income, the worst ever, and buyers were still 29. Here is the reconciliation: 1981 was a payment crisis with a cheap door. The median home cost 3.1 times income and 20% down was about 62% of a year's pay, so people bought young, suffered the rate, and refinanced down for decades. A rate problem is temporary. Today is the reverse: a normal payment behind a hard door. Homes run 3.9 times income, 20% down is 78% of a year's pay, and rent compounds while you save. The bottleneck moved from the monthly payment to the entry, and entry is a financing problem with financing solutions. The full answer gets its own chart: <a href="/geek-charts/price-to-income-ratio" style={LINK}>The Payment Was Never the Problem</a>.
+      </>
+    ),
   },
 ];
 
