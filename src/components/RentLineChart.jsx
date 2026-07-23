@@ -1,18 +1,45 @@
-import { useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot } from "recharts";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot, Customized } from "recharts";
 import { P, F, CHART_COLORS } from "../theme";
 import { withAlpha } from "../utils/format";
 import { RENT_LINE } from "../data/geekCharts";
+import { drawPath, clearDrawState } from "../utils/lineDraw";
+import { useStaticCharts, useHasHover } from "../utils/hooks";
+import { ChartDrawControls, drawControlsCss } from "./ChartDrawControls";
 
-// The Rent Line: CPI rent of primary residence vs average home price, both
-// indexed to 1970 = 100, on a dark charcoal canvas. Rent (red) is drawn heavier
-// and on top; it is the point of the chart (it has no down years). Colors from
-// CHART_COLORS / P via withAlpha; no hardcoded hex. No animation. Tooltip colors
-// each year-over-year change by sign (negative gold, positive red) so a scrubbing
-// viewer sees negatives only ever in the home row. sr-only table mirrors the
-// series for crawlers.
+// The Rent Line: CPI rent of primary residence (red) vs average home price
+// (cream), both indexed to 1970 = 100, on a dark charcoal canvas. Rent is the
+// point of the chart: it has no down years. Colors from CHART_COLORS / P via
+// withAlpha; no hardcoded hex.
+//
+// The chart renders drawn by default; Replay re-runs the animation. One click
+// draws BOTH lines at once (each with its own tracer), then the markers fade in
+// and the 2010 gold dot pulses. The "down years" counts that used to sit on the
+// line ends are dropped: the stat cards right below the chart already carry
+// them, so the line ends are just their current-value dots now. Only
+// prefers-reduced-motion hides the controls and shows the finished chart.
+
+const RENT = CHART_COLORS.mortgage;
+const HOME = CHART_COLORS.line;
+const GOLD = CHART_COLORS.gold;
+
 export function RentLineChart() {
   const { years, rentIdx, homeIdx, rentYoY, homeYoY } = RENT_LINE;
+  const staticCharts = useStaticCharts();
+  const hasHover = useHasHover();
+
+  // The chart starts drawn (phase "done", markers shown); Replay re-runs it.
+  // Phases while running: drawing → points → done.
+  const [phase, setPhase] = useState("done");
+  const [reveal, setReveal] = useState(1);
+  const [duration, setDuration] = useState(4000);
+
+  const plotRef = useRef(null);
+  const timers = useRef([]);
+  const cancels = useRef([]);
+
+  const shown = staticCharts ? "done" : phase;
+  const shownReveal = staticCharts ? 1 : reveal;
 
   const data = useMemo(
     () => years.map((year, i) => ({ year, rentIdx: rentIdx[i], homeIdx: homeIdx[i], rentYoY: rentYoY[i], homeYoY: homeYoY[i] })),
@@ -22,10 +49,91 @@ export function RentLineChart() {
   const tickColor = withAlpha(CHART_COLORS.line, 0.55);
   const isNull = (v) => v === null || v === undefined;
 
-  const SERIES = [
-    { key: "rentIdx", label: "Rent (CPI rent of primary residence)", color: CHART_COLORS.mortgage },
-    { key: "homeIdx", label: "Average home price", color: CHART_COLORS.line },
-  ];
+  const clearTimers = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    cancels.current.forEach((c) => c?.());
+    cancels.current = [];
+  }, []);
+
+  useEffect(() => clearTimers, [clearTimers]);
+
+  const homePath = () => plotRef.current?.querySelector(".rl-home .recharts-line-curve");
+  const rentPath = () => plotRef.current?.querySelector(".rl-rent .recharts-line-curve");
+
+  // Recharts wipes inline dash styles on every render and on resize. Keep both
+  // lines visible whenever they should be (they only hide mid-draw).
+  useEffect(() => {
+    const home = homePath();
+    const rent = rentPath();
+    if (!home || !rent) return;
+    if (shown === "done" || shown === "points") {
+      clearDrawState(home);
+      clearDrawState(rent);
+    }
+  });
+
+  // Draw both lines at once, each with its own tracer. The marker cascade waits
+  // for both to finish (they share a duration, so within a frame of each other).
+  useEffect(() => {
+    if (phase !== "drawing") return;
+    const home = homePath();
+    const rent = rentPath();
+    if (!home || !rent) {
+      setPhase("points");
+      return;
+    }
+    const homeTracer = plotRef.current?.querySelector(".rl-tracer-home");
+    const rentTracer = plotRef.current?.querySelector(".rl-tracer-rent");
+    if (homeTracer) homeTracer.setAttribute("opacity", "1");
+    if (rentTracer) rentTracer.setAttribute("opacity", "1");
+
+    let done = 0;
+    const finish = () => {
+      if (++done < 2) return;
+      if (homeTracer) homeTracer.setAttribute("opacity", "0");
+      if (rentTracer) rentTracer.setAttribute("opacity", "0");
+      setPhase("points");
+      timers.current.push(setTimeout(() => setReveal(1), 200));
+      timers.current.push(setTimeout(() => setPhase("done"), 900));
+    };
+
+    cancels.current.push(
+      drawPath(home, {
+        duration,
+        onTick: (_t, pt) => { if (homeTracer) { homeTracer.setAttribute("cx", pt.x); homeTracer.setAttribute("cy", pt.y); } },
+        onDone: finish,
+      })
+    );
+    cancels.current.push(
+      drawPath(rent, {
+        duration,
+        onTick: (_t, pt) => { if (rentTracer) { rentTracer.setAttribute("cx", pt.x); rentTracer.setAttribute("cy", pt.y); } },
+        onDone: finish,
+      })
+    );
+    // Duration is read once per run; speed is locked while drawing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  // Re-run from the drawn state: hide the markers, then redraw both lines.
+  const replay = useCallback(() => {
+    if (staticCharts || phase === "drawing") return;
+    clearTimers();
+    [".rl-tracer-home", ".rl-tracer-rent"].forEach((c) => {
+      const t = plotRef.current?.querySelector(c);
+      if (t) t.setAttribute("opacity", "0");
+    });
+    setReveal(0);
+    setPhase("drawing");
+  }, [staticCharts, phase, clearTimers]);
+
+  const onKeyDown = (e) => {
+    if (e.key === "r" || e.key === "R") {
+      e.preventDefault();
+      replay();
+    }
+  };
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -50,33 +158,70 @@ export function RentLineChart() {
     );
   };
 
-  const endLabel = (x, y, color, label) => (
-    <ReferenceDot x={x} y={y} r={5} fill={color} stroke={P.navyDark} strokeWidth={2} isFront
-      label={{ value: label, position: "left", fill: color, fontSize: 12, fontFamily: F.body, fontWeight: 700 }} />
-  );
+  // Pulse on the 2010 gold dot (rent's worst year, still positive), drawn through
+  // Recharts' scales so it tracks the point on resize. Only once settled.
+  const RentPulse = (props) => {
+    const { xAxisMap, yAxisMap } = props;
+    if (shown !== "done" || shownReveal < 1) return null;
+    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!xScale || !yScale) return null;
+    return (
+      <circle className="rl-pulse" cx={xScale(2010)} cy={yScale(536.3)} fill="none" stroke={GOLD} strokeWidth={2} style={{ pointerEvents: "none" }} />
+    );
+  };
+
+  const HomeTracer = () => <circle className="rl-tracer-home" r={6} fill={HOME} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
+  const RentTracer = () => <circle className="rl-tracer-rent" r={6.5} fill={RENT} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
+
+  const replayLabel = phase === "drawing" ? "Drawing…" : "Replay";
 
   return (
     <div className="rl-chart">
       <style>{`
+        ${drawControlsCss}
         .rl-chart { width: 100%; }
         .rl-legend { display: flex; flex-wrap: wrap; gap: 16px 20px; margin-bottom: 16px; }
         .rl-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; }
         .rl-swatch { display: inline-block; width: 18px; height: 3px; border-radius: 999px; flex-shrink: 0; }
-        .rl-plot { width: 100%; height: 400px; }
+        .rl-plot { width: 100%; height: 400px; min-height: 320px; }
         @media (max-width: 640px) { .rl-plot { height: 340px; } }
         .rl-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+        .rl-mk { opacity: 0; transition: opacity .45s ease; }
+        .rl-plot[data-reveal="1"] .rl-mk { opacity: 1; }
+
+        .rl-pulse { animation: rlPulse 1.8s ease-out infinite; }
+        @keyframes rlPulse { 0% { r: 6px; opacity: .85; } 100% { r: 24px; opacity: 0; } }
+        @media (prefers-reduced-motion: reduce) {
+          .rl-mk { transition: none; }
+          .rl-pulse { display: none; }
+        }
       `}</style>
 
       <div className="rl-legend">
-        {SERIES.map((s) => (
-          <span key={s.key} className="rl-legend-item" style={{ color: withAlpha(CHART_COLORS.line, 0.75) }}>
-            <span className="rl-swatch" style={{ background: s.color, height: s.key === "rentIdx" ? 4 : 3 }} />
-            {s.label}
-          </span>
-        ))}
+        <span className="rl-legend-item" style={{ color: withAlpha(CHART_COLORS.line, 0.75) }}>
+          <span className="rl-swatch" style={{ background: RENT, height: 4 }} />Rent
+        </span>
+        <span className="rl-legend-item" style={{ color: withAlpha(CHART_COLORS.line, 0.75) }}>
+          <span className="rl-swatch" style={{ background: HOME, height: 3 }} />Home price
+        </span>
       </div>
 
-      <div className="rl-plot" aria-hidden="true">
+      {!staticCharts && (
+        <ChartDrawControls
+          label={replayLabel}
+          onClick={replay}
+          disabled={phase === "drawing"}
+          duration={duration}
+          onDuration={setDuration}
+          speedDisabled={phase === "drawing"}
+          onKeyDown={onKeyDown}
+          hint={hasHover ? "Press Replay to redraw both lines. R also replays." : "Tap Replay to redraw both lines."}
+        />
+      )}
+
+      <div className="rl-plot" data-reveal={shownReveal} aria-hidden="true" ref={plotRef}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 16, right: 24, left: 8, bottom: 4 }}>
             <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
@@ -99,12 +244,17 @@ export function RentLineChart() {
               tickFormatter={(v) => v.toLocaleString()}
               width={52}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />
-            <Line type="monotone" dataKey="homeIdx" stroke={CHART_COLORS.line} strokeWidth={2.5} strokeOpacity={0.85} dot={false} isAnimationActive={false} />
-            <Line type="monotone" dataKey="rentIdx" stroke={CHART_COLORS.mortgage} strokeWidth={3.25} dot={false} isAnimationActive={false} />
-            <ReferenceDot x={2010} y={536.3} r={5} fill={CHART_COLORS.gold} stroke={P.navyDark} strokeWidth={2} isFront />
-            {endLabel(2026, 954.0, CHART_COLORS.mortgage, "rent: 0 down years")}
-            {endLabel(2026, 1931.0, CHART_COLORS.line, "homes: 8 down years")}
+            {shown === "done" && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
+            <Line className="rl-home" type="monotone" dataKey="homeIdx" stroke={HOME} strokeWidth={2.5} strokeOpacity={0.85} dot={false} isAnimationActive={false} />
+            <Line className="rl-rent" type="monotone" dataKey="rentIdx" stroke={RENT} strokeWidth={3.25} dot={false} isAnimationActive={false} />
+            {/* 2010: rent's worst year, still positive. Gold dot with a pulse. */}
+            <ReferenceDot className="rl-mk rl-mk-gold" x={2010} y={536.3} r={5} fill={GOLD} stroke={P.navyDark} strokeWidth={2} isFront />
+            {/* Current-value dots at the line ends (labels dropped; the stat cards below carry the counts). */}
+            <ReferenceDot className="rl-mk" x={2026} y={954.0} r={5} fill={RENT} stroke={P.navyDark} strokeWidth={2} isFront />
+            <ReferenceDot className="rl-mk" x={2026} y={1931.0} r={5} fill={HOME} stroke={P.navyDark} strokeWidth={2} isFront />
+            <Customized component={RentPulse} />
+            {!staticCharts && <Customized component={HomeTracer} />}
+            {!staticCharts && <Customized component={RentTracer} />}
           </LineChart>
         </ResponsiveContainer>
       </div>
