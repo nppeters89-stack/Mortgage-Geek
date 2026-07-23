@@ -212,6 +212,12 @@ export function PriceToIncomeChart() {
         @media (max-width: 640px) { .pti-plot { height: 340px; } }
         .pti-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+        /* 2022 peak marker (red dot + label): hidden while the chart is blank
+           or drawing, fades in with the pulse once the cream line lands. */
+        .pti-peak { opacity: 0; transition: opacity .45s ease; }
+        .pti-plot[data-phase="ma"] .pti-peak,
+        .pti-plot[data-phase="done"] .pti-peak { opacity: 1; }
+
         /* 2022 peak pulse: expanding ring, active once the cream line is drawn. */
         .pti-pulse { animation: ptiPulse 1.8s ease-out infinite; }
         @keyframes ptiPulse {
@@ -228,6 +234,7 @@ export function PriceToIncomeChart() {
           50%      { filter: drop-shadow(0 0 6px ${withAlpha(GOLD, 0.9)}); }
         }
         @media (prefers-reduced-motion: reduce) {
+          .pti-peak { transition: none; }
           .pti-pulse { display: none; }
           .pti-plot[data-phase="done"] .pti-line-ma .recharts-line-curve { animation: none; }
         }
@@ -295,8 +302,10 @@ export function PriceToIncomeChart() {
             {/* 2022 peak: the hardest door ever. Red dot with a custom label
                 lifted 16px above the dot center (Recharts' "top" pins a fixed
                 small offset that stays cramped no matter the ceiling), centered
-                so it clears the line on both sides. */}
-            <ReferenceDot x={2022} y={ratioAt(2022)} r={5} fill={ACCENT} stroke={P.navyDark} strokeWidth={2} isFront
+                so it clears the line on both sides. Hidden while the chart is
+                blank or the line is drawing; it fades in with the pulse once the
+                cream line lands (data-phase gates the .pti-peak group opacity). */}
+            <ReferenceDot className="pti-peak" x={2022} y={ratioAt(2022)} r={5} fill={ACCENT} stroke={P.navyDark} strokeWidth={2} isFront
               label={({ viewBox }) => (
                 <text x={viewBox.x} y={viewBox.y - 16} textAnchor="middle" fill={ACCENT} fontSize={12} fontFamily={F.body} fontWeight={700}>4.67x 2022</text>
               )} />
