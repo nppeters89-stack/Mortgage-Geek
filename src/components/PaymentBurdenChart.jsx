@@ -13,10 +13,12 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 // from CHART_COLORS / P via withAlpha; no hardcoded hex. sr-only table mirrors
 // the series for crawlers.
 //
-// The chart renders drawn by default; Replay re-runs the animation as a
-// narration aid for screen recordings: the cream line draws, then four markers
-// cascade in (1981 peak, 2020 low, 2023 squeeze, today) and the today marker
-// settles into a slow pulse. Only prefers-reduced-motion hides the controls.
+// The chart renders drawn by default. Replaying is a two-step click, a
+// narration aid for screen recordings: the first click (Replay) blanks the line
+// and hides the markers, the second (Draw) draws the cream line, then four
+// markers cascade in (1981 peak, 2020 low, 2023 squeeze, today) and the today
+// marker settles into a slow pulse. Only prefers-reduced-motion hides the
+// controls.
 
 // Marker cascade offsets from the moment the line finishes, then the settle into
 // the pulse. From the design handoff: peak +150, low +800, squeeze +1450, today
@@ -33,8 +35,8 @@ export function PaymentBurdenChart() {
   const staticCharts = useStaticCharts();
   const hasHover = useHasHover();
 
-  // The chart starts drawn (phase "done", all four markers revealed); Replay
-  // re-runs the animation. Phases while running: drawing → points → done.
+  // The chart starts drawn (phase "done", all four markers revealed); replaying
+  // is a two-step click: done → armed (line blanked) → drawing → points → done.
   const [phase, setPhase] = useState("done");
   const [reveal, setReveal] = useState(4);
   const [duration, setDuration] = useState(4000);
@@ -46,6 +48,13 @@ export function PaymentBurdenChart() {
   // On phones and under reduced motion the chart is simply finished.
   const shown = staticCharts ? "done" : phase;
   const shownReveal = staticCharts ? 4 : reveal;
+
+  // Markers are mounted only once the draw has finished (points/done). While the
+  // chart is armed or drawing they are absent from the DOM, not merely faded:
+  // Recharts' unlabeled ReferenceDots ignore the base opacity:0 rule, so gating
+  // render is the only reliable way to blank them. Once mounted they still fade
+  // in on their data-reveal cascade step.
+  const showDots = shown === "done" || shown === "points";
 
   const data = useMemo(
     () => years.map((year, i) => ({ year, ratio: ratio[i], pmt: pmt[i], price: price[i], rate: rate[i] })),
@@ -71,7 +80,7 @@ export function PaymentBurdenChart() {
   useEffect(() => {
     const path = linePath();
     if (!path) return;
-    if (shown === "idle") hidePath(path);
+    if (shown === "armed" || shown === "idle") hidePath(path);
     else if (shown === "done" || shown === "points") clearDrawState(path);
   });
 
@@ -109,24 +118,29 @@ export function PaymentBurdenChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // Re-run the animation from the drawn state: reset the markers, then draw. The
-  // drawing effect above re-hides the line and redraws it, and the cascade runs
-  // again on completion. Ignored while a run is in progress.
-  const replay = useCallback(() => {
+  // The control is a two-step toggle. From the drawn state, the first click
+  // arms it: reset the markers and blank the line. The second click starts the
+  // draw, and the cascade runs again on completion. A click mid-draw is ignored.
+  const advance = useCallback(() => {
     if (staticCharts || phase === "drawing") return;
+    if (phase === "armed") {
+      setPhase("drawing");
+      return;
+    }
+    // phase "done": arm it.
     clearTimers();
     const tracer = plotRef.current?.querySelector(`.${TRACER_CLASS}`);
     if (tracer) tracer.setAttribute("opacity", "0");
     setReveal(0);
-    setPhase("drawing");
+    setPhase("armed");
   }, [staticCharts, phase, clearTimers]);
 
-  // Space and Enter already activate the focused Replay button natively; the
-  // only shortcut worth adding is R to replay, scoped to the control bar.
+  // Space and Enter already activate the focused button natively; the only
+  // shortcut worth adding is R to advance a step, scoped to the control bar.
   const onKeyDown = (e) => {
     if (e.key === "r" || e.key === "R") {
       e.preventDefault();
-      replay();
+      advance();
     }
   };
 
@@ -166,10 +180,13 @@ export function PaymentBurdenChart() {
   };
 
   // The "23.0% today" label. Rendered as its own SVG text, not the ReferenceDot
-  // label, so it can sit ~44px BELOW the dot and anchor at its end: below clears
-  // the descending line and the pulse ring, and end-anchoring keeps it off the
-  // right edge (the today point is the last on the axis). Fades in with the
-  // marker via the same data-reveal step.
+  // label, so it can sit well BELOW the dot and anchor at its end. The line
+  // reaches the today point descending from the 2023 peak, so it crosses the
+  // 23% band just left of the dot; a shallow drop landed the text right on that
+  // rising/falling stroke. Dropping it into the clear wedge below the 2020 low
+  // (about the 12% line) clears the stroke entirely, and end-anchoring keeps it
+  // off the right edge (the today point is the last on the axis). Fades in with
+  // the marker via the same data-reveal step.
   const TodayLabel = (props) => {
     const { xAxisMap, yAxisMap } = props;
     const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
@@ -178,8 +195,8 @@ export function PaymentBurdenChart() {
     return (
       <text
         className="pbn-lbl-today"
-        x={xScale(2026) - 8}
-        y={yScale(yAt(2026)) + 44}
+        x={xScale(2026) - 6}
+        y={yScale(12)}
         textAnchor="end"
         fill={CREAM}
         fontSize={12}
@@ -192,7 +209,8 @@ export function PaymentBurdenChart() {
     );
   };
 
-  const replayLabel = phase === "drawing" ? "Drawing…" : "Replay";
+  const replayLabel =
+    phase === "drawing" ? "Drawing…" : phase === "armed" ? "Draw" : "Replay";
 
   return (
     <div className="pbn-chart">
@@ -242,13 +260,17 @@ export function PaymentBurdenChart() {
       {!staticCharts && (
         <ChartDrawControls
           label={replayLabel}
-          onClick={replay}
+          onClick={advance}
           disabled={phase === "drawing"}
           duration={duration}
           onDuration={setDuration}
           speedDisabled={phase === "drawing"}
           onKeyDown={onKeyDown}
-          hint={hasHover ? "Press Replay to redraw the line. R also replays." : "Tap Replay to redraw the line."}
+          hint={
+            phase === "armed"
+              ? (hasHover ? "Press Draw to draw the line." : "Tap Draw to draw the line.")
+              : (hasHover ? "Press Replay, then Draw to redraw the line. R advances." : "Tap Replay, then Draw to redraw the line.")
+          }
         />
       )}
 
@@ -290,17 +312,20 @@ export function PaymentBurdenChart() {
               label={{ value: `avg ${BURDEN_AVG}%`, position: "insideTopLeft", fill: tickColor, fontSize: 10, fontFamily: F.body }}
             />
             <Line type="monotone" dataKey="ratio" stroke={CHART_COLORS.line} strokeWidth={2.75} dot={false} isAnimationActive={false} />
-            {/* 1981 peak: red dot, label above. */}
-            <ReferenceDot className="pbn-mk pbn-mk-peak" x={1981} y={yAt(1981)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} isFront
-              label={{ value: "41.3% 1981", position: "top", fill: CHART_COLORS.accent, fontSize: 12, fontFamily: F.body, fontWeight: 700 }} />
-            {/* 2020 low: unlabeled cream dot. */}
-            <ReferenceDot className="pbn-mk pbn-mk-low" x={2020} y={yAt(2020)} r={4.5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
-            {/* 2023 squeeze: unlabeled gold dot. */}
-            <ReferenceDot className="pbn-mk pbn-mk-squeeze" x={2023} y={yAt(2023)} r={4.5} fill={CHART_COLORS.gold} stroke={P.navyDark} strokeWidth={2} isFront />
-            {/* Today: cream dot. Its label is rendered separately (TodayLabel) so
-                it can sit below the dot, anchored end, clear of the pulse ring. */}
-            <ReferenceDot className="pbn-mk pbn-mk-today" x={2026} y={yAt(2026)} r={5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
-            <Customized component={TodayLabel} />
+            {/* Markers mount only once the line has drawn (see showDots). */}
+            {showDots && <>
+              {/* 1981 peak: red dot, label above. */}
+              <ReferenceDot className="pbn-mk pbn-mk-peak" x={1981} y={yAt(1981)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} isFront
+                label={{ value: "41.3% 1981", position: "top", fill: CHART_COLORS.accent, fontSize: 12, fontFamily: F.body, fontWeight: 700 }} />
+              {/* 2020 low: unlabeled cream dot. */}
+              <ReferenceDot className="pbn-mk pbn-mk-low" x={2020} y={yAt(2020)} r={4.5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
+              {/* 2023 squeeze: unlabeled gold dot. */}
+              <ReferenceDot className="pbn-mk pbn-mk-squeeze" x={2023} y={yAt(2023)} r={4.5} fill={CHART_COLORS.gold} stroke={P.navyDark} strokeWidth={2} isFront />
+              {/* Today: cream dot. Its label is rendered separately (TodayLabel) so
+                  it can sit below the dot, anchored end, clear of the pulse ring. */}
+              <ReferenceDot className="pbn-mk pbn-mk-today" x={2026} y={yAt(2026)} r={5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
+            </>}
+            {showDots && <Customized component={TodayLabel} />}
             <Customized component={TodayPulse} />
             {!staticCharts && <Customized component={() => <Tracer fill={CREAM} />} />}
           </LineChart>
