@@ -200,8 +200,11 @@ export function Gl2App({ apiKey }) {
     <>
       {/* Tap-pop (count bump) and the syncing-dot blink. This route does not
           inject globalCSS, so the keyframes live here, ported from the CD
-          prototype head. Disabled under reduced-motion. */}
+          prototype head. Disabled under reduced-motion. The html/body background
+          is set to the app's base so the iOS bottom safe-area (home-indicator
+          strip) and any overscroll show the dark app color, not white. */}
       <style>{`
+        html, body { background: ${T.bg1}; overscroll-behavior: none; }
         @keyframes gl-pop { 0% { transform: scale(1); } 38% { transform: scale(1.26); } 100% { transform: scale(1); } }
         @keyframes gl-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
         @media (prefers-reduced-motion: reduce) {
