@@ -198,6 +198,17 @@ export function Gl2App({ apiKey }) {
 
   return (
     <>
+      {/* Tap-pop (count bump) and the syncing-dot blink. This route does not
+          inject globalCSS, so the keyframes live here, ported from the CD
+          prototype head. Disabled under reduced-motion. */}
+      <style>{`
+        @keyframes gl-pop { 0% { transform: scale(1); } 38% { transform: scale(1.26); } 100% { transform: scale(1); } }
+        @keyframes gl-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) {
+          @keyframes gl-pop { from { transform: none; } to { transform: none; } }
+          @keyframes gl-blink { from { opacity: 0.7; } to { opacity: 0.7; } }
+        }
+      `}</style>
       <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
           {tab === "today" && (
