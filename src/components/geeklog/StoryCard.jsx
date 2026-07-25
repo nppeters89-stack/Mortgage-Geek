@@ -37,7 +37,7 @@ export function StoryCard({ week, rangeLabel }) {
       <div style={{ position: "absolute", left: -180, bottom: -220, width: 760, height: 760, borderRadius: "50%", background: "radial-gradient(circle, rgba(47,191,113,0.13) 0%, rgba(47,191,113,0) 68%)", pointerEvents: "none" }} />
 
       <div style={{ position: "relative", flex: "0 0 auto" }}>
-        <Wordmark size={34} tone="red" />
+        <Wordmark height={64} />
         <div style={{ marginTop: 34, height: 1, background: T.line }} />
         <div style={{ marginTop: 30, display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <div style={{ fontWeight: 700, fontSize: 25, letterSpacing: "0.22em", textTransform: "uppercase", color: T.cream }}>Weekly activity</div>

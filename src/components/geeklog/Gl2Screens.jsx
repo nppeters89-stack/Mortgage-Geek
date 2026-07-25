@@ -72,7 +72,7 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {syncing && <SyncDot />}
           <HeaderButton onClick={onSettings} ariaLabel="Settings"><GearGlyph /></HeaderButton>
-          <Wordmark size={11} tone="red" />
+          <Wordmark height={24} />
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExpo
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>This Week</div>
           <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>{rangeLabel}</div>
         </div>
-        <Wordmark size={11} tone="red" />
+        <Wordmark height={24} />
       </div>
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 13 }}>
@@ -202,7 +202,7 @@ export function ClosingsContent({ closings, year }) {
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>Closings</div>
           <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>{year} goal</div>
         </div>
-        <Wordmark size={11} tone="red" />
+        <Wordmark height={24} />
       </div>
 
       <div style={{ padding: "0 20px 20px" }}>
@@ -255,7 +255,7 @@ export function SettingsPanel({ target, setTarget, onClose }) {
           </HeaderButton>
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>Settings</div>
         </div>
-        <Wordmark size={11} tone="red" />
+        <Wordmark height={24} />
       </div>
 
       <div style={{ padding: "0 20px" }}>

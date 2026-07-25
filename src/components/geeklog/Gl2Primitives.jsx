@@ -6,13 +6,34 @@ import { T, FF, greenFor } from "./gl2Tokens";
 // the real page fills the viewport. The tap-pop keyframes (gl-pop) live in the
 // page's <style>. No em-dashes in copy.
 
-// ---------- Wordmark ---------- (MORTGAGE = DM Sans 700, GEEK = Archivo 800)
-export function Wordmark({ size = 18, tone = "cream" }) {
-  const geekColor = tone === "red" ? T.redLift : T.cream;
+// ---------- Wordmark lockup ---------- (the main-site mg-lockup: MG monogram +
+// stacked Mortgage / Geek. MORTGAGE = DM Sans 700, GEEK = Archivo 800 in true
+// Arrow Red. `height` is the monogram height in px; the type scales from it.)
+//
+// The MG mark is inlined (from /assets/mg-mark-cream-truered-sm.svg) rather than
+// referenced by <img> so it rasterizes reliably in the html-to-image story-card
+// export on mobile WebKit. Colors come from the scoped Geek Log tokens.
+function MgMark({ height }) {
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: size * 0.34, lineHeight: 1 }}>
-      <span style={{ fontFamily: FF.mark1, fontWeight: 700, fontSize: size, letterSpacing: size * 0.14, color: T.cream }}>MORTGAGE</span>
-      <span style={{ fontFamily: FF.mark2, fontWeight: 800, fontSize: size * 1.16, letterSpacing: size * 0.02, color: geekColor }}>GEEK</span>
+    <svg
+      width={Math.round(height * (548 / 680))} height={height} viewBox="236 368 548 680"
+      xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
+      shapeRendering="geometricPrecision" style={{ display: "block", flexShrink: 0 }}
+    >
+      <path fill={T.cream} fillRule="evenodd" d="M 511 369 L 698 499 L 640 543 L 511 455 L 382 542 L 322 500 Z M 237 1047 L 312 1047 L 312 624 L 510 769 L 706 624 L 707 752 L 782 752 L 783 476 L 511 675 L 237 476 Z M 412 734 C 386 774 368 815 368 858 C 368 964 452 1046 520 1047 L 782 1047 L 782 824 L 621 824 C 608 809 589 799 569 799 C 540 799 517 823 517 856 C 517 889 543 912 573 912 C 594 912 610 902 621 886 L 650 886 L 650 907 L 677 907 L 677 886 L 706 886 L 707 969 L 541 970 C 485 970 445 920 445 857 C 445 826 456 799 473 778 L 415 735 Z M 554.4 839 C 563.2 839 570.4 846.2 570.4 855 C 570.4 863.8 563.2 871 554.4 871 C 545.6 871 538.4 863.8 538.4 855 C 538.4 846.2 545.6 839 554.4 839 Z" />
+      <rect x="470" y="523" width="81" height="81" fill={T.red} />
+    </svg>
+  );
+}
+
+export function Wordmark({ height = 24 }) {
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: height * 0.24 }}>
+      <MgMark height={height} />
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1, transform: `translateY(${height * 0.05}px)` }}>
+        <span style={{ fontFamily: FF.mark1, fontWeight: 700, fontSize: height * 0.24, letterSpacing: "0.24em", textTransform: "uppercase", color: T.cream }}>Mortgage</span>
+        <span style={{ fontFamily: FF.mark2, fontWeight: 800, fontSize: height * 0.6, letterSpacing: "-0.01em", textTransform: "uppercase", color: T.red, marginTop: height * 0.05 }}>Geek</span>
+      </div>
     </div>
   );
 }
