@@ -86,16 +86,11 @@ export function GeekLogPage() {
           The wordmark (DM Sans + Archivo) and body (Figtree) need them, and
           getFontEmbedCSS() embeds them into the exported PNG. */}
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" />
-      {/* Manifest + PWA/iOS install tags only when authorized, so the 404
-          masquerade never leaks the route's purpose from <head>. iOS ignores
-          the manifest icons for the home-screen icon and uses apple-touch-icon,
-          so that link is what actually shows the Geek Log icon on an iPhone. */}
-      {authed && <link rel="manifest" href="/geeklog.webmanifest" />}
-      {authed && <meta name="theme-color" content="#131416" />}
-      {authed && <link rel="apple-touch-icon" sizes="180x180" href="/geeklog/icon-180.png" />}
-      {authed && <meta name="apple-mobile-web-app-capable" content="yes" />}
-      {authed && <meta name="apple-mobile-web-app-title" content="Geek Log" />}
-      {authed && <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />}
+      {/* The PWA manifest, apple-touch-icon, and app title for /geek-log are set
+          in the document shell (src/root.jsx), route-aware. Setting them here too
+          only duplicated the shell's tags: browsers used the first manifest and
+          iOS the site apple-touch-icon, so the install kept the Mortgage Geek
+          identity. Do not re-add them here. */}
     </Helmet>
   );
 

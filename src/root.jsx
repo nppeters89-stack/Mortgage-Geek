@@ -1,4 +1,4 @@
-import { Meta, Links, Outlet, ScrollRestoration, Scripts } from "react-router";
+import { Meta, Links, Outlet, ScrollRestoration, Scripts, useLocation } from "react-router";
 import { HelmetProvider } from "react-helmet-async";
 import { P } from "./theme";
 
@@ -86,6 +86,19 @@ const SW_REGISTER = `
 // Document shell — every head/body element migrated from index.html. Pure shell:
 // no nav/sidebar/business logic (the layout route + pages own all of that).
 export function Layout({ children }) {
+  // The gated /geek-log app installs as its own PWA with its own home-screen
+  // identity. It is the ONLY route that swaps the manifest, apple-touch-icon,
+  // and app title; every other route keeps the main Mortgage Geek icon and
+  // manifest byte-for-byte as before. These head links are hardcoded in the
+  // shell, so per-route overrides via helmet/route-meta only duplicate them
+  // (browsers use the first manifest, iOS the site apple-touch-icon), which is
+  // why the swap has to happen here.
+  const { pathname } = useLocation();
+  const isGeekLog = pathname.replace(/\/+$/, "") === "/geek-log";
+  const manifestHref = isGeekLog ? "/geeklog.webmanifest" : "/manifest.json";
+  const appleTouchHref = isGeekLog ? "/geeklog/icon-180.png" : "/favicons/apple-touch-icon.png?v=cream";
+  const appName = isGeekLog ? "Geek Log" : "Mortgage Geek";
+
   return (
     <html lang="en">
       <head>
@@ -99,25 +112,25 @@ export function Layout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
-        {/* PWA Manifest */}
-        <link rel="manifest" href="/manifest.json" />
+        {/* PWA Manifest (Geek Log installs its own) */}
+        <link rel="manifest" href={manifestHref} />
 
         {/* Browser tab favicon: red-tile MG (reads on light + dark tabs). */}
         <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16.png" />
         <link rel="icon" type="image/png" href="/favicons/favicon.png" />
-        {/* iOS / PWA home-screen icon: cream variant (cache-busted). */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=cream" />
+        {/* iOS / PWA home-screen icon: cream MG variant, or the Geek Log icon on /geek-log. */}
+        <link rel="apple-touch-icon" sizes="180x180" href={appleTouchHref} />
 
         {/* iOS Web App */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Mortgage Geek" />
+        <meta name="apple-mobile-web-app-title" content={appName} />
 
         {/* Android / Chrome */}
         <meta name="theme-color" content="#131416" />
-        <meta name="application-name" content="Mortgage Geek" />
+        <meta name="application-name" content={appName} />
 
         {/* Open Graph + Twitter — site-wide static bits (per-page title/description/
             url come from route meta). */}
