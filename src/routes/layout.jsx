@@ -19,11 +19,17 @@ export default function SiteLayout() {
       ? "deepdive"
       : "home";
 
+  // /geek-log is a gated, full-screen app that owns the whole viewport and does
+  // not inject globalCSS. The marketing footer + welcome toast do not belong
+  // there, and the footer's lockup would render unstyled (oversized) without
+  // globalCSS. Render no site chrome on it.
+  const isApp = p === "geek-log";
+
   return (
     <>
       <Outlet />
-      <SiteFooter hasSidebar={hasSidebar} layout={layout} />
-      <WelcomeToast />
+      {!isApp && <SiteFooter hasSidebar={hasSidebar} layout={layout} />}
+      {!isApp && <WelcomeToast />}
     </>
   );
 }
