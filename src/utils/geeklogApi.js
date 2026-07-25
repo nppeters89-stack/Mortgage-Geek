@@ -96,3 +96,36 @@ export async function deleteClosing(key, dateISO, index) {
     body: JSON.stringify({ date: dateISO, index }),
   });
 }
+
+// ---- Geek Log 2.0 activity tracker (G1 Phase 1 endpoints) ----
+
+// GET /api/geeklog/activity?date=YYYY-MM-DD (optional; default today Central).
+// Returns { weekStart, days: [{ date, ...seven counters }] x7, weeklyTarget }.
+export async function fetchWeek(key, dateISO) {
+  const q = dateISO ? `?date=${encodeURIComponent(dateISO)}` : "";
+  return request(key, `/activity${q}`);
+}
+
+// POST /api/geeklog/activity — upsert one day; body = { date, ...seven counters }.
+// Server enforces the current-week write window and returns the stored document.
+export async function saveDay(key, dayDoc) {
+  return request(key, `/activity`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dayDoc),
+  });
+}
+
+// GET /api/geeklog/settings — { weeklyTarget } (defaults to 50 when unset).
+export async function fetchSettings(key) {
+  return request(key, `/settings`);
+}
+
+// POST /api/geeklog/settings — { weeklyTarget }.
+export async function saveSettings(key, weeklyTarget) {
+  return request(key, `/settings`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ weeklyTarget }),
+  });
+}
