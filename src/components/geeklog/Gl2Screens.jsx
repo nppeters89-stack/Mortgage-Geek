@@ -113,7 +113,7 @@ function WeekRow({ label, value, last }) {
   );
 }
 
-function WeekGroup({ title, total, subs, week }) {
+export function WeekGroup({ title, total, subs, week }) {
   return (
     <Card pad={15}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", paddingBottom: 10, borderBottom: `1px solid ${T.line}`, marginBottom: 4 }}>
