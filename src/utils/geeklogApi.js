@@ -123,6 +123,12 @@ export async function fetchYear(key, year) {
   return request(key, `/activity?year=${encodeURIComponent(year)}`);
 }
 
+// GET /api/geeklog/activity?scope=stats — reward-layer read. Returns
+// { todayKey, bestDay: {date, count}, currentStreak, streakBase, lastWeek }.
+export async function fetchStats(key) {
+  return request(key, `/activity?scope=stats`);
+}
+
 // GET /api/geeklog/settings — { weeklyTarget } (defaults to 50 when unset).
 export async function fetchSettings(key) {
   return request(key, `/settings`);

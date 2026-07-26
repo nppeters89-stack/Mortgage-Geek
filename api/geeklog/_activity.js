@@ -15,6 +15,11 @@ export const COUNTERS = ["pastClient", "inProcess", "prospecting", "preApproval"
 export const DEFAULT_WEEKLY_TARGET = 50;
 export const MAX_WEEKLY_TARGET = 500;
 
+// Reward layer: tracking began this Sunday, and a "streak" day needs at least
+// this many conversations. Both are shared so client and server agree.
+export const TRACKING_EPOCH = "2026-07-19";
+export const STREAK_FLOOR = 3;
+
 // Redis keys. Distinct namespaces from closings/entries/goal (all per-year):
 // activity is per-day, settings is a singleton. Cannot collide.
 export const activityKey = (dateKey) => `geeklog:activity:${dateKey}`;
