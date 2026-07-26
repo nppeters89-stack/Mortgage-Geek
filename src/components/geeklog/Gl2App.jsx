@@ -3,6 +3,7 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T } from "./gl2Tokens";
 import { TabBar } from "./Gl2Primitives";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
+import { YtdContent } from "./Gl2Ytd";
 import { StoryCard } from "./StoryCard";
 import { ALL_KEYS, emptyDay, normalizeDay, convOf } from "./gl2Model";
 import { centralDateKey, weekStartFor, weekDayKeys, dayOfWeek, addDays, monthDay, weekdayName, rangeLabel } from "./gl2Week";
@@ -228,6 +229,7 @@ export function Gl2App({ apiKey }) {
           {tab === "week" && (
             <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={doExport} exporting={exporting} />
           )}
+          {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
         </div>
 

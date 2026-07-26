@@ -116,6 +116,13 @@ export async function saveDay(key, dayDoc) {
   });
 }
 
+// GET /api/geeklog/activity?year=YYYY — YTD weekly totals. Returns
+// { year, weeks: [{ weekStart, ...seven counter totals }] } from the first week
+// with data through the current Central week (zero-filled gaps).
+export async function fetchYear(key, year) {
+  return request(key, `/activity?year=${encodeURIComponent(year)}`);
+}
+
 // GET /api/geeklog/settings — { weeklyTarget } (defaults to 50 when unset).
 export async function fetchSettings(key) {
   return request(key, `/settings`);

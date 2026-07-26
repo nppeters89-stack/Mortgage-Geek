@@ -58,6 +58,18 @@ export function weekDayKeys(weekStartKey) {
   return Array.from({ length: 7 }, (_, i) => utcDateKey(base + i * 86400000));
 }
 
+// dateKey shifted by n calendar days (date-only UTC math; DST-irrelevant).
+export function addDays(dateKey, n) {
+  return utcDateKey(dateOnlyMs(dateKey) + n * 86400000);
+}
+
+// Every Sunday week-start key from fromWeek through toWeek, inclusive.
+export function weekStartsBetween(fromWeek, toWeek) {
+  const out = [];
+  for (let w = fromWeek; w <= toWeek; w = addDays(w, 7)) out.push(w);
+  return out;
+}
+
 // The write window: a date is writable only if it falls in the current week,
 // from that week's Sunday through today inclusive (prior weeks and future
 // days are read-only). Lexicographic compare is valid for YYYY-MM-DD.

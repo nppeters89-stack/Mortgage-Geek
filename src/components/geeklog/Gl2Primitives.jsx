@@ -185,11 +185,12 @@ export function TabBar({ active, onChange }) {
   const tabs = [
     { id: "today", label: "Today" },
     { id: "week", label: "Week" },
+    { id: "ytd", label: "YTD" },
     { id: "closings", label: "Closings" },
   ];
   return (
     <div style={{ flex: "0 0 auto", borderTop: `1px solid ${T.line}`, background: "rgba(19,20,22,0.92)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <div style={{ height: 64, display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
+      <div style={{ height: 64, display: "grid", gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
         {tabs.map((t) => {
           const on = t.id === active;
           return (
