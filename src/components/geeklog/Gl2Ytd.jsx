@@ -3,19 +3,27 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { T, FF } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card } from "./Gl2Primitives";
 import { WeekGroup } from "./Gl2Screens";
-import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, sumKeys, convOf } from "./gl2Model";
+import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, sumKeys } from "./gl2Model";
 import { monthDay, rangeLabel } from "./gl2Week";
 import { fetchYear } from "../../utils/geeklogApi";
 
-// Geek Log 2.0 YTD screen: total conversations by Central week, first data week
-// through this week. Tapping a point selects that week and shows its
-// consolidated pillar breakdown. Green accents, same as the rest of the app.
+// Geek Log 2.0 YTD screen: weekly totals by Central week, first data week
+// through this week. A toggle switches the charted pillar (Conversations /
+// Appointments / Content); tapping a point selects that week and shows its
+// consolidated breakdown. Green accents, same as the rest of the app.
 
 const withA = (a) => `rgba(255,254,251,${a})`;
+
+const METRICS = [
+  { id: "conversations", label: "Conversations", subs: CONV_SUBS, unit: "conversations" },
+  { id: "appointments", label: "Appointments", subs: APPT_SUBS, unit: "appointments" },
+  { id: "content", label: "Content", subs: CONTENT_SUBS, unit: "posts" },
+];
 
 export function YtdContent({ apiKey, year }) {
   const [weeks, setWeeks] = useState(null); // null = loading, [] = no data
   const [selected, setSelected] = useState(null); // weekStart key
+  const [metric, setMetric] = useState("conversations");
 
   useEffect(() => {
     let cancelled = false;
@@ -30,9 +38,11 @@ export function YtdContent({ apiKey, year }) {
     return () => { cancelled = true; };
   }, [apiKey, year]);
 
+  const active = METRICS.find((m) => m.id === metric);
+
   const data = useMemo(
-    () => (weeks || []).map((w) => ({ weekStart: w.weekStart, label: monthDay(w.weekStart), conversations: convOf(w), week: w })),
-    [weeks]
+    () => (weeks || []).map((w) => ({ weekStart: w.weekStart, label: monthDay(w.weekStart), value: sumKeys(w, active.subs), week: w })),
+    [weeks, active]
   );
   const selectedWeek = useMemo(() => (weeks || []).find((w) => w.weekStart === selected) || null, [weeks, selected]);
 
@@ -43,13 +53,13 @@ export function YtdContent({ apiKey, year }) {
     return <circle cx={cx} cy={cy} r={on ? 6 : 4} fill={on ? T.greenBright : T.green} stroke={T.bg1} strokeWidth={2} />;
   };
 
-  const Tip = ({ active, payload }) => {
-    if (!active || !payload?.length) return null;
+  const Tip = ({ active: on, payload }) => {
+    if (!on || !payload?.length) return null;
     const d = payload[0].payload;
     return (
       <div style={{ background: T.bg1, border: `1px solid ${withA(0.15)}`, borderRadius: 8, padding: "8px 12px" }}>
         <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 12, color: T.cream }}>Week of {d.label}</div>
-        <div style={{ fontFamily: FF.body, fontSize: 12, color: T.greenBright, marginTop: 3, fontWeight: 600 }}>{d.conversations} conversations</div>
+        <div style={{ fontFamily: FF.body, fontSize: 12, color: T.greenBright, marginTop: 3, fontWeight: 600 }}>{d.value} {active.unit}</div>
       </div>
     );
   };
@@ -66,14 +76,32 @@ export function YtdContent({ apiKey, year }) {
       <div style={{ flex: "0 0 auto", padding: "2px 20px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>This Year</div>
-          <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>Conversations by week</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>Weekly totals</div>
         </div>
         <Wordmark height={24} />
       </div>
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 13 }}>
         <Card pad={15}>
-          <Eyebrow size={10.5} style={{ marginBottom: 12 }}>Conversations by week</Eyebrow>
+          {/* Pillar toggle */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }} role="group" aria-label="Chart metric">
+            {METRICS.map((m) => {
+              const on = m.id === metric;
+              return (
+                <button
+                  key={m.id} type="button" onClick={() => setMetric(m.id)} aria-pressed={on}
+                  style={{
+                    flex: 1, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, padding: "8px 4px",
+                    borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap",
+                    background: on ? "rgba(47,191,113,0.16)" : "transparent",
+                    border: `1px solid ${on ? "rgba(47,191,113,0.55)" : T.line}`,
+                    color: on ? T.cream : T.dim, transition: "background .15s, border-color .15s, color .15s",
+                  }}
+                >{m.label}</button>
+              );
+            })}
+          </div>
+
           {weeks === null ? (
             <div style={{ fontFamily: FF.body, fontSize: 12.5, color: T.dimmer, padding: "24px 0", textAlign: "center" }}>Loading your weeks.</div>
           ) : data.length === 0 ? (
@@ -88,7 +116,7 @@ export function YtdContent({ apiKey, year }) {
                   <XAxis dataKey="label" tick={{ fill: withA(0.55), fontSize: 11 }} tickLine={false} axisLine={{ stroke: withA(0.2) }} />
                   <YAxis allowDecimals={false} width={30} tick={{ fill: withA(0.55), fontSize: 11 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<Tip />} cursor={{ stroke: withA(0.2) }} />
-                  <Line type="monotone" dataKey="conversations" stroke={T.green} strokeWidth={2.75} dot={renderDot} activeDot={false} isAnimationActive={false} />
+                  <Line type="monotone" dataKey="value" stroke={T.green} strokeWidth={2.75} dot={renderDot} activeDot={false} isAnimationActive={false} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -107,8 +135,8 @@ export function YtdContent({ apiKey, year }) {
                   <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 12, color: T.dim, marginTop: 5 }}>{rangeLabel(selectedWeek.weekStart)}</div>
                 </div>
                 <div style={{ fontFamily: FF.body, fontVariantNumeric: "tabular-nums", textAlign: "right" }}>
-                  <span style={{ fontWeight: 700, fontSize: 26, color: T.greenBright }}>{convOf(selectedWeek)}</span>
-                  <div style={{ fontWeight: 500, fontSize: 11, color: T.dimmer }}>conversations</div>
+                  <span style={{ fontWeight: 700, fontSize: 26, color: T.greenBright }}>{sumKeys(selectedWeek, active.subs)}</span>
+                  <div style={{ fontWeight: 500, fontSize: 11, color: T.dimmer }}>{active.unit}</div>
                 </div>
               </div>
             </div>
