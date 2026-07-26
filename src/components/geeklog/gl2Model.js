@@ -18,6 +18,10 @@ export const CONTENT_SUBS = [
 
 export const ALL_KEYS = [...CONV_SUBS, ...APPT_SUBS, ...CONTENT_SUBS].map((s) => s.key);
 
+// A streak day needs at least this many conversations. Mirrors STREAK_FLOOR in
+// api/geeklog/_activity.js so client and server agree.
+export const STREAK_FLOOR = 3;
+
 export const CONV_DEF = "A conversation is a two way exchange with a human about mortgage business.";
 
 export function sumKeys(obj, subs) {
