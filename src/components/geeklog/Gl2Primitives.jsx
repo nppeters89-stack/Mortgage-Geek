@@ -129,7 +129,7 @@ export function Pillar({ title, total, note, children, gap = 8 }) {
 }
 
 // ---------- Week progress ----------
-export function WeekBar({ value, target, thickness = 8, showCaption = true, big = false }) {
+export function WeekBar({ value, target, thickness = 8, showCaption = true, big = false, pulse = 0 }) {
   const pct = Math.min(1, value / target);
   const over = value >= target;
   return (
@@ -141,8 +141,11 @@ export function WeekBar({ value, target, thickness = 8, showCaption = true, big 
           <span style={{ fontWeight: 500, fontSize: big ? 16 : 13, color: T.dimmer }}> / {target}</span>
         </div>
       </div>
-      <div style={{ height: thickness, borderRadius: thickness / 2, background: "rgba(255,254,251,0.08)", overflow: "hidden", boxShadow: `inset 0 0 0 1px ${T.lineSoft}` }}>
-        <div style={{ height: "100%", width: `${pct * 100}%`, borderRadius: thickness / 2, background: `linear-gradient(90deg, ${T.greenDeep} 0%, ${T.green} 62%, ${T.greenBright} 100%)`, boxShadow: "0 0 18px rgba(47,191,113,.42)", transition: "width .4s cubic-bezier(.2,.8,.3,1)" }} />
+      <div style={{ position: "relative" }}>
+        <div style={{ height: thickness, borderRadius: thickness / 2, background: "rgba(255,254,251,0.08)", overflow: "hidden", boxShadow: `inset 0 0 0 1px ${T.lineSoft}` }}>
+          <div style={{ height: "100%", width: `${pct * 100}%`, borderRadius: thickness / 2, background: `linear-gradient(90deg, ${T.greenDeep} 0%, ${T.green} 62%, ${T.greenBright} 100%)`, boxShadow: "0 0 18px rgba(47,191,113,.42)", transition: "width .4s cubic-bezier(.2,.8,.3,1)" }} />
+        </div>
+        {pulse ? <div key={pulse} aria-hidden="true" style={{ position: "absolute", inset: -3, borderRadius: thickness, boxShadow: `0 0 26px 6px ${T.greenBright}`, animation: "gl-barpulse .6s ease both", pointerEvents: "none" }} /> : null}
       </div>
       {showCaption && (
         <div style={{ marginTop: big ? 12 : 7, fontFamily: FF.body, fontWeight: 500, fontSize: big ? 13.5 : 11.5, color: T.dim, letterSpacing: "0.01em" }}>

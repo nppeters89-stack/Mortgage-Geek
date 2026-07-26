@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { T, FF } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
+import { WeekRewards } from "./Gl2Rewards";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
 
 // Geek Log 2.0 screen bodies. Each renders header + scrollable content only; the
@@ -47,7 +48,7 @@ function SyncDot() {
 // ===========================================================================
 // Today
 // ===========================================================================
-export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, weekConv, target, syncing }) {
+export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, weekConv, target, syncing, pulse }) {
   const convTotal = sumKeys(state, CONV_SUBS);
   const apptTotal = sumKeys(state, APPT_SUBS);
   const contentTotal = sumKeys(state, CONTENT_SUBS);
@@ -77,7 +78,7 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
       </div>
 
       <div style={{ flex: "0 0 auto", margin: "0 20px 14px", padding: "12px 14px 13px", borderRadius: 14, background: "rgba(255,254,251,0.035)", boxShadow: `inset 0 0 0 1px ${T.line}` }}>
-        <WeekBar value={weekConv} target={target} thickness={7} />
+        <WeekBar value={weekConv} target={target} thickness={7} pulse={pulse} />
       </div>
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
@@ -127,7 +128,7 @@ export function WeekGroup({ title, total, subs, week }) {
   );
 }
 
-export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExport, exporting }) {
+export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExport, exporting, rewards }) {
   const convTotal = sumKeys(week, CONV_SUBS);
   const apptTotal = sumKeys(week, APPT_SUBS);
   const contentTotal = sumKeys(week, CONTENT_SUBS);
@@ -152,6 +153,8 @@ export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExpo
           <Eyebrow size={10.5} style={{ marginBottom: 12 }}>Activity by day</Eyebrow>
           <DayStrip days={days} todayIndex={todayIndex} />
         </Card>
+
+        {rewards && <WeekRewards {...rewards} />}
 
         <Card pad={15}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -245,7 +248,7 @@ export function ClosingsContent({ closings, year }) {
 // ===========================================================================
 // Settings overlay (opened from the Today gear; not a tab)
 // ===========================================================================
-export function SettingsPanel({ target, setTarget, onClose }) {
+export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn }) {
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 20, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <div style={{ flex: "0 0 auto", padding: "14px 20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -275,6 +278,21 @@ export function SettingsPanel({ target, setTarget, onClose }) {
           </div>
           <div style={{ marginTop: 15, paddingTop: 13, borderTop: `1px solid ${T.lineSoft}`, fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, lineHeight: 1.5 }}>Week starts Sunday at 12:00am Central. Every day is a business day.</div>
         </Card>
+
+        <div style={{ marginTop: 13 }}>
+          <Card pad={16}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <div>
+                <Eyebrow size={10.5}>Tap sound</Eyebrow>
+                <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 5, lineHeight: 1.5 }}>A quiet tick on every count.</div>
+              </div>
+              <div onClick={() => setSoundOn(!soundOn)} role="switch" aria-checked={soundOn} aria-label="Tap sound"
+                style={{ flex: "0 0 auto", width: 52, height: 30, borderRadius: 999, cursor: "pointer", padding: 3, background: soundOn ? T.green : "rgba(255,254,251,0.12)", transition: "background .2s", display: "flex", justifyContent: soundOn ? "flex-end" : "flex-start", alignItems: "center" }}>
+                <div style={{ width: 24, height: 24, borderRadius: "50%", background: soundOn ? T.bg1 : T.dim, transition: "background .2s" }} />
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -11,14 +11,18 @@ import {
   COUNTERS,
   DEFAULT_WEEKLY_TARGET,
   SETTINGS_KEY,
+  TRACKING_EPOCH,
+  STREAK_FLOOR,
   activityKey,
   centralDateKey,
   weekStartFor,
   weekDayKeys,
   weekStartsBetween,
+  addDays,
   isWritableDate,
   emptyDoc,
   normalizeDoc,
+  sumConversations,
   validateDayBody,
 } from "./_activity.js";
 
@@ -29,7 +33,39 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === "GET") {
-      const { date, year } = req.query || {};
+      const { date, year, scope } = req.query || {};
+
+      // Stats mode: the reward-layer read. Enumerates every day from the
+      // tracking epoch through today Central (bounded and cheap at one user),
+      // and returns best day, streak, and last week. Reads only activity keys.
+      if (scope === "stats") {
+        const todayKey = centralDateKey();
+        const dayKeys = [];
+        for (let d = TRACKING_EPOCH; d <= todayKey; d = addDays(d, 1)) dayKeys.push(d);
+        const raw = dayKeys.length ? await redis.mget(...dayKeys.map(activityKey)) : [];
+        const conv = {};
+        dayKeys.forEach((dk, i) => { conv[dk] = sumConversations(normalizeDoc(parseStored(raw[i]))); });
+
+        // Best single day ever, excluding today.
+        let bestDay = { date: null, count: 0 };
+        for (const dk of dayKeys) {
+          if (dk !== todayKey && conv[dk] > bestDay.count) bestDay = { date: dk, count: conv[dk] };
+        }
+
+        // Streak: consecutive days >= STREAK_FLOOR ending yesterday; today adds
+        // one only once it reaches the floor (a low today never breaks it).
+        let streakBase = 0;
+        for (let d = addDays(todayKey, -1); d >= TRACKING_EPOCH && (conv[d] || 0) >= STREAK_FLOOR; d = addDays(d, -1)) streakBase++;
+        const currentStreak = streakBase + ((conv[todayKey] || 0) >= STREAK_FLOOR ? 1 : 0);
+
+        // Prior week's seven day documents (for pace + the Sunday recap).
+        const lastWeekStart = addDays(weekStartFor(todayKey), -7);
+        const lwKeys = weekDayKeys(lastWeekStart);
+        const lwRaw = await redis.mget(...lwKeys.map(activityKey));
+        const lastWeek = { weekStart: lastWeekStart, days: lwKeys.map((dk, i) => ({ date: dk, ...normalizeDoc(parseStored(lwRaw[i])) })) };
+
+        return jsonResponse(res, 200, { todayKey, bestDay, currentStreak, streakBase, lastWeek });
+      }
 
       // Year (YTD) mode: weekly counter totals for every Central week from the
       // first week with data through the current week (zero-filled gaps). Drives
