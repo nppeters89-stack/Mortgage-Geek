@@ -6,7 +6,7 @@
 // One Redis STRING key per day: geeklog:activity:YYYY-MM-DD. Reuses the shared
 // auth + client from _redis.js. Does not read or write any closings key.
 
-import { redis, requireKey, jsonResponse, isValidISODate, parseStored } from "./_redis.js";
+import { redis, requireKey, jsonResponse, isValidISODate, isValidYear, parseStored } from "./_redis.js";
 import {
   COUNTERS,
   DEFAULT_WEEKLY_TARGET,
@@ -15,17 +15,50 @@ import {
   centralDateKey,
   weekStartFor,
   weekDayKeys,
+  weekStartsBetween,
   isWritableDate,
+  emptyDoc,
   normalizeDoc,
   validateDayBody,
 } from "./_activity.js";
+
+const ACTIVITY_PREFIX = "geeklog:activity:";
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
 
   try {
     if (req.method === "GET") {
-      const { date } = req.query || {};
+      const { date, year } = req.query || {};
+
+      // Year (YTD) mode: weekly counter totals for every Central week from the
+      // first week with data through the current week (zero-filled gaps). Drives
+      // the YTD chart. Reads only activity keys; closings are untouched.
+      if (year !== undefined) {
+        if (!isValidYear(year)) return jsonResponse(res, 400, { error: "Invalid year" });
+        const keys = await redis.keys(`${ACTIVITY_PREFIX}${year}-*`);
+        const buckets = {};
+        let firstWeek = null;
+        if (keys.length) {
+          const docs = await redis.mget(...keys);
+          keys.forEach((k, i) => {
+            const dateKey = k.slice(ACTIVITY_PREFIX.length);
+            const doc = normalizeDoc(parseStored(docs[i]));
+            const ws = weekStartFor(dateKey);
+            if (!buckets[ws]) buckets[ws] = emptyDoc();
+            for (const c of COUNTERS) buckets[ws][c] += doc[c];
+            if (firstWeek === null || ws < firstWeek) firstWeek = ws;
+          });
+        }
+        const currentWeek = weekStartFor(centralDateKey());
+        let weeks = [];
+        if (firstWeek !== null) {
+          const start = firstWeek < currentWeek ? firstWeek : currentWeek;
+          weeks = weekStartsBetween(start, currentWeek).map((ws) => ({ weekStart: ws, ...(buckets[ws] || emptyDoc()) }));
+        }
+        return jsonResponse(res, 200, { year: Number(year), weeks });
+      }
+
       if (date && !isValidISODate(date)) return jsonResponse(res, 400, { error: "Invalid date" });
       const anchor = date || centralDateKey();
       const weekStart = weekStartFor(anchor);
