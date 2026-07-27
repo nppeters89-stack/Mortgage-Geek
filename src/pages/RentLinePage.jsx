@@ -2,6 +2,7 @@ import { P, F, globalCSS, CHART_COLORS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { ShareButton } from "../components/ShareButton";
 import { RentLineChart } from "../components/RentLineChart";
+import { RentShareChart } from "../components/RentShareChart";
 import { withAlpha } from "../utils/format";
 import { GeekChartsLockup } from "../components/GeekChartsLockup";
 
@@ -89,6 +90,39 @@ export function RentLinePage() {
           {STATS.map((s) => <StatCard key={s.label} {...s} />)}
         </div>
 
+        <h2 style={{ fontFamily: F.display, fontSize: 28, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: "56px 0 18px" }}>If rent never falls, why hasn't it eaten the whole paycheck?</h2>
+
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "0 0 16px", maxWidth: 720 }}>
+          Fair question, and the honest answer deserves its own chart. The line above shows rent's level: 56 years, zero down years, about 4.1 percent growth per year. But incomes grew too, at nearly the same pace. So rent as a share of the median family's income has not exploded. It has ground upward slowly: about 14 percent of income in 1981, about 17.7 percent today.
+        </p>
+
+        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 16px", marginTop: 8 }}>
+          <RentShareChart />
+        </div>
+
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "24px 0 16px", maxWidth: 720 }}>
+          Two things about that line are worth staring at.
+        </p>
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "0 0 16px", maxWidth: 720 }}>
+          First, <strong style={{ color: CREAM }}>17.7 percent is the record</strong>. The highest rent share in the entire 45-year series is not some year in the past. It is right now, in 2026. Rent never spikes the way home prices do, so it never makes headlines. It just takes a slightly bigger bite, decade after decade, and the biggest bite yet is the one being taken today.
+        </p>
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "0 0 16px", maxWidth: 720 }}>
+          Second, look at the dashed line, which is the monthly cost of buying the median new home against the same income. Buying is the rollercoaster: 41 percent of income in 1981, under 16 percent in 2020, 23 percent now. Renting is the conveyor belt: no relief, no crisis, no exit. For a stretch in the late 2010s the two lines nearly touched, when buying the median new home briefly cost about the same share of income as the median rent. That window is what everyone's expectations are still anchored to.
+        </p>
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "0 0 16px", maxWidth: 720 }}>
+          So the reconciliation is this. Rent did not outrun the median paycheck; it matched it stride for stride, forever, and is currently at its highest share ever. The thing that outran the paycheck is the price of the house itself, and that story has <a href="/geek-charts/price-to-income-ratio" style={LINK}>its own chart</a>. Rent is not how the market prices you out. Rent is how the market keeps you exactly where you are while the <a href="/geek-charts/price-to-income-ratio" style={LINK}>entry price</a> moves.
+        </p>
+        <p style={{ fontSize: 15, color: BODY, lineHeight: 1.7, margin: "0 0 24px", maxWidth: 720 }}>
+          One honest caveat on the math: this line divides median rent by median FAMILY income, the same denominator as the <a href="/geek-charts/mortgage-payment-burden" style={LINK}>buy burden chart</a>, so the two lines are directly comparable. Renter households earn less than the overall median family, so this line understates what renters themselves feel. The Census puts the typical renter household's own rent share at about 31 percent of its income.
+        </p>
+
+        <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${CHART_COLORS.gold}`, borderRadius: 12, padding: "20px 22px", maxWidth: 720 }}>
+          <div style={{ fontFamily: F.display, fontSize: 18, color: CREAM, marginBottom: 10, lineHeight: 1.25 }}>The record share is now</div>
+          <p style={{ fontSize: 14, color: BODY, lineHeight: 1.65, margin: 0 }}>
+            Rent took about 14 percent of the median family's income in 1981. Today it takes 17.7 percent, the highest in the 45-year series. Rent never crashes and never makes headlines. It just compounds.
+          </p>
+        </div>
+
         <h2 style={{ fontFamily: F.display, fontSize: 28, color: CREAM, fontWeight: 400, lineHeight: 1.2, margin: "48px 0 18px" }}>What this means for you</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
           {MEANS.map((m, i) => (
@@ -110,7 +144,7 @@ export function RentLinePage() {
         </p>
 
         <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginTop: 24, fontStyle: "italic" }}>
-          Sources: Rent is BLS CPI for All Urban Consumers, Rent of Primary Residence, U.S. city average, not seasonally adjusted (FRED: CUUR0000SEHA), annual averages of monthly data; the October 2025 reading was not published due to the federal appropriations lapse, so 2025 averages eleven months, and 2026 averages January through May. Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages of quarterly data; 2026 uses the Q1 2026 reading ($514,600). Both series are indexed to 1970 = 100; linear scale from zero.
+          Sources: Rent is BLS CPI for All Urban Consumers, Rent of Primary Residence, U.S. city average, not seasonally adjusted (FRED: CUUR0000SEHA), annual averages of monthly data; the October 2025 reading was not published due to the federal appropriations lapse, so 2025 averages eleven months, and 2026 averages January through May. Home prices are the Census and HUD average sales price of houses sold (ASPUS), annual averages of quarterly data; 2026 uses the Q1 2026 reading ($514,600). Both series are indexed to 1970 = 100; linear scale from zero. Rent share of income benchmarks median gross rent to Census figures ($243 in 1980, $447 in 1990, $602 in 2000, and $1,406 in the 2023 ACS), with CPI rent of primary residence interpolating between benchmarks, divided by median family income. Median family income is used for direct comparability with the buy burden line; renter household incomes are lower.
         </p>
       </article>
 
