@@ -46,11 +46,11 @@ export function StoryCard({ week, rangeLabel }) {
       </div>
 
       <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 74, paddingTop: 20 }}>
-        <StoryBlock label="Conversations" total={conv} subs={CONV_SUBS} week={week} numeral={252} cols={3} accent />
+        <StoryBlock label="Conversations" total={conv} subs={CONV_SUBS} week={week} numeral={252} cols={CONV_SUBS.length} accent />
         <div style={{ height: 1, background: T.line }} />
-        <StoryBlock label="Appointments" total={appt} subs={APPT_SUBS} week={week} numeral={168} cols={2} />
+        <StoryBlock label="Appointments" total={appt} subs={APPT_SUBS} week={week} numeral={168} cols={APPT_SUBS.length} />
         <div style={{ height: 1, background: T.line }} />
-        <StoryBlock label="Content" total={content} subs={CONTENT_SUBS} week={week} numeral={168} cols={2} />
+        <StoryBlock label="Content" total={content} subs={CONTENT_SUBS} week={week} numeral={168} cols={CONTENT_SUBS.length} />
       </div>
 
       <div style={{ position: "relative", flex: "0 0 auto", paddingTop: 40, borderTop: `1px solid ${T.line}` }}>

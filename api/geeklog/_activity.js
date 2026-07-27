@@ -9,8 +9,10 @@
 // date-only anchors, so nothing does wall-clock math across a DST transition
 // and every result is deterministic. No npm dependencies.
 
-// The seven per-day activity counters, in canonical order.
-export const COUNTERS = ["pastClient", "inProcess", "prospecting", "preApproval", "realtor", "reel", "static"];
+// The per-day activity counters, in canonical order. currentSoi (Sphere of
+// Influence) is a Conversations sub-category; older stored docs lack it and
+// normalizeDoc backfills it to 0.
+export const COUNTERS = ["pastClient", "inProcess", "prospecting", "currentSoi", "preApproval", "realtor", "reel", "static"];
 
 export const DEFAULT_WEEKLY_TARGET = 50;
 export const MAX_WEEKLY_TARGET = 500;
@@ -123,6 +125,6 @@ export function validateWeeklyTarget(v) {
 }
 
 // Pillar sums over a (normalized) seven-counter document.
-export const sumConversations = (doc) => doc.pastClient + doc.inProcess + doc.prospecting;
+export const sumConversations = (doc) => doc.pastClient + doc.inProcess + doc.prospecting + doc.currentSoi;
 export const sumAppointments = (doc) => doc.preApproval + doc.realtor;
 export const sumContent = (doc) => doc.reel + doc.static;
