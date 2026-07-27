@@ -6,6 +6,7 @@ export const CONV_SUBS = [
   { key: "pastClient", label: "Past Client", ceiling: 8 },
   { key: "inProcess", label: "In Process", ceiling: 8 },
   { key: "prospecting", label: "Prospecting", ceiling: 10 },
+  { key: "currentSoi", label: "Current SOI", ceiling: 6 },
 ];
 export const APPT_SUBS = [
   { key: "preApproval", label: "Pre Approval", ceiling: 4 },
