@@ -23,10 +23,10 @@ const CACHE_KEY = "gl2:week";
 const WRITE_DEBOUNCE_MS = 350;
 const RETRY_MS = 4000;
 const CONV_KEYS = new Set(CONV_SUBS.map((s) => s.key));
-// Desktop cap: keep the cockpit a phone-width column, centered, instead of
-// stretching cards and tap targets across a wide monitor. Mobile is unaffected
-// (viewport is narrower than this, so the column is full width).
-const APP_MAX = 440;
+// Desktop cap: keep the cockpit a centered column instead of stretching across
+// a wide monitor. Mobile is unaffected (viewport is narrower than this, so the
+// column is full width).
+const APP_MAX = 880;
 
 function loadCache() {
   try { const raw = localStorage.getItem(CACHE_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
