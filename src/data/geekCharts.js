@@ -227,6 +227,30 @@ const homeYoY = [null, 5.4, 7.0, 16.7, 10.3, 9.8, 13.0, 13.1, 15.4, 14.7, 6.2, 8
 
 export const RENT_LINE = { years: rlYears, rentIdx, homeIdx: rlHomeIdx, rentYoY, homeYoY };
 
+// Rent as a share of income, 1981 to 2026. rentShare = median gross rent
+// (annualized) over median family income, in percent. rentMo backs the tooltip.
+// Rent dollars are benchmarked to verified Census figures: decennial median
+// gross rent $243 (1980), $447 (1990), $602 (2000), and ACS 1-year $1,406
+// (2023), with CPI rent of primary residence interpolating the shape between
+// benchmarks and carrying it past 2023. Midpoint sanity check: the method
+// yields $842 for 2010 vs the ACS reading of roughly $855, within 1.5 percent.
+// Income is median family income, held at the 2024 reading for 2025-2026,
+// the same convention as the payment burden chart. Same denominator as the
+// buy burden line so the two are directly comparable; renter household
+// incomes are lower, so this line understates what renters themselves feel.
+// Precomputed; not recomputed at runtime.
+const rsYears = Array.from({ length: 2026 - 1981 + 1 }, (_, i) => 1981 + i);
+
+const rsShare = [14.2, 14.8, 15.0, 14.8, 15.1, 15.1, 15.1, 15.2, 14.9, 15.2, 15.5, 15.6, 15.8, 15.5, 15.2, 15.0,
+  14.6, 14.4, 14.3, 14.2, 14.7, 15.3, 15.5, 15.5, 15.4, 15.4, 15.4, 15.9, 16.7, 16.8, 16.9, 17.1,
+  16.7, 17.0, 16.7, 16.9, 16.8, 16.9, 16.0, 16.9, 16.5, 16.8, 16.7, 16.8, 17.4, 17.7];
+
+const rsRentMo = [266, 288, 307, 326, 348, 371, 389, 407, 426, 447, 464, 476, 487, 500, 513, 527, 544, 562,
+  580, 602, 631, 658, 679, 699, 723, 751, 785, 817, 838, 842, 859, 885, 913, 945, 981, 1022,
+  1064, 1106, 1150, 1190, 1221, 1298, 1406, 1478, 1530, 1561];
+
+export const RENT_SHARE = { years: rsYears, share: rsShare, rentMo: rsRentMo };
+
 // Homes Priced in the S&P 500, a two-part page. Group 1 (ratio series) is the
 // historical chart: sp500Ratio = home price / index level (how many S&P units
 // buy the average home), with home (ASPUS average price) and sp (S&P 500 annual
