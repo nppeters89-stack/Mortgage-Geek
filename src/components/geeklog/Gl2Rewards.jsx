@@ -105,7 +105,7 @@ export function RecapSeal({ lastWeek, target, streak, onExport, onDismiss, expor
   );
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 55, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", animation: "gl-sealin .4s ease both" }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 55, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", animation: "gl-sealin .4s ease both" }}>
       <div style={{ flex: "0 0 auto", padding: "16px 20px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Eyebrow size={11} color={T.greenBright}>Last week, sealed</Eyebrow>
         <Wordmark height={22} />
