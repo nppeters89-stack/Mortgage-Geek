@@ -23,6 +23,10 @@ const CACHE_KEY = "gl2:week";
 const WRITE_DEBOUNCE_MS = 350;
 const RETRY_MS = 4000;
 const CONV_KEYS = new Set(CONV_SUBS.map((s) => s.key));
+// Desktop cap: keep the cockpit a phone-width column, centered, instead of
+// stretching cards and tap targets across a wide monitor. Mobile is unaffected
+// (viewport is narrower than this, so the column is full width).
+const APP_MAX = 440;
 
 function loadCache() {
   try { const raw = localStorage.getItem(CACHE_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
@@ -295,7 +299,10 @@ export function Gl2App({ apiKey }) {
           @keyframes gl-flash { 0% { opacity: 1; } 100% { opacity: 1; } }
         }
       `}</style>
-      <main style={{ position: "fixed", inset: 0, display: "flex", flexDirection: "column", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
+      <main style={{ position: "fixed", inset: 0, display: "flex", justifyContent: "center", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
+        {/* Phone-width column, centered on desktop. The gradient full-bleeds on
+            main behind it; the scroll area, tab bar, and overlays live inside. */}
+        <div style={{ position: "relative", width: "100%", maxWidth: APP_MAX, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
           {tab === "today" && (
             <TodayContent
@@ -318,11 +325,14 @@ export function Gl2App({ apiKey }) {
         <TabBar active={tab} onChange={setTab} />
 
         {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} />}
+
+        {/* Recap seal is scoped to the column so it does not stretch on desktop. */}
+        {recapOpen && stats?.lastWeek && <RecapSeal lastWeek={stats.lastWeek} target={target} streak={stats.currentStreak || 0} onExport={recapExport} onDismiss={closeRecap} exporting={exporting} />}
+        </div>
       </main>
 
       {bestFlash && <BestDayFlash />}
       {targetBurst && <TargetBurst />}
-      {recapOpen && stats?.lastWeek && <RecapSeal lastWeek={stats.lastWeek} target={target} streak={stats.currentStreak || 0} onExport={recapExport} onDismiss={closeRecap} exporting={exporting} />}
 
       {/* Off-screen render target for the story-card PNG. Fed only the seven
           activity totals + the range label. Closings can never reach it. */}
