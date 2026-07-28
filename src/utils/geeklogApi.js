@@ -116,6 +116,28 @@ export async function saveDay(key, dayDoc) {
   });
 }
 
+// Fire-and-forget upsert of one day with keepalive: true, so the write survives
+// the page being backgrounded or unloaded (the phone locked right after a tap).
+// sendBeacon cannot set custom headers, but a keepalive fetch can, so the
+// X-Geeklog-Key auth header rides along. Same endpoint and body as saveDay; the
+// server upsert makes a duplicate write harmless. The caller cannot await during
+// unload, and the load-time reconcile is the backstop if this never lands.
+export function saveDayKeepalive(key, dayDoc) {
+  try {
+    fetch(`${BASE}/activity`, {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Geeklog-Key": key,
+      },
+      body: JSON.stringify(dayDoc),
+    });
+  } catch {
+    /* best-effort; reconcile on next load recovers a lost write */
+  }
+}
+
 // GET /api/geeklog/activity?year=YYYY — YTD weekly totals. Returns
 // { year, weeks: [{ weekStart, ...seven counter totals }] } from the first week
 // with data through the current Central week (zero-filled gaps).

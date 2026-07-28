@@ -8,7 +8,7 @@ import { BestDayFlash, TargetBurst, RecapSeal } from "./Gl2Rewards";
 import { StoryCard } from "./StoryCard";
 import { ALL_KEYS, CONV_SUBS, STREAK_FLOOR, emptyDay, normalizeDay, convOf } from "./gl2Model";
 import { centralDateKey, weekStartFor, weekDayKeys, dayOfWeek, addDays, monthDay, weekdayName, rangeLabel } from "./gl2Week";
-import { fetchWeek, saveDay, saveSettings, fetchYearStats, fetchStats } from "../../utils/geeklogApi";
+import { fetchWeek, saveDay, saveDayKeepalive, saveSettings, fetchYearStats, fetchStats } from "../../utils/geeklogApi";
 import { initAudio, playTick, playMilestone, playDown, haptic } from "./gl2Sound";
 
 // Geek Log 2.0 authorized app. Fills the viewport (charcoal cockpit), holds the
@@ -20,6 +20,10 @@ import { initAudio, playTick, playMilestone, playDown, haptic } from "./gl2Sound
 // untouched.
 
 const CACHE_KEY = "gl2:week";
+// Marks that the cached week holds taps not yet confirmed by the server. Its
+// value is the date key those taps belong to, so a stale flag from an earlier
+// day is ignored. Set on every tap, cleared when a flush fully drains.
+const DIRTY_KEY = "gl2:dirty";
 const WRITE_DEBOUNCE_MS = 350;
 const RETRY_MS = 4000;
 const CONV_KEYS = new Set(CONV_SUBS.map((s) => s.key));
@@ -83,12 +87,32 @@ export function Gl2App({ apiKey }) {
     fetchWeek(apiKey)
       .then((res) => {
         if (cancelled || !res || res.weekStart !== weekStart) return;
-        setDaysMap(() => {
-          const next = {};
-          for (const dk of dayKeys) next[dk] = emptyDay();
-          for (const d of res.days || []) if (next[d.date]) next[d.date] = normalizeDay(d);
-          return next;
-        });
+        // The server's view of the current week.
+        const serverDays = {};
+        for (const dk of dayKeys) serverDays[dk] = emptyDay();
+        for (const d of res.days || []) if (serverDays[d.date]) serverDays[d.date] = normalizeDay(d);
+
+        // Reconcile today rather than blindly overwriting. A debounced tap can be
+        // lost when the PWA is backgrounded before it POSTs; the local cache still
+        // holds it and the dirty flag is set. If our cached today is unsynced and
+        // ahead of the server, push it and keep it; otherwise the server wins,
+        // which is the normal case (clean load, or the server is already current).
+        const wasDirty = lsGet(DIRTY_KEY) === todayKey;
+        const localToday = daysRef.current[todayKey] || emptyDay();
+        const localSum = ALL_KEYS.reduce((n, k) => n + (localToday[k] || 0), 0);
+        const serverSum = ALL_KEYS.reduce((n, k) => n + (serverDays[todayKey][k] || 0), 0);
+
+        if (wasDirty && localSum > serverSum) {
+          const next = { ...serverDays, [todayKey]: localToday };
+          daysRef.current = next;
+          setDaysMap(next);
+          pending.current.add(todayKey);
+          flush();
+        } else {
+          daysRef.current = serverDays;
+          setDaysMap(serverDays);
+          lsSet(DIRTY_KEY, "");
+        }
         if (Number.isInteger(res.weeklyTarget)) setTarget(res.weeklyTarget);
       })
       .catch(() => {});
@@ -127,21 +151,43 @@ export function Gl2App({ apiKey }) {
       const left = pending.current.size > 0;
       setSyncing(left);
       if (left) timer.current = setTimeout(flush, RETRY_MS);
+      else lsSet(DIRTY_KEY, ""); // everything confirmed; the cache is clean again
     });
   }, [apiKey]);
 
   const scheduleWrite = useCallback((dateKey) => {
     pending.current.add(dateKey);
+    lsSet(DIRTY_KEY, todayKey); // taps exist that the server has not confirmed
     setSyncing(true);
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(flush, WRITE_DEBOUNCE_MS);
-  }, [flush]);
+  }, [flush, todayKey]);
+
+  // Immediately flush any pending day writes when the page is hidden or unloaded,
+  // before the debounce timer would have fired. A normal fetch would be killed
+  // with the page; a keepalive fetch survives suspension and still carries the
+  // auth header. Fire-and-forget: we cannot await during unload, and the pending
+  // set plus the dirty flag let the online-retry and the load-time reconcile
+  // recover anything that does not land. The server upsert makes a duplicate
+  // write (beacon now, debounce later on resume) harmless.
+  const flushBeacon = useCallback(() => {
+    for (const dk of Array.from(pending.current)) {
+      saveDayKeepalive(apiKey, { date: dk, ...daysRef.current[dk] });
+    }
+  }, [apiKey]);
 
   useEffect(() => {
     const onOnline = () => flush();
+    const onVisibility = () => { if (document.visibilityState === "hidden") flushBeacon(); };
     window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-  }, [flush]);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flushBeacon);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flushBeacon);
+    };
+  }, [flush, flushBeacon]);
 
   const weekConvOf = (map) => dayKeys.reduce((a, dk) => a + convOf(map[dk] || emptyDay()), 0);
   const flashTimer = useRef(null);
