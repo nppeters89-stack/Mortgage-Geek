@@ -78,7 +78,7 @@ export const EVENT_SOURCES = {
   chapter13: {
     Fannie: "Selling Guide B3-5.3-07",
     Freddie: "Selling Guide 5202.5",
-    FHA: "HUD 4000.1 II.A.5.b.iv",
+    FHA: "HUD 4000.1 II.A.4.b.iii(A); II.A.5.b.iv",
     VA: "Lender's Handbook M26-7 Ch. 4",
     USDA: "HB-1-3555 Chapter 10",
   },
@@ -106,55 +106,119 @@ export const EVENT_SOURCES = {
 };
 
 export const CH13_PATHS = [
-  { key: "discharged", label: "Discharged" },
-  { key: "dismissed",  label: "Dismissed" },
   { key: "activePlan", label: "During active plan" },
+  { key: "discharged", label: "Discharged (completed)" },
+  { key: "dismissed",  label: "Dismissed (failed)" },
 ];
 
+// Badge vocabulary: "aus" (solid navy pill), "manual" (outlined navy pill),
+// "exception" (outlined muted-red pill), "na" (dashed gray pill).
+// headlineSize "sm" renders the headline at 16px instead of 21px.
 export const CH13_DATA = {
   rows: [
     {
       program: "Fannie",
       paths: {
-        discharged: { years: 2, label: "2 yrs" },
-        dismissed:  { years: 4, label: "4 yrs" },
-        activePlan: { years: null, label: "Not eligible" },
+        activePlan: {
+          headline: "Not eligible", headlineSize: "sm", muted: true,
+          badge: "na", badgeLabel: "Not eligible",
+          note: "Must wait for discharge or dismissal. No in-plan path exists.",
+        },
+        discharged: {
+          headline: "2 yrs",
+          badge: "aus", badgeLabel: "AUS OK",
+          note: "From discharge date. **Extenuating circumstances do not shorten this**: it is 2 years either way.",
+        },
+        dismissed: {
+          headline: "4 yrs",
+          badge: "aus", badgeLabel: "AUS OK",
+          note: "From dismissal date. Drops to **2 yrs with documented extenuating circumstances**.",
+        },
       },
       source: "Selling Guide B3-5.3-07",
     },
     {
       program: "Freddie",
       paths: {
-        discharged: { years: 2, label: "2 yrs" },
-        dismissed:  { years: 4, label: "4 yrs" },
-        activePlan: { years: null, label: "Not eligible" },
+        activePlan: {
+          headline: "Not eligible", headlineSize: "sm", muted: true,
+          badge: "na", badgeLabel: "Not eligible",
+          note: "Must wait for discharge or dismissal. No in-plan path exists.",
+        },
+        discharged: {
+          headline: "2 yrs",
+          badge: "aus", badgeLabel: "AUS OK",
+          note: "From discharge date. Same 2 years with or without extenuating circumstances.",
+        },
+        dismissed: {
+          headline: "4 yrs",
+          badge: "aus", badgeLabel: "AUS OK",
+          note: "From dismissal date. Drops to **2 yrs with documented extenuating circumstances**.",
+        },
       },
       source: "Selling Guide 5202.5",
     },
     {
       program: "FHA",
       paths: {
-        discharged: { years: 0, label: "No wait" },
-        dismissed:  { years: 1, label: "Manual UW" },
-        activePlan: { years: 1, label: "12 mo + court OK" },
+        activePlan: {
+          headline: "12 mo in plan",
+          badge: "manual", badgeLabel: "Manual UW",
+          note: "12 months of on-time trustee payments at case number assignment, plus **written court permission** to enter the mortgage.",
+        },
+        discharged: {
+          headline: "No wait",
+          badge: "manual", badgeLabel: "Manual UW < 2 yrs",
+          note: "Eligible immediately, but a TOTAL Accept **must be downgraded to manual** when the discharge is within 2 years of case number assignment. AUS opens at the 2-year mark.",
+          ausUnlock: true,
+        },
+        dismissed: {
+          headline: "Underwriter review", headlineSize: "sm",
+          badge: "manual", badgeLabel: "Manual UW",
+          note: "No fixed wait published. Expect a manual underwrite with full credit analysis of why the plan failed.",
+        },
       },
-      source: "HUD 4000.1 II.A.5.b.iv",
+      source: "HUD 4000.1 II.A.4.b.iii(A); II.A.5.b.iv",
     },
     {
       program: "VA",
       paths: {
-        discharged: { years: 0, label: "No wait" },
-        dismissed:  { years: 1, label: "Manual UW" },
-        activePlan: { years: 1, label: "12 mo + court OK" },
+        activePlan: {
+          headline: "12 mo in plan",
+          badge: "manual", badgeLabel: "Manual UW",
+          note: "12 months of satisfactory payments, and the **trustee or bankruptcy judge approves** the new credit. Lender may then give favorable consideration.",
+        },
+        discharged: {
+          headline: "No wait",
+          badge: "aus", badgeLabel: "AUS OK",
+          note: "A completed plan means the lender **may conclude satisfactory credit is re-established**. AUS per findings; VA files can always fall back to manual.",
+        },
+        dismissed: {
+          headline: "Underwriter review", headlineSize: "sm",
+          badge: "manual", badgeLabel: "Manual UW",
+          note: "The handbook publishes no Ch 13 dismissal rule. Overall credit picture and re-established history govern.",
+        },
       },
       source: "Lender's Handbook M26-7 Ch. 4",
     },
     {
       program: "USDA",
       paths: {
-        discharged: { years: 1, label: "12 mo" },
-        dismissed:  { years: 1, label: "Credit exception" },
-        activePlan: { years: 1, label: "12 mo + court OK" },
+        activePlan: {
+          headline: "Eligible in plan",
+          badge: "aus", badgeLabel: "GUS Accept OK",
+          note: "All plan payments on time plus written court/trustee permission. **GUS Accept files need no seasoning and no credit exception.** GUS Refer or manual files must show 12 months of the plan elapsed.",
+        },
+        discharged: {
+          headline: "No wait",
+          badge: "aus", badgeLabel: "GUS Accept OK",
+          note: "No credit exception on GUS Accept. Manual or Refer files completed **less than 12 months ago require a documented credit exception**; at 12+ months, none needed.",
+        },
+        dismissed: {
+          headline: "Credit review", headlineSize: "sm",
+          badge: "exception", badgeLabel: "Credit exception",
+          note: "For a dismissed or not-completed plan, the lender evaluates the overall credit profile to determine if a credit exception applies.",
+        },
       },
       source: "HB-1-3555 Chapter 10",
     },
