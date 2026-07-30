@@ -197,6 +197,12 @@ function Ch13Badge({ variant, label }) {
   return <span className="ch13x-badge" style={CH13_BADGE_STYLES[variant]}>{label}</span>;
 }
 
+// A subtle wash of the program's color for its eligibility cells. Solid mix over
+// white (not a translucent overlay), so it reads as a clean tint and does not
+// blend with the creamDark grid gaps behind the cell. Browsers without color-mix
+// fall back to the white .ch13x-cell / .ch13x-mcell background.
+const cellTint = (accent) => `color-mix(in srgb, ${accent} 7%, #fff)`;
+
 // The FHA "no wait" underwriting story: manual for the first 2 years, AUS after.
 // Labels sit BELOW the two-segment track, never on top of it.
 function Ch13AusUnlock() {
@@ -370,7 +376,7 @@ export function Ch13Card() {
             ];
             for (const p of CH13_PATHS) {
               cells.push(
-                <div key={`${row.program}-${p.key}`} className="ch13x-cell">
+                <div key={`${row.program}-${p.key}`} className="ch13x-cell" style={{ background: cellTint(accent) }}>
                   <Ch13PathCell accent={accent} path={row.paths[p.key]} />
                 </div>
               );
@@ -392,7 +398,7 @@ export function Ch13Card() {
                 <div className="ch13x-id-source">{row.source}</div>
               </div>
               {CH13_PATHS.map((p) => (
-                <div key={p.key} className="ch13x-mcell">
+                <div key={p.key} className="ch13x-mcell" style={{ background: cellTint(accent) }}>
                   <div className="ch13x-mlabel">{p.label}</div>
                   <Ch13PathCell accent={accent} path={row.paths[p.key]} />
                 </div>
