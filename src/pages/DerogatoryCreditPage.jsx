@@ -24,12 +24,13 @@ export function DerogatoryCreditPage() {
     {
       id: "chapter13",
       title: "Chapter 13 Bankruptcy",
-      summary: "Repayment plan bankruptcy. Most lenient paths: FHA and VA can approve during the active plan with just 12 months of on-time payments + court permission.",
+      summary: "Repayment plan bankruptcy. FHA, VA, and USDA all have paths during the active plan, and USDA's GUS Accept path needs no seasoning at all. After discharge, watch FHA's 2-year automated underwriting rule.",
       explainer: [
         "Chapter 13 is the \"reorganization\" bankruptcy: no liquidation of assets, but a court-approved plan to repay some or all of the debt over 3-5 years. Because the borrower is actively demonstrating commitment to repaying obligations, every agency treats Chapter 13 more favorably than Chapter 7.",
-        "**The big unlock is the \"during active plan\" path.** FHA, VA, and USDA all allow a borrower to qualify for a mortgage *while still in* their Chapter 13 repayment plan, provided they've made 12 months of on-time payments to the trustee and received written permission from the bankruptcy court to take on new debt. This is a huge lifeline for borrowers who'd otherwise face a 5+ year wait.",
+        "**The big unlock is the \"during active plan\" path.** FHA and VA allow a borrower to qualify for a mortgage *while still in* their Chapter 13 repayment plan, provided they've made 12 months of on-time payments to the trustee and received written permission from the bankruptcy court to take on new debt. USDA goes a step further: a GUS Accept file in an active plan needs **no seasoning at all**, just on-time plan payments and court or trustee permission. The 12-months-elapsed requirement only applies to USDA files that get a GUS Refer or are manually underwritten. This is a huge lifeline for borrowers who'd otherwise face a 5+ year wait.",
         "Fannie and Freddie do *not* allow qualification during an active plan. The borrower must wait until the plan is fully discharged or dismissed.",
-        "**The discharge vs dismissal distinction matters enormously.** A **discharge** means the borrower successfully completed the plan; debts are forgiven as agreed. A **dismissal** means the plan failed (missed payments, non-compliance, etc.). For Fannie/Freddie, discharge triggers a 2-year wait, but dismissal triggers a 4-year wait. That's a big difference borrowers often don't realize.",
+        "**The discharge vs dismissal distinction matters enormously.** A **discharge** means the borrower successfully completed the plan; debts are forgiven as agreed. A **dismissal** means the plan failed (missed payments, non-compliance, etc.). For Fannie/Freddie, discharge triggers a 2-year wait, but dismissal triggers a 4-year wait. One asymmetry worth knowing: extenuating circumstances shorten the *dismissal* wait from 4 years to 2, but they do *not* shorten the 2-year discharge wait. It's 2 years from discharge either way.",
+        "**FHA's \"no wait\" after discharge comes with an underwriting catch.** The borrower is eligible immediately, but if the discharge is within 2 years of the FHA case number assignment, a TOTAL Accept must be downgraded to manual underwriting. In practice that means the first 2 years after a Chapter 13 discharge are [manual underwriting](/deep-dives/fha-manual-underwriting) territory: doable, but with stricter ratios and compensating-factor requirements. At the 2-year mark, automated approval opens up.",
       ],
       tip: "Currently in a Chapter 13 plan and wondering if homeownership is years away? It might not be. **12+ months of on-time trustee payments plus written court permission can unlock an FHA or VA mortgage while still inside the active plan**. No need to wait for the full discharge. The trustee permission letter is the part that takes the longest: courts move slowly, and getting the approval often takes 60-90 days from when the request is filed. If this path interests you, the conversation with the trustee should start early, well before you're under contract on a home.",
     },
@@ -110,7 +111,7 @@ export function DerogatoryCreditPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.gold }}>🐳 Deep Dive</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
-            <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified April 2026</span>
+            <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified July 2026</span>
           </div>
           <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.1, marginBottom: 16 }}>
             Derogatory Credit <em style={{ fontStyle: "italic", color: P.gold }}>Wait Periods</em>
