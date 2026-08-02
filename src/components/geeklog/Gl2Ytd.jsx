@@ -53,6 +53,13 @@ export function YtdContent({ apiKey, year }) {
   );
   const selectedWeek = useMemo(() => (weeks || []).find((w) => w.weekStart === selected) || null, [weeks, selected]);
 
+  // Year-to-date totals per pillar, summed across the completed weeks shown on
+  // the chart. Rendered as four pills below the chart (2x2 on a phone).
+  const ytdTotals = useMemo(
+    () => METRICS.map((m) => ({ id: m.id, label: m.label, total: (weeks || []).reduce((n, w) => n + sumKeys(w, m.subs), 0) })),
+    [weeks]
+  );
+
   const renderDot = (props) => {
     const { cx, cy, payload } = props;
     if (cx == null || cy == null) return null;
@@ -130,6 +137,20 @@ export function YtdContent({ apiKey, year }) {
           )}
           {data.length > 0 && (
             <div style={{ fontFamily: FF.body, fontSize: 11, color: T.dimmer, marginTop: 4, textAlign: "center" }}>Tap a point to see that week.</div>
+          )}
+
+          {data.length > 0 && (
+            <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${T.lineSoft}` }}>
+              <Eyebrow size={10.5} style={{ marginBottom: 10 }}>Year to date</Eyebrow>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 9 }}>
+                {ytdTotals.map((t) => (
+                  <div key={t.id} style={{ background: T.bg1, boxShadow: `inset 0 0 0 1px ${T.line}`, borderRadius: 14, padding: "13px 14px" }}>
+                    <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 25, lineHeight: 1, color: t.total > 0 ? T.greenBright : T.dimmer, fontVariantNumeric: "tabular-nums" }}>{t.total}</div>
+                    <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: T.dimmer, marginTop: 6 }}>{t.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </Card>
 
