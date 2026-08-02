@@ -102,7 +102,8 @@ export function PriceToIncomePage() {
       <article className="tool-page-content" style={{ padding: "48px 24px 64px", maxWidth: 900, margin: "0 auto" }}>
         <header style={{ marginBottom: 28 }}>
           <GeekChartsLockup variant="dark" compact height={30} style={{ marginBottom: 14 }} />
-          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 12px" }}>The Payment Was Never the Problem</h1>
+          <h1 style={{ fontFamily: F.display, fontSize: 40, color: CREAM, fontWeight: 400, lineHeight: 1.12, margin: "0 0 6px" }}>The Price to Income Ratio</h1>
+          <p style={{ fontFamily: F.display, fontSize: 23, color: BODY, fontWeight: 400, lineHeight: 1.25, margin: "0 0 14px" }}>The Payment Was Never the Problem</p>
           <p style={{ fontSize: 16, color: BODY, lineHeight: 1.6, maxWidth: 660, margin: 0 }}>
             The worst mortgage payment in history produced the youngest buyers ever. Today's ordinary payment is producing the oldest. One ratio explains it: what the median home costs, measured in years of the median family's income.
           </p>
