@@ -55,7 +55,7 @@ export const GEEK_CHARTS = [
   },
   {
     slug: "price-to-income-ratio",
-    title: "The Payment Was Never the Problem",
+    title: "The Price to Income Ratio",
     tagline: "The worst mortgage payment in history produced the youngest buyers ever. Today's ordinary payment is producing the oldest. One ratio explains it.",
     period: "1971 to 2026",
     updated: "2026-07-23",

@@ -30,7 +30,7 @@ const MEANS = [
     title: "If it feels harder than your parents had it",
     body: (
       <>
-        Depends which parents. The 2010s buyer had the easiest payment math in the series and anchored everyone's expectations. The 1981 buyer put 41% of the median income toward the same house, more than double today's burden, and that cohort kept the house and refinanced down the mountain as rates fell for decades. Today's 23% is roughly the average American homebuying experience since 1971. The full 1981 versus today comparison gets its own chart: <a href="/geek-charts/price-to-income-ratio" style={LINK}>The Payment Was Never the Problem</a>.
+        Depends which parents. The 2010s buyer had the easiest payment math in the series and anchored everyone's expectations. The 1981 buyer put 41% of the median income toward the same house, more than double today's burden, and that cohort kept the house and refinanced down the mountain as rates fell for decades. Today's 23% is roughly the average American homebuying experience since 1971. The full 1981 versus today comparison gets its own chart: <a href="/geek-charts/price-to-income-ratio" style={LINK}>The Price to Income Ratio</a>.
       </>
     ),
   },
