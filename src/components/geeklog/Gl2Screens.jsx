@@ -256,7 +256,7 @@ export function ClosingsContent({ closings, year }) {
 // ===========================================================================
 // Settings overlay (opened from the Today gear; not a tab)
 // ===========================================================================
-export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn }) {
+export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn, onOpenCorrection }) {
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 20, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <div style={{ flex: "0 0 auto", padding: "14px 20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -301,6 +301,19 @@ export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn 
             </div>
           </Card>
         </div>
+
+        {onOpenCorrection && (
+          <div style={{ marginTop: 13 }}>
+            <div onClick={onOpenCorrection} role="button" aria-label="Correct a past day"
+              style={{ background: T.surface, borderRadius: 15, boxShadow: `inset 0 0 0 1px ${T.line}`, padding: 16, cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <div>
+                <Eyebrow size={10.5}>Correct a past day</Eyebrow>
+                <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 5, lineHeight: 1.5 }}>Fix or backfill activity for an earlier day this year.</div>
+              </div>
+              <div style={{ width: 8, height: 8, borderRight: `1.6px solid ${T.dim}`, borderBottom: `1.6px solid ${T.dim}`, transform: "rotate(-45deg)", flexShrink: 0 }} />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

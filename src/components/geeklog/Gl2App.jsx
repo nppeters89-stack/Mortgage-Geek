@@ -3,6 +3,7 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T } from "./gl2Tokens";
 import { TabBar } from "./Gl2Primitives";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
+import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
 import { BestDayFlash, TargetBurst, RecapSeal } from "./Gl2Rewards";
 import { StoryCard } from "./StoryCard";
@@ -67,6 +68,7 @@ export function Gl2App({ apiKey }) {
   const [stats, setStats] = useState(null);
   const [tab, setTab] = useState("today");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [correctionOpen, setCorrectionOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayKey);
   const [syncing, setSyncing] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -257,6 +259,17 @@ export function Gl2App({ apiKey }) {
     settingsTimer.current = setTimeout(() => { saveSettings(apiKey, clamped).catch(() => {}); }, 400);
   };
 
+  // A backdated correction wrote straight to the server. If it landed on a day
+  // in the current week, merge it into the in-memory week so Today/Week reflect
+  // it at once; past weeks refresh on their own when their screen remounts.
+  const handleCorrectionSaved = useCallback((saved) => {
+    if (!saved || !dayKeys.includes(saved.date)) return;
+    const next = { ...daysRef.current, [saved.date]: normalizeDay(saved) };
+    daysRef.current = next;
+    setDaysMap(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekStart]);
+
   // Day navigation.
   const goBack = () => setSelectedDate((d) => (d > weekStart ? addDays(d, -1) : d));
   const goForward = () => setSelectedDate((d) => (d < todayKey ? addDays(d, +1) : d));
@@ -370,7 +383,10 @@ export function Gl2App({ apiKey }) {
 
         <TabBar active={tab} onChange={setTab} />
 
-        {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} />}
+        {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} onOpenCorrection={() => setCorrectionOpen(true)} />}
+
+        {/* Correction form layers above Settings; closing it returns there. */}
+        {correctionOpen && <CorrectionPanel apiKey={apiKey} onClose={() => setCorrectionOpen(false)} onSaved={handleCorrectionSaved} />}
 
         {/* Recap seal is scoped to the column so it does not stretch on desktop. */}
         {recapOpen && stats?.lastWeek && <RecapSeal lastWeek={stats.lastWeek} target={target} streak={stats.currentStreak || 0} onExport={recapExport} onDismiss={closeRecap} exporting={exporting} />}

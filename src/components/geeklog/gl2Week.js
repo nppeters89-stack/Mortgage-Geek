@@ -5,6 +5,10 @@
 const CHICAGO = { timeZone: "America/Chicago", year: "numeric", month: "2-digit", day: "2-digit" };
 const chicagoFmt = new Intl.DateTimeFormat("en-US", CHICAGO);
 
+// Mirrors TRACKING_EPOCH in api/geeklog/_activity.js: the earliest date the
+// correction form allows and the floor of the server's correction window.
+export const TRACKING_EPOCH = "2026-07-19";
+
 const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 

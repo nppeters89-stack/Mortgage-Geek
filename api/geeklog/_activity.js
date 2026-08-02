@@ -87,6 +87,18 @@ export function isWritableDate(dateKey, todayKey) {
   return dateKey >= start && dateKey <= todayKey;
 }
 
+// The correction window: the deliberately narrow escape hatch for backdated
+// edits from the Settings correction form. A date is correctable if it falls in
+// the current calendar year, from the tracking epoch through today. Future dates
+// are never writable. The ordinary upsert path stays locked to the current week
+// (isWritableDate); only the explicit ?correction=1 path uses this wider window,
+// so history cannot be rewritten arbitrarily and normal logging is unaffected.
+export function isCorrectableDate(dateKey, todayKey) {
+  return dateKey >= TRACKING_EPOCH
+    && dateKey.slice(0, 4) === todayKey.slice(0, 4)
+    && dateKey <= todayKey;
+}
+
 // A fresh counter document, all zeros.
 export function emptyDoc() {
   const doc = {};
