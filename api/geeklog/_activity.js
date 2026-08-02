@@ -9,10 +9,12 @@
 // date-only anchors, so nothing does wall-clock math across a DST transition
 // and every result is deterministic. No npm dependencies.
 
-// The per-day activity counters, in canonical order. currentSoi (Sphere of
-// Influence) is a Conversations sub-category; older stored docs lack it and
-// normalizeDoc backfills it to 0.
-export const COUNTERS = ["pastClient", "inProcess", "prospecting", "currentSoi", "preApproval", "realtor", "reel", "static"];
+// The per-day activity counters, in canonical order, grouped by pillar:
+// Conversations, Appointments, Content, then Events. Counters are only ever
+// appended, never reordered or removed, so older stored docs that predate a
+// counter simply lack it and normalizeDoc backfills it to 0 (currentSoi,
+// networking, and sponsored were all added this way).
+export const COUNTERS = ["pastClient", "inProcess", "prospecting", "currentSoi", "preApproval", "realtor", "reel", "static", "networking", "sponsored"];
 
 export const DEFAULT_WEEKLY_TARGET = 50;
 export const MAX_WEEKLY_TARGET = 500;
@@ -85,14 +87,14 @@ export function isWritableDate(dateKey, todayKey) {
   return dateKey >= start && dateKey <= todayKey;
 }
 
-// A fresh seven-counter document, all zeros.
+// A fresh counter document, all zeros.
 export function emptyDoc() {
   const doc = {};
   for (const k of COUNTERS) doc[k] = 0;
   return doc;
 }
 
-// Coerce a stored (possibly null / partial) value into a full seven-counter
+// Coerce a stored (possibly null / partial) value into a full counter
 // document, filling missing or invalid counters with 0.
 export function normalizeDoc(raw) {
   const doc = emptyDoc();
@@ -102,15 +104,18 @@ export function normalizeDoc(raw) {
   return doc;
 }
 
-// Validate a POST-day body's counters: all seven present, each a non-negative
-// integer, and no fields beyond `date` + the seven counters. Returns an error
-// string, or null when valid. (Date format / write-window are checked by the
-// endpoint.)
+// Validate a POST-day body's counters: every counter that IS present must be a
+// non-negative integer, and no fields beyond `date` + the counters are allowed.
+// A missing counter is not an error: it defaults to 0 in the handler, so an
+// older client that predates a newly added counter can still write. Returns an
+// error string, or null when valid. (Date format / write-window are checked by
+// the endpoint.)
 export function validateDayBody(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return "body must be a JSON object";
   const allowed = new Set(["date", ...COUNTERS]);
   for (const k of Object.keys(body)) if (!allowed.has(k)) return `unexpected field: ${k}`;
   for (const k of COUNTERS) {
+    if (body[k] === undefined) continue; // missing counter defaults to 0 (forward-compatible with older clients)
     const v = body[k];
     if (!Number.isInteger(v) || v < 0) return `${k} must be a non-negative integer`;
   }
@@ -124,7 +129,8 @@ export function validateWeeklyTarget(v) {
   return null;
 }
 
-// Pillar sums over a (normalized) seven-counter document.
+// Pillar sums over a (normalized) counter document.
 export const sumConversations = (doc) => doc.pastClient + doc.inProcess + doc.prospecting + doc.currentSoi;
 export const sumAppointments = (doc) => doc.preApproval + doc.realtor;
 export const sumContent = (doc) => doc.reel + doc.static;
+export const sumEvents = (doc) => doc.networking + doc.sponsored;

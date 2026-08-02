@@ -2,7 +2,7 @@ import { useState } from "react";
 import { T, FF } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
 import { WeekRewards } from "./Gl2Rewards";
-import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
+import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
 
 // Geek Log 2.0 screen bodies. Each renders header + scrollable content only; the
 // page (GeekLogPage) supplies the viewport shell and the persistent TabBar, and
@@ -52,6 +52,7 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
   const convTotal = sumKeys(state, CONV_SUBS);
   const apptTotal = sumKeys(state, APPT_SUBS);
   const contentTotal = sumKeys(state, CONTENT_SUBS);
+  const eventsTotal = sumKeys(state, EVENTS_SUBS);
 
   return (
     <>
@@ -97,6 +98,11 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
             <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
           ))}
         </Pillar>
+        <Pillar title="Events" total={eventsTotal}>
+          {EVENTS_SUBS.map((s) => (
+            <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
+          ))}
+        </Pillar>
       </div>
     </>
   );
@@ -132,6 +138,7 @@ export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExpo
   const convTotal = sumKeys(week, CONV_SUBS);
   const apptTotal = sumKeys(week, APPT_SUBS);
   const contentTotal = sumKeys(week, CONTENT_SUBS);
+  const eventsTotal = sumKeys(week, EVENTS_SUBS);
   const ratio = apptTotal > 0 ? (convTotal / apptTotal).toFixed(1) : null;
 
   return (
@@ -169,6 +176,7 @@ export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExpo
         <WeekGroup title="Conversations" total={convTotal} subs={CONV_SUBS} week={week} />
         <WeekGroup title="Appointments" total={apptTotal} subs={APPT_SUBS} week={week} />
         <WeekGroup title="Content" total={contentTotal} subs={CONTENT_SUBS} week={week} />
+        <WeekGroup title="Events" total={eventsTotal} subs={EVENTS_SUBS} week={week} />
 
         <div onClick={exporting ? undefined : onExport} role="button" aria-label="Generate story card"
           style={{ marginTop: 2, height: 54, borderRadius: 14, cursor: exporting ? "default" : "pointer", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, background: T.cream, color: T.bg1, opacity: exporting ? 0.7 : 1 }}>
