@@ -6,7 +6,6 @@ import { withAlpha } from "../utils/format";
 import { PriceToIncomeChart } from "../components/PriceToIncomeChart";
 import { PaymentBurdenChart } from "../components/PaymentBurdenChart";
 import { FthbAgeChart } from "../components/FthbAgeChart";
-import { PricesIncomeInflationChart } from "../components/PricesIncomeInflationChart";
 import { RentLineChart } from "../components/RentLineChart";
 
 // Dark-mode Geek Charts page 8: the price-to-income ratio, the long-form
@@ -129,7 +128,7 @@ export function PriceToIncomePage() {
           <FthbAgeChart />
         </EmbedCard>
         <Para>Sit with that for a second. The worst payment in history produced the youngest buyers. A completely ordinary payment is producing the oldest. If the monthly payment were the thing keeping people out of homeownership, those two facts would run the other way.</Para>
-        <Para>The payment was never the problem. The door was. The chart at the top of this page is the door: what the median home costs, measured in years of the median family's income. Every other chart in this series is a clue. This one is the answer.</Para>
+        <Para>The payment was never the problem. The door was. The chart at the top of this page is the door: the red line is what the median new home costs, the blue line is what the median family earns, and the white line beneath them is one divided by the other. Every other chart in this series is a clue. That ratio is the answer.</Para>
 
         <Section>1981: a payment crisis with a cheap door</Section>
         <Para>Here is what buying looked like at the worst moment in the payment data. The median new home cost $68,950. The median family earned $22,390. That is a price-to-income ratio of 3.1, and here is the detail almost nobody knows: it was below the 56-year average of 3.5. In the year the payment was the worst it has ever been, the door itself was cheaper than normal. A 20 percent down payment was $13,790, about 62 percent of a year's pay. Painful, but reachable: a few years of serious saving for a young couple.</Para>
@@ -140,10 +139,7 @@ export function PriceToIncomePage() {
         <Section>Today: a normal payment behind a hard door</Section>
         <Para>Now run the same numbers for today. The payment burden is 23.0 percent, a hair under the long-run average of 23.7. By monthly cost, and I will not pretend otherwise, this market is ordinary.</Para>
         <Para>But look at the chart at the top of this page. The median home now runs about 3.8 times the median family income, still well above the 3.5 long-run average even after three years of easing. At the 2022 peak it hit 4.67, the worst entry ratio in the entire series. A 20 percent down payment today is about 78 percent of a year's pay, up from 62 percent in 1981.</Para>
-        <Para>Why did the door move? Since 1970, home prices are up 19.5x while incomes are up 10.7x. Homes rose roughly 1.8 times faster than the paychecks trying to buy them. The gap is the door.</Para>
-        <EmbedCard href="/geek-charts/home-prices-income-inflation" label="View the full Home Prices, Inflation, and Family Income chart">
-          <PricesIncomeInflationChart />
-        </EmbedCard>
+        <Para>Why did the door move? Scroll back to the two lines at the top of this page. Since 1971, the red line went from $25,225 to $403,200, roughly 16x. The blue line went from $10,290 to $105,800, roughly 10x. The house grew about 1.6 times faster than the paycheck trying to buy it, and the widening space between those two lines is the door. The white ratio line beneath them is that space, measured. For the fuller picture with inflation alongside, see the <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income chart</a>.</Para>
         <Para>And here is the detail that convinces me this is the right diagnosis. The first-time buyer age line did not drift upward slowly. It sat in a band between 28 and 33 for forty years, from 1981 through 2020. Then it jumped from 33 to 36 between 2021 and 2022, exactly the window when the price-to-income ratio spiked from 3.89 to its all-time worst 4.67. The payment squeeze of 2023 came and partly went. The age line kept climbing: 38 in 2024, 40 in 2025.</Para>
         <Para>A rate problem is temporary because you can refinance the rate. A price problem is permanent because you cannot refinance the principal. Whatever you pay for the house, you pay for the house. The 1981 buyer's problem melted every time rates fell. Today's buyer's problem is baked into the purchase price on day one.</Para>
 
@@ -188,7 +184,7 @@ export function PriceToIncomePage() {
 
         <div style={{ background: withAlpha(CHART_COLORS.accent, 0.08), border: `1px solid ${withAlpha(CHART_COLORS.accent, 0.3)}`, borderRadius: 12, padding: "18px 22px", marginTop: 32 }}>
           <p style={{ fontSize: 13, color: BODY, lineHeight: 1.65, margin: 0 }}>
-            <strong style={{ color: CREAM }}>Methodology.</strong> Price-to-income ratio is the median new home sales price (Census/HUD) divided by median family income (Census). Income data runs through 2024; 2025 and 2026 hold the latest reading, the same convention as the Mortgage Payment Burden chart. Payment burden figures use principal and interest on the median new home with 20 percent down at that year's average Freddie Mac PMMS 30-year rate. Buyer ages and shares are from the NAR Profile of Home Buyers and Sellers. Rent is CPI rent of primary residence (BLS). Educational content, not a loan offer or commitment to lend.
+            <strong style={{ color: CREAM }}>Methodology.</strong> The hero chart shows the median new home sales price (Census/HUD) and median family income (Census) in nominal dollars, and the price-to-income ratio is the first divided by the second, year by year. Income data runs through 2024; 2025 and 2026 hold the latest reading, the same convention as the Mortgage Payment Burden chart. Payment burden figures use principal and interest on the median new home with 20 percent down at that year's average Freddie Mac PMMS 30-year rate. Buyer ages and shares are from the NAR Profile of Home Buyers and Sellers. Rent is CPI rent of primary residence (BLS). Educational content, not a loan offer or commitment to lend.
           </p>
         </div>
       </article>
