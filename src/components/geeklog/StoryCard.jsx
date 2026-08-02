@@ -1,11 +1,11 @@
 import { T, FF } from "./gl2Tokens";
 import { Wordmark } from "./Gl2Primitives";
-import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, sumKeys } from "./gl2Model";
+import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, sumKeys } from "./gl2Model";
 
 // Geek Log 2.0 export card: Instagram Story, exactly 1080 x 1920. Raw weekly
 // activity scoreboard only. HARD RULE (permanent): closings data must never be
 // passed to, rendered in, or reachable from this component. Its props are the
-// seven activity counters (via `week`) and the range label, nothing else. No
+// activity counters (via `week`) and the range label, nothing else. No
 // closings, no target, no progress, no ratios.
 
 function StoryBlock({ label, total, subs, week, numeral, cols, accent }) {
@@ -31,6 +31,7 @@ export function StoryCard({ week, rangeLabel }) {
   const conv = sumKeys(week, CONV_SUBS);
   const appt = sumKeys(week, APPT_SUBS);
   const content = sumKeys(week, CONTENT_SUBS);
+  const events = sumKeys(week, EVENTS_SUBS);
 
   return (
     <div style={{ width: 1080, height: 1920, position: "relative", overflow: "hidden", background: `linear-gradient(178deg, ${T.bg0} 0%, ${T.bg1} 58%, #0E0F11 100%)`, fontFamily: FF.body, color: T.cream, display: "flex", flexDirection: "column", padding: "104px 88px 76px", boxSizing: "border-box" }}>
@@ -45,23 +46,14 @@ export function StoryCard({ week, rangeLabel }) {
         </div>
       </div>
 
-      <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 74, paddingTop: 20 }}>
+      <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 62, paddingTop: 20, paddingBottom: 20 }}>
         <StoryBlock label="Conversations" total={conv} subs={CONV_SUBS} week={week} numeral={252} cols={CONV_SUBS.length} accent />
         <div style={{ height: 1, background: T.line }} />
         <StoryBlock label="Appointments" total={appt} subs={APPT_SUBS} week={week} numeral={168} cols={APPT_SUBS.length} />
         <div style={{ height: 1, background: T.line }} />
         <StoryBlock label="Content" total={content} subs={CONTENT_SUBS} week={week} numeral={168} cols={CONTENT_SUBS.length} />
-      </div>
-
-      <div style={{ position: "relative", flex: "0 0 auto", paddingTop: 40, borderTop: `1px solid ${T.line}` }}>
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 40 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-            <div style={{ fontWeight: 600, fontSize: 21, color: T.dim, letterSpacing: "0.04em" }}>Nick Peters, NMLS #1119524</div>
-            <div style={{ fontWeight: 500, fontSize: 19, color: T.dimmer, letterSpacing: "0.04em" }}>Rate corporate NMLS #2611</div>
-            <div style={{ fontWeight: 500, fontSize: 19, color: T.dimmer, letterSpacing: "0.04em" }}>Equal Housing Opportunity</div>
-          </div>
-          <div style={{ fontWeight: 600, fontSize: 20, letterSpacing: "0.10em", textTransform: "uppercase", color: T.dimmer, whiteSpace: "nowrap" }}>mortgagegeek.ai</div>
-        </div>
+        <div style={{ height: 1, background: T.line }} />
+        <StoryBlock label="Events" total={events} subs={EVENTS_SUBS} week={week} numeral={168} cols={EVENTS_SUBS.length} />
       </div>
     </div>
   );
