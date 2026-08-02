@@ -1,6 +1,7 @@
-// Geek Log 2.0 shared activity model: the seven counters, their pillar
-// grouping, ceilings (for the green wash), and pure sums. Matches the Phase 1
-// API document (api/geeklog/_activity.js) exactly.
+// Geek Log 2.0 shared activity model: the per-day counters, their pillar
+// grouping, ceilings (for the green wash), and pure sums. The counter keys must
+// match the COUNTERS list in api/geeklog/_activity.js exactly (same keys, same
+// order): Conversations, Appointments, Content, then Events.
 
 export const CONV_SUBS = [
   { key: "pastClient", label: "Past Client", ceiling: 8 },
@@ -16,8 +17,12 @@ export const CONTENT_SUBS = [
   { key: "reel", label: "Reel", ceiling: 2 },
   { key: "static", label: "Static Post", ceiling: 2 },
 ];
+export const EVENTS_SUBS = [
+  { key: "networking", label: "Networking", ceiling: 2 },
+  { key: "sponsored", label: "Sponsored", ceiling: 2 },
+];
 
-export const ALL_KEYS = [...CONV_SUBS, ...APPT_SUBS, ...CONTENT_SUBS].map((s) => s.key);
+export const ALL_KEYS = [...CONV_SUBS, ...APPT_SUBS, ...CONTENT_SUBS, ...EVENTS_SUBS].map((s) => s.key);
 
 // A streak day needs at least this many conversations. Mirrors STREAK_FLOOR in
 // api/geeklog/_activity.js so client and server agree.
@@ -29,14 +34,14 @@ export function sumKeys(obj, subs) {
   return subs.reduce((n, s) => n + (obj[s.key] || 0), 0);
 }
 
-// A fresh seven-counter day, all zeros.
+// A fresh counter day, all zeros.
 export function emptyDay() {
   const d = {};
   for (const k of ALL_KEYS) d[k] = 0;
   return d;
 }
 
-// Coerce any (partial / null) stored day into a full seven-counter object.
+// Coerce any (partial / null) stored day into a full counter object.
 export function normalizeDay(raw) {
   const d = emptyDay();
   if (raw && typeof raw === "object") {

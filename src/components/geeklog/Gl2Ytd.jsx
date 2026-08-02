@@ -3,14 +3,16 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { T, FF } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card } from "./Gl2Primitives";
 import { WeekGroup } from "./Gl2Screens";
-import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, sumKeys } from "./gl2Model";
-import { monthDay, rangeLabel } from "./gl2Week";
+import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, sumKeys } from "./gl2Model";
+import { monthDay, rangeLabel, weekStartFor, centralDateKey } from "./gl2Week";
 import { fetchYear } from "../../utils/geeklogApi";
 
 // Geek Log 2.0 YTD screen: weekly totals by Central week, first data week
-// through this week. A toggle switches the charted pillar (Conversations /
-// Appointments / Content); tapping a point selects that week and shows its
-// consolidated breakdown. Green accents, same as the rest of the app.
+// through the last COMPLETED week. The current, still-running week is excluded
+// so the chart only ever shows weeks that have fully printed. A toggle switches
+// the charted pillar (Conversations / Appointments / Content / Events); tapping
+// a point selects that week and shows its consolidated breakdown. Green accents,
+// same as the rest of the app.
 
 const withA = (a) => `rgba(255,254,251,${a})`;
 
@@ -18,6 +20,7 @@ const METRICS = [
   { id: "conversations", label: "Conversations", subs: CONV_SUBS, unit: "conversations" },
   { id: "appointments", label: "Appointments", subs: APPT_SUBS, unit: "appointments" },
   { id: "content", label: "Content", subs: CONTENT_SUBS, unit: "posts" },
+  { id: "events", label: "Events", subs: EVENTS_SUBS, unit: "events" },
 ];
 
 export function YtdContent({ apiKey, year }) {
@@ -30,7 +33,11 @@ export function YtdContent({ apiKey, year }) {
     fetchYear(apiKey, year)
       .then((res) => {
         if (cancelled) return;
-        const ws = (res && res.weeks) || [];
+        const all = (res && res.weeks) || [];
+        // Only completed weeks: drop the current, still-running week (and any
+        // future weeks) so the chart shows fully printed weeks only.
+        const currentWeek = weekStartFor(centralDateKey());
+        const ws = all.filter((w) => w.weekStart < currentWeek);
         setWeeks(ws);
         setSelected(ws.length ? ws[ws.length - 1].weekStart : null);
       })
@@ -76,7 +83,7 @@ export function YtdContent({ apiKey, year }) {
       <div style={{ flex: "0 0 auto", padding: "2px 20px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>This Year</div>
-          <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>Weekly totals</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>Completed weeks</div>
         </div>
         <Wordmark height={24} />
       </div>
@@ -84,14 +91,14 @@ export function YtdContent({ apiKey, year }) {
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 13 }}>
         <Card pad={15}>
           {/* Pillar toggle */}
-          <div style={{ display: "flex", gap: 6, marginBottom: 14 }} role="group" aria-label="Chart metric">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }} role="group" aria-label="Chart metric">
             {METRICS.map((m) => {
               const on = m.id === metric;
               return (
                 <button
                   key={m.id} type="button" onClick={() => setMetric(m.id)} aria-pressed={on}
                   style={{
-                    flex: 1, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, padding: "8px 4px",
+                    flex: "1 1 calc(50% - 3px)", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, padding: "8px 4px",
                     borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap",
                     background: on ? "rgba(47,191,113,0.16)" : "transparent",
                     border: `1px solid ${on ? "rgba(47,191,113,0.55)" : T.line}`,
@@ -144,6 +151,7 @@ export function YtdContent({ apiKey, year }) {
             <WeekGroup title="Conversations" total={sumKeys(selectedWeek, CONV_SUBS)} subs={CONV_SUBS} week={selectedWeek} />
             <WeekGroup title="Appointments" total={sumKeys(selectedWeek, APPT_SUBS)} subs={APPT_SUBS} week={selectedWeek} />
             <WeekGroup title="Content" total={sumKeys(selectedWeek, CONTENT_SUBS)} subs={CONTENT_SUBS} week={selectedWeek} />
+            <WeekGroup title="Events" total={sumKeys(selectedWeek, EVENTS_SUBS)} subs={EVENTS_SUBS} week={selectedWeek} />
           </>
         )}
       </div>

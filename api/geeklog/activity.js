@@ -127,7 +127,7 @@ export default async function handler(req, res) {
       if (err) return jsonResponse(res, 400, { error: err });
 
       const doc = {};
-      for (const k of COUNTERS) doc[k] = body[k];
+      for (const k of COUNTERS) doc[k] = Number.isInteger(body[k]) && body[k] >= 0 ? body[k] : 0;
       await redis.set(activityKey(body.date), JSON.stringify(doc));
       return jsonResponse(res, 200, { date: body.date, ...doc });
     }
