@@ -138,6 +138,18 @@ export function saveDayKeepalive(key, dayDoc) {
   }
 }
 
+// POST /api/geeklog/activity?correction=1 — a backdated correction. Same body
+// as saveDay (a full day document), but the server accepts any in-year date
+// from the tracking epoch through today, not just the current week. Used only
+// by the correction form in Settings.
+export async function saveDayCorrection(key, dayDoc) {
+  return request(key, `/activity?correction=1`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(dayDoc),
+  });
+}
+
 // GET /api/geeklog/activity?year=YYYY — YTD weekly totals. Returns
 // { year, weeks: [{ weekStart, ...seven counter totals }] } from the first week
 // with data through the current Central week (zero-filled gaps).

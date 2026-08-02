@@ -20,6 +20,7 @@ import {
   weekStartsBetween,
   addDays,
   isWritableDate,
+  isCorrectableDate,
   emptyDoc,
   normalizeDoc,
   sumConversations,
@@ -118,9 +119,15 @@ export default async function handler(req, res) {
         return jsonResponse(res, 400, { error: "date must be a valid ISO date (YYYY-MM-DD)" });
       }
       const today = centralDateKey();
-      if (!isWritableDate(body.date, today)) {
+      // Backdated corrections (?correction=1) use the wider, still-bounded
+      // correction window; every other write stays locked to the current week.
+      const isCorrection = req.query?.correction === "1" || req.query?.correction === "true";
+      const allowed = isCorrection ? isCorrectableDate(body.date, today) : isWritableDate(body.date, today);
+      if (!allowed) {
         return jsonResponse(res, 400, {
-          error: `Writes are only accepted for the current week: Sunday ${weekStartFor(today)} through today ${today}, inclusive. Prior weeks are read-only.`,
+          error: isCorrection
+            ? `Corrections are only accepted for dates from ${TRACKING_EPOCH} through today ${today}, within ${today.slice(0, 4)}. Future dates are not allowed.`
+            : `Writes are only accepted for the current week: Sunday ${weekStartFor(today)} through today ${today}, inclusive. Prior weeks are read-only.`,
         });
       }
       const err = validateDayBody(body);
