@@ -230,11 +230,10 @@ export function PaymentBurdenChart() {
   };
 
   // The "23.0% today" label. Rendered as its own SVG text, not the ReferenceDot
-  // label, so it can sit ABOVE the dot and anchor at its end. The tail climbs
-  // steeply from the 2020 low to 2023, so a label at the final point's y gets
-  // crossed by the stroke; lifting it ~35px above the point and end-anchoring at
-  // the plot's right edge clears the rising stroke and the axis edge alike. Fades
-  // in with the marker via the same data-reveal step.
+  // label, so it can sit BELOW the end dot and anchor at its end. It drops ~30px
+  // under the final point, clear of the dot's pulse ring, and end-anchors at the
+  // plot's right edge (the today point is the last on the axis) so it never runs
+  // off the edge. Fades in with the marker via the same data-reveal step.
   const TodayLabel = (props) => {
     const { xAxisMap, yAxisMap } = props;
     const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
@@ -244,7 +243,7 @@ export function PaymentBurdenChart() {
       <text
         className="pbn-lbl-today"
         x={xScale(2026) - 6}
-        y={yScale(yAt(2026)) - 35}
+        y={yScale(yAt(2026)) + 30}
         textAnchor="end"
         fill={CREAM}
         fontSize={12}
