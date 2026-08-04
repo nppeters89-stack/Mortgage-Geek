@@ -64,6 +64,39 @@ export const FTHB_HEAT = {
   fillMid: "#c9663c", // fill midpoint tint (offset 0.55)
 };
 
+// Position-driven color scale for the price-to-income ratio line (PriceToIncomeChart,
+// lower panel). Color tracks distance from the 3.52x crossover, not the year: above
+// the average the line warms and deepens to oxblood (homes harder than normal), below
+// it cools to violet (cheaper than normal), washing out to near-white at the average.
+// strokeStops run top→bottom of the plot (offset 0 = 5.5x, offset 1 = 2x); the two
+// stops that straddle the crossover are injected at runtime at avgOffset ± 0.001 so
+// the break lands exactly on 3.52x at any viewport height. fillStops feed the split
+// area fill (red above the average, blue below), with per-stop opacity set in the
+// component. Scoped here per the no-hardcoded-hex rule; mapped by visual result.
+export const PTI_SCALE = {
+  strokeStops: [
+    { off: 0,    c: "#6e0704" }, // 5.5x, near-oxblood (top of plot)
+    { off: 0.15, c: "#a3120f" },
+    { off: 0.24, c: "#c8201a" }, // ~4.67x, the 2022 peak
+    { off: 0.34, c: "#ec4a34" },
+    { off: 0.45, c: "#f2955f" },
+    // crossover pair (pale warm / pale blue) injected at avgOffset ± 0.001
+    { off: 0.66, c: "#63aade" },
+    { off: 0.76, c: "#2a6ac0" },
+    { off: 0.86, c: "#2a3cb0" },
+    { off: 0.93, c: "#4a1f9e" },
+    { off: 1,    c: "#5f1275" }, // 2x, violet (bottom of plot)
+  ],
+  crossWarm: "#fbd8c0", // pale warm, just above 3.52x
+  crossBlue: "#d2e8f8", // pale blue, just below 3.52x
+  fillStops: {
+    redTop:  "#ff3b30", // fill opacity 0.60 at the top
+    redAvg:  "#ff3b30", // fill opacity 0.08 just above the average
+    blueAvg: "#3d7ea6", // fill opacity 0.08 just below the average
+    blueBot: "#3b47b8", // fill opacity 0.45 at the bottom (2x)
+  },
+};
+
 export const F = {
   // Rate's web typeface, now site-wide for congruence with the editorial
   // homepage. display/body/sans all resolve to Figtree; the only exceptions are
