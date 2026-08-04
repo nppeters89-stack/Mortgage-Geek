@@ -49,6 +49,21 @@ export const CHART_COLORS = {
   reinvest: "#5FBF8F",              // reinvest-mode data series and accents on dark charcoal (5.09:1 on P.navy)
 };
 
+// Heat-gradient stops for the first-time-homebuyer-age line (FthbAgeChart, shown
+// on both the FTHB-age and price-to-income pages). The stroke warms left to
+// right across the series — cool slate in the 1980s, amber through the 2000s,
+// hot red at 2025 — so the post-2020 breakout reads as heat, not a neutral line.
+// The fill reuses these, fading from red at the line to nothing at the baseline.
+// Scoped here (not in the component) per the no-hardcoded-hex rule; mapped by
+// visual role, never by name.
+export const FTHB_HEAT = {
+  slate:   "#4b6a86", // 1981, cool slate — stroke offset 0, fill baseline
+  amber:   "#c99a3f", // ~2003, amber — stroke offset 0.50
+  orange:  "#e8663c", // ~2015, orange — stroke offset 0.78, draw tracer
+  red:     "#ff3b30", // 2025, hot red — stroke offset 1, fill top, record marker
+  fillMid: "#c9663c", // fill midpoint tint (offset 0.55)
+};
+
 export const F = {
   // Rate's web typeface, now site-wide for congruence with the editorial
   // homepage. display/body/sans all resolve to Figtree; the only exceptions are

@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea, Customized } from "recharts";
-import { P, F, CHART_COLORS } from "../theme";
+import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea, Customized } from "recharts";
+import { P, F, CHART_COLORS, FTHB_HEAT } from "../theme";
 import { withAlpha } from "../utils/format";
 import { FTHB_AGE } from "../data/geekCharts";
 import { drawPath, clearDrawState, hidePath } from "../utils/lineDraw";
@@ -8,10 +8,14 @@ import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, drawControlsCss } from "./ChartDrawControls";
 
 // The Age of the First-Time Homebuyer: NAR's median first-time buyer age by
-// survey year, on a dark charcoal canvas. One cream line with a dot at every
-// survey point, because the data is a survey and not every year exists (NAR
-// skipped years in the 1980s and 1990s), so the line connects the years that
-// do. Colors from CHART_COLORS / P via withAlpha; no hardcoded hex.
+// survey year, on a dark charcoal canvas. One line that warms across time (cool
+// slate in the 1980s, amber through the 2000s, hot red at 2025) with a soft glow
+// fill under it, so the post-2020 breakout gains visual mass. The data is a
+// survey and not every year exists (NAR skipped years in the 1980s and 1990s),
+// so the line connects the years that do. The heat stops live in FTHB_HEAT; the
+// gradients are declared once in the chart's <defs> (see HeatDefs) so the
+// draw-reveal always has them. Colors from FTHB_HEAT / CHART_COLORS / P; no
+// hardcoded hex.
 //
 // The chart renders drawn by default. Replaying is a two-step click: the first
 // (Replay) blanks the line and hides the callouts, the second (Draw) draws the
@@ -47,10 +51,6 @@ export function FthbAgeChart() {
   const tickColor = withAlpha(CHART_COLORS.line, 0.55);
   const faint = withAlpha(CHART_COLORS.line, 0.4);
   const ageAt = (yr) => surveyAges[surveyYears.indexOf(yr)];
-
-  // Line dots only show once the draw has finished, so they don't pop in ahead
-  // of the stroke that connects them.
-  const showDots = shown === "done" || shown === "points";
 
   const clearTimers = useCallback(() => {
     timers.current.forEach(clearTimeout);
@@ -143,8 +143,31 @@ export function FthbAgeChart() {
     );
   };
 
-  // A single cream tracer that rides the line while it draws.
-  const Tracer = () => <circle className="fthb-tracer" r={6} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
+  // A single warm tracer (orange, the gradient's mid tone) that rides the line
+  // while it draws — no white on the series, even mid-draw.
+  const Tracer = () => <circle className="fthb-tracer" r={6} fill={FTHB_HEAT.orange} stroke={P.navyDark} strokeWidth={2} opacity={0} style={{ pointerEvents: "none" }} />;
+
+  // The two heat gradients, declared once as a Recharts <Customized> layer so
+  // they live in the chart SVG from mount (the draw-reveal and the fill both
+  // reference them by id). Stroke warms left→right across the line's own
+  // bounding box; fill fades top→bottom to nothing at the baseline. Default
+  // objectBoundingBox units map 1981→first stop and 2025→last regardless of
+  // viewport width, so the sweep spans the full series at any screen size.
+  const HeatDefs = () => (
+    <defs>
+      <linearGradient id="fthbAgeStroke" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stopColor={FTHB_HEAT.slate} />
+        <stop offset="0.5" stopColor={FTHB_HEAT.amber} />
+        <stop offset="0.78" stopColor={FTHB_HEAT.orange} />
+        <stop offset="1" stopColor={FTHB_HEAT.red} />
+      </linearGradient>
+      <linearGradient id="fthbAgeFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor={FTHB_HEAT.red} stopOpacity={0.3} />
+        <stop offset="0.55" stopColor={FTHB_HEAT.fillMid} stopOpacity={0.1} />
+        <stop offset="1" stopColor={FTHB_HEAT.slate} stopOpacity={0} />
+      </linearGradient>
+    </defs>
+  );
 
   // The two callouts (1991 low, 2025 record) drawn through Recharts' scales so
   // they track the points on resize. Rendered as one plain SVG layer we fully
@@ -164,9 +187,12 @@ export function FthbAgeChart() {
         {/* 1991 record low: income-blue dot, label below in open space. */}
         <circle cx={xScale(1991)} cy={yScale(low)} r={5} fill={CHART_COLORS.income} stroke={P.navyDark} strokeWidth={2} />
         <text x={xScale(1991)} y={yScale(low) + 22} textAnchor="middle" fill={CHART_COLORS.income} fontSize={12} fontFamily={F.body} fontWeight={700}>{`${low} · 1991`}</text>
-        {/* 2025 record high: accent-red dot at the top right; label grows
-            leftward above the dot, clear of the rising line and the edge. */}
-        <circle cx={xScale(2025)} cy={yScale(rec)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} />
+        {/* 2025 record high: hot-red dot at the top right, with one concentric
+            ring pulsing outward (non-scaling stroke, so it thins as it grows,
+            not fattens). Label grows leftward above the dot, clear of the rising
+            line and the edge. */}
+        <circle className="fthb-pulse" cx={xScale(2025)} cy={yScale(rec)} r={5} fill="none" stroke={FTHB_HEAT.red} strokeWidth={1.5} vectorEffect="non-scaling-stroke" style={{ transformBox: "fill-box", transformOrigin: "center" }} />
+        <circle cx={xScale(2025)} cy={yScale(rec)} r={4.5} fill={FTHB_HEAT.red} stroke={P.navyDark} strokeWidth={2} />
         <text x={xScale(2025) - 8} y={yScale(rec) - 12} textAnchor="end" fill={CHART_COLORS.accent} fontSize={12} fontFamily={F.body} fontWeight={700}>{`${rec} · record`}</text>
       </g>
     );
@@ -183,7 +209,29 @@ export function FthbAgeChart() {
         @media (max-width: 640px) { .fthb-plot { height: 340px; } }
         .fthb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
-        @media (prefers-reduced-motion: reduce) { .fthb-callouts { transition: none !important; } }
+        /* Glow fill rises from the baseline behind the line. Origin is the
+           bottom of the fill's own box (the y=18 baseline). The whole draw
+           sequence — line, fill, reveal — is paced off --draw-dur, set inline
+           from the SPEED control, so 3s/4s/5s scales everything together. The
+           fill starts at ~45% of the draw and grows over ~25% of it. */
+        .fthb-area .recharts-area-area { transform-box: fill-box; transform-origin: bottom; }
+        .fthb-plot[data-phase="armed"] .fthb-area .recharts-area-area { opacity: 0; transform: scaleY(0); }
+        .fthb-plot[data-phase="drawing"] .fthb-area .recharts-area-area {
+          animation: fthbFillRise calc(var(--draw-dur, 4000ms) * 0.25) cubic-bezier(.4, 0, .2, 1) calc(var(--draw-dur, 4000ms) * 0.45) both;
+        }
+        @keyframes fthbFillRise { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+
+        /* The 2025 marker's outward ring pulse (starts with the callouts, after
+           the draw completes; loops ~2.4s). scale + non-scaling stroke keeps the
+           ring thin as it expands. */
+        .fthb-pulse { animation: fthbPulse 2.4s ease-out infinite; }
+        @keyframes fthbPulse { from { transform: scale(1); opacity: 0.85; } to { transform: scale(4.4); opacity: 0; } }
+
+        @media (prefers-reduced-motion: reduce) {
+          .fthb-callouts { transition: none !important; }
+          .fthb-pulse { display: none; animation: none; }
+          .fthb-area .recharts-area-area { animation: none; }
+        }
       `}</style>
 
       {!staticCharts && (
@@ -203,9 +251,9 @@ export function FthbAgeChart() {
         />
       )}
 
-      <div className="fthb-plot" aria-hidden="true" ref={plotRef}>
+      <div className="fthb-plot" aria-hidden="true" ref={plotRef} data-phase={shown} style={{ "--draw-dur": `${duration}ms` }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 20, right: 24, left: 8, bottom: 4 }}>
+          <ComposedChart data={data} margin={{ top: 20, right: 24, left: 8, bottom: 4 }}>
             <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
             <XAxis
               dataKey="year"
@@ -242,21 +290,38 @@ export function FthbAgeChart() {
                 <text x={viewBox.x + 6} y={viewBox.y + viewBox.height + 56} fill={faint} fontSize={11} fontFamily={F.body}>{`the 1981 to 2020 range: ${BAND_LOW} to ${BAND_HIGH}`}</text>
               )}
             />
+            {/* The heat gradients, defined once for the stroke and the fill. */}
+            <Customized component={HeatDefs} />
             {shown === "done" && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
+            {/* Glow fill: same monotone shape as the line, closed to the y=18
+                baseline, rendered behind the line. Its CSS-driven rise is keyed
+                off the plot's data-phase (see the style block). */}
+            <Area
+              className="fthb-area"
+              type="monotone"
+              dataKey="age"
+              baseValue={18}
+              stroke="none"
+              fill="url(#fthbAgeFill)"
+              isAnimationActive={false}
+              activeDot={false}
+            />
             <Line
               className="fthb-line"
               type="monotone"
               dataKey="age"
-              stroke={CHART_COLORS.line}
-              strokeWidth={2.75}
-              dot={showDots ? { r: 3, fill: CHART_COLORS.line, stroke: P.navyDark, strokeWidth: 1.5 } : false}
-              activeDot={{ r: 5, fill: CHART_COLORS.line, stroke: P.navyDark, strokeWidth: 2 }}
+              stroke="url(#fthbAgeStroke)"
+              strokeWidth={4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              dot={false}
+              activeDot={{ r: 5, fill: FTHB_HEAT.red, stroke: P.navyDark, strokeWidth: 2 }}
               isAnimationActive={false}
             />
             {/* Both callouts as one owned SVG layer (see Callouts above). */}
             <Customized component={Callouts} />
             {!staticCharts && <Customized component={Tracer} />}
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
 
