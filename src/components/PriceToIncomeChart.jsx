@@ -1,63 +1,69 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceDot, Customized } from "recharts";
-import { P, F, CHART_COLORS } from "../theme";
+import { LineChart, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceDot, Customized } from "recharts";
+import { P, F, CHART_COLORS, PTI_SCALE } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { PRICE_TO_INCOME, PTI_AVG } from "../data/geekCharts";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
 import { useStaticCharts, useHasHover } from "../utils/hooks";
 import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./ChartDrawControls";
 
-// The Price-to-Income hero, v2: a two-panel unit on the dark charcoal canvas.
+// The Price-to-Income hero, v3: a two-panel unit on the dark charcoal canvas.
 // Panel A ("the inputs") plots the two nominal-dollar lines that back the
 // ratio: the median new home price in lifted red and the median family income
 // in the legible income blue, 1971 to 2026, on a single $0 to $450K axis. Panel
-// B ("the door") is the ratio itself, red divided by blue: the cream line, the
-// dashed 56-year average at 3.52, and the gold 10-year moving average, exactly
-// as built before. The white line is literally the red divided by the blue, so
-// the two panels share one PRICE_TO_INCOME source and the tooltips show the
-// division both ways. Colors come from CHART_COLORS / P via withAlpha; no
-// hardcoded hex.
+// B ("the door") is the ratio itself, red divided by blue, now a single stroke
+// whose color is driven by VERTICAL POSITION relative to the 56-year average at
+// 3.52x: it warms and deepens to oxblood above the line (homes harder than
+// normal) and cools to violet below it (cheaper than normal), washing out at the
+// crossover. A split area fill hinged on the same 3.52x line reads red above /
+// blue below. The ratio is literally red divided by blue, so the two panels
+// share one PRICE_TO_INCOME source and the tooltips show the division both ways.
+// The heat scale lives in PTI_SCALE; the gradients and the wipe clip are declared
+// once in the panel-B <defs> (see RatioDefs). Colors from PTI_SCALE / CHART_COLORS
+// / P; no hardcoded hex.
 //
 // Panel B's y-axis floors at 2 (the ratio sits 2.45 to 4.67, so a zero floor
 // would flatten it) and ceilings at 5.5 for headroom, so the 2022 peak label
 // clears the line per the text-overlay rule. sr-only table mirrors the series.
 //
 // The hero renders fully drawn by default. Replay is a staged, click-gated
-// sequence driven by the single control button, the same infrastructure as the
-// Rent Line chart, extended to walk both panels one line per click:
-//   done -> armed -> price -> priceDone -> income -> incomeDone -> ratio -> ma -> done
+// sequence driven by the single control button, extended to walk both panels:
+//   done -> armed -> price -> priceDone -> income -> incomeDone -> ratio -> done
 // Replay blanks both panels (empty axes stay visible). Click 1 draws the red
-// price line, click 2 the blue income line, click 3 the cream ratio line, and
-// once the ratio lands the dashed average and the gold moving average appear
-// with a pulse on the 2022 peak. Only prefers-reduced-motion and phones skip
-// the controls and pulses and render the whole thing finished.
+// price line (dash-draw + tracer), click 2 the blue income line, click 3 reveals
+// the ratio: unlike the panel-A lines, the gradient stroke and its split fill
+// wipe in TOGETHER left-to-right (a clip rect scaling in X) so the fill never
+// trails the stroke; the dashed average and the 2022 peak land as it completes.
+// Only prefers-reduced-motion and phones skip the controls and render finished.
 
-const CREAM = CHART_COLORS.line;
-const GOLD = CHART_COLORS.gold;
 const ACCENT = CHART_COLORS.accent; // lifted red: panel A price line and the 2022 peak
 const BLUE = CHART_COLORS.income; // legible blue: panel A income line
-const MA_WINDOW = 10;
 
-// Which line each drawing phase owns, where to find it and its tracer, its
-// tracer color, and the phase to settle into when the draw finishes.
+// Legend swatch for the ratio: a horizontal gradient standing in for the
+// vertical position scale, cheap (violet/blue, low ratio) on the left to hard
+// (red/oxblood, high ratio) on the right. Built from PTI_SCALE, bottom→top.
+const RATIO_LEGEND_GRADIENT = `linear-gradient(90deg, ${[...PTI_SCALE.strokeStops].reverse().map((s) => s.c).join(", ")})`;
+
+// Panel A's two dash-drawn lines: which line each phase owns, where to find it
+// and its tracer, its tracer color, and the phase to settle into on completion.
+// The ratio (panel B) is not here: it reveals by clip-wipe, not a dash-draw.
 const DRAW = {
   price: { line: ".pti-price", panel: ".pti-panel-a", color: ACCENT, next: "priceDone" },
   income: { line: ".pti-income", panel: ".pti-panel-a", color: BLUE, next: "incomeDone" },
-  ratio: { line: ".pti-line-white", panel: ".pti-panel-b", color: CREAM, next: "ma" },
-  ma: { line: ".pti-line-ma", panel: ".pti-panel-b", color: GOLD, next: "done" },
 };
 
-// Per phase, which lines are shown (fully drawn), hidden (blanked before their
-// turn), or owned (left alone because the draw effect is animating them).
+// Per phase, which panel-A lines are shown (fully drawn), hidden (blanked before
+// their turn), or owned (left alone because the draw effect is animating them).
+// The ratio line/fill are governed by the wipe clip (CSS off data-phase), so
+// they never appear here.
 const LINE_STATE = {
-  done: { show: ["price", "income", "ratio", "ma"] },
-  armed: { hide: ["price", "income", "ratio", "ma"] },
-  price: { own: ["price"], hide: ["income", "ratio", "ma"] },
-  priceDone: { show: ["price"], hide: ["income", "ratio", "ma"] },
-  income: { show: ["price"], own: ["income"], hide: ["ratio", "ma"] },
-  incomeDone: { show: ["price", "income"], hide: ["ratio", "ma"] },
-  ratio: { show: ["price", "income"], own: ["ratio"], hide: ["ma"] },
-  ma: { show: ["price", "income", "ratio"], own: ["ma"] },
+  done: { show: ["price", "income"] },
+  armed: { hide: ["price", "income"] },
+  price: { own: ["price"], hide: ["income"] },
+  priceDone: { show: ["price"], hide: ["income"] },
+  income: { show: ["price"], own: ["income"] },
+  incomeDone: { show: ["price", "income"] },
+  ratio: { show: ["price", "income"] },
 };
 
 // The control button's label maps to the NEXT action from each settled phase.
@@ -82,22 +88,11 @@ export function PriceToIncomeChart() {
 
   // On phones and under reduced motion the hero is simply finished.
   const shown = staticCharts ? "done" : phase;
-  const drawing = phase === "price" || phase === "income" || phase === "ratio" || phase === "ma";
-
-  // Trailing 10-year moving average of the ratio, the smoothed trend line.
-  // Derived from the canonical ratio series, not stored: the first 9 years lack
-  // a full window, so they are null and the gold line begins in 1980 (no
-  // interpolation across the gap).
-  const ma = useMemo(() => ratio.map((_, i) => {
-    if (i < MA_WINDOW - 1) return null;
-    let sum = 0;
-    for (let k = i - MA_WINDOW + 1; k <= i; k++) sum += ratio[k];
-    return sum / MA_WINDOW;
-  }), [ratio]);
+  const drawing = phase === "price" || phase === "income" || phase === "ratio";
 
   const data = useMemo(
-    () => years.map((year, i) => ({ year, ratio: ratio[i], price: price[i], income: income[i], ma: ma[i] })),
-    [years, ratio, price, income, ma]
+    () => years.map((year, i) => ({ year, ratio: ratio[i], price: price[i], income: income[i] })),
+    [years, ratio, price, income]
   );
 
   const tickColor = withAlpha(CHART_COLORS.line, 0.55);
@@ -121,11 +116,9 @@ export function PriceToIncomeChart() {
     const paths = {
       price: curve(".pti-price"),
       income: curve(".pti-income"),
-      ratio: curve(".pti-line-white"),
-      ma: curve(".pti-line-ma"),
     };
-    // Panels not mounted yet (first paint / resize): try again next render.
-    if (!paths.price || !paths.ratio) return;
+    // Panel A not mounted yet (first paint / resize): try again next render.
+    if (!paths.price) return;
     const state = LINE_STATE[shown] || LINE_STATE.done;
     (state.show || []).forEach((k) => paths[k] && clearDrawState(paths[k]));
     (state.hide || []).forEach((k) => paths[k] && hidePath(paths[k]));
@@ -137,6 +130,15 @@ export function PriceToIncomeChart() {
   // handles every stage; it reads the phase's config, recolors the panel's
   // tracer, draws, and settles into the next phase on completion.
   useEffect(() => {
+    // The ratio reveals by a left-to-right clip wipe (fill + gradient stroke
+    // together), driven by CSS off panel B's data-phase. There is no path to
+    // dash-draw and no tracer; we only settle into "done" once the wipe, whose
+    // duration is the same SPEED value, has run. A timer (not an rAF loop) also
+    // means a backgrounded tab still lands finished.
+    if (phase === "ratio") {
+      timers.current.push(setTimeout(() => setPhase("done"), duration));
+      return;
+    }
     const cfg = DRAW[phase];
     if (!cfg) return;
     const path = curve(cfg.line);
@@ -200,7 +202,9 @@ export function PriceToIncomeChart() {
     : phase === "incomeDone" ? "Click to divide them into the ratio."
     : "Drawing…";
 
-  const showRatioPanel = shown === "ratio" || shown === "ma" || shown === "done";
+  // The dashed 3.52x average (the fills' hinge) shows once the ratio reveal
+  // begins and stays through the finished state.
+  const showAvg = shown === "ratio" || shown === "done";
   const tooltipBox = { background: P.navyDark, border: `1px solid ${withAlpha(CHART_COLORS.line, 0.15)}`, borderRadius: 8, padding: "10px 14px", boxShadow: `0 4px 20px ${withAlpha(P.navyDark, 0.5)}`, minWidth: 220 };
 
   // Panel A read-out: both nominal-dollar values plus the ratio footer, so the
@@ -218,17 +222,14 @@ export function PriceToIncomeChart() {
     );
   };
 
-  // Panel B read-out: the ratio, the trend, and the division that produced it.
+  // Panel B read-out: the ratio and the division that produced it.
   const RatioTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     const d = payload[0].payload;
     return (
       <div style={tooltipBox}>
         <p style={{ fontSize: 12, fontWeight: 700, color: CHART_COLORS.line, marginBottom: 6 }}>{d.year}</p>
-        <p style={{ fontSize: 14, fontWeight: 700, color: CHART_COLORS.line, marginBottom: d.ma != null ? 4 : 6 }}>price to income: {d.ratio.toFixed(2)}x</p>
-        {d.ma != null && (
-          <p style={{ fontSize: 12, color: GOLD, fontWeight: 600, marginBottom: 6 }}>10-year trend: {d.ma.toFixed(2)}x</p>
-        )}
+        <p style={{ fontSize: 14, fontWeight: 700, color: CHART_COLORS.line, marginBottom: 6 }}>price to income: {d.ratio.toFixed(2)}x</p>
         <p style={{ fontSize: 11, color: withAlpha(CHART_COLORS.line, 0.5), lineHeight: 1.5, margin: 0 }}>
           {fmt(d.price)} median new home / {fmt(d.income)} median family income
         </p>
@@ -236,11 +237,54 @@ export function PriceToIncomeChart() {
     );
   };
 
+  // The two panel-B gradients (position-driven stroke, split fill) and the wipe
+  // clip, declared once as a Customized layer so they live in the SVG from mount
+  // (the reveal and the draw-your-own reveal both reference them by id). Both
+  // gradients use userSpaceOnUse mapped to the plot's top and bottom pixels, so
+  // the stops track ratio values; the crossover pair is emitted at avgOffset ±
+  // 0.001 (computed from yScale(3.52)) for a hard color break exactly on 3.52x.
+  // The clip rect spans the plot and is scaled in X by CSS to wipe the reveal.
+  const RatioDefs = (props) => {
+    const { xAxisMap, yAxisMap } = props;
+    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!xScale || !yScale) return null;
+    // Plot pixel bounds straight off the scale ranges: yScale maps 2x→bottom and
+    // 5.5x→top, so its range is [plotBottom, plotTop]; xScale's is [left, right].
+    const [plotBottom, plotTop] = yScale.range();
+    const [plotLeft, plotRight] = xScale.range();
+    const avgOffset = (yScale(PTI_AVG) - plotTop) / (plotBottom - plotTop);
+    const lo = avgOffset - 0.001;
+    const hi = avgOffset + 0.001;
+    const below = PTI_SCALE.strokeStops.filter((s) => s.off < avgOffset);
+    const above = PTI_SCALE.strokeStops.filter((s) => s.off > avgOffset);
+    const f = PTI_SCALE.fillStops;
+    return (
+      <defs>
+        <linearGradient id="ptiStroke" gradientUnits="userSpaceOnUse" x1="0" y1={plotTop} x2="0" y2={plotBottom}>
+          {below.map((s) => <stop key={s.off} offset={s.off} stopColor={s.c} />)}
+          <stop offset={lo} stopColor={PTI_SCALE.crossWarm} />
+          <stop offset={hi} stopColor={PTI_SCALE.crossBlue} />
+          {above.map((s) => <stop key={s.off} offset={s.off} stopColor={s.c} />)}
+        </linearGradient>
+        <linearGradient id="ptiFill" gradientUnits="userSpaceOnUse" x1="0" y1={plotTop} x2="0" y2={plotBottom}>
+          <stop offset={0} stopColor={f.redTop} stopOpacity={0.6} />
+          <stop offset={lo} stopColor={f.redAvg} stopOpacity={0.08} />
+          <stop offset={hi} stopColor={f.blueAvg} stopOpacity={0.08} />
+          <stop offset={1} stopColor={f.blueBot} stopOpacity={0.45} />
+        </linearGradient>
+        <clipPath id="ptiWipe">
+          <rect className="pti-wipe-rect" x={plotLeft} y={plotTop} width={plotRight - plotLeft} height={plotBottom - plotTop} />
+        </clipPath>
+      </defs>
+    );
+  };
+
   // Pulse ring on the 2022 peak, drawn through Recharts' own scales so it tracks
-  // the point on resize. Mounted once the cream ratio line has drawn (ma/done).
+  // the point on resize. Mounted once the ratio has revealed (done).
   const PeakPulse = (props) => {
     const { xAxisMap, yAxisMap } = props;
-    if (shown !== "ma" && shown !== "done") return null;
+    if (shown !== "done") return null;
     const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
     const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
     if (!xScale || !yScale) return null;
@@ -277,6 +321,7 @@ export function PriceToIncomeChart() {
         .pti-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: ${withAlpha(CHART_COLORS.line, 0.75)}; }
         .pti-swatch { display: inline-block; width: 20px; border-radius: 999px; flex-shrink: 0; }
         .pti-swatch--dash { width: 20px; height: 0; border-top: 2px dashed ${withAlpha(CHART_COLORS.line, 0.5)}; border-radius: 0; }
+        .pti-swatch--scale { width: 22px; height: 6px; background: ${RATIO_LEGEND_GRADIENT}; }
         .pti-panel-a .pti-plot { width: 100%; height: 300px; min-height: 240px; }
         .pti-panel-b .pti-plot { width: 100%; height: 300px; min-height: 240px; }
         @media (max-width: 640px) {
@@ -286,30 +331,37 @@ export function PriceToIncomeChart() {
         .pti-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
         /* 2022 peak marker (red dot + label): hidden while panel B is blank or
-           the ratio is drawing, fades in with the pulse once the line lands. */
+           the ratio is wiping in, fades in with the pulse once the reveal lands. */
         .pti-peak { opacity: 0; transition: opacity .45s ease; }
-        .pti-panel-b[data-phase="ma"] .pti-peak,
         .pti-panel-b[data-phase="done"] .pti-peak { opacity: 1; }
 
-        /* 2022 peak pulse: expanding ring, active once the ratio line is drawn. */
+        /* 2022 peak pulse: expanding ring, active once the ratio has revealed. */
         .pti-pulse { animation: ptiPulse 1.8s ease-out infinite; }
         @keyframes ptiPulse {
           0%   { r: 6px;  opacity: .9; }
           100% { r: 26px; opacity: 0; }
         }
-        /* Gold trend: a soft glow that pulses once the whole sequence settles,
-           so the smoothed line reads as the emphasized trend. */
-        .pti-panel-b[data-phase="done"] .pti-line-ma .recharts-line-curve {
-          animation: ptiTrendGlow 1.8s ease-in-out infinite;
+
+        /* Ratio reveal: the gradient fill and stroke share one clip whose rect
+           scales in X from the plot's left edge, so both wipe in together left to
+           right. Hidden (scaleX 0) before the ratio's turn; a full scaleX(1) once
+           settled. The wipe duration is the SPEED value via --draw-dur, set on
+           the panel, so 3s/4s/5s scales the reveal. */
+        .pti-fill, .pti-ratio { clip-path: url(#ptiWipe); }
+        .pti-wipe-rect { transform-box: fill-box; transform-origin: left; transform: scaleX(1); }
+        .pti-panel-b[data-phase="armed"] .pti-wipe-rect,
+        .pti-panel-b[data-phase="price"] .pti-wipe-rect,
+        .pti-panel-b[data-phase="priceDone"] .pti-wipe-rect,
+        .pti-panel-b[data-phase="income"] .pti-wipe-rect,
+        .pti-panel-b[data-phase="incomeDone"] .pti-wipe-rect { transform: scaleX(0); }
+        .pti-panel-b[data-phase="ratio"] .pti-wipe-rect {
+          animation: ptiWipe var(--draw-dur, 4000ms) cubic-bezier(.4, .05, .2, 1) forwards;
         }
-        @keyframes ptiTrendGlow {
-          0%, 100% { filter: drop-shadow(0 0 1px ${withAlpha(GOLD, 0.4)}); }
-          50%      { filter: drop-shadow(0 0 6px ${withAlpha(GOLD, 0.9)}); }
-        }
+        @keyframes ptiWipe { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
         @media (prefers-reduced-motion: reduce) {
           .pti-peak { transition: none; }
           .pti-pulse { display: none; }
-          .pti-panel-b[data-phase="done"] .pti-line-ma .recharts-line-curve { animation: none; }
         }
       `}</style>
 
@@ -358,16 +410,16 @@ export function PriceToIncomeChart() {
       {/* Divider: the arithmetic that turns panel A into panel B. */}
       <div className="pti-divider">↓ red divided by blue, year by year ↓</div>
 
-      {/* Panel B: the ratio, red divided by blue. */}
-      <div className="pti-panel-b" data-phase={shown}>
+      {/* Panel B: the ratio, red divided by blue. --draw-dur drives the reveal
+          wipe off the SPEED control. */}
+      <div className="pti-panel-b" data-phase={shown} style={{ "--draw-dur": `${duration}ms` }}>
         <div className="pti-legend">
-          <span className="pti-legend-item"><span className="pti-swatch" style={{ background: CREAM, height: 3 }} />Price to income (median home / median family income)</span>
+          <span className="pti-legend-item"><span className="pti-swatch pti-swatch--scale" />Price to income (median home / median family income)</span>
           <span className="pti-legend-item"><span className="pti-swatch pti-swatch--dash" />56-year avg {PTI_AVG}x</span>
-          <span className="pti-legend-item"><span className="pti-swatch" style={{ background: GOLD, height: 4 }} />10-year trend</span>
         </div>
         <div className="pti-plot" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 20, right: 24, left: 8, bottom: 4 }}>
+            <ComposedChart data={data} margin={{ top: 20, right: 24, left: 8, bottom: 4 }}>
               <CartesianGrid stroke={CHART_COLORS.grid} strokeDasharray="3 3" />
               <XAxis {...xAxisProps} />
               <YAxis
@@ -379,13 +431,17 @@ export function PriceToIncomeChart() {
                 tickFormatter={(v) => `${v}x`}
                 width={46}
               />
+              {/* Position-driven stroke gradient, split fill, and the wipe clip. */}
+              <Customized component={RatioDefs} />
               {shown === "done" && <Tooltip content={<RatioTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
-              {/* 56-year average. Appears with the moving average once the ratio
-                  line has drawn (phase ma/done), so panel B populates in order:
-                  ratio, then the dashed average and the gold trend. The terse
-                  label matches the payment burden chart and stays short enough
-                  that the 1980s rise in the ratio never reaches it on mobile. */}
-              {showRatioPanel && (shown === "ma" || shown === "done") && (
+              {/* Split fill: one Area closed to the 3.52x average (not the plot
+                  bottom), so the ptiFill gradient reads red above / blue below.
+                  Behind the line; clipped by the reveal wipe. */}
+              <Area className="pti-fill" type="monotone" dataKey="ratio" baseValue={PTI_AVG} stroke="none" fill="url(#ptiFill)" isAnimationActive={false} activeDot={false} dot={false} />
+              {/* 56-year average, the fills' hinge. Appears with the ratio reveal
+                  and stays. Label sits just above the dashed line (insideTopLeft),
+                  never on the blue fill. */}
+              {showAvg && (
                 <ReferenceLine
                   y={PTI_AVG}
                   stroke={CHART_COLORS.axis}
@@ -393,18 +449,16 @@ export function PriceToIncomeChart() {
                   label={{ value: `avg ${PTI_AVG}x`, position: "insideTopLeft", fill: tickColor, fontSize: 10, fontFamily: F.body }}
                 />
               )}
-              <Line className="pti-line-white" type="monotone" dataKey="ratio" stroke={CREAM} strokeWidth={2.75} dot={false} isAnimationActive={false} />
-              <Line className="pti-line-ma" type="monotone" dataKey="ma" stroke={GOLD} strokeWidth={4} dot={false} isAnimationActive={false} connectNulls={false} />
+              <Line className="pti-ratio" type="monotone" dataKey="ratio" stroke="url(#ptiStroke)" strokeWidth={4.8} strokeLinecap="round" strokeLinejoin="round" dot={false} activeDot={false} isAnimationActive={false} />
               {/* 2022 peak: the hardest door ever. Red dot with a custom label
                   lifted 16px above the dot center, centered so it clears the
-                  line on both sides. Hidden until the ratio line lands. */}
+                  line on both sides. Hidden until the reveal lands. */}
               <ReferenceDot className="pti-peak" x={2022} y={ratioAt(2022)} r={5} fill={ACCENT} stroke={P.navyDark} strokeWidth={2} isFront
                 label={({ viewBox }) => (
                   <text x={viewBox.x} y={viewBox.y - 16} textAnchor="middle" fill={ACCENT} fontSize={12} fontFamily={F.body} fontWeight={700}>4.67x 2022</text>
                 )} />
               <Customized component={PeakPulse} />
-              {!staticCharts && <Customized component={() => <Tracer fill={CREAM} />} />}
-            </LineChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       </div>
