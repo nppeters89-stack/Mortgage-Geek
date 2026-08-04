@@ -84,6 +84,9 @@ export function PaymentBurdenPage() {
         <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 16px" }}>
           <PaymentBurdenChart />
         </div>
+        <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, margin: "12px 0 0", maxWidth: 720 }}>
+          Read the line by color: red marks the years the payment ran worse than the 23.7% average, blue the years it ran better. 1981 is the reddest year here. On the <a href="/geek-charts/price-to-income-ratio" style={LINK}>price-to-income ratio</a>, that same 1981 shows blue: the payment was brutal, but the door was cheap.
+        </p>
 
         <p style={{ fontSize: 14, color: BODY, lineHeight: 1.7, margin: "20px 0 0", maxWidth: 720 }}>
           After the 2022 rate shock pushed the burden to 26.5% in 2023, it has improved three years running, and today's 23.0% sits slightly below the 56-year average of 23.7%. Prices flattened, rates eased, incomes kept growing. The real outliers on this chart are 1981, when the same payment consumed 41% of the median family's income, and the 2009 to 2021 stretch, when cheap money made housing artificially light.
