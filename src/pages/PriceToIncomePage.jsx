@@ -66,6 +66,12 @@ function Para({ children, style }) {
   return <p style={{ fontSize: 15, color: BODY, lineHeight: 1.75, margin: "0 0 18px", maxWidth: 720, ...style }}>{children}</p>;
 }
 
+// Small caption that sits directly under a chart, explaining how to read its
+// color coding.
+function Caption({ children }) {
+  return <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.6, margin: "12px 0 0", maxWidth: 720 }}>{children}</p>;
+}
+
 // An embedded sibling chart in its own surface card, with a link to the full
 // chart directly below it.
 function EmbedCard({ children, href, label }) {
@@ -112,6 +118,7 @@ export function PriceToIncomePage() {
         <div style={{ background: SURFACE, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "24px 20px 16px" }}>
           <PriceToIncomeChart />
         </div>
+        <Caption>How to read the ratio line: it runs red in the years the door was harder than its 3.52x average, and blue in the years it was cheaper. 1981, the worst payment year on record, sits in the blue.</Caption>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginTop: 32 }}>
           {STATS.map((s) => <StatCard key={s.label} {...s} />)}
@@ -124,12 +131,13 @@ export function PriceToIncomePage() {
         <EmbedCard href="/geek-charts/mortgage-payment-burden" label="View the full Mortgage Payment Burden chart">
           <PaymentBurdenChart />
         </EmbedCard>
+        <Caption>Same color rule, read for the payment instead of the door: red is a burden worse than the 23.7% average, blue is better. 1981 is the reddest year here and among the bluest on the ratio at the top of this page. A brutal payment on a cheap door.</Caption>
         <Para>And the typical first-time buyer is 40. The oldest ever recorded, in a survey that goes back to 1981.</Para>
         <EmbedCard href="/geek-charts/first-time-homebuyer-age" label="View the full First-Time Homebuyer Age chart">
           <FthbAgeChart />
         </EmbedCard>
         <Para>Sit with that for a second. The worst payment in history produced the youngest buyers. A completely ordinary payment is producing the oldest. If the monthly payment were the thing keeping people out of homeownership, those two facts would run the other way.</Para>
-        <Para>The payment was never the problem. The door was. The chart at the top of this page is the door: the red line is what the median new home costs, the blue line is what the median family earns, and the white line beneath them is one divided by the other. Every other chart in this series is a clue. That ratio is the answer.</Para>
+        <Para>The payment was never the problem. The door was. The chart at the top of this page is the door: the red line is what the median new home costs, the blue line is what the median family earns, and the line beneath them is one divided by the other. Every other chart in this series is a clue. That ratio is the answer.</Para>
 
         <Section>1981: a payment crisis with a cheap door</Section>
         <Para>Here is what buying looked like at the worst moment in the payment data. The median new home cost $68,950. The median family earned $22,390. That is a price-to-income ratio of 3.1, and here is the detail almost nobody knows: it was below the 56-year average of 3.5. In the year the payment was the worst it has ever been, the door itself was cheaper than normal. A 20 percent down payment was $13,790, about 62 percent of a year's pay. Painful, but reachable: a few years of serious saving for a young couple.</Para>
@@ -140,7 +148,7 @@ export function PriceToIncomePage() {
         <Section>Today: a normal payment behind a hard door</Section>
         <Para>Now run the same numbers for today. The payment burden is 23.0 percent, a hair under the long-run average of 23.7. By monthly cost, and I will not pretend otherwise, this market is ordinary.</Para>
         <Para>But look at the chart at the top of this page. The median home now runs about 3.8 times the median family income, still well above the 3.5 long-run average even after three years of easing. At the 2022 peak it hit 4.67, the worst entry ratio in the entire series. A 20 percent down payment today is about 78 percent of a year's pay, up from 62 percent in 1981.</Para>
-        <Para>Why did the door move? Scroll back to the two lines at the top of this page. Since 1971, the red line went from $25,225 to $403,200, roughly 16x. The blue line went from $10,290 to $105,800, roughly 10x. The house grew about 1.6 times faster than the paycheck trying to buy it, and the widening space between those two lines is the door. The white ratio line beneath them is that space, measured. For the fuller picture with inflation alongside, see the <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income chart</a>.</Para>
+        <Para>Why did the door move? Scroll back to the two lines at the top of this page. Since 1971, the red line went from $25,225 to $403,200, roughly 16x. The blue line went from $10,290 to $105,800, roughly 10x. The house grew about 1.6 times faster than the paycheck trying to buy it, and the widening space between those two lines is the door. The ratio line beneath them is that space, measured. For the fuller picture with inflation alongside, see the <a href="/geek-charts/home-prices-income-inflation" style={LINK}>Home Prices, Inflation, and Family Income chart</a>.</Para>
         <Para>And here is the detail that convinces me this is the right diagnosis. The first-time buyer age line did not drift upward slowly. It sat in a band between 28 and 33 for forty years, from 1981 through 2020. Then it jumped from 33 to 36 between 2021 and 2022, exactly the window when the price-to-income ratio spiked from 3.89 to its all-time worst 4.67. The payment squeeze of 2023 came and partly went. The age line kept climbing: 38 in 2024, 40 in 2025.</Para>
         <Para>A rate problem is temporary because you can refinance the rate. A price problem is permanent because you cannot refinance the principal. Whatever you pay for the house, you pay for the house. The 1981 buyer's problem melted every time rates fell. Today's buyer's problem is baked into the purchase price on day one.</Para>
 

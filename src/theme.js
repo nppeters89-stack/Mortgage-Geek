@@ -97,6 +97,20 @@ export const PTI_SCALE = {
   },
 };
 
+// Threshold color split for the mortgage-payment-burden line (PaymentBurdenChart,
+// shown on the payment-burden and price-to-income pages). Unlike the year-based
+// or depth-shaded ramps, this encodes only WHICH SIDE of the 23.7% long-run
+// average a year sits on: red above (worse than average to be paying a mortgage),
+// cool blue below (better). Each side stays near-uniform so the break — a hard
+// stop at the average, injected at avgOffset ± 0.001 in the component — reads as
+// a clean line crossing, not a distance ramp. Scoped here per no-hardcoded-hex.
+export const BURDEN_HEAT = {
+  worst: "#ff3b30", // 45%, worst — stroke offset 0; "worse than average" chip
+  warm:  "#ff5a4a", // just above the 23.7% average
+  cool:  "#5fa8d3", // just below the 23.7% average; "better than average" chip
+  best:  "#4b7ea0", // 0%, best — stroke offset 1
+};
+
 export const F = {
   // Rate's web typeface, now site-wide for congruence with the editorial
   // homepage. display/body/sans all resolve to Figtree; the only exceptions are

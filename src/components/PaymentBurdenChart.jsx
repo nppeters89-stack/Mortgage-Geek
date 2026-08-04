@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, ReferenceDot, Customized } from "recharts";
-import { P, F, CHART_COLORS } from "../theme";
+import { P, F, CHART_COLORS, BURDEN_HEAT } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
 import { PAYMENT_BURDEN, BURDEN_AVG } from "../data/geekCharts";
 import { drawPath, hidePath, clearDrawState } from "../utils/lineDraw";
@@ -9,9 +9,13 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 
 // The Mortgage Payment Burden: P&I on the median new home (20% down, that year's
 // average 30-yr rate) as a percent of median family income, 1971 to 2026, on a
-// dark charcoal canvas. Single cream line against the 56-year average. Colors
-// from CHART_COLORS / P via withAlpha; no hardcoded hex. sr-only table mirrors
-// the series for crawlers.
+// dark charcoal canvas. One threshold-colored line against the 56-year average:
+// the stroke is red wherever the burden is worse than the 23.7% average and cool
+// blue wherever it is better, so the nine crossings read as a rhythm of hot and
+// cold decades. The color comes from the line's own y position via a vertical
+// userSpaceOnUse gradient with a hard stop at the average (see BurdenDefs); no
+// fills, no time ramp. Heat stops live in BURDEN_HEAT. Colors from BURDEN_HEAT /
+// CHART_COLORS / P; no hardcoded hex. sr-only table mirrors the series.
 //
 // The chart renders drawn by default. Replaying is a two-step click, a
 // narration aid for screen recordings: the first click (Replay) blanks the line
@@ -179,14 +183,58 @@ export function PaymentBurdenChart() {
     );
   };
 
+  // The threshold stroke gradient, declared once as a Customized layer so it
+  // lives in the SVG from mount (the draw and the draw-your-own reveal both
+  // reference it by id). Vertical userSpaceOnUse gradient mapped to the plot's
+  // top and bottom pixels, so the stops track burden values; the two stops that
+  // straddle the crossover are emitted at avgOffset ± 0.001 (from yScale(23.7))
+  // for a hard red/blue break exactly on the average at any plot height.
+  const BurdenDefs = (props) => {
+    const { yAxisMap } = props;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!yScale) return null;
+    // yScale maps 0%→bottom and 45%→top, so its range is [plotBottom, plotTop].
+    const [plotBottom, plotTop] = yScale.range();
+    const avgOffset = (yScale(BURDEN_AVG) - plotTop) / (plotBottom - plotTop);
+    const lo = avgOffset - 0.001;
+    const hi = avgOffset + 0.001;
+    return (
+      <defs>
+        <linearGradient id="burdenStroke" gradientUnits="userSpaceOnUse" x1="0" y1={plotTop} x2="0" y2={plotBottom}>
+          <stop offset={0} stopColor={BURDEN_HEAT.worst} />
+          <stop offset={lo} stopColor={BURDEN_HEAT.warm} />
+          <stop offset={hi} stopColor={BURDEN_HEAT.cool} />
+          <stop offset={1} stopColor={BURDEN_HEAT.best} />
+        </linearGradient>
+      </defs>
+    );
+  };
+
+  // "41.3% 1981": the peak sits near the top of the plot, so there is no room to
+  // stack a label above it. Set it BESIDE the spike, left-anchored ~30px to the
+  // right of the peak, on two lines (value at the peak's y, year 19px below), no
+  // pointer arrow. Fades in with the peak marker.
+  const PeakLabel = (props) => {
+    const { xAxisMap, yAxisMap } = props;
+    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
+    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
+    if (!xScale || !yScale) return null;
+    const x = xScale(1981) + 30;
+    const y = yScale(yAt(1981));
+    return (
+      <text className="pbn-lbl-peak" textAnchor="start" fill={CHART_COLORS.accent} fontSize={12} fontFamily={F.body} fontWeight={700} style={{ pointerEvents: "none" }}>
+        <tspan x={x} y={y}>41.3%</tspan>
+        <tspan x={x} y={y + 19}>1981</tspan>
+      </text>
+    );
+  };
+
   // The "23.0% today" label. Rendered as its own SVG text, not the ReferenceDot
-  // label, so it can sit well BELOW the dot and anchor at its end. The line
-  // reaches the today point descending from the 2023 peak, so it crosses the
-  // 23% band just left of the dot; a shallow drop landed the text right on that
-  // rising/falling stroke. Dropping it into the clear wedge below the 2020 low
-  // (about the 12% line) clears the stroke entirely, and end-anchoring keeps it
-  // off the right edge (the today point is the last on the axis). Fades in with
-  // the marker via the same data-reveal step.
+  // label, so it can sit ABOVE the dot and anchor at its end. The tail climbs
+  // steeply from the 2020 low to 2023, so a label at the final point's y gets
+  // crossed by the stroke; lifting it ~35px above the point and end-anchoring at
+  // the plot's right edge clears the rising stroke and the axis edge alike. Fades
+  // in with the marker via the same data-reveal step.
   const TodayLabel = (props) => {
     const { xAxisMap, yAxisMap } = props;
     const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
@@ -196,7 +244,7 @@ export function PaymentBurdenChart() {
       <text
         className="pbn-lbl-today"
         x={xScale(2026) - 6}
-        y={yScale(12)}
+        y={yScale(yAt(2026)) - 35}
         textAnchor="end"
         fill={CREAM}
         fontSize={12}
@@ -221,6 +269,13 @@ export function PaymentBurdenChart() {
         @media (max-width: 640px) { .pbn-plot { height: 340px; } }
         .pbn-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
+        /* Threshold legend: red = worse than average, blue = better. Without it
+           the color split reads as decorative. Same chip idiom as the other
+           geek charts. */
+        .pbn-legend { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-bottom: 12px; }
+        .pbn-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: ${withAlpha(CHART_COLORS.line, 0.75)}; }
+        .pbn-swatch { display: inline-block; width: 20px; height: 3px; border-radius: 999px; flex-shrink: 0; }
+
         /* Markers start hidden and fade in on their reveal step. */
         .pbn-mk { opacity: 0; transition: opacity .45s ease; }
         .pbn-plot[data-reveal="1"] .pbn-mk-peak,
@@ -234,10 +289,17 @@ export function PaymentBurdenChart() {
         .pbn-plot[data-reveal="4"] .pbn-mk-squeeze,
         .pbn-plot[data-reveal="4"] .pbn-mk-today { opacity: 1; }
 
-        /* The separately-rendered today label fades in with its marker. */
+        /* The separately-rendered labels fade in with their markers: the peak
+           label with the 1981 dot (reveal 1), the today label with its dot
+           (reveal 4). */
+        .pbn-lbl-peak { opacity: 0; transition: opacity .45s ease; }
+        .pbn-plot[data-reveal="1"] .pbn-lbl-peak,
+        .pbn-plot[data-reveal="2"] .pbn-lbl-peak,
+        .pbn-plot[data-reveal="3"] .pbn-lbl-peak,
+        .pbn-plot[data-reveal="4"] .pbn-lbl-peak { opacity: 1; }
         .pbn-lbl-today { opacity: 0; transition: opacity .45s ease; }
         .pbn-plot[data-reveal="4"] .pbn-lbl-today { opacity: 1; }
-        @media (prefers-reduced-motion: reduce) { .pbn-lbl-today { transition: none; } }
+        @media (prefers-reduced-motion: reduce) { .pbn-lbl-peak, .pbn-lbl-today { transition: none; } }
 
         /* Today marker: expanding ring plus a soft dot glow, both once done. */
         .pbn-pulse { animation: pbnPulse 1.8s ease-out infinite; }
@@ -274,6 +336,13 @@ export function PaymentBurdenChart() {
         />
       )}
 
+      {/* Threshold legend: what the red/blue split means. Always shown (it
+          explains the color even under reduced motion, where controls are off). */}
+      <div className="pbn-legend">
+        <span className="pbn-legend-item"><span className="pbn-swatch" style={{ background: BURDEN_HEAT.worst }} />worse than average</span>
+        <span className="pbn-legend-item"><span className="pbn-swatch" style={{ background: BURDEN_HEAT.cool }} />better than average</span>
+      </div>
+
       <div
         className="pbn-plot"
         data-reveal={shownReveal}
@@ -303,6 +372,8 @@ export function PaymentBurdenChart() {
               tickFormatter={(v) => `${v}%`}
               width={44}
             />
+            {/* Threshold stroke gradient (red above the average, blue below). */}
+            <Customized component={BurdenDefs} />
             {/* Hover read-out only once the sequence has settled. */}
             {shown === "done" && <Tooltip content={<CustomTooltip />} cursor={{ stroke: withAlpha(CHART_COLORS.line, 0.2) }} />}
             <ReferenceLine
@@ -311,12 +382,12 @@ export function PaymentBurdenChart() {
               strokeDasharray="5 5"
               label={{ value: `avg ${BURDEN_AVG}%`, position: "insideTopLeft", fill: tickColor, fontSize: 10, fontFamily: F.body }}
             />
-            <Line type="monotone" dataKey="ratio" stroke={CHART_COLORS.line} strokeWidth={2.75} dot={false} isAnimationActive={false} />
+            <Line type="monotone" dataKey="ratio" stroke="url(#burdenStroke)" strokeWidth={4.4} strokeLinecap="round" strokeLinejoin="round" dot={false} isAnimationActive={false} />
             {/* Markers mount only once the line has drawn (see showDots). */}
             {showDots && <>
-              {/* 1981 peak: red dot, label above. */}
-              <ReferenceDot className="pbn-mk pbn-mk-peak" x={1981} y={yAt(1981)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} isFront
-                label={{ value: "41.3% 1981", position: "top", fill: CHART_COLORS.accent, fontSize: 12, fontFamily: F.body, fontWeight: 700 }} />
+              {/* 1981 peak: red dot. Its label is rendered separately (PeakLabel)
+                  so it can sit beside the spike, clear of the top edge. */}
+              <ReferenceDot className="pbn-mk pbn-mk-peak" x={1981} y={yAt(1981)} r={5} fill={CHART_COLORS.accent} stroke={P.navyDark} strokeWidth={2} isFront />
               {/* 2020 low: unlabeled cream dot. */}
               <ReferenceDot className="pbn-mk pbn-mk-low" x={2020} y={yAt(2020)} r={4.5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
               {/* 2023 squeeze: unlabeled gold dot. */}
@@ -325,6 +396,7 @@ export function PaymentBurdenChart() {
                   it can sit below the dot, anchored end, clear of the pulse ring. */}
               <ReferenceDot className="pbn-mk pbn-mk-today" x={2026} y={yAt(2026)} r={5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
             </>}
+            {showDots && <Customized component={PeakLabel} />}
             {showDots && <Customized component={TodayLabel} />}
             <Customized component={TodayPulse} />
             {!staticCharts && <Customized component={() => <Tracer fill={CREAM} />} />}
