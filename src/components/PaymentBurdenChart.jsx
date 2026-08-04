@@ -229,33 +229,6 @@ export function PaymentBurdenChart() {
     );
   };
 
-  // The "23.0% today" label. Rendered as its own SVG text, not the ReferenceDot
-  // label, so it can sit BELOW the end dot and anchor at its end. It drops ~30px
-  // under the final point, clear of the dot's pulse ring, and end-anchors at the
-  // plot's right edge (the today point is the last on the axis) so it never runs
-  // off the edge. Fades in with the marker via the same data-reveal step.
-  const TodayLabel = (props) => {
-    const { xAxisMap, yAxisMap } = props;
-    const xScale = xAxisMap?.[Object.keys(xAxisMap)[0]]?.scale;
-    const yScale = yAxisMap?.[Object.keys(yAxisMap)[0]]?.scale;
-    if (!xScale || !yScale) return null;
-    return (
-      <text
-        className="pbn-lbl-today"
-        x={xScale(2026) - 6}
-        y={yScale(yAt(2026)) + 30}
-        textAnchor="end"
-        fill={CREAM}
-        fontSize={12}
-        fontFamily={F.body}
-        fontWeight={700}
-        style={{ pointerEvents: "none" }}
-      >
-        23.0% today
-      </text>
-    );
-  };
-
   const replayLabel =
     phase === "drawing" ? "Drawing…" : phase === "armed" ? "Draw" : "Replay";
 
@@ -288,17 +261,13 @@ export function PaymentBurdenChart() {
         .pbn-plot[data-reveal="4"] .pbn-mk-squeeze,
         .pbn-plot[data-reveal="4"] .pbn-mk-today { opacity: 1; }
 
-        /* The separately-rendered labels fade in with their markers: the peak
-           label with the 1981 dot (reveal 1), the today label with its dot
-           (reveal 4). */
+        /* The separately-rendered peak label fades in with the 1981 dot (reveal 1). */
         .pbn-lbl-peak { opacity: 0; transition: opacity .45s ease; }
         .pbn-plot[data-reveal="1"] .pbn-lbl-peak,
         .pbn-plot[data-reveal="2"] .pbn-lbl-peak,
         .pbn-plot[data-reveal="3"] .pbn-lbl-peak,
         .pbn-plot[data-reveal="4"] .pbn-lbl-peak { opacity: 1; }
-        .pbn-lbl-today { opacity: 0; transition: opacity .45s ease; }
-        .pbn-plot[data-reveal="4"] .pbn-lbl-today { opacity: 1; }
-        @media (prefers-reduced-motion: reduce) { .pbn-lbl-peak, .pbn-lbl-today { transition: none; } }
+        @media (prefers-reduced-motion: reduce) { .pbn-lbl-peak { transition: none; } }
 
         /* Today marker: expanding ring plus a soft dot glow, both once done. */
         .pbn-pulse { animation: pbnPulse 1.8s ease-out infinite; }
@@ -391,12 +360,10 @@ export function PaymentBurdenChart() {
               <ReferenceDot className="pbn-mk pbn-mk-low" x={2020} y={yAt(2020)} r={4.5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
               {/* 2023 squeeze: unlabeled gold dot. */}
               <ReferenceDot className="pbn-mk pbn-mk-squeeze" x={2023} y={yAt(2023)} r={4.5} fill={CHART_COLORS.gold} stroke={P.navyDark} strokeWidth={2} isFront />
-              {/* Today: cream dot. Its label is rendered separately (TodayLabel) so
-                  it can sit below the dot, anchored end, clear of the pulse ring. */}
+              {/* Today: cream dot with its outward pulse, no text label. */}
               <ReferenceDot className="pbn-mk pbn-mk-today" x={2026} y={yAt(2026)} r={5} fill={CHART_COLORS.line} stroke={P.navyDark} strokeWidth={2} isFront />
             </>}
             {showDots && <Customized component={PeakLabel} />}
-            {showDots && <Customized component={TodayLabel} />}
             <Customized component={TodayPulse} />
             {!staticCharts && <Customized component={() => <Tracer fill={CREAM} />} />}
           </LineChart>
