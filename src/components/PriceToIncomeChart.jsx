@@ -28,13 +28,14 @@ import { ChartDrawControls, Tracer, TRACER_CLASS, drawControlsCss } from "./Char
 //
 // The hero renders fully drawn by default. Replay is a staged, click-gated
 // sequence driven by the single control button, extended to walk both panels:
-//   done -> armed -> price -> priceDone -> income -> incomeDone -> ratio -> done
+//   done -> armed -> inputs -> inputsDone -> ratio -> done
 // Replay blanks both panels (empty axes stay visible). Click 1 draws the red
-// price line (dash-draw + tracer), click 2 the blue income line, click 3 reveals
-// the ratio: unlike the panel-A lines, the gradient stroke and its split fill
-// wipe in TOGETHER left-to-right (a clip rect scaling in X) so the fill never
-// trails the stroke; the dashed average and the 2022 peak land as it completes.
-// Only prefers-reduced-motion and phones skip the controls and render finished.
+// price line and the blue income line TOGETHER (both dash-draw over the same
+// duration; the panel tracer rides the price line), click 2 reveals the ratio:
+// unlike the panel-A lines, the gradient stroke and its split fill wipe in
+// together left-to-right (a clip rect scaling in X) so the fill never trails the
+// stroke; the dashed average and the 2022 peak land as it completes. Only
+// prefers-reduced-motion and phones skip the controls and render finished.
 
 const ACCENT = CHART_COLORS.accent; // lifted red: panel A price line and the 2022 peak
 const BLUE = CHART_COLORS.income; // legible blue: panel A income line
@@ -44,34 +45,24 @@ const BLUE = CHART_COLORS.income; // legible blue: panel A income line
 // (red/oxblood, high ratio) on the right. Built from PTI_SCALE, bottom→top.
 const RATIO_LEGEND_GRADIENT = `linear-gradient(90deg, ${[...PTI_SCALE.strokeStops].reverse().map((s) => s.c).join(", ")})`;
 
-// Panel A's two dash-drawn lines: which line each phase owns, where to find it
-// and its tracer, its tracer color, and the phase to settle into on completion.
-// The ratio (panel B) is not here: it reveals by clip-wipe, not a dash-draw.
-const DRAW = {
-  price: { line: ".pti-price", panel: ".pti-panel-a", color: ACCENT, next: "priceDone" },
-  income: { line: ".pti-income", panel: ".pti-panel-a", color: BLUE, next: "incomeDone" },
-};
-
 // Per phase, which panel-A lines are shown (fully drawn), hidden (blanked before
 // their turn), or owned (left alone because the draw effect is animating them).
-// The ratio line/fill are governed by the wipe clip (CSS off data-phase), so
-// they never appear here.
+// The price and income lines draw together in the single "inputs" phase, so they
+// share every state. The ratio line/fill are governed by the wipe clip (CSS off
+// data-phase), so they never appear here.
 const LINE_STATE = {
   done: { show: ["price", "income"] },
   armed: { hide: ["price", "income"] },
-  price: { own: ["price"], hide: ["income"] },
-  priceDone: { show: ["price"], hide: ["income"] },
-  income: { show: ["price"], own: ["income"] },
-  incomeDone: { show: ["price", "income"] },
+  inputs: { own: ["price", "income"] },
+  inputsDone: { show: ["price", "income"] },
   ratio: { show: ["price", "income"] },
 };
 
 // The control button's label maps to the NEXT action from each settled phase.
 const STEP_LABEL = {
   done: "Replay",
-  armed: "1. Draw the price",
-  priceDone: "2. Draw the paycheck",
-  incomeDone: "3. Divide them",
+  armed: "1. Draw the inputs",
+  inputsDone: "2. Divide them",
 };
 
 export function PriceToIncomeChart() {
@@ -88,7 +79,7 @@ export function PriceToIncomeChart() {
 
   // On phones and under reduced motion the hero is simply finished.
   const shown = staticCharts ? "done" : phase;
-  const drawing = phase === "price" || phase === "income" || phase === "ratio";
+  const drawing = phase === "inputs" || phase === "ratio";
 
   const data = useMemo(
     () => years.map((year, i) => ({ year, ratio: ratio[i], price: price[i], income: income[i] })),
@@ -126,9 +117,7 @@ export function PriceToIncomeChart() {
 
   // The draw has to start AFTER the render that sets the phase, not inside the
   // click handler: Recharts rebuilds its SVG on every render, so a path styled
-  // during the handler is detached by the time the browser paints. One effect
-  // handles every stage; it reads the phase's config, recolors the panel's
-  // tracer, draws, and settles into the next phase on completion.
+  // during the handler is detached by the time the browser paints.
   useEffect(() => {
     // The ratio reveals by a left-to-right clip wipe (fill + gradient stroke
     // together), driven by CSS off panel B's data-phase. There is no path to
@@ -139,38 +128,47 @@ export function PriceToIncomeChart() {
       timers.current.push(setTimeout(() => setPhase("done"), duration));
       return;
     }
-    const cfg = DRAW[phase];
-    if (!cfg) return;
-    const path = curve(cfg.line);
-    const tracer = plotRef.current?.querySelector(`${cfg.panel} .${TRACER_CLASS}`);
-    if (!path) {
-      setPhase(cfg.next);
+    if (phase !== "inputs") return;
+    // The price and income lines draw together on this one click. Both dash-draw
+    // over the same SPEED duration; the panel's single tracer rides the price
+    // line. We settle into "inputsDone" only once BOTH strokes have finished.
+    const pricePath = curve(".pti-price");
+    const incomePath = curve(".pti-income");
+    if (!pricePath || !incomePath) {
+      setPhase("inputsDone");
       return;
     }
+    const tracer = plotRef.current?.querySelector(`.pti-panel-a .${TRACER_CLASS}`);
     if (tracer) {
-      tracer.setAttribute("fill", cfg.color);
+      tracer.setAttribute("fill", ACCENT);
       tracer.setAttribute("opacity", "1");
     }
-    cancelDraw.current = drawPath(path, {
+    let remaining = 2;
+    const finishOne = () => {
+      if (--remaining > 0) return;
+      if (tracer) tracer.setAttribute("opacity", "0");
+      setPhase("inputsDone");
+    };
+    const cancelPrice = drawPath(pricePath, {
       duration,
       onTick: (_t, pt) => {
         if (!tracer) return;
         tracer.setAttribute("cx", pt.x);
         tracer.setAttribute("cy", pt.y);
       },
-      onDone: () => {
-        if (tracer) tracer.setAttribute("opacity", "0");
-        setPhase(cfg.next);
-      },
+      onDone: finishOne,
     });
+    const cancelIncome = drawPath(incomePath, { duration, onDone: finishOne });
+    cancelDraw.current = () => { cancelPrice(); cancelIncome(); };
     // Duration is read once at the start of a draw; the speed control is locked
     // while drawing, so it is intentionally not a dependency here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   // The control advances the staged sequence one click at a time. From the
-  // drawn state the first click (Replay) blanks both panels; each later click
-  // draws the next line. A click mid-draw is ignored.
+  // drawn state the first click (Replay) blanks both panels; the next draws the
+  // price and income lines together, then the last divides them into the ratio.
+  // A click mid-draw is ignored.
   const advance = useCallback(() => {
     if (staticCharts || drawing) return;
     if (phase === "done") {
@@ -180,9 +178,8 @@ export function PriceToIncomeChart() {
       setPhase("armed");
       return;
     }
-    if (phase === "armed") setPhase("price");
-    else if (phase === "priceDone") setPhase("income");
-    else if (phase === "incomeDone") setPhase("ratio");
+    if (phase === "armed") setPhase("inputs");
+    else if (phase === "inputsDone") setPhase("ratio");
   }, [staticCharts, drawing, phase, clearTimers]);
 
   // Space and Enter already activate the focused button natively; R advances the
@@ -196,10 +193,9 @@ export function PriceToIncomeChart() {
 
   const replayLabel = drawing ? "Drawing…" : (STEP_LABEL[phase] || "Replay");
   const hint = phase === "done"
-    ? (hasHover ? "Press Replay, then draw the price, the paycheck, and the ratio in turn. R advances." : "Tap Replay, then draw the price, the paycheck, and the ratio in turn.")
-    : phase === "armed" ? "Click to draw the median new home price."
-    : phase === "priceDone" ? "Click to draw the median family income."
-    : phase === "incomeDone" ? "Click to divide them into the ratio."
+    ? (hasHover ? "Press Replay, then draw the inputs and the ratio in turn. R advances." : "Tap Replay, then draw the inputs and the ratio in turn.")
+    : phase === "armed" ? "Click to draw the price and the paycheck together."
+    : phase === "inputsDone" ? "Click to divide them into the ratio."
     : "Drawing…";
 
   // The dashed 3.52x average (the fills' hinge) shows once the ratio reveal
@@ -350,10 +346,8 @@ export function PriceToIncomeChart() {
         .pti-fill, .pti-ratio { clip-path: url(#ptiWipe); }
         .pti-wipe-rect { transform-box: fill-box; transform-origin: left; transform: scaleX(1); }
         .pti-panel-b[data-phase="armed"] .pti-wipe-rect,
-        .pti-panel-b[data-phase="price"] .pti-wipe-rect,
-        .pti-panel-b[data-phase="priceDone"] .pti-wipe-rect,
-        .pti-panel-b[data-phase="income"] .pti-wipe-rect,
-        .pti-panel-b[data-phase="incomeDone"] .pti-wipe-rect { transform: scaleX(0); }
+        .pti-panel-b[data-phase="inputs"] .pti-wipe-rect,
+        .pti-panel-b[data-phase="inputsDone"] .pti-wipe-rect { transform: scaleX(0); }
         .pti-panel-b[data-phase="ratio"] .pti-wipe-rect {
           animation: ptiWipe var(--draw-dur, 4000ms) cubic-bezier(.4, .05, .2, 1) forwards;
         }
