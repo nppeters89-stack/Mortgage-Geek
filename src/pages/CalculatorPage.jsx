@@ -5,7 +5,7 @@ import { ContactCard } from "../components/homepage/ContactCard";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
 import { generateAmortData, formatPayoff, calculateAPR } from "../utils/math";
-import { resolveProgram, monthlyMI, vaFeeRate as computeVaFeeRate } from "../utils/mortgageMath.js";
+import { vaFeeRate as computeVaFeeRate } from "../utils/mortgageMath.js";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { ToolLockup } from "../components/ToolLockup";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -15,6 +15,7 @@ import { webApplicationSchema } from "../utils/schema";
 import { useIsCockpit, usePieDiameter } from "../utils/hooks";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
+import { computeMonthlyPayment } from "../components/calculator/paymentModel";
 import { DetailPanel } from "../components/calculator/DetailPanel";
 import { PaymentPieChart } from "../components/calculator/PaymentPieChart";
 
@@ -203,35 +204,38 @@ export function CalculatorPage() {
   const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
   const baseLoan = homePrice - downAmt;
 
-  // Per-program loan structure and mortgage insurance come from the shared
-  // mortgageMath module, the same source the Rent vs Own tool uses, so the two
-  // tools cannot drift. The amortized P&I, APR, and card assembly stay here.
-  const convT = resolveProgram({ program: "Conventional", price: homePrice, downPct, downAmt });
-  const fhaT = resolveProgram({ program: "FHA", price: homePrice, downPct, downAmt });
-  const vaT = resolveProgram({ program: "VA", price: homePrice, downPct, downAmt, vaUsage });
-  const usdaT = resolveProgram({ program: "USDA", price: homePrice, downPct, downAmt });
+  // Per-program loan structure, mortgage insurance, amortized P&I, and the total
+  // monthly payment now come from the one shared forward model (computeMonthlyPayment,
+  // which itself calls the shared mortgageMath module). Memoized per program so
+  // the amortization schedule is not rebuilt on unrelated re-renders, exactly as
+  // the prior inline useMemo did. The payment-first solver drives this same
+  // function, so the two input modes cannot drift. APR and card assembly stay here.
+  const conv = useMemo(() => computeMonthlyPayment({ program: "Conventional", price: homePrice, downPct, downAmt, term, rate: convRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, convRate, taxes, insurance, hoa]);
+  const fha = useMemo(() => computeMonthlyPayment({ program: "FHA", price: homePrice, downPct, downAmt, term, rate: fhaRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, fhaRate, taxes, insurance, hoa]);
+  const va = useMemo(() => computeMonthlyPayment({ program: "VA", price: homePrice, downPct, downAmt, term, rate: vaRate, vaUsage, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, vaRate, vaUsage, taxes, insurance, hoa]);
+  const usda = useMemo(() => computeMonthlyPayment({ program: "USDA", price: homePrice, downPct, downAmt, term, rate: usdaRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, usdaRate, taxes, insurance, hoa]);
 
   // Conventional
-  const convLoan = convT.loan;
-  const convMiRate = convT.miRate;
-  const convMI = monthlyMI(convT.baseLoan, convMiRate);
-  const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
-  const convTotal = convPI + convMI + taxes + insurance + hoa;
+  const convLoan = conv.loan;
+  const convMiRate = conv.miRate;
+  const convMI = conv.mi;
+  const convPI = conv.pi;
+  const convTotal = conv.total;
 
   // FHA
-  const fhaUpfront = fhaT.upfront;
-  const fhaLoan = fhaT.loan;
-  const fhaMiRate = fhaT.miRate;
-  const fhaMI = monthlyMI(fhaT.baseLoan, fhaMiRate);
-  const { monthly: fhaPI } = useMemo(() => generateAmortData(fhaLoan, fhaRate, term), [fhaLoan, fhaRate, term]);
-  const fhaTotal = fhaPI + fhaMI + taxes + insurance + hoa;
+  const fhaUpfront = fha.upfront;
+  const fhaLoan = fha.loan;
+  const fhaMiRate = fha.miRate;
+  const fhaMI = fha.mi;
+  const fhaPI = fha.pi;
+  const fhaTotal = fha.total;
 
   // VA - Funding fee varies by usage type and down payment
   const vaFeeRate = computeVaFeeRate(vaUsage, downPct);
-  const vaFee = vaT.upfront;
-  const vaLoan = vaT.loan;
-  const { monthly: vaPI } = useMemo(() => generateAmortData(vaLoan, vaRate, term), [vaLoan, vaRate, term]);
-  const vaTotal = vaPI + taxes + insurance + hoa;
+  const vaFee = va.upfront;
+  const vaLoan = va.loan;
+  const vaPI = va.pi;
+  const vaTotal = va.total;
 
   const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
@@ -252,16 +256,14 @@ export function CalculatorPage() {
   const vaAprCharges = calcLenderFees + vaFee;
   const vaAPR = calculateAPR(vaLoan, vaAprCharges, vaRate, term, 0, 0);
 
-  // USDA — Rural Development guaranteed loan (FY2026 fees)
-  const usdaUpfront = usdaT.upfront;
-  const usdaLoan = usdaT.loan;
-  const usdaMiRate = usdaT.miRate;
-  const usdaMI = monthlyMI(usdaT.baseLoan, usdaMiRate);
-  const { monthly: usdaPI } = useMemo(
-    () => generateAmortData(usdaLoan, usdaRate, term),
-    [usdaLoan, usdaRate, term]
-  );
-  const usdaTotal = usdaPI + usdaMI + taxes + insurance + hoa;
+  // USDA — Rural Development guaranteed loan (FY2026 fees). Structure and payment
+  // from the shared forward model above; APR (life-of-loan annual fee) stays here.
+  const usdaUpfront = usda.upfront;
+  const usdaLoan = usda.loan;
+  const usdaMiRate = usda.miRate;
+  const usdaMI = usda.mi;
+  const usdaPI = usda.pi;
+  const usdaTotal = usda.total;
 
   const usdaAprCharges = calcLenderFees + usdaUpfront;
   const usdaAprMI = (baseLoan * (usdaMiRate / 100)) / 12;
