@@ -146,6 +146,14 @@ export function ProgramCardCompact({
         <span style={headerRateStyle}>
           /mo · {Number(prog.rate).toFixed(3)}%
         </span>
+        {/* Payment mode: this program's own solved price for the target payment,
+            in its own feature box within the colored header. */}
+        {prog.solvedPrice != null && (
+          <span style={headerPriceBoxStyle}>
+            <span style={headerPriceBoxLabelStyle}>Purchase price</span>
+            <span style={headerPriceBoxValueStyle}>~{fmt(prog.solvedPrice)}</span>
+          </span>
+        )}
       </header>
 
       {/* Compact body — eligibility note + click-to-detail affordance. */}
@@ -288,6 +296,33 @@ const headerRateStyle = {
   fontSize: 11,
   color: 'rgba(255, 255, 255, 0.4)',
   marginTop: 2,
+};
+
+const headerPriceBoxStyle = {
+  display: 'inline-block',
+  marginTop: 10,
+  padding: '6px 12px',
+  background: 'rgba(255, 255, 255, 0.16)',
+  border: '1px solid rgba(255, 255, 255, 0.32)',
+  borderRadius: 8,
+  textAlign: 'center',
+};
+
+const headerPriceBoxLabelStyle = {
+  display: 'block',
+  fontSize: 9,
+  fontWeight: 700,
+  letterSpacing: 0.6,
+  textTransform: 'uppercase',
+  color: 'rgba(255, 255, 255, 0.75)',
+};
+
+const headerPriceBoxValueStyle = {
+  display: 'block',
+  fontSize: 15,
+  fontWeight: 700,
+  color: 'rgba(255, 255, 255, 0.98)',
+  marginTop: 1,
 };
 
 const compactBodyStyle = {

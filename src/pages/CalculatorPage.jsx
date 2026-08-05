@@ -5,7 +5,7 @@ import { ContactCard } from "../components/homepage/ContactCard";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
 import { generateAmortData, formatPayoff, calculateAPR } from "../utils/math";
-import { resolveProgram, monthlyMI, vaFeeRate as computeVaFeeRate } from "../utils/mortgageMath.js";
+import { vaFeeRate as computeVaFeeRate } from "../utils/mortgageMath.js";
 import { MortgageCalcIcon, CompareIcon } from "../components/icons";
 import { ToolLockup } from "../components/ToolLockup";
 import { MobileToolbar } from "../components/MobileToolbar";
@@ -15,6 +15,7 @@ import { webApplicationSchema } from "../utils/schema";
 import { useIsCockpit, usePieDiameter } from "../utils/hooks";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
+import { computeMonthlyPayment, solvePriceForPayment, priceScaledEscrow } from "../components/calculator/paymentModel";
 import { DetailPanel } from "../components/calculator/DetailPanel";
 import { PaymentPieChart } from "../components/calculator/PaymentPieChart";
 
@@ -42,6 +43,21 @@ export function CalculatorPage() {
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
+  // Input direction: "price" (default, enter a price, get a payment) or "payment"
+  // (enter a target monthly payment, the solver finds the price). Payment mode
+  // feeds the solved price into homePrice, so everything downstream is unchanged.
+  const [inputMode, setInputMode] = useState("price");
+  const [targetPayment, setTargetPayment] = useState(() => { const v = parseFloat(params.get("payment")); return v > 0 ? v : 2500; });
+  // The solve is heavy (four binary searches through the amortization model), so
+  // it runs off a debounced copy of the target, not every keystroke. The input
+  // stays bound to targetPayment (instant); debouncedTarget catches up after a
+  // short pause and drives the solver, so a full multi-digit payment types
+  // smoothly instead of recomputing on each digit.
+  const [debouncedTarget, setDebouncedTarget] = useState(() => { const v = parseFloat(params.get("payment")); return v > 0 ? v : 2500; });
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedTarget(targetPayment), 350);
+    return () => clearTimeout(id);
+  }, [targetPayment]);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
   const isCockpit = useIsCockpit();
@@ -203,35 +219,82 @@ export function CalculatorPage() {
   const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
   const baseLoan = homePrice - downAmt;
 
-  // Per-program loan structure and mortgage insurance come from the shared
-  // mortgageMath module, the same source the Rent vs Own tool uses, so the two
-  // tools cannot drift. The amortized P&I, APR, and card assembly stay here.
-  const convT = resolveProgram({ program: "Conventional", price: homePrice, downPct, downAmt });
-  const fhaT = resolveProgram({ program: "FHA", price: homePrice, downPct, downAmt });
-  const vaT = resolveProgram({ program: "VA", price: homePrice, downPct, downAmt, vaUsage });
-  const usdaT = resolveProgram({ program: "USDA", price: homePrice, downPct, downAmt });
+  // Payment-first mode. The "primary" program (the selected one, or Conventional
+  // by default) drives the shared price: we solve its price for the target payment
+  // and feed it into homePrice, rounded to the nearest $1,000, so the whole page
+  // (escrow effects, detail views, APR) reflects that price with no other changes.
+  // Down payment is held as a percent; taxes and insurance scale with the solved
+  // price (the price-change effects do this once homePrice updates). Each program
+  // card solves and shows its OWN price (see the per-program compute below).
+  const rateFor = { Conventional: convRate, FHA: fhaRate, VA: vaRate, USDA: usdaRate };
+  const primaryProgram = selectedProgram || "Conventional";
+  const primarySolve = useMemo(
+    () => (inputMode === "payment"
+      ? solvePriceForPayment(debouncedTarget, { program: primaryProgram, downPct, term, rate: rateFor[primaryProgram] ?? convRate, vaUsage, taxRatePct: taxRate, hoa })
+      : null),
+    // rateFor is derived from the rate states listed here; primaryProgram from selectedProgram.
+    [inputMode, debouncedTarget, primaryProgram, downPct, term, convRate, fhaRate, vaRate, usdaRate, vaUsage, taxRate, hoa]
+  );
+  useEffect(() => {
+    if (inputMode !== "payment") return;
+    if (primarySolve?.price != null) setHomePrice(Math.round(primarySolve.price / 1000) * 1000);
+  }, [inputMode, primarySolve]);
+
+  // Per-program loan structure, mortgage insurance, amortized P&I, and the total
+  // monthly payment now come from the one shared forward model (computeMonthlyPayment,
+  // which itself calls the shared mortgageMath module). Memoized per program so
+  // the amortization schedule is not rebuilt on unrelated re-renders, exactly as
+  // the prior inline useMemo did. The payment-first solver drives this same
+  // function, so the two input modes cannot drift. APR and card assembly stay here.
+  // In payment mode each program solves for its OWN price at the target payment
+  // (programs differ in MI and financed fees, so the prices differ), rounded to
+  // $1,000, and its breakdown is recomputed at that price with price-scaled escrow
+  // so the card is honest. In price mode, and for the rare program that cannot
+  // reach the target while the primary can, it computes at the shared homePrice
+  // with the current escrow (identical to before). solvedPrice drives the card's
+  // per-program price line; it is null whenever the shared price is used.
+  const paymentModeActive = inputMode === "payment" && primarySolve?.reason == null && primarySolve?.price != null;
+  const { conv, fha, va, usda } = useMemo(() => {
+    const compute = (program, rate) => {
+      if (paymentModeActive) {
+        const solved = solvePriceForPayment(debouncedTarget, { program, downPct, term, rate, vaUsage, taxRatePct: taxRate, hoa });
+        if (solved.reason !== "belowFloor" && solved.price != null) {
+          const price = Math.round(solved.price / 1000) * 1000;
+          const escrow = priceScaledEscrow(price, taxRate);
+          return { ...computeMonthlyPayment({ program, price, downPct, downAmt: null, term, rate, vaUsage, ...escrow, hoa }), solvedPrice: price };
+        }
+      }
+      return { ...computeMonthlyPayment({ program, price: homePrice, downPct, downAmt, term, rate, vaUsage, taxes, insurance, hoa }), solvedPrice: null };
+    };
+    return {
+      conv: compute("Conventional", convRate),
+      fha: compute("FHA", fhaRate),
+      va: compute("VA", vaRate),
+      usda: compute("USDA", usdaRate),
+    };
+  }, [paymentModeActive, debouncedTarget, homePrice, downPct, downAmt, term, convRate, fhaRate, vaRate, usdaRate, vaUsage, taxes, insurance, taxRate, hoa]);
 
   // Conventional
-  const convLoan = convT.loan;
-  const convMiRate = convT.miRate;
-  const convMI = monthlyMI(convT.baseLoan, convMiRate);
-  const { monthly: convPI } = useMemo(() => generateAmortData(convLoan, convRate, term), [convLoan, convRate, term]);
-  const convTotal = convPI + convMI + taxes + insurance + hoa;
+  const convLoan = conv.loan;
+  const convMiRate = conv.miRate;
+  const convMI = conv.mi;
+  const convPI = conv.pi;
+  const convTotal = conv.total;
 
   // FHA
-  const fhaUpfront = fhaT.upfront;
-  const fhaLoan = fhaT.loan;
-  const fhaMiRate = fhaT.miRate;
-  const fhaMI = monthlyMI(fhaT.baseLoan, fhaMiRate);
-  const { monthly: fhaPI } = useMemo(() => generateAmortData(fhaLoan, fhaRate, term), [fhaLoan, fhaRate, term]);
-  const fhaTotal = fhaPI + fhaMI + taxes + insurance + hoa;
+  const fhaUpfront = fha.upfront;
+  const fhaLoan = fha.loan;
+  const fhaMiRate = fha.miRate;
+  const fhaMI = fha.mi;
+  const fhaPI = fha.pi;
+  const fhaTotal = fha.total;
 
   // VA - Funding fee varies by usage type and down payment
   const vaFeeRate = computeVaFeeRate(vaUsage, downPct);
-  const vaFee = vaT.upfront;
-  const vaLoan = vaT.loan;
-  const { monthly: vaPI } = useMemo(() => generateAmortData(vaLoan, vaRate, term), [vaLoan, vaRate, term]);
-  const vaTotal = vaPI + taxes + insurance + hoa;
+  const vaFee = va.upfront;
+  const vaLoan = va.loan;
+  const vaPI = va.pi;
+  const vaTotal = va.total;
 
   const vaUsageLabels = { first: "First-Time Use", subsequent: "Subsequent Use", exempt: "Exempt (Disability)" };
 
@@ -252,16 +315,14 @@ export function CalculatorPage() {
   const vaAprCharges = calcLenderFees + vaFee;
   const vaAPR = calculateAPR(vaLoan, vaAprCharges, vaRate, term, 0, 0);
 
-  // USDA — Rural Development guaranteed loan (FY2026 fees)
-  const usdaUpfront = usdaT.upfront;
-  const usdaLoan = usdaT.loan;
-  const usdaMiRate = usdaT.miRate;
-  const usdaMI = monthlyMI(usdaT.baseLoan, usdaMiRate);
-  const { monthly: usdaPI } = useMemo(
-    () => generateAmortData(usdaLoan, usdaRate, term),
-    [usdaLoan, usdaRate, term]
-  );
-  const usdaTotal = usdaPI + usdaMI + taxes + insurance + hoa;
+  // USDA — Rural Development guaranteed loan (FY2026 fees). Structure and payment
+  // from the shared forward model above; APR (life-of-loan annual fee) stays here.
+  const usdaUpfront = usda.upfront;
+  const usdaLoan = usda.loan;
+  const usdaMiRate = usda.miRate;
+  const usdaMI = usda.mi;
+  const usdaPI = usda.pi;
+  const usdaTotal = usda.total;
 
   const usdaAprCharges = calcLenderFees + usdaUpfront;
   const usdaAprMI = (baseLoan * (usdaMiRate / 100)) / 12;
@@ -272,7 +333,7 @@ export function CalculatorPage() {
 
   const programs = [
     {
-      name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI,
+      name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI, solvedPrice: conv.solvedPrice,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate, apr: convAPR,
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
@@ -284,7 +345,7 @@ export function CalculatorPage() {
       } : null,
     },
     {
-      name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI, solvedPrice: fha.solvedPrice,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate, apr: fhaAPR,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
@@ -296,7 +357,7 @@ export function CalculatorPage() {
       } : null,
     },
     {
-      name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
+      name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0, solvedPrice: va.solvedPrice,
       miLabel: null,
       upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate, apr: vaAPR,
       note: vaUsage === "exempt"
@@ -307,7 +368,7 @@ export function CalculatorPage() {
       ineligibleReason: null,
     },
     {
-      name: "USDA", color: PROGRAM_COLORS.USDA, loan: usdaLoan, pi: usdaPI, mi: usdaMI,
+      name: "USDA", color: PROGRAM_COLORS.USDA, loan: usdaLoan, pi: usdaPI, mi: usdaMI, solvedPrice: usda.solvedPrice,
       miLabel: `Annual Fee (${usdaMiRate}%)`,
       upfront: usdaUpfront, upfrontLabel: "Guarantee Fee (1.00%)",
       total: usdaTotal, rate: usdaRate, apr: usdaAPR,
@@ -366,6 +427,40 @@ export function CalculatorPage() {
     setSaveToast({ type: "success", msg: `${selectedProg.name} saved! ${saved.length} of 3 in comparison.` });
     setTimeout(() => setSaveToast(null), 4000);
   };
+
+  // Payment-first UI, reused in both layouts. The result line states the solved
+  // price honestly: it uses the primary program's payment recomputed at the shown
+  // (rounded) price, so the figure can differ from the typed target by a few
+  // dollars, which is expected. Below-floor and above-cap targets show a plain
+  // note instead of a price.
+  const paymentResult = (() => {
+    if (inputMode !== "payment") return null;
+    if (primarySolve?.reason === "belowFloor") return { note: "That payment is below the taxes, insurance, and smallest loan at these settings. Try a higher amount." };
+    if (primarySolve?.reason === "aboveCap") return { note: "That payment is above the range this tool covers. Try a lower amount." };
+    const prog = programs.find((p) => p.name === primaryProgram && p.eligible) || programs.find((p) => p.eligible);
+    if (!prog || !(prog.total > 0)) return null;
+    return { text: `A payment of about ${fmt(Math.round(prog.total))}/mo gets you to roughly ${fmt(homePrice)} at these settings.` };
+  })();
+
+  const ModeToggle = () => (
+    <div className="calc-mode-toggle" role="group" aria-label="Choose how to start">
+      <button type="button" className={`calc-mode-btn${inputMode === "price" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "price"} onClick={() => setInputMode("price")}>Start with a price</button>
+      <button type="button" className={`calc-mode-btn${inputMode === "payment" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "payment"} onClick={() => setInputMode("payment")}>Start with a payment</button>
+    </div>
+  );
+
+  const PriceOrPaymentInput = () => (
+    inputMode === "payment" ? (
+      <>
+        <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
+        {paymentResult && (
+          <p className={`calc-mode-result${paymentResult.note ? " calc-mode-result-note" : ""}`}>{paymentResult.note || paymentResult.text}</p>
+        )}
+      </>
+    ) : (
+      <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+    )
+  );
 
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
@@ -435,6 +530,17 @@ export function CalculatorPage() {
           .calc-detail-panel,
           .calc-cockpit-cards > .calc-compact-card { animation: none; }
         }
+
+        /* Price/Payment mode toggle. Segmented control on the dark input card:
+           gold-accent active pill, muted inactive, matching the card's gold top
+           accent and light labels. Visible keyboard focus. */
+        .calc-mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+        .calc-mode-btn { flex: 1; padding: 10px 8px; border-radius: 8px; font-family: ${F.body}; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; background: transparent; color: ${P.warmGrayLight}; border: 1.5px solid ${P.navyLight}; }
+        .calc-mode-btn:hover:not(.calc-mode-btn-active) { color: ${P.cream}; border-color: ${P.goldLight}; }
+        .calc-mode-btn-active { background: ${P.goldLight}; color: ${P.navyDark}; border-color: ${P.goldLight}; font-weight: 700; }
+        .calc-mode-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+        .calc-mode-result { font-size: 12px; line-height: 1.5; margin: 8px 0 0; color: ${P.creamDark}; }
+        .calc-mode-result-note { color: ${P.goldLight}; }
       `}</style>
 
       {/* Calculator header */}
@@ -477,6 +583,7 @@ export function CalculatorPage() {
               program selection is part of configuring the scenario, not
               part of reading the results. Active pills use a uniform gold
               border so the navy-on-navy Conv pill stays clearly readable. */}
+          {ModeToggle()}
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
@@ -532,7 +639,7 @@ export function CalculatorPage() {
                 </select>
               </div>
 
-              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+              {PriceOrPaymentInput()}
 
               <div className="calc-dp-row">
                 <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
@@ -766,6 +873,14 @@ export function CalculatorPage() {
                   <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
                   <span style={{ fontFamily: F.display, fontSize: 40, color: "#fff" }}>{fmt(prog.total)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {Number(prog.rate).toFixed(3)}% rate</span>
+                  {/* Payment mode: this program's own solved price for the target
+                      payment, in its own feature box within the colored header. */}
+                  {prog.solvedPrice != null && (
+                    <span style={{ display: "inline-block", marginTop: 10, padding: "6px 14px", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 8, textAlign: "center" }}>
+                      <span style={{ display: "block", fontSize: 9, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "rgba(255,255,255,0.75)" }}>Purchase price</span>
+                      <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.98)", marginTop: 1 }}>~{fmt(prog.solvedPrice)}</span>
+                    </span>
+                  )}
                 </div>
 
                 <div style={{ padding: "20px" }}>
@@ -1199,6 +1314,7 @@ export function CalculatorPage() {
                       lives alongside the inputs, not in the results area.
                       Active pills get a uniform gold border so the navy-on-
                       navy Conv pill stays clearly readable. */}
+                  {ModeToggle()}
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
                     <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
@@ -1252,7 +1368,7 @@ export function CalculatorPage() {
                     </select>
                   </div>
 
-                  <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+                  {PriceOrPaymentInput()}
 
                   <div className="calc-dp-row">
                     <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
