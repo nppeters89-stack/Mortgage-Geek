@@ -455,11 +455,14 @@ export function CalculatorPage() {
   // Animated segmented control: an absolutely-positioned thumb slides under the
   // active label (spring easing). It is a radiogroup with roving tabindex.
   const ModeToggle = () => (
+    <>
+    <span className="calc-seg-lead">Start with</span>
     <div className="calc-seg" role="radiogroup" aria-label="Calculator mode" onKeyDown={onSegKeyDown}>
       <span className={`calc-seg-thumb${inputMode === "payment" ? " is-payment" : ""}`} aria-hidden="true" />
       <button type="button" role="radio" aria-checked={inputMode === "price"} tabIndex={inputMode === "price" ? 0 : -1} className={`calc-seg-btn${inputMode === "price" ? " is-active" : ""}`} onClick={() => setInputMode("price")}>Price</button>
       <button type="button" role="radio" aria-checked={inputMode === "payment"} tabIndex={inputMode === "payment" ? 0 : -1} className={`calc-seg-btn${inputMode === "payment" ? " is-active" : ""}`} onClick={() => setInputMode("payment")}>Payment</button>
     </div>
+    </>
   );
 
   // The primary field cross-fades between the two modes: both CalcInputs are
@@ -564,6 +567,10 @@ export function CalculatorPage() {
         /* Price/Payment mode toggle. Segmented control on the dark input card:
            gold-accent active pill, muted inactive, matching the card's gold top
            accent and light labels. Visible keyboard focus. */
+        /* "Start with" lead-in above the mode control, in lifted Arrow Red so it
+           reads on the dark input card and matches the card's other labels. */
+        .calc-seg-lead { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: ${P.goldReverse}; }
+
         /* Animated segmented mode control (design handoff: option 2b·i). The thumb
            slides under the active label with a spring overshoot (keep the 1.7). */
         .calc-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 5px; margin-bottom: 16px; background: ${CALC_MODE.track}; border: 1px solid ${CALC_MODE.border}; border-radius: 14px; }
