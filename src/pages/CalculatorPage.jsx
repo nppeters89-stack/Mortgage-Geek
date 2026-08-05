@@ -439,7 +439,7 @@ export function CalculatorPage() {
     if (primarySolve?.reason === "aboveCap") return { note: "That payment is above the range this tool covers. Try a lower amount." };
     const prog = programs.find((p) => p.name === primaryProgram && p.eligible) || programs.find((p) => p.eligible);
     if (!prog || !(prog.total > 0)) return null;
-    return { text: `A payment of about ${fmt(Math.round(prog.total))}/mo gets you to roughly ${fmt(homePrice)} at these settings.` };
+    return { price: homePrice, payment: Math.round(prog.total) };
   })();
 
   const ModeToggle = () => (
@@ -453,9 +453,15 @@ export function CalculatorPage() {
     inputMode === "payment" ? (
       <>
         <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
-        {paymentResult && (
-          <p className={`calc-mode-result${paymentResult.note ? " calc-mode-result-note" : ""}`}>{paymentResult.note || paymentResult.text}</p>
-        )}
+        {paymentResult && (paymentResult.note ? (
+          <p className="calc-mode-result calc-mode-result-note">{paymentResult.note}</p>
+        ) : (
+          <div className="calc-price-box">
+            <span className="calc-price-box-label">Estimated purchase price</span>
+            <span className="calc-price-box-value">{fmt(paymentResult.price)}</span>
+            <span className="calc-price-box-sub">at about {fmt(paymentResult.payment)}/mo</span>
+          </div>
+        ))}
       </>
     ) : (
       <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
@@ -541,6 +547,13 @@ export function CalculatorPage() {
         .calc-mode-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
         .calc-mode-result { font-size: 12px; line-height: 1.5; margin: 8px 0 0; color: ${P.creamDark}; }
         .calc-mode-result-note { color: ${P.goldLight}; }
+        /* Solved purchase price called out in its own box so it stands out from
+           the target payment input above it. Light surface (matching the input
+           fields) with an Arrow Red accent bar. */
+        .calc-price-box { margin-top: 12px; background: ${P.cream}; border-radius: 10px; border-left: 3px solid ${P.gold}; padding: 12px 14px; }
+        .calc-price-box-label { display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: ${P.warmGray}; margin-bottom: 3px; }
+        .calc-price-box-value { display: block; font-family: ${F.display}; font-size: 27px; color: ${P.text}; line-height: 1.1; }
+        .calc-price-box-sub { display: block; font-size: 12px; color: ${P.warmGray}; margin-top: 3px; }
       `}</style>
 
       {/* Calculator header */}
