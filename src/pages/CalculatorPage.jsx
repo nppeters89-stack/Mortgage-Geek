@@ -863,9 +863,13 @@ export function CalculatorPage() {
                   <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
                   <span style={{ fontFamily: F.display, fontSize: 40, color: "#fff" }}>{fmt(prog.total)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {Number(prog.rate).toFixed(3)}% rate</span>
-                  {/* Payment mode: this program's own solved price for the target payment. */}
+                  {/* Payment mode: this program's own solved price for the target
+                      payment, in its own feature box within the colored header. */}
                   {prog.solvedPrice != null && (
-                    <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.85)", marginTop: 6 }}>gets you to ~{fmt(prog.solvedPrice)}</span>
+                    <span style={{ display: "inline-block", marginTop: 10, padding: "6px 14px", background: "rgba(255,255,255,0.16)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 8, textAlign: "center" }}>
+                      <span style={{ display: "block", fontSize: 9, fontWeight: 700, letterSpacing: 0.6, textTransform: "uppercase", color: "rgba(255,255,255,0.75)" }}>Purchase price</span>
+                      <span style={{ display: "block", fontSize: 16, fontWeight: 700, color: "rgba(255,255,255,0.98)", marginTop: 1 }}>~{fmt(prog.solvedPrice)}</span>
+                    </span>
                   )}
                 </div>
 
