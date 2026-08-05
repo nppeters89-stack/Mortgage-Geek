@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useId } from "react";
 import { useSearchParams } from "react-router";
-import { P, F, PROGRAM_COLORS, globalCSS } from "../theme";
+import { P, F, PROGRAM_COLORS, globalCSS, CALC_MODE } from "../theme";
 import { ContactCard } from "../components/homepage/ContactCard";
 import { SHARED_STATE_TAX_RATES, DEFAULT_LIMITS } from "../data/taxRates";
 import { fmt } from "../utils/format";
@@ -442,30 +442,52 @@ export function CalculatorPage() {
     return { price: homePrice, payment: Math.round(prog.total) };
   })();
 
+  // Arrow keys move between the two radio modes and take focus with them.
+  const onSegKeyDown = (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const next = e.key === "ArrowRight" ? "payment" : "price";
+    if (next !== inputMode) setInputMode(next);
+    const radios = e.currentTarget.querySelectorAll('[role="radio"]');
+    (next === "price" ? radios[0] : radios[1])?.focus();
+  };
+
+  // Animated segmented control: an absolutely-positioned thumb slides under the
+  // active label (spring easing). It is a radiogroup with roving tabindex.
   const ModeToggle = () => (
-    <div className="calc-mode-toggle" role="group" aria-label="Choose how to start">
-      <button type="button" className={`calc-mode-btn${inputMode === "price" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "price"} onClick={() => setInputMode("price")}>Start with a price</button>
-      <button type="button" className={`calc-mode-btn${inputMode === "payment" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "payment"} onClick={() => setInputMode("payment")}>Start with a payment</button>
+    <div className="calc-seg" role="radiogroup" aria-label="Calculator mode" onKeyDown={onSegKeyDown}>
+      <span className={`calc-seg-thumb${inputMode === "payment" ? " is-payment" : ""}`} aria-hidden="true" />
+      <button type="button" role="radio" aria-checked={inputMode === "price"} tabIndex={inputMode === "price" ? 0 : -1} className={`calc-seg-btn${inputMode === "price" ? " is-active" : ""}`} onClick={() => setInputMode("price")}>Price</button>
+      <button type="button" role="radio" aria-checked={inputMode === "payment"} tabIndex={inputMode === "payment" ? 0 : -1} className={`calc-seg-btn${inputMode === "payment" ? " is-active" : ""}`} onClick={() => setInputMode("payment")}>Payment</button>
     </div>
   );
 
+  // The primary field cross-fades between the two modes: both CalcInputs are
+  // always mounted and stacked in one grid cell; only the active one is visible
+  // and interactive (the inactive one is hidden from tab order after the fade).
+  // The payment helper/price box expands in below rather than popping.
   const PriceOrPaymentInput = () => (
-    inputMode === "payment" ? (
-      <>
-        <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
+    <>
+      <div className="calc-field-stack">
+        <div className={`calc-field-layer${inputMode === "price" ? " is-active" : ""}`}>
+          <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+        </div>
+        <div className={`calc-field-layer calc-field-layer--payment${inputMode === "payment" ? " is-active" : ""}`}>
+          <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
+        </div>
+      </div>
+      <div className={`calc-result-expand${inputMode === "payment" && paymentResult ? " is-open" : ""}`}>
         {paymentResult && (paymentResult.note ? (
           <p className="calc-mode-result calc-mode-result-note">{paymentResult.note}</p>
-        ) : (
+        ) : paymentResult.price != null ? (
           <div className="calc-price-box">
             <span className="calc-price-box-label">Estimated purchase price</span>
             <span className="calc-price-box-value">{fmt(paymentResult.price)}</span>
             <span className="calc-price-box-sub">at about {fmt(paymentResult.payment)}/mo</span>
           </div>
-        ))}
-      </>
-    ) : (
-      <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
-    )
+        ) : null)}
+      </div>
+    </>
   );
 
   return (
@@ -535,16 +557,38 @@ export function CalculatorPage() {
         @media (prefers-reduced-motion: reduce) {
           .calc-detail-panel,
           .calc-cockpit-cards > .calc-compact-card { animation: none; }
+          .calc-seg-thumb, .calc-seg-btn, .calc-field-layer,
+          .calc-field-layer--payment > div > div, .calc-result-expand { transition: none; }
         }
 
         /* Price/Payment mode toggle. Segmented control on the dark input card:
            gold-accent active pill, muted inactive, matching the card's gold top
            accent and light labels. Visible keyboard focus. */
-        .calc-mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
-        .calc-mode-btn { flex: 1; padding: 10px 8px; border-radius: 8px; font-family: ${F.body}; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; background: transparent; color: ${P.warmGrayLight}; border: 1.5px solid ${P.navyLight}; }
-        .calc-mode-btn:hover:not(.calc-mode-btn-active) { color: ${P.cream}; border-color: ${P.goldLight}; }
-        .calc-mode-btn-active { background: ${P.goldLight}; color: ${P.navyDark}; border-color: ${P.goldLight}; font-weight: 700; }
-        .calc-mode-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+        /* Animated segmented mode control (design handoff: option 2b·i). The thumb
+           slides under the active label with a spring overshoot (keep the 1.7). */
+        .calc-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; padding: 5px; margin-bottom: 16px; background: ${CALC_MODE.track}; border: 1px solid ${CALC_MODE.border}; border-radius: 14px; }
+        .calc-seg-thumb { position: absolute; top: 5px; left: 5px; width: calc(50% - 5px); height: calc(100% - 10px); border-radius: 10px; background: ${CALC_MODE.thumb}; box-shadow: 0 6px 18px ${CALC_MODE.thumbShadow}; transform: translateX(0%); transition: transform .42s cubic-bezier(.34, 1.7, .5, 1); pointer-events: none; }
+        .calc-seg-thumb.is-payment { transform: translateX(100%); }
+        .calc-seg-btn { position: relative; z-index: 1; min-height: 44px; padding: 13px 0; border: 0; background: none; cursor: pointer; font-family: ${F.body}; font-size: 16px; font-weight: 600; color: ${CALC_MODE.labelInactive}; transform: scale(.97); transition: color .25s, transform .42s cubic-bezier(.34, 1.7, .5, 1); }
+        .calc-seg-btn.is-active { color: ${CALC_MODE.labelActive}; transform: scale(1); }
+        .calc-seg-btn:focus-visible { outline: 2px solid ${CALC_MODE.thumb}; outline-offset: 2px; border-radius: 10px; }
+
+        /* Primary field cross-fade (Home Price <-> Target Monthly Payment). Both
+           fields are always mounted, stacked in one grid cell; the inactive one
+           fades out and is dropped from tab order after the fade (delayed
+           visibility). */
+        .calc-field-stack { display: grid; }
+        .calc-field-layer { grid-area: 1 / 1 / 2 / 2; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .3s, transform .34s cubic-bezier(.34, 1.5, .5, 1), visibility 0s .3s; }
+        .calc-field-layer.is-active { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity .3s, transform .34s cubic-bezier(.34, 1.5, .5, 1), visibility 0s 0s; }
+        /* Coral focus ring on the payment field (CalcInput's bordered field div,
+           its second flex child). */
+        .calc-field-layer--payment > div > div { transition: box-shadow .3s; }
+        .calc-field-layer--payment.is-active > div > div { box-shadow: inset 0 0 0 2px ${CALC_MODE.ring}; }
+
+        /* Payment helper/price box expands in rather than popping. */
+        .calc-result-expand { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .42s cubic-bezier(.4, 1, .3, 1), opacity .3s; }
+        .calc-result-expand.is-open { max-height: 160px; opacity: 1; }
+
         .calc-mode-result { font-size: 12px; line-height: 1.5; margin: 8px 0 0; color: ${P.creamDark}; }
         .calc-mode-result-note { color: ${P.goldLight}; }
         /* Solved purchase price called out in its own box so it stands out from

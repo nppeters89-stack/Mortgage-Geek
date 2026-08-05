@@ -111,6 +111,21 @@ export const BURDEN_HEAT = {
   best:  "#4b7ea0", // 0%, best — stroke offset 1
 };
 
+// Calculator mode segmented control (design handoff: "Mode Toggle Explorations",
+// option 2b·i, the spring-slide). Scoped like HOME/DEEP_DIVES so the rest of the
+// palette is untouched; the coral accent and near-black track are specific to
+// this control. Values are the handoff's, verbatim. Colors live here per the
+// no-hardcoded-hex rule.
+export const CALC_MODE = {
+  track:         "#121315",              // control container (just under P.navyDark)
+  border:        "#2e2f32",              // container hairline
+  thumb:         "#e8737b",              // coral sliding thumb, focus ring
+  thumbShadow:   "rgba(232,115,123,0.28)", // thumb drop shadow
+  ring:          "rgba(232,115,123,0.55)", // payment-mode field focus ring
+  labelActive:   "#1b1c1e",              // active label (on the coral thumb)
+  labelInactive: "#9a9895",              // inactive label
+};
+
 export const F = {
   // Rate's web typeface, now site-wide for congruence with the editorial
   // homepage. display/body/sans all resolve to Figtree; the only exceptions are
