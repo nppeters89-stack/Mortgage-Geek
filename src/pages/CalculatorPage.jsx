@@ -432,21 +432,44 @@ export function CalculatorPage() {
     return { text: `A payment of about ${fmt(Math.round(prog.total))}/mo gets you to roughly ${fmt(homePrice)} at these settings.` };
   })();
 
-  const ModeToggle = () => (
-    <div className="calc-mode-toggle" role="group" aria-label="Choose how to start">
-      <button type="button" className={`calc-mode-btn${inputMode === "price" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "price"} onClick={() => setInputMode("price")}>Start with a price</button>
-      <button type="button" className={`calc-mode-btn${inputMode === "payment" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "payment"} onClick={() => setInputMode("payment")}>Start with a payment</button>
-    </div>
+  // Single Arrow Red button that enables target payment mode (and exits back to
+  // price mode). The calculator always loads in price mode.
+  const ModeButton = () => (
+    <button
+      type="button"
+      className="calc-mode-btn2"
+      aria-pressed={inputMode === "payment"}
+      onClick={() => setInputMode(inputMode === "payment" ? "price" : "payment")}
+    >
+      {inputMode === "payment" ? "Back to price mode" : "Enable target payment mode"}
+    </button>
   );
+
+  const setTargetFromText = (raw) => {
+    const n = parseInt(String(raw).replace(/[^0-9]/g, ""), 10);
+    setTargetPayment(Number.isFinite(n) ? n : 0);
+  };
 
   const PriceOrPaymentInput = () => (
     inputMode === "payment" ? (
-      <>
-        <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
+      <div className="calc-payment-box">
+        <span className="calc-payment-box-label">Target Monthly Payment</span>
+        <div className="calc-payment-box-row">
+          <span className="calc-payment-box-cur">$</span>
+          <input
+            className="calc-payment-box-input"
+            type="text"
+            inputMode="numeric"
+            aria-label="Target monthly payment"
+            value={targetPayment ? targetPayment.toLocaleString() : ""}
+            onChange={(e) => setTargetFromText(e.target.value)}
+          />
+          <span className="calc-payment-box-suffix">/mo</span>
+        </div>
         {paymentResult && (
-          <p className={`calc-mode-result${paymentResult.note ? " calc-mode-result-note" : ""}`}>{paymentResult.note || paymentResult.text}</p>
+          <p className={`calc-payment-box-result${paymentResult.note ? " is-note" : ""}`}>{paymentResult.note || paymentResult.text}</p>
         )}
-      </>
+      </div>
     ) : (
       <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
     )
@@ -521,16 +544,22 @@ export function CalculatorPage() {
           .calc-cockpit-cards > .calc-compact-card { animation: none; }
         }
 
-        /* Price/Payment mode toggle. Segmented control on the dark input card:
-           gold-accent active pill, muted inactive, matching the card's gold top
-           accent and light labels. Visible keyboard focus. */
-        .calc-mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
-        .calc-mode-btn { flex: 1; padding: 10px 8px; border-radius: 8px; font-family: ${F.body}; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; background: transparent; color: ${P.warmGrayLight}; border: 1.5px solid ${P.navyLight}; }
-        .calc-mode-btn:hover:not(.calc-mode-btn-active) { color: ${P.cream}; border-color: ${P.goldLight}; }
-        .calc-mode-btn-active { background: ${P.goldLight}; color: ${P.navyDark}; border-color: ${P.goldLight}; font-weight: 700; }
-        .calc-mode-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
-        .calc-mode-result { font-size: 12px; line-height: 1.5; margin: 8px 0 0; color: ${P.creamDark}; }
-        .calc-mode-result-note { color: ${P.goldLight}; }
+        /* Small true-Arrow-Red button to enable (or exit) target payment mode. */
+        .calc-mode-btn2 { display: inline-flex; align-items: center; margin-bottom: 16px; padding: 7px 14px; border-radius: 8px; border: none; background: ${P.gold}; color: ${P.white}; font-family: ${F.body}; font-size: 12.5px; font-weight: 700; letter-spacing: 0.2px; cursor: pointer; transition: opacity 0.15s; }
+        .calc-mode-btn2:hover { opacity: 0.9; }
+        .calc-mode-btn2:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+
+        /* Target payment box: an Arrow Red panel with white text that displays and
+           edits the target monthly payment in payment mode. */
+        .calc-payment-box { background: ${P.gold}; border-radius: 10px; padding: 14px 16px; }
+        .calc-payment-box-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: ${P.white}; opacity: 0.9; margin-bottom: 6px; }
+        .calc-payment-box-row { display: flex; align-items: baseline; gap: 4px; }
+        .calc-payment-box-cur { color: ${P.white}; font-family: ${F.display}; font-size: 26px; }
+        .calc-payment-box-input { flex: 1; min-width: 0; background: transparent; border: none; color: ${P.white}; font-family: ${F.display}; font-size: 30px; padding: 0; outline: none; }
+        .calc-payment-box-input::placeholder { color: ${P.white}; opacity: 0.6; }
+        .calc-payment-box-suffix { color: ${P.white}; opacity: 0.85; font-size: 13px; font-weight: 600; }
+        .calc-payment-box-result { font-size: 12px; line-height: 1.5; margin: 10px 0 0; color: ${P.white}; opacity: 0.92; }
+        .calc-payment-box-result.is-note { font-weight: 700; opacity: 1; }
       `}</style>
 
       {/* Calculator header */}
@@ -573,7 +602,7 @@ export function CalculatorPage() {
               program selection is part of configuring the scenario, not
               part of reading the results. Active pills use a uniform gold
               border so the navy-on-navy Conv pill stays clearly readable. */}
-          <ModeToggle />
+          <ModeButton />
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
@@ -1300,7 +1329,7 @@ export function CalculatorPage() {
                       lives alongside the inputs, not in the results area.
                       Active pills get a uniform gold border so the navy-on-
                       navy Conv pill stays clearly readable. */}
-                  <ModeToggle />
+                  <ModeButton />
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
                     <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
