@@ -15,7 +15,7 @@ import { webApplicationSchema } from "../utils/schema";
 import { useIsCockpit, usePieDiameter } from "../utils/hooks";
 import { CockpitShell } from "../components/cockpit/CockpitShell";
 import { ProgramCardCompact } from "../components/calculator/ProgramCardCompact";
-import { computeMonthlyPayment } from "../components/calculator/paymentModel";
+import { computeMonthlyPayment, solvePriceForPayment, priceScaledEscrow } from "../components/calculator/paymentModel";
 import { DetailPanel } from "../components/calculator/DetailPanel";
 import { PaymentPieChart } from "../components/calculator/PaymentPieChart";
 
@@ -43,6 +43,11 @@ export function CalculatorPage() {
   const [term, setTerm] = useState(() => { const v = parseInt(params.get("term")); return v === 15 ? 15 : 30; });
   const [downPct, setDownPct] = useState(() => { const v = parseFloat(params.get("down")); return v >= 0 && v <= 100 ? v : 3.5; });
   const [downDollarOverride, setDownDollarOverride] = useState(null);
+  // Input direction: "price" (default, enter a price, get a payment) or "payment"
+  // (enter a target monthly payment, the solver finds the price). Payment mode
+  // feeds the solved price into homePrice, so everything downstream is unchanged.
+  const [inputMode, setInputMode] = useState("price");
+  const [targetPayment, setTargetPayment] = useState(() => { const v = parseFloat(params.get("payment")); return v > 0 ? v : 2500; });
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [saveToast, setSaveToast] = useState(null);
   const isCockpit = useIsCockpit();
@@ -203,6 +208,27 @@ export function CalculatorPage() {
 
   const downAmt = downDollarOverride !== null ? downDollarOverride : homePrice * (downPct / 100);
   const baseLoan = homePrice - downAmt;
+
+  // Payment-first mode. The "primary" program (the selected one, or Conventional
+  // by default) drives the shared price: we solve its price for the target payment
+  // and feed it into homePrice, rounded to the nearest $1,000, so the whole page
+  // (escrow effects, detail views, APR) reflects that price with no other changes.
+  // Down payment is held as a percent; taxes and insurance scale with the solved
+  // price (the price-change effects do this once homePrice updates). Each program
+  // card solves and shows its OWN price (see the per-program compute below).
+  const rateFor = { Conventional: convRate, FHA: fhaRate, VA: vaRate, USDA: usdaRate };
+  const primaryProgram = selectedProgram || "Conventional";
+  const primarySolve = useMemo(
+    () => (inputMode === "payment"
+      ? solvePriceForPayment(targetPayment, { program: primaryProgram, downPct, term, rate: rateFor[primaryProgram] ?? convRate, vaUsage, taxRatePct: taxRate, hoa })
+      : null),
+    // rateFor is derived from the rate states listed here; primaryProgram from selectedProgram.
+    [inputMode, targetPayment, primaryProgram, downPct, term, convRate, fhaRate, vaRate, usdaRate, vaUsage, taxRate, hoa]
+  );
+  useEffect(() => {
+    if (inputMode !== "payment") return;
+    if (primarySolve?.price != null) setHomePrice(Math.round(primarySolve.price / 1000) * 1000);
+  }, [inputMode, primarySolve]);
 
   // Per-program loan structure, mortgage insurance, amortized P&I, and the total
   // monthly payment now come from the one shared forward model (computeMonthlyPayment,
@@ -369,6 +395,40 @@ export function CalculatorPage() {
     setTimeout(() => setSaveToast(null), 4000);
   };
 
+  // Payment-first UI, reused in both layouts. The result line states the solved
+  // price honestly: it uses the primary program's payment recomputed at the shown
+  // (rounded) price, so the figure can differ from the typed target by a few
+  // dollars, which is expected. Below-floor and above-cap targets show a plain
+  // note instead of a price.
+  const paymentResult = (() => {
+    if (inputMode !== "payment") return null;
+    if (primarySolve?.reason === "belowFloor") return { note: "That payment is below the taxes, insurance, and smallest loan at these settings. Try a higher amount." };
+    if (primarySolve?.reason === "aboveCap") return { note: "That payment is above the range this tool covers. Try a lower amount." };
+    const prog = programs.find((p) => p.name === primaryProgram && p.eligible) || programs.find((p) => p.eligible);
+    if (!prog || !(prog.total > 0)) return null;
+    return { text: `A payment of about ${fmt(Math.round(prog.total))}/mo gets you to roughly ${fmt(homePrice)} at these settings.` };
+  })();
+
+  const ModeToggle = () => (
+    <div className="calc-mode-toggle" role="group" aria-label="Choose how to start">
+      <button type="button" className={`calc-mode-btn${inputMode === "price" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "price"} onClick={() => setInputMode("price")}>Start with a price</button>
+      <button type="button" className={`calc-mode-btn${inputMode === "payment" ? " calc-mode-btn-active" : ""}`} aria-pressed={inputMode === "payment"} onClick={() => setInputMode("payment")}>Start with a payment</button>
+    </div>
+  );
+
+  const PriceOrPaymentInput = () => (
+    inputMode === "payment" ? (
+      <>
+        <CalcInput label="Target Monthly Payment" value={targetPayment} onChange={setTargetPayment} prefix="$" step={100} comma labelColor={P.goldLight} />
+        {paymentResult && (
+          <p className={`calc-mode-result${paymentResult.note ? " calc-mode-result-note" : ""}`}>{paymentResult.note || paymentResult.text}</p>
+        )}
+      </>
+    ) : (
+      <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+    )
+  );
+
   return (
     <main style={{ fontFamily: F.body, color: P.text, background: P.cream, minHeight: "100dvh" }}>
       <style>{globalCSS}{`
@@ -437,6 +497,17 @@ export function CalculatorPage() {
           .calc-detail-panel,
           .calc-cockpit-cards > .calc-compact-card { animation: none; }
         }
+
+        /* Price/Payment mode toggle. Segmented control on the dark input card:
+           gold-accent active pill, muted inactive, matching the card's gold top
+           accent and light labels. Visible keyboard focus. */
+        .calc-mode-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+        .calc-mode-btn { flex: 1; padding: 10px 8px; border-radius: 8px; font-family: ${F.body}; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; background: transparent; color: ${P.warmGrayLight}; border: 1.5px solid ${P.navyLight}; }
+        .calc-mode-btn:hover:not(.calc-mode-btn-active) { color: ${P.cream}; border-color: ${P.goldLight}; }
+        .calc-mode-btn-active { background: ${P.goldLight}; color: ${P.navyDark}; border-color: ${P.goldLight}; font-weight: 700; }
+        .calc-mode-btn:focus-visible { outline: 2px solid ${P.goldLight}; outline-offset: 2px; }
+        .calc-mode-result { font-size: 12px; line-height: 1.5; margin: 8px 0 0; color: ${P.creamDark}; }
+        .calc-mode-result-note { color: ${P.goldLight}; }
       `}</style>
 
       {/* Calculator header */}
@@ -479,6 +550,7 @@ export function CalculatorPage() {
               program selection is part of configuring the scenario, not
               part of reading the results. Active pills use a uniform gold
               border so the navy-on-navy Conv pill stays clearly readable. */}
+          <ModeToggle />
           <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }} role="group" aria-label="Select programs to compare">
             <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
@@ -534,7 +606,7 @@ export function CalculatorPage() {
                 </select>
               </div>
 
-              <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+              <PriceOrPaymentInput />
 
               <div className="calc-dp-row">
                 <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
@@ -1201,6 +1273,7 @@ export function CalculatorPage() {
                       lives alongside the inputs, not in the results area.
                       Active pills get a uniform gold border so the navy-on-
                       navy Conv pill stays clearly readable. */}
+                  <ModeToggle />
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }} role="group" aria-label="Select programs to compare">
                     <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase", color: P.goldLight }}>Compare</span>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
@@ -1254,7 +1327,7 @@ export function CalculatorPage() {
                     </select>
                   </div>
 
-                  <CalcInput label="Home Price" value={homePrice} onChange={setHomePrice} prefix="$" step={5000} comma labelColor={P.goldLight} />
+                  <PriceOrPaymentInput />
 
                   <div className="calc-dp-row">
                     <CalcInput label="Down Payment %" value={downPct} onChange={handleDownPctChange} suffix="%" step={0.5} min={0} max={100} labelColor={P.goldLight} />
