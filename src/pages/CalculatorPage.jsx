@@ -236,10 +236,33 @@ export function CalculatorPage() {
   // the amortization schedule is not rebuilt on unrelated re-renders, exactly as
   // the prior inline useMemo did. The payment-first solver drives this same
   // function, so the two input modes cannot drift. APR and card assembly stay here.
-  const conv = useMemo(() => computeMonthlyPayment({ program: "Conventional", price: homePrice, downPct, downAmt, term, rate: convRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, convRate, taxes, insurance, hoa]);
-  const fha = useMemo(() => computeMonthlyPayment({ program: "FHA", price: homePrice, downPct, downAmt, term, rate: fhaRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, fhaRate, taxes, insurance, hoa]);
-  const va = useMemo(() => computeMonthlyPayment({ program: "VA", price: homePrice, downPct, downAmt, term, rate: vaRate, vaUsage, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, vaRate, vaUsage, taxes, insurance, hoa]);
-  const usda = useMemo(() => computeMonthlyPayment({ program: "USDA", price: homePrice, downPct, downAmt, term, rate: usdaRate, taxes, insurance, hoa }), [homePrice, downPct, downAmt, term, usdaRate, taxes, insurance, hoa]);
+  // In payment mode each program solves for its OWN price at the target payment
+  // (programs differ in MI and financed fees, so the prices differ), rounded to
+  // $1,000, and its breakdown is recomputed at that price with price-scaled escrow
+  // so the card is honest. In price mode, and for the rare program that cannot
+  // reach the target while the primary can, it computes at the shared homePrice
+  // with the current escrow (identical to before). solvedPrice drives the card's
+  // per-program price line; it is null whenever the shared price is used.
+  const paymentModeActive = inputMode === "payment" && primarySolve?.reason == null && primarySolve?.price != null;
+  const { conv, fha, va, usda } = useMemo(() => {
+    const compute = (program, rate) => {
+      if (paymentModeActive) {
+        const solved = solvePriceForPayment(targetPayment, { program, downPct, term, rate, vaUsage, taxRatePct: taxRate, hoa });
+        if (solved.reason !== "belowFloor" && solved.price != null) {
+          const price = Math.round(solved.price / 1000) * 1000;
+          const escrow = priceScaledEscrow(price, taxRate);
+          return { ...computeMonthlyPayment({ program, price, downPct, downAmt: null, term, rate, vaUsage, ...escrow, hoa }), solvedPrice: price };
+        }
+      }
+      return { ...computeMonthlyPayment({ program, price: homePrice, downPct, downAmt, term, rate, vaUsage, taxes, insurance, hoa }), solvedPrice: null };
+    };
+    return {
+      conv: compute("Conventional", convRate),
+      fha: compute("FHA", fhaRate),
+      va: compute("VA", vaRate),
+      usda: compute("USDA", usdaRate),
+    };
+  }, [paymentModeActive, targetPayment, homePrice, downPct, downAmt, term, convRate, fhaRate, vaRate, usdaRate, vaUsage, taxes, insurance, taxRate, hoa]);
 
   // Conventional
   const convLoan = conv.loan;
@@ -300,7 +323,7 @@ export function CalculatorPage() {
 
   const programs = [
     {
-      name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI,
+      name: "Conventional", color: PROGRAM_COLORS.Conventional, loan: convLoan, pi: convPI, mi: convMI, solvedPrice: conv.solvedPrice,
       miLabel: convMiRate > 0 ? `PMI (${convMiRate}%)` : null,
       upfront: 0, upfrontLabel: null, total: convTotal, rate: convRate, apr: convAPR,
       note: downPct >= 20 ? "No PMI required" : `PMI est. based on 740+ FICO, <43% DTI`,
@@ -312,7 +335,7 @@ export function CalculatorPage() {
       } : null,
     },
     {
-      name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI,
+      name: "FHA", color: PROGRAM_COLORS.FHA, loan: fhaLoan, pi: fhaPI, mi: fhaMI, solvedPrice: fha.solvedPrice,
       miLabel: `MIP (${fhaMiRate}%)`,
       upfront: fhaUpfront, upfrontLabel: "UFMIP (1.75%)", total: fhaTotal, rate: fhaRate, apr: fhaAPR,
       note: downPct < 10 ? "MIP for life of loan" : "MIP removable after 11 years",
@@ -324,7 +347,7 @@ export function CalculatorPage() {
       } : null,
     },
     {
-      name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0,
+      name: "VA", color: PROGRAM_COLORS.VA, loan: vaLoan, pi: vaPI, mi: 0, solvedPrice: va.solvedPrice,
       miLabel: null,
       upfront: vaFee, upfrontLabel: vaFeeRate > 0 ? `Funding Fee (${vaFeeRate}%)` : null, total: vaTotal, rate: vaRate, apr: vaAPR,
       note: vaUsage === "exempt"
@@ -335,7 +358,7 @@ export function CalculatorPage() {
       ineligibleReason: null,
     },
     {
-      name: "USDA", color: PROGRAM_COLORS.USDA, loan: usdaLoan, pi: usdaPI, mi: usdaMI,
+      name: "USDA", color: PROGRAM_COLORS.USDA, loan: usdaLoan, pi: usdaPI, mi: usdaMI, solvedPrice: usda.solvedPrice,
       miLabel: `Annual Fee (${usdaMiRate}%)`,
       upfront: usdaUpfront, upfrontLabel: "Guarantee Fee (1.00%)",
       total: usdaTotal, rate: usdaRate, apr: usdaAPR,
@@ -840,6 +863,10 @@ export function CalculatorPage() {
                   <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.6)", marginBottom: 4 }}>{prog.name}</span>
                   <span style={{ fontFamily: F.display, fontSize: 40, color: "#fff" }}>{fmt(prog.total)}</span>
                   <span style={{ display: "block", fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>/month · {Number(prog.rate).toFixed(3)}% rate</span>
+                  {/* Payment mode: this program's own solved price for the target payment. */}
+                  {prog.solvedPrice != null && (
+                    <span style={{ display: "block", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.85)", marginTop: 6 }}>gets you to ~{fmt(prog.solvedPrice)}</span>
+                  )}
                 </div>
 
                 <div style={{ padding: "20px" }}>
