@@ -84,8 +84,10 @@ export function GeekLogPage() {
       <meta name="robots" content="noindex, nofollow" />
       {/* This route does not inject globalCSS, so load the brand fonts here.
           The wordmark (DM Sans + Archivo) and body (Figtree) need them, and
-          getFontEmbedCSS() embeds them into the exported PNG. */}
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap" />
+          getFontEmbedCSS() embeds them into the exported PNG. Instrument Serif
+          is the display serif for Geek Log numbers, snapshot card, and the
+          Prospecting names/headers. */}
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=Figtree:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&display=swap" />
       {/* The PWA manifest, apple-touch-icon, and app title for /geek-log are set
           in the document shell (src/root.jsx), route-aware. Setting them here too
           only duplicated the shell's tags: browsers used the first manifest and
