@@ -35,6 +35,8 @@ export const FF = {
   body: "'Figtree', system-ui, sans-serif",
   mark1: "'DM Sans', sans-serif",
   mark2: "'Archivo', sans-serif",
+  serif: "'Instrument Serif', Georgia, serif", // display serif: numbers, names, headers
+  sans: "'DM Sans', -apple-system, system-ui, sans-serif", // prospecting UI sans
 };
 
 // Green wash for a tap target, scaled by count against a soft ceiling.
