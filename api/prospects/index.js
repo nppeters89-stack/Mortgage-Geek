@@ -15,6 +15,8 @@ import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.
 const LIST_KEY = "prospects:list:v1";
 const LOGGED_SET = "prospects:logged";
 const logKey = (id) => `prospects:log:${id}`;
+const FU_SET = "prospects:fu:ids";
+const fuKey = (id) => `prospects:fu:${id}`;
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
@@ -36,7 +38,19 @@ export default async function handler(req, res) {
       });
     }
 
-    return jsonResponse(res, 200, { list, logs });
+    // Follow-up touch histories, keyed by the same phone-digits id. Membership is
+    // derived (score >= 9) client-side, so this only carries histories that exist.
+    const fuIds = (await redis.smembers(FU_SET)) || [];
+    const followUps = {};
+    if (fuIds.length) {
+      const vals = await redis.mget(...fuIds.map(fuKey));
+      fuIds.forEach((id, i) => {
+        const v = parseStored(vals[i]);
+        if (Array.isArray(v)) followUps[id] = v;
+      });
+    }
+
+    return jsonResponse(res, 200, { list, logs, followUps });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });
