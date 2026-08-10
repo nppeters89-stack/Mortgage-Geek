@@ -212,11 +212,11 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
 // (8px + safe-area inset); the sticky header sticks flush at the bottom of it, so
 // there is no gap for a row to show through. Zero-ish height on non-inset
 // displays. Fixed to the viewport.
-function StatusBarCap() {
+export function StatusBarCap() {
   return <div aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "calc(8px + env(safe-area-inset-top, 0px))", background: T.bg1, zIndex: 40 }} />;
 }
 
-function Toast({ msg }) {
+export function Toast({ msg }) {
   return (
     <div aria-live="polite" style={{
       position: "fixed", bottom: 96, left: "50%", transform: `translateX(-50%) translateY(${msg ? 0 : 8}px)`,
