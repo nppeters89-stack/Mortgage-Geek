@@ -249,6 +249,19 @@ export function Gl2App({ apiKey }) {
   const inc = (k) => bump(k, +1);
   const dec = (k) => bump(k, -1);
 
+  // Log a prospecting conversation from the Prospecting tab: bump TODAY's
+  // "Prospecting" conversation counter and persist it through the same debounced
+  // write + reconcile as the tap counters. Quiet (no tap sound) since the user
+  // is logging a call, not tapping the Today counters.
+  const addProspectingConversation = useCallback(() => {
+    const prev = daysRef.current;
+    const day = prev[todayKey] || emptyDay();
+    const next = { ...prev, [todayKey]: { ...day, prospecting: (day.prospecting || 0) + 1 } };
+    daysRef.current = next;
+    setDaysMap(next);
+    scheduleWrite(todayKey);
+  }, [todayKey, scheduleWrite]);
+
   useEffect(() => () => { clearTimeout(flashTimer.current); clearTimeout(burstTimer.current); }, []);
 
   // Settings target.
@@ -378,7 +391,7 @@ export function Gl2App({ apiKey }) {
           {tab === "week" && (
             <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} />
           )}
-          {tab === "prospecting" && <ProspectingContent apiKey={apiKey} />}
+          {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
           {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
         </div>

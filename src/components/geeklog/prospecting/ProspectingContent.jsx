@@ -32,7 +32,7 @@ const CHIPS = [
   { id: "today", label: "Logged today" },
 ];
 
-export function ProspectingContent({ apiKey }) {
+export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const seed = sessionCache || loadLS();
   const [prospects, setProspects] = useState(() => (seed?.prospects ? sortedQueue(seed.prospects) : []));
   const [logs, setLogs] = useState(() => seed?.logs || {});
@@ -97,16 +97,21 @@ export function ProspectingContent({ apiKey }) {
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const handleSave = useCallback((id, log) => {
+    const prevOutcome = logsRef.current[id]?.outcome;
     setLogs((prev) => ({ ...prev, [id]: log }));
     const d = getDirty(); d.add(id); writeDirty(d);
     saveProspectLogKeepalive(apiKey, id, log); // survives the phone locking
     saveProspectLog(apiKey, id, log)
       .then(() => { const dd = getDirty(); dd.delete(id); writeDirty(dd); })
       .catch(() => { /* stays dirty; reconciled on next load */ });
+    // A newly-marked "Talked" is a two-way conversation, so add it to today's
+    // Prospecting count on the Today screen. Only on the transition to Talked, so
+    // editing or re-saving the same contact never double-counts.
+    if (log.outcome === "Talked" && prevOutcome !== "Talked") onTalkedLogged?.();
     showToast("Saved");
     setView("queue");
     setOpenId(null);
-  }, [apiKey, showToast]);
+  }, [apiKey, showToast, onTalkedLogged]);
 
   const copy = useCallback((text, msg, emptyMsg) => {
     if (!text) { showToast(emptyMsg || "Nothing to copy"); return; }
@@ -123,6 +128,26 @@ export function ProspectingContent({ apiKey }) {
   const todayLogs = useMemo(() => Object.values(logs).filter((l) => l && l.outcome && isToday(l.ts)), [logs]);
   const callsToday = todayLogs.length;
   const conversationsToday = todayLogs.filter((l) => l.outcome === "Talked").length;
+
+  // The most recently logged contact (max ts). Opening the tab (or returning to
+  // the queue after a save) scrolls this row into view so Nick resumes where he
+  // left off in the list.
+  const lastLoggedId = useMemo(() => {
+    let id = null, best = -1;
+    for (const [k, l] of Object.entries(logs)) {
+      const ts = l?.ts || 0;
+      if (l && l.outcome && ts > best) { best = ts; id = k; }
+    }
+    return id;
+  }, [logs]);
+
+  const queueRef = useRef(null);
+  useEffect(() => {
+    if (view !== "queue" || !ready || !lastLoggedId) return;
+    const el = queueRef.current?.querySelector(`[data-pid="${lastLoggedId}"]`);
+    if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "center" }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, ready, lastLoggedId]);
 
   // ----- Contact card view -----
   if (view === "detail" && openProspect) {
@@ -144,7 +169,7 @@ export function ProspectingContent({ apiKey }) {
   // ----- Queue view -----
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      <header style={{ padding: "20px 20px 14px", position: "sticky", top: 0, zIndex: 20, background: `linear-gradient(${T.bg1} 82%, rgba(19,20,22,0))` }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 20, marginTop: "calc(-8px - env(safe-area-inset-top, 0px))", padding: "20px 20px 14px", paddingTop: "calc(28px + env(safe-area-inset-top, 0px))", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Prospecting</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
@@ -169,7 +194,7 @@ export function ProspectingContent({ apiKey }) {
         </div>
       </header>
 
-      <div style={{ flex: 1, padding: "4px 12px 0" }}>
+      <div ref={queueRef} style={{ flex: 1, padding: "4px 12px 0" }}>
         {shown.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? "Nothing here yet." : "Loading queue…"}
@@ -182,7 +207,7 @@ export function ProspectingContent({ apiKey }) {
             const meta = log && log.outcome ? outcomeMeta(log.outcome) : null;
             const tone = meta ? PILL_TONES[meta.tone] : null;
             return (
-              <div key={id} role="button" tabIndex={0}
+              <div key={id} data-pid={id} role="button" tabIndex={0}
                 onClick={() => { setOpenId(id); setView("detail"); }}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(id); setView("detail"); } }}
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${T.line}`, cursor: "pointer", borderRadius: 8 }}>
