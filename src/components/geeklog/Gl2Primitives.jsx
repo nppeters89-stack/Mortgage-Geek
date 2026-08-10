@@ -187,6 +187,7 @@ export function DayStrip({ days, todayIndex, size = 34 }) {
 export function TabBar({ active, onChange }) {
   const tabs = [
     { id: "today", label: "Today" },
+    { id: "prospecting", label: "Prospects" },
     { id: "week", label: "Week" },
     { id: "ytd", label: "YTD" },
     { id: "closings", label: "Closings" },

@@ -5,6 +5,7 @@ import { TabBar } from "./Gl2Primitives";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
+import { ProspectingContent } from "./prospecting/ProspectingContent";
 import { BestDayFlash, TargetBurst, RecapSeal } from "./Gl2Rewards";
 import { StoryCard } from "./StoryCard";
 import { ALL_KEYS, CONV_SUBS, STREAK_FLOOR, emptyDay, normalizeDay, convOf } from "./gl2Model";
@@ -377,6 +378,7 @@ export function Gl2App({ apiKey }) {
           {tab === "week" && (
             <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} />
           )}
+          {tab === "prospecting" && <ProspectingContent apiKey={apiKey} />}
           {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
         </div>

@@ -176,3 +176,56 @@ export async function saveSettings(key, weeklyTarget) {
     body: JSON.stringify({ weeklyTarget }),
   });
 }
+
+// ---- Prospecting (Geek Log tab) ----
+// These endpoints live under /api/prospects (not /api/geeklog), so they use
+// their own fetches rather than request(). Same X-Geeklog-Key auth. Contact data
+// is returned only to an authorized client and is never cached in this module.
+
+async function prospectsFetch(key, path, init = {}) {
+  let res;
+  try {
+    res = await fetch(`/api/prospects${path}`, {
+      ...init,
+      headers: { ...(init.headers || {}), "X-Geeklog-Key": key },
+    });
+  } catch {
+    throw new Error("Network error");
+  }
+  if (res.status === 401) throw new Error("Unauthorized");
+  let body = null;
+  try { body = await res.json(); } catch { body = null; }
+  if (res.status >= 400) throw new Error(body?.error || `Request failed: ${res.status}`);
+  return body;
+}
+
+// GET /api/prospects — { list, logs }. list = seed blob; logs keyed by phone id.
+export async function fetchProspects(key) {
+  const data = await prospectsFetch(key, "");
+  return data || { list: { prospects: [] }, logs: {} };
+}
+
+// PUT /api/prospects/log — upsert one contact's log. Awaited write.
+export async function saveProspectLog(key, id, log) {
+  return prospectsFetch(key, "/log", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, log }),
+  });
+}
+
+// Fire-and-forget keepalive PUT so the log survives the phone locking right
+// after Save (same idiom as saveDayKeepalive). Small payload; a duplicate write
+// on the load-time reconcile is harmless (last write wins).
+export function saveProspectLogKeepalive(key, id, log) {
+  try {
+    fetch(`/api/prospects/log`, {
+      method: "PUT",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      body: JSON.stringify({ id, log }),
+    });
+  } catch {
+    /* best-effort; reconcile on next load recovers a lost write */
+  }
+}
