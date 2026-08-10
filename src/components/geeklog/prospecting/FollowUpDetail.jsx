@@ -22,7 +22,7 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
   return (
     <div style={{ padding: "0 20px 40px" }}>
       <button type="button" onClick={onBack}
-        style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "none", color: T.dim, fontFamily: FF.sans, fontSize: 14, padding: "18px 0 8px", cursor: "pointer" }}>
+        style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "none", color: T.dim, fontFamily: FF.body, fontSize: 14, padding: "18px 0 8px", cursor: "pointer" }}>
         ← Follow Ups
       </button>
 
@@ -31,21 +31,21 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
       {log && (
         <div style={{ marginTop: 22, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "13px 15px" }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dim, marginBottom: 6 }}>First contact</div>
-          <div style={{ fontSize: 14, color: T.cream, fontFamily: FF.sans }}>
+          <div style={{ fontSize: 14, color: T.cream, fontFamily: FF.body }}>
             {formatTouchDate(log.ts)}
             {log.outcome ? ` · ${log.outcome}` : ""}
             {log.score ? ` · ${log.score}/10` : ""}
           </div>
-          {log.note && <div style={{ fontSize: 13.5, color: T.dim, marginTop: 6, lineHeight: 1.5, fontFamily: FF.sans, whiteSpace: "pre-wrap" }}>{log.note}</div>}
+          {log.note && <div style={{ fontSize: 13.5, color: T.dim, marginTop: 6, lineHeight: 1.5, fontFamily: FF.body, whiteSpace: "pre-wrap" }}>{log.note}</div>}
         </div>
       )}
 
       <div style={{ marginTop: 26 }}>
-        <h2 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 22, marginBottom: 12, color: T.cream }}>Log a follow up</h2>
+        <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Log a follow up</h2>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
-          style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.sans, fontSize: 15, lineHeight: 1.5 }} />
+          style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
         <button type="button" onClick={submit} disabled={!note.trim()}
-          style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? T.green : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.sans, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
+          style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? T.green : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
           Log follow up
         </button>
       </div>
@@ -57,9 +57,9 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
             <details key={`${t.ts}-${i}`} style={{ border: `1px solid ${T.line}`, borderRadius: 10, overflow: "hidden", marginBottom: 8 }}>
               <summary style={{ listStyle: "none", display: "flex", alignItems: "baseline", gap: 10, padding: "12px 14px", cursor: "pointer", background: T.surface }}>
                 <span style={{ flex: "none", fontSize: 12.5, fontWeight: 600, color: T.cream, fontVariantNumeric: "tabular-nums" }}>{formatTouchDate(t.ts)}</span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: T.dim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FF.sans }}>{t.note}</span>
+                <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: T.dim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FF.body }}>{t.note}</span>
               </summary>
-              <div style={{ padding: "12px 14px", fontSize: 14, lineHeight: 1.55, color: T.cream, background: T.bg0, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: FF.sans }}>{t.note || "No note"}</div>
+              <div style={{ padding: "12px 14px", fontSize: 14, lineHeight: 1.55, color: T.cream, background: T.bg0, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: FF.body }}>{t.note || "No note"}</div>
             </details>
           ))}
         </div>

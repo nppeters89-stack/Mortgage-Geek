@@ -129,7 +129,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
       <StatusBarCap />
       <header style={{ position: "sticky", top: 0, zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <h1 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Prospecting</h1>
+          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Prospecting</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
             <strong style={{ color: T.redLift, fontWeight: 600 }}>{loggedCount}</strong> logged · {shown.length} in queue
           </div>
@@ -137,14 +137,14 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 10, padding: "10px 12px" }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={T.faint} strokeWidth="2.4"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or brokerage" autoComplete="off"
-            style={{ flex: 1, background: "none", border: "none", outline: "none", color: T.cream, fontFamily: FF.sans, fontSize: 15 }} />
+            style={{ flex: 1, background: "none", border: "none", outline: "none", color: T.cream, fontFamily: FF.body, fontSize: 15 }} />
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 12, overflowX: "auto", scrollbarWidth: "none" }}>
           {CHIPS.map((c) => {
             const on = filter === c.id;
             return (
               <button key={c.id} type="button" onClick={() => setFilter(c.id)}
-                style={{ flex: "none", fontSize: 13, fontWeight: on ? 600 : 500, color: on ? T.bg1 : T.dim, border: `1px solid ${on ? T.cream : T.line}`, borderRadius: 999, padding: "7px 14px", background: on ? T.cream : "none", fontFamily: FF.sans, cursor: "pointer" }}>
+                style={{ flex: "none", fontSize: 13, fontWeight: on ? 600 : 500, color: on ? T.bg1 : T.dim, border: `1px solid ${on ? T.cream : T.line}`, borderRadius: 999, padding: "7px 14px", background: on ? T.cream : "none", fontFamily: FF.body, cursor: "pointer" }}>
                 {c.label}
               </button>
             );
@@ -171,7 +171,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${T.line}`, cursor: "pointer", borderRadius: 8 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: hasIntelDot(p) ? T.redLift : "transparent", flex: "none" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: FF.serif, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
+                  <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
                   <div style={{ fontSize: 12.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
                 </div>
                 {meta && (
@@ -197,7 +197,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           <span style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em" }}>Conversations</span>
         </div>
         <button type="button" onClick={() => copy(logTsvAll(prospects, logs), `${loggedCount} rows copied`, "No calls logged yet")}
-          style={{ flex: "none", padding: "0 18px", borderRadius: 12, border: `1px solid ${T.line}`, background: T.bg0, color: T.cream, fontFamily: FF.sans, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+          style={{ flex: "none", padding: "0 18px", borderRadius: 12, border: `1px solid ${T.line}`, background: T.bg0, color: T.cream, fontFamily: FF.body, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
           Copy log
         </button>
       </div>
@@ -222,7 +222,7 @@ export function Toast({ msg }) {
       position: "fixed", bottom: 96, left: "50%", transform: `translateX(-50%) translateY(${msg ? 0 : 8}px)`,
       background: T.cream, color: T.bg1, fontSize: 13.5, fontWeight: 600, padding: "10px 18px", borderRadius: 999,
       opacity: msg ? 1 : 0, pointerEvents: "none", transition: "opacity 0.2s, transform 0.2s", zIndex: 50, whiteSpace: "nowrap",
-      fontFamily: FF.sans,
+      fontFamily: FF.body,
     }}>{msg}</div>
   );
 }
