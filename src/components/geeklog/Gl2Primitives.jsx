@@ -224,8 +224,8 @@ export function TabBar({ active, onChange }) {
   const tint = withAlpha(T.greenBright, 0.15);
   const EASE = "180ms ease-out";
   return (
-    <div style={{ flex: "0 0 auto", borderTop: `1px solid ${T.line}`, background: "rgba(19,20,22,0.92)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "9px 12px" }}>
+    <div style={{ flex: "0 0 auto", borderTop: `1px solid ${T.line}`, background: "rgba(19,20,22,0.92)", paddingBottom: "max(8px, calc(env(safe-area-inset-bottom, 0px) - 12px))" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "8px 12px 0" }}>
         {tabs.map((t) => {
           const on = t.id === active;
           return (
