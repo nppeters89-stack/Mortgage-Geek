@@ -1,29 +1,16 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive } from "../../../utils/geeklogApi";
 import { ContactCard } from "./ContactCard";
+import { getCachedProspects, loadProspects, persistLog } from "./prospectStore";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
   outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
 } from "./prospectsModel";
 
-// Prospecting tab root: loads the call queue + logs once (cached for instant
-// re-open), renders the queue or a contact card, and persists each call log via
-// the keepalive pattern with a dirty-flag reconcile on load — the same
-// durability approach as the day tracker, so a Save survives the phone locking
-// mid-walk. Contact data is never persisted anywhere but Redis + this session's
-// caches.
-
-// Session cache so switching tabs re-opens instantly; localStorage backs it for
-// offline. Reconcile against the server on every load.
-let sessionCache = null; // { prospects, logs }
-const LS_KEY = "gl2:prospects:v1";
-const DIRTY_KEY = "gl2:prospects:dirty";
-
-function loadLS() { try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
-function saveLS(obj) { try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch { /* best-effort */ } }
-function getDirty() { try { return new Set(JSON.parse(localStorage.getItem(DIRTY_KEY) || "[]")); } catch { return new Set(); } }
-function writeDirty(set) { try { localStorage.setItem(DIRTY_KEY, JSON.stringify([...set])); } catch { /* best-effort */ } }
+// Prospecting tab root: reads the shared prospect store (prospectStore.js) for
+// the call queue + logs, renders the queue or a contact card, and persists each
+// call log through the store's keepalive + dirty-flag path so a Save survives the
+// phone locking mid-walk. Contact data lives only in Redis + the session cache.
 
 const CHIPS = [
   { id: "all", label: "All" },
@@ -33,7 +20,7 @@ const CHIPS = [
 ];
 
 export function ProspectingContent({ apiKey, onTalkedLogged }) {
-  const seed = sessionCache || loadLS();
+  const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => (seed?.prospects ? sortedQueue(seed.prospects) : []));
   const [logs, setLogs] = useState(() => seed?.logs || {});
   const [ready, setReady] = useState(!!seed);
@@ -53,62 +40,31 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   }, []);
   useEffect(() => () => clearTimeout(toastTimer.current), []);
 
-  // Load + reconcile: server logs are the source of truth, but re-push any dirty
-  // (unsynced) local log that never landed, and keep the local version until the
-  // server confirms it.
+  // Load + reconcile via the shared store (one GET for the whole feature).
   useEffect(() => {
     let cancelled = false;
-    fetchProspects(apiKey)
-      .then((data) => {
-        if (cancelled || !data) return;
-        const srv = sortedQueue(data.list?.prospects || []);
-        const serverLogs = data.logs || {};
-        const merged = { ...serverLogs };
-        const dirty = getDirty();
-        for (const id of Array.from(dirty)) {
-          const local = logsRef.current[id];
-          const s = serverLogs[id];
-          if (local && (!s || (s.ts || 0) < (local.ts || 0))) {
-            merged[id] = local;
-            saveProspectLog(apiKey, id, local)
-              .then(() => { const d = getDirty(); d.delete(id); writeDirty(d); })
-              .catch(() => {});
-          } else {
-            dirty.delete(id);
-          }
-        }
-        writeDirty(dirty);
-        setProspects(srv);
-        setLogs(merged);
+    loadProspects(apiKey)
+      .then((c) => {
+        if (cancelled) return;
+        setProspects(c.prospects);
+        setLogs(c.logs);
         setReady(true);
       })
       .catch(() => setReady(true));
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKey]);
-
-  // Persist the session + offline cache on any change.
-  useEffect(() => {
-    if (!ready) return;
-    sessionCache = { prospects, logs };
-    saveLS(sessionCache);
-  }, [prospects, logs, ready]);
 
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const handleSave = useCallback((id, log) => {
     const prevOutcome = logsRef.current[id]?.outcome;
     setLogs((prev) => ({ ...prev, [id]: log }));
-    const d = getDirty(); d.add(id); writeDirty(d);
-    saveProspectLogKeepalive(apiKey, id, log); // survives the phone locking
-    saveProspectLog(apiKey, id, log)
-      .then(() => { const dd = getDirty(); dd.delete(id); writeDirty(dd); })
-      .catch(() => { /* stays dirty; reconciled on next load */ });
+    persistLog(apiKey, id, log); // cache + keepalive + reconcile
     // A newly-marked "Talked" is a two-way conversation, so add it to today's
     // Prospecting count on the Today screen. Only on the transition to Talked, so
     // editing or re-saving the same contact never double-counts.
     if (log.outcome === "Talked" && prevOutcome !== "Talked") onTalkedLogged?.();
-    showToast("Saved");
+    showToast(log.score >= 9 ? "Saved. Added to Follow Ups" : "Saved");
     setView("queue");
     setOpenId(null);
   }, [apiKey, showToast, onTalkedLogged]);
@@ -256,11 +212,11 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
 // (8px + safe-area inset); the sticky header sticks flush at the bottom of it, so
 // there is no gap for a row to show through. Zero-ish height on non-inset
 // displays. Fixed to the viewport.
-function StatusBarCap() {
+export function StatusBarCap() {
   return <div aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "calc(8px + env(safe-area-inset-top, 0px))", background: T.bg1, zIndex: 40 }} />;
 }
 
-function Toast({ msg }) {
+export function Toast({ msg }) {
   return (
     <div aria-live="polite" style={{
       position: "fixed", bottom: 96, left: "50%", transform: `translateX(-50%) translateY(${msg ? 0 : 8}px)`,

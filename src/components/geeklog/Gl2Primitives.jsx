@@ -190,7 +190,7 @@ export function TabBar({ active, onChange }) {
     { id: "prospecting", label: "Prospects" },
     { id: "week", label: "Week" },
     { id: "ytd", label: "YTD" },
-    { id: "closings", label: "Closings" },
+    { id: "followups", label: "Follow Ups" },
   ];
   return (
     <div style={{ flex: "0 0 auto", borderTop: `1px solid ${T.line}`, background: "rgba(19,20,22,0.92)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>

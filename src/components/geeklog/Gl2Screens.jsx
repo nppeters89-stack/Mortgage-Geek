@@ -36,6 +36,15 @@ function GearGlyph() {
   );
 }
 
+function DollarGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2.5v19" stroke={T.dim} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M16.5 6.6c0-1.7-2-3.1-4.5-3.1S7.5 4.9 7.5 6.6s2 2.7 4.5 3 4.5 1.3 4.5 3.1-2 3.1-4.5 3.1-4.5-1.4-4.5-3.1" stroke={T.dim} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function SyncDot() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -48,7 +57,7 @@ function SyncDot() {
 // ===========================================================================
 // Today
 // ===========================================================================
-export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, weekConv, target, syncing, pulse }) {
+export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, onOpenClosings, weekConv, target, syncing, pulse }) {
   const convTotal = sumKeys(state, CONV_SUBS);
   const apptTotal = sumKeys(state, APPT_SUBS);
   const contentTotal = sumKeys(state, CONTENT_SUBS);
@@ -73,6 +82,7 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {syncing && <SyncDot />}
+          <HeaderButton onClick={onOpenClosings} ariaLabel="Closings"><DollarGlyph /></HeaderButton>
           <HeaderButton onClick={onSettings} ariaLabel="Settings"><GearGlyph /></HeaderButton>
           <Wordmark height={24} />
         </div>

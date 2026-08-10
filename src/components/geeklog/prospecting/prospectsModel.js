@@ -93,3 +93,51 @@ export function logTsvAll(prospects, logs) {
   }
   return rows.length > 1 ? rows.join("\n") : "";
 }
+
+// ----- Follow Ups (derived membership: a call scored 9 or 10) -----
+
+const DAY_MS = 86400000;
+export const FOLLOWUP_MIN_SCORE = 9;
+export const STALE_DAYS = 14;
+
+export const qualifiesForFollowUp = (log) => !!(log && log.score >= FOLLOWUP_MIN_SCORE);
+
+// Newest touch timestamp for a contact (0 if none).
+export function lastTouchTs(touches) {
+  if (!Array.isArray(touches) || !touches.length) return 0;
+  return touches.reduce((m, t) => Math.max(m, t.ts || 0), 0);
+}
+
+// { label, stale } for the queue's last-touch line. Stale (amber) at zero touches
+// or more than STALE_DAYS since the last touch.
+export function lastTouchLabel(touches) {
+  const ts = lastTouchTs(touches);
+  if (!ts) return { label: "No touches yet", stale: true };
+  const days = Math.floor((Date.now() - ts) / DAY_MS);
+  return { label: days <= 0 ? "Today" : `${days}d ago`, stale: days > STALE_DAYS };
+}
+
+// Qualifying contacts sorted by neglect: never-touched first, then ascending by
+// most-recent touch (longest since last touch at the top = the next right call).
+// Stable within ties (keeps the incoming buyside order).
+export function followUpQueue(prospects, logs, followUps) {
+  return prospects
+    .filter((p) => qualifiesForFollowUp(logs[idFromPhone(p.phone)]))
+    .map((p, i) => ({ p, i, last: lastTouchTs(followUps[idFromPhone(p.phone)]) }))
+    .sort((a, b) => {
+      if (a.last === 0 && b.last === 0) return a.i - b.i;
+      if (a.last === 0) return -1;
+      if (b.last === 0) return 1;
+      return (a.last - b.last) || (a.i - b.i);
+    })
+    .map((x) => x.p);
+}
+
+// Readable touch date for the history rows, e.g. "Aug 10, 2026".
+export function formatTouchDate(ts) {
+  try {
+    return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  } catch {
+    return "";
+  }
+}

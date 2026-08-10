@@ -199,10 +199,11 @@ async function prospectsFetch(key, path, init = {}) {
   return body;
 }
 
-// GET /api/prospects — { list, logs }. list = seed blob; logs keyed by phone id.
+// GET /api/prospects — { list, logs, followUps }. list = seed blob; logs and
+// followUps keyed by phone id.
 export async function fetchProspects(key) {
   const data = await prospectsFetch(key, "");
-  return data || { list: { prospects: [] }, logs: {} };
+  return data || { list: { prospects: [] }, logs: {}, followUps: {} };
 }
 
 // PUT /api/prospects/log — upsert one contact's log. Awaited write.
@@ -224,6 +225,30 @@ export function saveProspectLogKeepalive(key, id, log) {
       keepalive: true,
       headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
       body: JSON.stringify({ id, log }),
+    });
+  } catch {
+    /* best-effort; reconcile on next load recovers a lost write */
+  }
+}
+
+// PUT /api/prospects/fu — upsert one contact's follow-up touch history (the full
+// array). Awaited write.
+export async function saveFollowUps(key, id, touches) {
+  return prospectsFetch(key, "/fu", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, touches }),
+  });
+}
+
+// Fire-and-forget keepalive variant, same durability idiom as the call log.
+export function saveFollowUpsKeepalive(key, id, touches) {
+  try {
+    fetch(`/api/prospects/fu`, {
+      method: "PUT",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      body: JSON.stringify({ id, touches }),
     });
   } catch {
     /* best-effort; reconcile on next load recovers a lost write */

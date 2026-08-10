@@ -6,6 +6,7 @@ import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2
 import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
 import { ProspectingContent } from "./prospecting/ProspectingContent";
+import { FollowUpsContent } from "./prospecting/FollowUpsContent";
 import { BestDayFlash, TargetBurst, RecapSeal } from "./Gl2Rewards";
 import { StoryCard } from "./StoryCard";
 import { ALL_KEYS, CONV_SUBS, STREAK_FLOOR, emptyDay, normalizeDay, convOf } from "./gl2Model";
@@ -385,6 +386,7 @@ export function Gl2App({ apiKey }) {
               onBack={goBack} backDisabled={backDisabled}
               onForward={goForward} canForward={canForward}
               onSettings={() => setSettingsOpen(true)}
+              onOpenClosings={() => setTab("closings")}
               weekConv={weekConv} target={target} syncing={syncing} pulse={pulse}
             />
           )}
@@ -392,7 +394,9 @@ export function Gl2App({ apiKey }) {
             <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} />
           )}
           {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
+          {tab === "followups" && <FollowUpsContent apiKey={apiKey} />}
           {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
+          {/* Closings is no longer a bottom tab; it opens from the dollar button in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
         </div>
 
