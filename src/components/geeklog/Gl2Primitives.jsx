@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { T, FF, greenFor } from "./gl2Tokens";
+import { withAlpha } from "../../utils/format";
 
 // Geek Log 2.0 primitives, ported from the CD handoff (gl2-components). The
 // prototype's StatusBar and fixed-size Screen frame are intentionally dropped;
@@ -184,6 +185,34 @@ export function DayStrip({ days, todayIndex, size = 34 }) {
 }
 
 // ---------- Bottom tab bar ---------- (safe-area padding for the home indicator)
+//
+// Icon-based bar (design handoff, option 1c "active tab expands to icon + label"):
+// every tab shows its glyph; the active tab expands into a pill with its label on
+// an accent tint. Inactive tabs share the width (flex-grow 1); the active pill is
+// content-sized (flex-grow 0). The pill's width + background animate 180ms on tab
+// change (flex-grow, padding, and the label's max-width); the glyphs never scale.
+// Colors from the Geek Log tokens: active = greenBright, inactive = dimmer.
+
+// The five nav glyphs, 24-viewBox rendered at 22px, stroke:currentColor so they
+// take the tab's color. Recreated from the supplied SVG assets.
+function TabGlyph({ id }) {
+  const common = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, style: { display: "block", flex: "none" } };
+  switch (id) {
+    case "today":
+      return (<svg {...common}><rect x="3.25" y="4.75" width="17.5" height="16" rx="3.2" /><path d="M3.25 9.6h17.5M8.2 3.1v3.4M15.8 3.1v3.4" /><circle cx="12" cy="15.1" r="1.85" fill="currentColor" stroke="none" /></svg>);
+    case "prospecting":
+      return (<svg {...common}><circle cx="9.4" cy="8.6" r="3.3" /><path d="M3.6 19.9c0-3.25 2.6-5.4 5.8-5.4s5.8 2.15 5.8 5.4" /><path d="M18.6 7.1v5M16.1 9.6h5" /></svg>);
+    case "week":
+      return (<svg {...common}><rect x="3.25" y="4.75" width="17.5" height="16" rx="3.2" /><path d="M3.25 9.6h17.5M9.2 9.6v11.15M14.8 9.6v11.15M8.2 3.1v3.4M15.8 3.1v3.4" /></svg>);
+    case "ytd":
+      return (<svg {...common}><path d="M3.6 16.9 9.2 11.3l3.4 3.4 7.8-7.8" /><path d="M15.4 6.9h5v5" /><path d="M3.6 20.6h17" /></svg>);
+    case "followups":
+      return (<svg {...common}><path d="M12 3.4a5.9 5.9 0 0 0-5.9 5.9c0 4.4-1.55 5.7-1.55 5.7h14.9s-1.55-1.3-1.55-5.7A5.9 5.9 0 0 0 12 3.4Z" /><path d="M9.9 18.1a2.25 2.25 0 0 0 4.2 0" /></svg>);
+    default:
+      return null;
+  }
+}
+
 export function TabBar({ active, onChange }) {
   const tabs = [
     { id: "today", label: "Today" },
@@ -192,17 +221,44 @@ export function TabBar({ active, onChange }) {
     { id: "ytd", label: "YTD" },
     { id: "followups", label: "Follow Ups" },
   ];
+  const tint = withAlpha(T.greenBright, 0.15);
+  const EASE = "180ms ease-out";
   return (
     <div style={{ flex: "0 0 auto", borderTop: `1px solid ${T.line}`, background: "rgba(19,20,22,0.92)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
-      <div style={{ height: 64, display: "grid", gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "9px 12px" }}>
         {tabs.map((t) => {
           const on = t.id === active;
           return (
-            <div key={t.id} onClick={() => onChange && onChange(t.id)} role="tab" aria-selected={on}
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", userSelect: "none" }}>
-              <div style={{ width: 18, height: 3, borderRadius: 2, background: on ? T.greenBright : "transparent" }} />
-              <div style={{ fontFamily: FF.body, fontWeight: on ? 700 : 500, fontSize: 12, letterSpacing: "0.04em", color: on ? T.cream : T.dimmer }}>{t.label}</div>
-            </div>
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => onChange && onChange(t.id)}
+              aria-label={t.label}
+              aria-current={on ? "page" : undefined}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                minHeight: 44, border: "none", borderRadius: 22, cursor: "pointer",
+                background: on ? tint : "transparent",
+                color: on ? T.greenBright : T.dimmer,
+                flexGrow: on ? 0 : 1, flexShrink: on ? 0 : 1, flexBasis: "auto",
+                padding: on ? "0 14px" : "0 6px",
+                transition: `flex-grow ${EASE}, background-color ${EASE}, padding ${EASE}, color ${EASE}`,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <TabGlyph id={t.id} />
+              <span
+                aria-hidden="true"
+                style={{
+                  overflow: "hidden", whiteSpace: "nowrap",
+                  maxWidth: on ? 130 : 0, opacity: on ? 1 : 0, marginLeft: on ? 8 : 0,
+                  fontFamily: FF.body, fontWeight: 600, fontSize: 13, color: "inherit",
+                  transition: `max-width ${EASE}, opacity ${EASE}, margin-left ${EASE}`,
+                }}
+              >
+                {t.label}
+              </span>
+            </button>
           );
         })}
       </div>
