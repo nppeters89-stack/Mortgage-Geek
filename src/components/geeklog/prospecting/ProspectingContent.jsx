@@ -154,6 +154,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
     const id = idFromPhone(openProspect.phone);
     return (
       <>
+        <StatusBarCap />
         <ContactCard
           prospect={openProspect}
           log={logs[id]}
@@ -169,7 +170,8 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   // ----- Queue view -----
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
-      <header style={{ position: "sticky", top: 0, zIndex: 20, marginTop: "calc(-8px - env(safe-area-inset-top, 0px))", padding: "20px 20px 14px", paddingTop: "calc(28px + env(safe-area-inset-top, 0px))", background: T.bg1 }}>
+      <StatusBarCap />
+      <header style={{ position: "sticky", top: "env(safe-area-inset-top, 0px)", zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Prospecting</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
@@ -247,6 +249,13 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
       <Toast msg={toast} />
     </div>
   );
+}
+
+// Opaque cap over the iOS status-bar / notch strip so scrolled content never
+// bleeds through the top in the installed PWA. Fixed to the viewport; zero height
+// (invisible) on displays without a top safe-area inset.
+function StatusBarCap() {
+  return <div aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "env(safe-area-inset-top, 0px)", background: T.bg1, zIndex: 40 }} />;
 }
 
 function Toast({ msg }) {
