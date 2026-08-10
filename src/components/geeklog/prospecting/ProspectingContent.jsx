@@ -171,7 +171,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
       <StatusBarCap />
-      <header style={{ position: "sticky", top: "env(safe-area-inset-top, 0px)", zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Prospecting</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
@@ -251,11 +251,13 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   );
 }
 
-// Opaque cap over the iOS status-bar / notch strip so scrolled content never
-// bleeds through the top in the installed PWA. Fixed to the viewport; zero height
-// (invisible) on displays without a top safe-area inset.
+// Opaque cap over the top of the installed PWA so scrolled content never bleeds
+// through. Its height matches the app scroll container's top padding
+// (8px + safe-area inset); the sticky header sticks flush at the bottom of it, so
+// there is no gap for a row to show through. Zero-ish height on non-inset
+// displays. Fixed to the viewport.
 function StatusBarCap() {
-  return <div aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "env(safe-area-inset-top, 0px)", background: T.bg1, zIndex: 40 }} />;
+  return <div aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, right: 0, height: "calc(8px + env(safe-area-inset-top, 0px))", background: T.bg1, zIndex: 40 }} />;
 }
 
 function Toast({ msg }) {
