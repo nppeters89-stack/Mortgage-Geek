@@ -60,6 +60,13 @@ export const GEEK_CHARTS = [
     period: "1971 to 2026",
     updated: "2026-07-23",
   },
+  {
+    slug: "the-other-down-payment",
+    title: "The Costs Turned Around. The Age Didn't.",
+    tagline: "The force outside the housing market: what today's first-time buyer carries before the house price even enters the math.",
+    period: "1989 to 2026",
+    updated: "2026-08-12",
+  },
 ];
 
 // Long-run average ratio (ounces of gold to buy the average home), 1970 to 2026.
@@ -377,3 +384,61 @@ const ptiIncome = [10290, 11120, 12050, 12900, 13720, 14960, 16010, 17640, 19590
 
 export const PTI_AVG = 3.52;
 export const PRICE_TO_INCOME = { years: ptiYears, ratio: ptiRatio, price: ptiPrice, income: ptiIncome };
+
+// Aggregate household debt service ratio, percent of disposable income, quarterly,
+// 2005Q1 to 2026Q1. Board of Governors via FRED (TDSP), credit-bureau methodology;
+// the Fed's published history begins 2005. Series average 12.44 computed on this
+// series. Peak 15.85 (2007Q4), trough 9.05 (2021Q1), latest 11.16 (2026Q1).
+// Precomputed; not recomputed at runtime.
+const dsrQuarters = Array.from({ length: 85 }, (_, i) => ({ y: 2005 + Math.floor(i / 4), q: (i % 4) + 1 }));
+
+const dsrRatio = [14.80, 14.83, 15.14, 15.03, 14.99, 15.04, 15.37, 15.51, 15.53, 15.63, 15.71, 15.85,
+  15.78, 15.33, 15.55, 15.72, 15.60, 15.25, 15.09, 14.90, 14.51, 14.07, 13.92, 13.58,
+  13.31, 13.06, 12.94, 12.75, 12.24, 12.03, 12.08, 11.75, 12.01, 11.79, 11.84, 11.99,
+  11.88, 11.62, 11.65, 11.63, 11.56, 11.49, 11.61, 11.74, 11.76, 11.77, 11.77, 11.87,
+  11.72, 11.76, 11.82, 11.82, 11.64, 11.60, 11.62, 11.67, 11.50, 11.63, 11.65, 11.73,
+  11.59, 9.74, 10.06, 10.39, 9.05, 9.84, 10.01, 10.23, 10.47, 10.68, 10.57, 10.74,
+  10.56, 10.58, 10.75, 11.10, 11.06, 11.02, 11.14, 11.12, 11.11, 11.12, 11.23, 11.32, 11.16];
+
+export const DSR_AVG = 12.44;
+export const DSR_AGGREGATE = { quarters: dsrQuarters, ratio: dsrRatio };
+
+// Total student loans outstanding, billions, quarterly, 2006Q1 to 2024Q4.
+// Board of Governors G.19 via FRED (SLOAS), end of period; the Fed discontinued
+// this breakout after 2024Q4. First 481.0, last 1777.1 (3.7x). The payment pause
+// era begins at index 57 (2020Q2). The NY Fed credit-panel measure (different
+// scope, not spliced here) stands at $1.66T as of 2026Q1; cited in page copy only.
+// Precomputed; not recomputed at runtime.
+const slQuarters = Array.from({ length: 76 }, (_, i) => ({ y: 2006 + Math.floor(i / 4), q: (i % 4) + 1 }));
+
+const slBillions = [481.0, 487.1, 510.5, 521.4, 545.0, 549.3, 577.4, 589.5, 619.3, 626.6, 660.6, 676.0,
+  707.2, 712.3, 746.5, 771.7, 800.1, 811.1, 845.8, 855.5, 896.8, 905.2, 940.3, 959.8,
+  994.3, 1011.3, 1041.0, 1054.6, 1092.0, 1099.6, 1134.2, 1145.6, 1182.1, 1190.5, 1226.4, 1235.8,
+  1271.8, 1278.8, 1311.8, 1320.2, 1358.1, 1365.3, 1398.6, 1405.3, 1440.4, 1446.7, 1479.0, 1488.9,
+  1523.3, 1530.8, 1560.7, 1566.9, 1597.7, 1603.3, 1635.1, 1637.9, 1672.0, 1672.5, 1696.5, 1693.9,
+  1718.7, 1719.1, 1739.4, 1733.4, 1747.5, 1744.0, 1761.7, 1764.1, 1774.9, 1761.2, 1732.6, 1729.1,
+  1753.3, 1741.1, 1772.9, 1777.1];
+
+export const STUDENT_LOANS_G19 = { quarters: slQuarters, billions: slBillions, pauseStartIndex: 57 };
+
+// Student loan delinquency, NY Fed Consumer Credit Panel / Quarterly Report on
+// Household Debt and Credit. flow = new flow into serious (90+ day) delinquency,
+// percent of balances, the 2025 credit-reporting switch. stock = percent of all
+// balances 90+ days delinquent; pause-era stock reported below 1 percent; the
+// pre-pandemic norm ran above 10 percent. Precomputed; not recomputed at runtime.
+export const SL_DELINQUENCY = {
+  flow: [
+    { label: "2024 Q4", value: 0.70 },
+    { label: "2025 Q1", value: 8.04 },
+    { label: "2025 Q2", value: 12.88 },
+  ],
+  stock: [
+    { label: "Pause era 2020-2024", value: 0.7, pause: true },
+    { label: "2025 Q1", value: 7.74 },
+    { label: "2025 Q2", value: 10.2 },
+    { label: "2025 Q3", value: 9.4 },
+    { label: "2025 Q4", value: 9.6 },
+    { label: "2026 Q1", value: 10.3 },
+  ],
+  prePandemicNorm: 10,
+};
