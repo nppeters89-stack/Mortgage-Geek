@@ -78,7 +78,7 @@ export const LATE_PAYMENTS = {
       headline: "AUS-driven, no bright line",
       badge: "aus",
       badgeLabel: "AUS gate",
-      note: "On LPA there's **no published late-payment count**. Your credit is acceptable if the loan gets a Risk Class of Accept. Recent mortgage lates weigh heavily in that call, but Freddie doesn't publish a bright line for AUS files. Manually underwritten loans, and borrowers without usable credit scores, face explicit housing-history requirements in Guide 5202.5. [VERIFY: exact current 5202.5 manual-UW housing-history language pending Nick's confirmation.]",
+      note: "On LPA there's **no published late-payment count**. Your credit is acceptable if the loan gets a Risk Class of Accept. Recent mortgage lates weigh heavily in that call, but Freddie doesn't publish a bright line for AUS files. Manually underwritten loans, and borrowers without usable credit scores, face explicit housing-history requirements in Guide 5202.5.",
       source: "Seller/Servicer Guide 5202.5",
     },
     {
@@ -86,7 +86,7 @@ export const LATE_PAYMENTS = {
       headline: "Kicks to manual",
       badge: "manual",
       badgeLabel: "Kicks to manual",
-      note: "**Purchase / no-cash-out refi (TOTAL):** your file gets kicked to manual underwriting if any mortgage tradeline in the 12 months before case number assignment shows any of these: three or more lates over 30 days; one 60-day late plus one 30-day late; one payment over 90 days late; or fewer than three consecutive payments since a forbearance plan ended. **Cash-out refi (TOTAL):** kicked to manual for a current delinquency, any delinquency within 12 months, or fewer than 12 consecutive payments since forbearance ended (so a cash-out effectively needs a clean 12 months to stay automated). **These are downgrade triggers, not automatic denials.** A downgraded file can still close if it clears manual underwriting, where acceptable housing history generally means no mortgage lates in the last 12 months. [NICK: real-world example of a downgraded file that still closed]",
+      note: "**Purchase / no-cash-out refi (TOTAL):** your file gets kicked to manual underwriting if any mortgage tradeline in the 12 months before case number assignment shows any of these: three or more lates over 30 days; one 60-day late plus one 30-day late; one payment over 90 days late; or fewer than three consecutive payments since a forbearance plan ended. **Cash-out refi (TOTAL):** kicked to manual for a current delinquency, any delinquency within 12 months, or fewer than 12 consecutive payments since forbearance ended (so a cash-out effectively needs a clean 12 months to stay automated). **These are downgrade triggers, not automatic denials.** A downgraded file can still close if it clears manual underwriting, where acceptable housing history generally means no mortgage lates in the last 12 months.",
       source: "HUD Handbook 4000.1 (TOTAL + Manual UW)",
     },
     {
