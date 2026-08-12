@@ -5,7 +5,12 @@ import { dialHref } from "./prospectsModel";
 // name, brokerage + line type, buysides, email, a full-width tel: Call button, and
 // the collapsible intel block. Presentation only (no log/touch controls), so both
 // detail views render an identical header. Colors/fonts from the Geek Log tokens.
-export function ContactHeader({ prospect: p }) {
+//
+// callAction is an optional slot rendered directly under the Call button, for a
+// secondary action that belongs to the phone/contact block rather than the view
+// below it. Follow Ups passes Add to Contacts; Prospecting passes nothing and
+// renders exactly as before.
+export function ContactHeader({ prospect: p, callAction = null }) {
   const notes = p.notes || "";
   const sub = [p.brokerage, p.lineType ? `${p.lineType} line` : ""].filter(Boolean).join(" · ");
 
@@ -34,6 +39,8 @@ export function ContactHeader({ prospect: p }) {
         </svg>
         Call {p.phone}
       </a>
+
+      {callAction}
 
       {notes.length > 0 && (
         <details open={notes.length < 200} style={{ marginTop: 18, border: `1px solid ${T.line}`, borderRadius: 12, overflow: "hidden" }}>

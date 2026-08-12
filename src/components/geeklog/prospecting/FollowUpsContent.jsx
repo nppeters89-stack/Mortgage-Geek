@@ -65,6 +65,7 @@ export function FollowUpsContent({ apiKey }) {
           touches={followUps[id] || []}
           onBack={() => { setView("queue"); setOpenId(null); }}
           onLogFollowUp={(note) => handleLogFollowUp(id, note)}
+          onToast={showToast}
         />
         <Toast msg={toast} />
       </>

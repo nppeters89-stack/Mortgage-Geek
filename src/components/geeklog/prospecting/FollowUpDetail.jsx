@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactHeader } from "./ContactHeader";
+import { AddToContactsButton } from "./AddToContactsButton";
 import { formatTouchDate } from "./prospectsModel";
 
 // Follow Ups detail: the shared ContactHeader, a compact read-only "First contact"
@@ -8,7 +9,7 @@ import { formatTouchDate } from "./prospectsModel";
 // (newest first, each an accordion consistent with the intel block). onLogFollowUp
 // hands the note up; the parent appends the touch and re-renders this view with it
 // on top.
-export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp }) {
+export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast }) {
   const [note, setNote] = useState("");
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
@@ -26,7 +27,7 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
         ← Follow Ups
       </button>
 
-      <ContactHeader prospect={p} />
+      <ContactHeader prospect={p} callAction={<AddToContactsButton prospect={p} onToast={onToast} />} />
 
       {log && (
         <div style={{ marginTop: 22, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "13px 15px" }}>
