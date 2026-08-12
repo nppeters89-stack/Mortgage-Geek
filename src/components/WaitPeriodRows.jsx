@@ -6,6 +6,7 @@ import {
   EVENT_SOURCES,
   CH13_PATHS,
   CH13_DATA,
+  LATE_PAYMENTS,
 } from "../data/derogatoryCredit";
 
 function WaitRow({ event, row, isFirst }) {
@@ -191,6 +192,10 @@ const CH13_BADGE_STYLES = {
   manual: { background: "transparent", color: P.navy, border: `1.5px solid ${P.navy}` },
   exception: { background: "transparent", color: P.goldMuted, border: `1.5px solid ${P.goldMuted}` },
   na: { background: "transparent", color: P.warmGray, border: `1.5px dashed ${P.warmGrayLight}` },
+  // Late-payments additions: a true eligibility line (solid danger red) vs a
+  // no-published-line judgment call (dashed navy).
+  hardline: { background: P.danger, color: P.white, border: "1.5px solid transparent" },
+  judgment: { background: "transparent", color: P.navy, border: `1.5px dashed ${P.navy}` },
 };
 
 function Ch13Badge({ variant, label }) {
@@ -403,6 +408,77 @@ export function Ch13Card() {
                   <Ch13PathCell accent={accent} path={row.paths[p.key]} />
                 </div>
               ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Late Mortgage Payments cells (A1 model). One cell per program in the same
+// visual language as the Chapter 13 card: program-tinted label, an AUS-vs-manual
+// headline, a badge, a bolded note, and the source. Reuses Ch13Badge /
+// renderCh13Bold / cellTint. The scale-bar model does not apply here (a late
+// payment is not a wait period), so this section renders as a stacked matrix.
+const LP_LEGEND = [
+  { variant: "hardline", label: "Eligibility line", desc: "true deny, not a gate" },
+  { variant: "aus", label: "AUS gate", desc: "no published line, AUS decides" },
+  { variant: "manual", label: "Kicks to manual", desc: "downgrade trigger" },
+  { variant: "exception", label: "Documented exception", desc: "can overcome on manual" },
+  { variant: "judgment", label: "Lender judgment", desc: "no published line" },
+];
+
+export function LatePaymentsRows() {
+  return (
+    <div className="lpx-card">
+      <style>{`
+        .lpx-card { background: ${P.white}; border: 1px solid ${P.creamDark}; border-radius: 10px; overflow: hidden; }
+        .lpx-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 16px; background: ${P.cream}; border-bottom: 1px solid ${P.creamDark}; }
+        .lpx-legend-item { display: flex; align-items: center; gap: 8px; }
+        .lpx-legend-desc { font-size: 11.5px; color: ${P.warmGray}; }
+        .lpx-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; border-radius: 4px; padding: 3px 8px; line-height: 1.2; white-space: nowrap; }
+        .lpx-rows { display: grid; gap: 1px; background: ${P.creamDark}; }
+        .lpx-row { display: grid; grid-template-columns: 150px 1fr; gap: 1px; background: ${P.creamDark}; }
+        .lpx-prog { padding: 14px; }
+        .lpx-body { background: ${P.white}; padding: 14px; }
+        .lpx-prog-name { font-weight: 700; font-size: 14px; line-height: 1.2; }
+        .lpx-prog-flavor { font-size: 11px; color: ${P.warmGray}; margin-top: 2px; }
+        .lpx-headline { font-weight: 600; font-size: 15px; line-height: 1.15; margin-bottom: 8px; }
+        .lpx-badge-wrap { margin-bottom: 9px; }
+        .lpx-note { font-size: 12px; color: ${P.warmGray}; line-height: 1.6; }
+        .lpx-source { font-size: 10px; color: ${P.warmGrayLight}; margin-top: 11px; font-style: italic; }
+        @media (max-width: 560px) { .lpx-row { grid-template-columns: 1fr; } }
+      `}</style>
+
+      <div className="lpx-legend">
+        {LP_LEGEND.map((l) => (
+          <div className="lpx-legend-item" key={l.variant}>
+            <span className="lpx-badge" style={CH13_BADGE_STYLES[l.variant]}>{l.label}</span>
+            <span className="lpx-legend-desc">{l.desc}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="lpx-rows">
+        {LATE_PAYMENTS.rows.map((row) => {
+          const meta = PROGRAM_META[row.program];
+          const accent = DEROG_PROGRAM_COLORS[row.program];
+          return (
+            <div className="lpx-row" key={row.program}>
+              <div className="lpx-prog" style={{ background: cellTint(accent) }}>
+                <div className="lpx-prog-name" style={{ color: accent }}>{meta.full}</div>
+                <div className="lpx-prog-flavor">{meta.flavor}</div>
+              </div>
+              <div className="lpx-body">
+                <div className="lpx-headline" style={{ color: accent }}>{row.headline}</div>
+                <div className="lpx-badge-wrap">
+                  <span className="lpx-badge" style={CH13_BADGE_STYLES[row.badge]}>{row.badgeLabel}</span>
+                </div>
+                <div className="lpx-note">{renderCh13Bold(row.note)}</div>
+                <div className="lpx-source">Source: {row.source}</div>
+              </div>
             </div>
           );
         })}

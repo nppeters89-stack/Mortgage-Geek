@@ -55,16 +55,57 @@ export const EVENTS = {
       { program: "USDA",    std: 3, stdLabel: "3 yrs",   extYears: 1, extLabel: "1 yr (manual)", note: "SS and DIL treated identically" },
     ],
   },
-  latepayments: {
-    id: "latepayments",
-    rows: [
-      { program: "Fannie",  std: 1, stdLabel: "12 mo clean", extYears: null, extLabel: null, note: "From last 60+ day delinquency" },
-      { program: "Freddie", std: 1, stdLabel: "12 mo clean", extYears: null, extLabel: null, note: "Max one 30-day late in 24 mo" },
-      { program: "FHA",     std: 1, stdLabel: "Varies",      extYears: null, extLabel: null, note: "Stricter on cash-out + manual UW" },
-      { program: "VA",      std: 1, stdLabel: "12 mo",       extYears: null, extLabel: null, note: "Max one 30-day late in 12 mo" },
-      { program: "USDA",    std: 1, stdLabel: "12 mo",       extYears: null, extLabel: null, note: "Max one 30-day late OR carve-outs" },
-    ],
-  },
+};
+
+// Late Mortgage Payments section (A1 model: a Ch13-style cell per program with a
+// headline, an AUS-vs-manual badge, and a detailed note). Content verified Aug
+// 2026 against HUD 4000.1, Fannie Selling Guide B3-5.3-03 / B3-5.3-09, VA M26-7
+// Ch. 4, and USDA HB-1-3555 Ch. 10. Two items ship hedged pending Nick's sign-off:
+// the Freddie 5202.5 manual-UW housing-history language, and any USDA shelter-cost
+// percentage (the handbook says "significantly reduce," not a fixed 50%).
+export const LATE_PAYMENTS = {
+  rows: [
+    {
+      program: "Fannie",
+      headline: "Hard eligibility line",
+      badge: "hardline",
+      badgeLabel: "Eligibility line",
+      note: "Any 60, 90, 120, or 150-day mortgage late reported in the 12 months before the credit report date is \"excessive prior mortgage delinquency,\" and the loan **can't be delivered to Fannie Mae**. That's a true eligibility line, not an AUS gate. Separately, DU returns Ineligible if a mortgage is currently two or more payments past due, or was two or more past due at any point in the last 12 months. **A single 30-day mortgage late can still get a DU approval** depending on the rest of the file. A 60-day or worse late means waiting until it's more than 12 months old.",
+      source: "Selling Guide B3-5.3-03, B3-5.3-09",
+    },
+    {
+      program: "Freddie",
+      headline: "AUS-driven, no bright line",
+      badge: "aus",
+      badgeLabel: "AUS gate",
+      note: "On LPA there's **no published late-payment count**. Your credit is acceptable if the loan gets a Risk Class of Accept. Recent mortgage lates weigh heavily in that call, but Freddie doesn't publish a bright line for AUS files. Manually underwritten loans, and borrowers without usable credit scores, face explicit housing-history requirements in Guide 5202.5. [VERIFY: exact current 5202.5 manual-UW housing-history language pending Nick's confirmation.]",
+      source: "Seller/Servicer Guide 5202.5",
+    },
+    {
+      program: "FHA",
+      headline: "Kicks to manual",
+      badge: "manual",
+      badgeLabel: "Kicks to manual",
+      note: "**Purchase / no-cash-out refi (TOTAL):** your file gets kicked to manual underwriting if any mortgage tradeline in the 12 months before case number assignment shows any of these: three or more lates over 30 days; one 60-day late plus one 30-day late; one payment over 90 days late; or fewer than three consecutive payments since a forbearance plan ended. **Cash-out refi (TOTAL):** kicked to manual for a current delinquency, any delinquency within 12 months, or fewer than 12 consecutive payments since forbearance ended (so a cash-out effectively needs a clean 12 months to stay automated). **These are downgrade triggers, not automatic denials.** A downgraded file can still close if it clears manual underwriting, where acceptable housing history generally means no mortgage lates in the last 12 months. [NICK: real-world example of a downgraded file that still closed]",
+      source: "HUD Handbook 4000.1 (TOTAL + Manual UW)",
+    },
+    {
+      program: "VA",
+      headline: "Judgment, no published line",
+      badge: "judgment",
+      badgeLabel: "Lender judgment",
+      note: "The handbook publishes **no bright-line late count**. VA credit underwriting is judgment-based: a mortgage late in the last 12 months generally needs a written explanation and is weighed within the whole credit picture. In practice, lenders want 12 months with no more than one 30-day mortgage late, and many run a 0x30 overlay. **That's lender practice, not handbook text.**",
+      source: "Lender's Handbook M26-7, Chapter 4",
+    },
+    {
+      program: "USDA",
+      headline: "Clean on GUS, exception on manual",
+      badge: "exception",
+      badgeLabel: "Documented exception",
+      note: "**GUS Accept files:** no bright-line late count is applied. **Manually underwritten files:** more than one 30-day late on rent or mortgage in the last 12 months is an indicator of unacceptable credit. It can be overcome with a documented credit exception (circumstances that were temporary, beyond the applicant's control, and resolved), or where the new loan significantly reduces shelter costs. This models the Guaranteed program; don't borrow Direct-program thresholds.",
+      source: "HB-1-3555, Chapter 10",
+    },
+  ],
 };
 
 export const EVENT_SOURCES = {
@@ -93,13 +134,6 @@ export const EVENT_SOURCES = {
     Fannie: "Selling Guide B3-5.3-07",
     Freddie: "Selling Guide 5202.5",
     FHA: "HUD 4000.1 II.A.5.a.iii",
-    VA: "Lender's Handbook M26-7 Ch. 4",
-    USDA: "HB-1-3555 Chapter 10",
-  },
-  latepayments: {
-    Fannie: "Selling Guide B3-5.3-03",
-    Freddie: "Selling Guide 5202.5",
-    FHA: "HUD 4000.1 II.A.4.b.K",
     VA: "Lender's Handbook M26-7 Ch. 4",
     USDA: "HB-1-3555 Chapter 10",
   },
