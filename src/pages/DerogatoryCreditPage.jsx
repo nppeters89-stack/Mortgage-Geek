@@ -2,7 +2,7 @@ import { useState } from "react";
 import { P, F, globalCSS } from "../theme";
 import { MobileToolbar } from "../components/MobileToolbar";
 import { ShareButton } from "../components/ShareButton";
-import { WaitPeriodRows, Ch13Card } from "../components/WaitPeriodRows";
+import { WaitPeriodRows, Ch13Card, LatePaymentsRows } from "../components/WaitPeriodRows";
 import { EVENTS } from "../data/derogatoryCredit";
 import { articleSchema } from "../utils/schema";
 
@@ -62,10 +62,11 @@ export function DerogatoryCreditPage() {
       id: "latepayments",
       title: "Late Mortgage Payments",
       summary: "Recent mortgage lates without a full credit event. Less severe than foreclosure but still creates underwriting friction.",
+      intro: "Here's what most people miss about late payments: for FHA, USDA, and Freddie, the published lines aren't approve-or-deny lines, they're AUS gates. Cross one and your file doesn't get denied, it gets kicked from automated underwriting to a human underwriter, where the standards are tighter. Fannie is the exception (its lines are true eligibility lines), and VA doesn't publish a line at all.",
       explainer: [
-        "This category isn't about catastrophic events. It's about borrowers with an otherwise clean file who missed a mortgage payment or two in the last year. Every agency cares about this more than most borrowers realize, because mortgage payment history is treated as the single strongest predictor of future mortgage payment behavior.",
-        "**The rules vary more than any other category on this page.** Not just between agencies but also within agencies based on loan purpose. FHA has different thresholds for purchase, rate-and-term refi, and cash-out refi. Fannie's rule is tied to the severity of the late (60-day vs 90-day vs 120-day), not just the count.",
-        "**The USDA \"housing expense reduction\" carve-out is specific and useful.** If the new USDA loan would reduce the borrower's housing expense by 50% or more, late mortgage payments in the past 12 months can be overlooked. This is almost exclusively a refinance-from-high-rate scenario but worth knowing.",
+        "This category isn't about catastrophic events. It's about a borrower with an otherwise clean file who missed a mortgage payment or two in the last year. Every agency cares about this more than most borrowers realize, because your mortgage payment history is treated as the single strongest predictor of how you'll pay the next mortgage.",
+        "**The rules vary more than any other category on this page**, not just between agencies but within an agency by loan purpose. FHA has different triggers for purchase, rate-and-term refi, and cash-out refi. Fannie ties its eligibility line to the severity of the late (60 vs 90 vs 120-day), not just the count.",
+        "USDA has a useful carve-out worth knowing on a manual file: recent lates can be overcome with a documented credit exception, or where the new loan significantly reduces shelter costs. That second path is almost always a refinance-out-of-a-high-rate scenario.",
       ],
       tip: "The single most common pitfall: a 30-day late from 6-8 months ago that feels like it \"shouldn't count.\" Maybe it was a bank error, an autopay glitch, or you caught up within a few days. **For credit reporting and underwriting purposes, it counts.**\n\nThe only way to remove it is to dispute the late directly with the mortgage servicer and get them to correct the reporting to the three credit bureaus. That process takes 30-60 days minimum, sometimes longer. If you spot a recent mortgage late on your credit report and you're thinking about buying a home in the next year, start the dispute process *now*, not after you're under contract. A pending dispute discovered mid-transaction is one of the most common reasons deals blow up at the underwriting stage.",
     },
@@ -111,7 +112,7 @@ export function DerogatoryCreditPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: P.gold }}>🐳 Deep Dive</span>
             <span style={{ fontSize: 11, color: P.warmGrayLight }}>·</span>
-            <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified July 2026</span>
+            <span style={{ fontSize: 11, color: P.warmGrayLight, fontStyle: "italic" }}>Last verified August 2026</span>
           </div>
           <h1 style={{ fontFamily: F.display, fontSize: 40, color: P.navy, fontWeight: 400, lineHeight: 1.1, marginBottom: 16 }}>
             Derogatory Credit <em style={{ fontStyle: "italic", color: P.gold }}>Wait Periods</em>
@@ -172,10 +173,17 @@ export function DerogatoryCreditPage() {
 
                 {isOpen && (
                   <div style={{ padding: "4px 22px 24px", borderTop: `1px solid ${P.creamDark}` }}>
+                    {acc.intro && (
+                      <p style={{ fontSize: 14, color: P.warmGray, lineHeight: 1.75, margin: "16px 0 4px" }}>
+                        {renderBold(acc.intro)}
+                      </p>
+                    )}
                     <div style={{ margin: "16px 0" }}>
                       {acc.id === "chapter13"
                         ? <Ch13Card />
-                        : <WaitPeriodRows event={EVENTS[acc.id]} />}
+                        : acc.id === "latepayments"
+                          ? <LatePaymentsRows />
+                          : <WaitPeriodRows event={EVENTS[acc.id]} />}
                     </div>
 
                     <div style={{ marginTop: 20 }}>
