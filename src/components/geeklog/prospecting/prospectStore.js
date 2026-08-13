@@ -7,8 +7,8 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive } from "../../../utils/geeklogApi";
-import { sortedQueue } from "./prospectsModel";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact } from "../../../utils/geeklogApi";
+import { sortedQueue, mergeManualContacts } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
 const LOG_DIRTY = "gl2:prospects:dirty";
@@ -47,13 +47,17 @@ function reconcile(serverMap, dirtyKey, localMap, push) {
 export async function loadProspects(apiKey) {
   const local = getCachedProspects();
   const data = await fetchProspects(apiKey);
-  const prospects = sortedQueue(data.list?.prospects || []);
+  const manual = data.manual || {};
+  // Manual contacts are merged in here, once, so that every consumer downstream
+  // (queues, detail views, Add to Contacts, SOI, touch histories) resolves them
+  // through the same path as a seeded contact with no special-casing.
+  const prospects = sortedQueue(mergeManualContacts(data.list?.prospects || [], manual));
   const logs = reconcile(data.logs || {}, LOG_DIRTY, local?.logs, (id, v) => saveProspectLog(apiKey, id, v));
   const followUps = reconcile(data.followUps || {}, FU_DIRTY, local?.followUps, (id, v) => saveFollowUps(apiKey, id, v));
-  // SOI is taken straight from the server with no dirty reconcile: the reconcile
-  // shape carries a value per id and cannot express a removal, and a promotion is
-  // a deliberate tap the user can simply repeat. Server is authoritative.
-  cache = { prospects, logs, followUps, soi: data.soi || {} };
+  // SOI and pins are taken straight from the server with no dirty reconcile: the
+  // reconcile shape carries a value per id and cannot express a removal, and both
+  // are deliberate taps the user can simply repeat. Server is authoritative.
+  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: data.pinned || [], manual };
   saveLS(cache);
   return cache;
 }
@@ -110,4 +114,52 @@ export function persistSoi(apiKey, id, action) {
 
   saveSoiKeepalive(apiKey, id, action);
   return saveSoi(apiKey, id, action);
+}
+
+// ----- Manual Follow Ups membership -----
+
+export function getCachedPinned() {
+  return getCachedProspects()?.pinned || [];
+}
+
+// Write a whole pinned list back to the cache: applies an optimistic pin, or puts
+// the previous list back when the write fails.
+export function setCachedPinned(pinned) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {} };
+  cache = { ...c, pinned };
+  saveLS(cache);
+  return cache;
+}
+
+// Pin a contact into Follow Ups ("add") or take them out ("remove"). Same shape
+// as persistSoi: optimistic cache write, keepalive for durability, and the
+// awaited call returned so the caller can revert.
+export function persistPin(apiKey, id, action) {
+  const current = getCachedPinned();
+  const next = action === "add"
+    ? (current.includes(id) ? current : [...current, id])
+    : current.filter((x) => x !== id);
+  setCachedPinned(next);
+
+  savePinKeepalive(apiKey, id, action);
+  return savePin(apiKey, id, action);
+}
+
+// Create a manual contact. Not optimistic: the server owns the id normalization
+// and the duplicate check, so the cache is only updated once it confirms. The
+// server pins it in the same handler, so the pin is applied here too. Resolves
+// with the stored contact.
+export async function persistManualContact(apiKey, input) {
+  const { id, contact } = await saveManualContact(apiKey, input);
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {} };
+  const manual = { ...(c.manual || {}), [id]: contact };
+  const pinned = c.pinned?.includes(id) ? c.pinned : [...(c.pinned || []), id];
+  cache = {
+    ...c,
+    manual,
+    pinned,
+    prospects: sortedQueue(mergeManualContacts(c.prospects || [], manual)),
+  };
+  saveLS(cache);
+  return { id, contact, cache };
 }

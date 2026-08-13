@@ -6,6 +6,7 @@ import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
   outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
 } from "./prospectsModel";
+import { copyText } from "./clipboard";
 
 // Prospecting tab root: reads the shared prospect store (prospectStore.js) for
 // the call queue + logs, renders the queue or a contact card, and persists each
@@ -71,11 +72,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
 
   const copy = useCallback((text, msg, emptyMsg) => {
     if (!text) { showToast(emptyMsg || "Nothing to copy"); return; }
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(() => showToast(msg), () => showToast("Copy failed"));
-    } else {
-      showToast("Copy failed");
-    }
+    copyText(text).then(() => showToast(msg), () => showToast("Copy failed"));
   }, [showToast]);
 
   const shown = useMemo(() => filterQueue(prospects, { filter, query, logs }), [prospects, filter, query, logs]);

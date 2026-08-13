@@ -1,5 +1,6 @@
 import { T, FF } from "../gl2Tokens";
 import { dialHref } from "./prospectsModel";
+import { mutedBadge } from "./ContactQueueRow";
 
 // Shared contact header for the Prospecting card and the Follow Ups detail: serif
 // name, brokerage + line type, buysides, email, a full-width tel: Call button, and
@@ -16,7 +17,10 @@ export function ContactHeader({ prospect: p, callAction = null }) {
 
   return (
     <>
-      <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 34, lineHeight: 1.1, color: T.cream }}>{p.name}</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" }}>
+        <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 34, lineHeight: 1.1, color: T.cream }}>{p.name}</span>
+        {p.manual && <span style={mutedBadge}>manual</span>}
+      </div>
       {sub && <div style={{ color: T.dim, fontSize: 14, marginTop: 6, fontFamily: FF.body }}>{sub}</div>}
 
       <div style={{ display: "flex", gap: 22, marginTop: 16 }}>

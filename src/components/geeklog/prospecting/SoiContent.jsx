@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi } from "./prospectStore";
-import { idFromPhone, soiQueue, isTopScore, formatSoiSince } from "./prospectsModel";
+import { idFromPhone, soiQueue, isTopScore, formatSoiSince, manualContactTsvRow } from "./prospectsModel";
+import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { StatusBarCap, Toast } from "./ProspectingContent";
@@ -96,6 +97,10 @@ export function SoiContent({ apiKey }) {
           onBack={() => { setView("queue"); setOpenId(null); }}
           onLogFollowUp={(note) => handleLogFollowUp(id, note)}
           onToast={showToast}
+          onCopyForExcel={openProspect.manual ? () => copyText(manualContactTsvRow(openProspect)).then(
+            () => showToast("Contact row copied"),
+            () => showToast("Copy failed"),
+          ) : null}
           backLabel="SOI"
           footerAction={
             <button type="button" onClick={() => handleRemoveFromSoi(id)} style={quietAction}>
@@ -137,6 +142,7 @@ export function SoiContent({ apiKey }) {
                 touches={followUps[id] || []}
                 highlight={isTopScore(logs[id])}
                 meta={since ? `SOI since ${since}` : ""}
+                badge={p.manual ? "manual" : ""}
                 onOpen={() => { setOpenId(id); setView("detail"); }}
               />
             );

@@ -5,12 +5,16 @@
 // Redis and is returned only to an authorized client; it is never bundled or
 // prerendered.
 //
-// Returns { list, logs, followUps, soi }:
+// Returns { list, logs, followUps, soi, pinned, manual }:
 //   list      - the seed blob { version, generated, source, prospects: [...] }
 //   logs      - { [id]: { outcome, score, note, callback, dateCalled, ts } }, keyed
 //               by phone digits, overlaid on the list client-side.
 //   followUps - { [id]: [{ ts, note }, ...] } touch histories.
 //   soi       - { [id]: ts } sphere-of-influence membership and promotion date.
+//   pinned    - [id, ...] contacts manually placed in Follow Ups.
+//   manual    - { [id]: contact } contacts created in the app rather than seeded
+//               from Excel. Merged into the list client-side; kept out of
+//               prospects:list:v1 so a re-seed cannot destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
 
@@ -20,6 +24,8 @@ const logKey = (id) => `prospects:log:${id}`;
 const FU_SET = "prospects:fu:ids";
 const fuKey = (id) => `prospects:fu:${id}`;
 const SOI_KEY = "prospects:soi";
+const PINNED_SET = "prospects:pinned";
+const MANUAL_KEY = "prospects:manual";
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
@@ -58,7 +64,18 @@ export default async function handler(req, res) {
     // strings; the client coerces.
     const soi = (await redis.hgetall(SOI_KEY)) || {};
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi });
+    const pinned = (await redis.smembers(PINNED_SET)) || [];
+
+    // Manual contacts are stored as JSON strings in one hash. A record that fails
+    // to parse is skipped rather than breaking the whole payload.
+    const manualRaw = (await redis.hgetall(MANUAL_KEY)) || {};
+    const manual = {};
+    for (const [id, value] of Object.entries(manualRaw)) {
+      const v = parseStored(value);
+      if (v && typeof v === "object") manual[id] = v;
+    }
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });

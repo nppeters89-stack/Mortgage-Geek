@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
-import { T } from "./gl2Tokens";
+import { T, APP_MAX } from "./gl2Tokens";
 import { TabBar } from "./Gl2Primitives";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
@@ -31,10 +31,9 @@ const DIRTY_KEY = "gl2:dirty";
 const WRITE_DEBOUNCE_MS = 350;
 const RETRY_MS = 4000;
 const CONV_KEYS = new Set(CONV_SUBS.map((s) => s.key));
-// Desktop cap: keep the cockpit a centered column instead of stretching across
-// a wide monitor. Mobile is unaffected (viewport is narrower than this, so the
-// column is full width).
-const APP_MAX = 880;
+// Desktop cap (APP_MAX, from gl2Tokens): keep the cockpit a centered column
+// instead of stretching across a wide monitor. Mobile is unaffected (viewport is
+// narrower than this, so the column is full width).
 
 function loadCache() {
   try { const raw = localStorage.getItem(CACHE_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }

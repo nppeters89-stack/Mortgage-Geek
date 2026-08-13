@@ -199,11 +199,11 @@ async function prospectsFetch(key, path, init = {}) {
   return body;
 }
 
-// GET /api/prospects — { list, logs, followUps, soi }. list = seed blob; logs,
-// followUps and soi are all keyed by phone id.
+// GET /api/prospects — { list, logs, followUps, soi, pinned, manual }. list =
+// seed blob; everything else is keyed by phone id (pinned is a plain id array).
 export async function fetchProspects(key) {
   const data = await prospectsFetch(key, "");
-  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {} };
+  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {}, pinned: [], manual: {} };
 }
 
 // PUT /api/prospects/log — upsert one contact's log. Awaited write.
@@ -279,4 +279,39 @@ export function saveSoiKeepalive(key, id, action) {
   } catch {
     /* best-effort; the next load reads server truth */
   }
+}
+
+// PUT /api/prospects/pin — manually place a contact in Follow Ups ("add") or take
+// them out ("remove"). Awaited so the caller can revert an optimistic update.
+export async function savePin(key, id, action) {
+  return prospectsFetch(key, "/pin", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, action }),
+  });
+}
+
+// Fire-and-forget keepalive variant, same idiom as the SOI write.
+export function savePinKeepalive(key, id, action) {
+  try {
+    fetch(`/api/prospects/pin`, {
+      method: "PUT",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      body: JSON.stringify({ id, action }),
+    });
+  } catch {
+    /* best-effort; the next load reads server truth */
+  }
+}
+
+// PUT /api/prospects/manual — create a contact that did not come from Excel. The
+// handler pins it too. Awaited only: this one creates a record, so the caller
+// must see a 409 (duplicate) or a validation error rather than fire and forget.
+export async function saveManualContact(key, contact) {
+  return prospectsFetch(key, "/manual", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contact }),
+  });
 }

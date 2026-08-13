@@ -4,6 +4,7 @@ import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
 import { AddToSoiButton } from "./AddToSoiButton";
 import { formatTouchDate } from "./prospectsModel";
+import { ghostAction } from "./detailActionStyles";
 
 // Contact detail, shared by Follow Ups and SOI: the ContactHeader, a compact
 // read-only "First contact" block from the original call log, a follow-up
@@ -15,7 +16,10 @@ import { formatTouchDate } from "./prospectsModel";
 // parent handler, so a contact keeps one history across a promotion or a removal.
 // The views differ only in backLabel and which membership action they pass:
 // Follow Ups passes onAddToSoi, SOI passes footerAction (Remove from SOI).
-export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, footerAction = null, backLabel = "Follow Ups" }) {
+//
+// The First contact block is already conditional on `log`, so a pinned contact
+// with no call log renders without it and needs no special-casing.
+export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel, footerAction = null, backLabel = "Follow Ups" }) {
   const [note, setNote] = useState("");
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
@@ -37,6 +41,14 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
         <>
           <AddToContactsButton prospect={p} onToast={onToast} />
           {onAddToSoi && <AddToSoiButton onAdd={onAddToSoi} />}
+          {onCopyForExcel && (
+            <button type="button" onClick={onCopyForExcel} style={{ ...ghostAction, marginTop: 8 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}>
+                <rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" />
+              </svg>
+              Copy contact for Excel
+            </button>
+          )}
         </>
       } />
 

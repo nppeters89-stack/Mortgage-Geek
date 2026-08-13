@@ -25,6 +25,12 @@ export const T = {
   amber: "#C9A23A", // callback status + callback accents (prospecting)
 };
 
+// Phone-width column, centered on desktop. Lives here rather than in Gl2App so
+// that an overlay rendered from inside a tab (which must use position:fixed,
+// because it sits within the scroll container) can match the column width without
+// importing Gl2App and creating an import cycle.
+export const APP_MAX = 880;
+
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.
 export const SCORE_HEAT = [

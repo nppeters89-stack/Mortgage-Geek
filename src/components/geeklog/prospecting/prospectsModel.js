@@ -55,9 +55,14 @@ export function sortedQueue(prospects) {
 }
 
 // Apply the active chip filter and the search query. `logs` is keyed by id.
+// Manual contacts are merged into the shared collection so Follow Ups, SOI and
+// the detail views treat them like any other contact, but they did not come from
+// the Excel master list and are not cold-call material, so they stay out of this
+// queue. (Their buysides is 0, which would otherwise sort them to the very top.)
 export function filterQueue(prospects, { filter, query, logs }) {
   const q = (query || "").trim().toLowerCase();
   return prospects.filter((p) => {
+    if (p.manual) return false;
     const log = logs[idFromPhone(p.phone)];
     if (filter === "vip" && !hasIntelDot(p)) return false;
     if (filter === "cb" && !(log && log.outcome === "Callback")) return false;
@@ -139,16 +144,26 @@ function byNeglect(prospects, followUps) {
     .map((x) => x.p);
 }
 
-// Follow Ups membership: scored 9+ and not yet promoted. A promoted contact
-// graduates out of this queue and into the SOI view; the call log is untouched,
-// so removing them from SOI drops them straight back in here.
-export function followUpQueue(prospects, logs, followUps, soi = {}) {
-  const qualifying = prospects.filter((p) => {
+// Follow Ups membership, the single formula: earned by a 9+ call score OR placed
+// by hand, and not already promoted to SOI. A promoted contact graduates into the
+// SOI view; the call log and the pin are both untouched, so removing them from
+// SOI drops them straight back in here.
+//
+// `pinned` is a Set of ids (or anything with .has).
+const EMPTY_SET = new Set();
+
+export function followUpQueue(prospects, logs, followUps, soi = {}, pinned = EMPTY_SET) {
+  const members = prospects.filter((p) => {
     const id = idFromPhone(p.phone);
-    return qualifiesForFollowUp(logs[id]) && !soi[id];
+    return (qualifiesForFollowUp(logs[id]) || pinned.has(id)) && !soi[id];
   });
-  return byNeglect(qualifying, followUps);
+  return byNeglect(members, followUps);
 }
+
+// A contact is in Follow Ups by hand, not by score. Only these get the manual
+// "Remove from Follow Ups" action: a derived member's place comes from the call
+// score, so there would be nothing for the action to undo.
+export const isPinnedMember = (id, pinned, soi = {}) => !!(pinned?.has(id) && !soi[id]);
 
 // SOI membership: stored, not derived. Every id in the hash that still exists in
 // the prospect list, sorted by the same neglect rule as Follow Ups.
@@ -166,6 +181,46 @@ export function formatSoiSince(ts) {
   } catch {
     return "";
   }
+}
+
+// ----- Manual contacts -----
+
+// Merge the manual hash into the seeded list. Manual records carry the same field
+// names as seeded ones plus a `manual` flag, so every downstream component works
+// on them unchanged. A seeded contact wins any id collision: Excel is the source
+// of truth for anyone who appears in it.
+export function mergeManualContacts(seeded, manual) {
+  const seen = new Set(seeded.map((p) => idFromPhone(p.phone)));
+  const extra = Object.entries(manual || {})
+    .filter(([id, c]) => c && !seen.has(id))
+    .map(([, c]) => ({ ...c, buysides: c.buysides || 0, manual: true }));
+  return extra.length ? [...seeded, ...extra] : seeded;
+}
+
+// Add-sheet search across every contact, seeded and manual: name, brokerage, and
+// phone digits. Deliberately wider than the Prospecting search (which does not
+// match on phone), because this is how Nick finds someone he only has a number
+// for. Empty query returns nothing: the sheet is a lookup, not a browser.
+export function searchContacts(prospects, query) {
+  const raw = (query || "").trim();
+  if (!raw) return [];
+  const q = raw.toLowerCase();
+  const qDigits = raw.replace(/\D/g, "");
+  return prospects.filter((p) => {
+    if (p.name?.toLowerCase().includes(q)) return true;
+    if (p.brokerage?.toLowerCase().includes(q)) return true;
+    return !!qDigits && idFromPhone(p.phone).includes(qDigits);
+  });
+}
+
+// One TSV row shaped for the master list columns, for pasting a manual contact
+// into Excel: Name, Email, Phone, Cold Call Notes. Tabs and newlines inside a
+// value would break the row, so they collapse to spaces.
+const cell = (v) => String(v ?? "").replace(/[\t\r\n]+/g, " ").trim();
+
+export function manualContactTsvRow(contact) {
+  if (!contact) return "";
+  return [cell(contact.name), cell(contact.email), cell(contact.phone), cell(contact.notes)].join("\t");
 }
 
 // Readable touch date for the history rows, e.g. "Aug 10, 2026".
