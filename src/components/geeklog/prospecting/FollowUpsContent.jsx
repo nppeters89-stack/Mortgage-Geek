@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps } from "./prospectStore";
-import { idFromPhone, followUpQueue, lastTouchLabel } from "./prospectsModel";
+import { idFromPhone, followUpQueue, lastTouchLabel, isTopScore } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 
@@ -98,11 +98,12 @@ export function FollowUpsContent({ apiKey }) {
             const touches = followUps[id] || [];
             const count = touches.length;
             const { label, stale } = lastTouchLabel(touches);
+            const top = isTopScore(logs[id]);
             return (
               <div key={id} role="button" tabIndex={0}
                 onClick={() => { setOpenId(id); setView("detail"); }}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(id); setView("detail"); } }}
-                style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${T.line}`, cursor: "pointer", borderRadius: 8 }}>
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${top ? T.greenWashLine : T.line}`, cursor: "pointer", borderRadius: 8, background: top ? T.greenWash : "transparent" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
                   <div style={{ fontSize: 12.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>

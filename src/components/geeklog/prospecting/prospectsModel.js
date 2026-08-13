@@ -102,6 +102,12 @@ export const STALE_DAYS = 14;
 
 export const qualifiesForFollowUp = (log) => !!(log && log.score >= FOLLOWUP_MIN_SCORE);
 
+// A perfect call. Both 9s and 10s qualify for follow up, but a 10 is the strongest
+// buying signal in the log, so the queue features it instead of letting it sit in
+// an undifferentiated list.
+export const TOP_SCORE = 10;
+export const isTopScore = (log) => !!(log && log.score === TOP_SCORE);
+
 // Newest touch timestamp for a contact (0 if none).
 export function lastTouchTs(touches) {
   if (!Array.isArray(touches) || !touches.length) return 0;
