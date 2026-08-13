@@ -255,63 +255,59 @@ export function saveFollowUpsKeepalive(key, id, touches) {
   }
 }
 
-// PUT /api/prospects/soi — promote one contact into the sphere of influence
-// (action "add") or take them back out ("remove"). Awaited so the caller can
-// revert its optimistic update when the write fails.
+// ----- Membership writes -----
+//
+// SOI, pinning, and manual contact creation all go to one endpoint,
+// /api/prospects/membership, discriminated by `kind`. They were three routes
+// until api/ hit Vercel's 12-function Hobby cap; they are one concern anyway
+// (which list a contact belongs to). The call signatures below are unchanged, so
+// nothing above this layer knows or cares.
+
+// prospectsFetch adds the auth header; this is just the PUT shape.
+const membershipBody = (body) => ({
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body),
+});
+
+// Fire-and-forget keepalive PUT so a membership change survives the phone
+// locking on the way back to the queue. Paired with the awaited call, which is
+// the one that reports failure.
+function membershipKeepalive(key, body) {
+  try {
+    fetch(`/api/prospects/membership`, {
+      method: "PUT",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    /* best-effort; the next load reads server truth */
+  }
+}
+
+// Promote one contact into the sphere of influence ("add") or take them back out
+// ("remove"). Awaited so the caller can revert its optimistic update.
 export async function saveSoi(key, id, action) {
-  return prospectsFetch(key, "/soi", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, action }),
-  });
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "soi", id, action }));
 }
 
-// Fire-and-forget keepalive variant. Paired with the awaited call above: this one
-// survives the phone locking, that one reports failure.
 export function saveSoiKeepalive(key, id, action) {
-  try {
-    fetch(`/api/prospects/soi`, {
-      method: "PUT",
-      keepalive: true,
-      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
-      body: JSON.stringify({ id, action }),
-    });
-  } catch {
-    /* best-effort; the next load reads server truth */
-  }
+  membershipKeepalive(key, { kind: "soi", id, action });
 }
 
-// PUT /api/prospects/pin — manually place a contact in Follow Ups ("add") or take
-// them out ("remove"). Awaited so the caller can revert an optimistic update.
+// Manually place a contact in Follow Ups ("add") or take them out ("remove").
 export async function savePin(key, id, action) {
-  return prospectsFetch(key, "/pin", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, action }),
-  });
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "pin", id, action }));
 }
 
-// Fire-and-forget keepalive variant, same idiom as the SOI write.
 export function savePinKeepalive(key, id, action) {
-  try {
-    fetch(`/api/prospects/pin`, {
-      method: "PUT",
-      keepalive: true,
-      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
-      body: JSON.stringify({ id, action }),
-    });
-  } catch {
-    /* best-effort; the next load reads server truth */
-  }
+  membershipKeepalive(key, { kind: "pin", id, action });
 }
 
-// PUT /api/prospects/manual — create a contact that did not come from Excel. The
-// handler pins it too. Awaited only: this one creates a record, so the caller
-// must see a 409 (duplicate) or a validation error rather than fire and forget.
+// Create a contact that did not come from Excel. The handler pins it too. Awaited
+// only: this one creates a record, so the caller must see a 409 (duplicate) or a
+// validation error rather than fire and forget.
 export async function saveManualContact(key, contact) {
-  return prospectsFetch(key, "/manual", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contact }),
-  });
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "manual", contact }));
 }
