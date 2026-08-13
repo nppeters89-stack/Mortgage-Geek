@@ -1,5 +1,5 @@
 import { CHART_COLORS } from "../theme";
-import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500, FTHB_AGE, PRICE_TO_INCOME } from "../data/geekCharts";
+import { GOLD_HOUSING_RATIO, RATES_HISTORY, PAYMENT_BURDEN, PRICES_INCOME_INFLATION, RENT_LINE, HOMES_IN_SP500, FTHB_AGE, PRICE_TO_INCOME, STUDENT_LOANS_G19 } from "../data/geekCharts";
 
 // Static sneak-peek sparkline for a Geek Charts hub card. Draws each chart's
 // line(s) straight from the data, so it always shows the fully rendered shape,
@@ -24,6 +24,11 @@ const PREVIEWS = {
   // Ratio sits 2.45 to 4.67, floored at 2 (matching the chart) so the
   // sparkline shows the real shape instead of a flat line near the top.
   "price-to-income-ratio": { data: PRICE_TO_INCOME, yMin: 2, yMax: 5, lines: [{ key: "ratio", color: C.line, w: 2.5 }] },
+  // The student loan mountain is the icon here, so a zero floor is correct: the
+  // series climbs from $481B to $1,777B. The renderer wants a {years, key} shape;
+  // an adapter object supplies the quarters as the x length without aliasing the
+  // export. Red emphasis, matching the full chart's line convention.
+  "the-other-down-payment": { data: { years: STUDENT_LOANS_G19.quarters, billions: STUDENT_LOANS_G19.billions }, yMin: 0, yMax: 2000, lines: [{ key: "billions", color: C.accent, w: 2.5 }] },
 };
 
 // Near-square viewBox (4:3) so the preview fills a square-ish card slot without
