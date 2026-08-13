@@ -1,16 +1,21 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi } from "./prospectStore";
-import { idFromPhone, followUpQueue, isTopScore } from "./prospectsModel";
+import { idFromPhone, soiQueue, isTopScore, formatSoiSince } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { StatusBarCap, Toast } from "./ProspectingContent";
+import { quietAction } from "./detailActionStyles";
 
-// Follow Ups tab: contacts whose call log scored 9 or 10 (derived membership),
-// sorted by neglect. Log repeated auto-dated touches per contact; full history per
-// contact. Shares the prospect store with the Prospecting tab, so a call scored
-// 9+ shows up here on the next tab switch without a reload.
-export function FollowUpsContent({ apiKey }) {
+// SOI (sphere of influence): contacts promoted out of Follow Ups after they send
+// a referral. Unlike Follow Ups, membership is stored (a Redis hash of id to
+// promotion date), not derived from the call score.
+//
+// Everything else is deliberately the same feature: the same queue row, the same
+// detail component, the same neglect sort, and the same touch history key. A
+// promotion moves no data, so removing someone drops them back into Follow Ups
+// with every touch intact.
+export function SoiContent({ apiKey }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
   const [logs, setLogs] = useState(() => seed?.logs || {});
@@ -48,9 +53,11 @@ export function FollowUpsContent({ apiKey }) {
     return () => { cancelled = true; };
   }, [apiKey]);
 
-  const queue = useMemo(() => followUpQueue(prospects, logs, followUps, soi), [prospects, logs, followUps, soi]);
+  const queue = useMemo(() => soiQueue(prospects, soi, followUps), [prospects, soi, followUps]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
+  // Same handler and same key as Follow Ups: a touch logged here is the same
+  // history the Follow Ups view would show.
   const handleLogFollowUp = useCallback((id, note) => {
     const next = [...(fuRef.current[id] || []), { ts: Date.now(), note }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
@@ -58,23 +65,25 @@ export function FollowUpsContent({ apiKey }) {
     showToast("Follow up logged");
   }, [apiKey, showToast]);
 
-  // Promote to SOI: optimistic, then straight back to the queue, where the
-  // contact no longer belongs. On a failed write put the previous map back in
-  // both this view and the shared cache.
-  const handleAddToSoi = useCallback((id) => {
+  // Demote: optimistic, back to the queue, revert both this view and the shared
+  // cache if the write fails. Nothing is deleted, so the contact reappears in
+  // Follow Ups on the strength of its original call score.
+  const handleRemoveFromSoi = useCallback((id) => {
     const prev = soiRef.current;
-    setSoi({ ...prev, [id]: String(Date.now()) });
+    const next = { ...prev };
+    delete next[id];
+    setSoi(next);
     setView("queue");
     setOpenId(null);
-    showToast("Added to SOI");
-    persistSoi(apiKey, id, "add").catch(() => {
+    showToast("Removed from SOI");
+    persistSoi(apiKey, id, "remove").catch(() => {
       setSoi(prev);
       setCachedSoi(prev);
       showToast("Could not update SOI");
     });
   }, [apiKey, showToast]);
 
-  // ----- Detail view (stay here after logging a touch) -----
+  // ----- Detail view -----
   if (view === "detail" && openProspect) {
     const id = idFromPhone(openProspect.phone);
     return (
@@ -87,7 +96,12 @@ export function FollowUpsContent({ apiKey }) {
           onBack={() => { setView("queue"); setOpenId(null); }}
           onLogFollowUp={(note) => handleLogFollowUp(id, note)}
           onToast={showToast}
-          onAddToSoi={() => handleAddToSoi(id)}
+          backLabel="SOI"
+          footerAction={
+            <button type="button" onClick={() => handleRemoveFromSoi(id)} style={quietAction}>
+              Remove from SOI
+            </button>
+          }
         />
         <Toast msg={toast} />
       </>
@@ -100,9 +114,9 @@ export function FollowUpsContent({ apiKey }) {
       <StatusBarCap />
       <header style={{ position: "sticky", top: 0, zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Ups</h1>
+          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>SOI</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
-            <strong style={{ color: T.redLift, fontWeight: 600 }}>{queue.length}</strong> to work
+            <strong style={{ color: T.green, fontWeight: 600 }}>{queue.length}</strong> in sphere
           </div>
         </div>
       </header>
@@ -111,16 +125,18 @@ export function FollowUpsContent({ apiKey }) {
         {queue.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? (
-              <>Nothing to follow up yet.<br />Any call you score 9 or 10 lands here automatically.</>
+              <>No one in your sphere yet.<br />Add a contact from their Follow Ups detail once they refer you.</>
             ) : "Loading…"}
           </div>
         ) : (
           queue.map((p) => {
             const id = idFromPhone(p.phone);
+            const since = formatSoiSince(soi[id]);
             return (
               <ContactQueueRow key={id} prospect={p}
                 touches={followUps[id] || []}
                 highlight={isTopScore(logs[id])}
+                meta={since ? `SOI since ${since}` : ""}
                 onOpen={() => { setOpenId(id); setView("detail"); }}
               />
             );

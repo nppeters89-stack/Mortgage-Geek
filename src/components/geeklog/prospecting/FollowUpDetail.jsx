@@ -2,14 +2,20 @@ import { useState } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
+import { AddToSoiButton } from "./AddToSoiButton";
 import { formatTouchDate } from "./prospectsModel";
 
-// Follow Ups detail: the shared ContactHeader, a compact read-only "First contact"
-// block from the original call log, a follow-up composer, and the touch history
-// (newest first, each an accordion consistent with the intel block). onLogFollowUp
-// hands the note up; the parent appends the touch and re-renders this view with it
-// on top.
-export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast }) {
+// Contact detail, shared by Follow Ups and SOI: the ContactHeader, a compact
+// read-only "First contact" block from the original call log, a follow-up
+// composer, and the touch history (newest first, each an accordion consistent
+// with the intel block). onLogFollowUp hands the note up; the parent appends the
+// touch and re-renders this view with it on top.
+//
+// Both views write touches to the same prospects:fu:{id} key through the same
+// parent handler, so a contact keeps one history across a promotion or a removal.
+// The views differ only in backLabel and which membership action they pass:
+// Follow Ups passes onAddToSoi, SOI passes footerAction (Remove from SOI).
+export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, footerAction = null, backLabel = "Follow Ups" }) {
   const [note, setNote] = useState("");
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
@@ -24,10 +30,15 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
     <div style={{ padding: "0 20px 40px" }}>
       <button type="button" onClick={onBack}
         style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "none", color: T.dim, fontFamily: FF.body, fontSize: 14, padding: "18px 0 8px", cursor: "pointer" }}>
-        ← Follow Ups
+        ← {backLabel}
       </button>
 
-      <ContactHeader prospect={p} callAction={<AddToContactsButton prospect={p} onToast={onToast} />} />
+      <ContactHeader prospect={p} callAction={
+        <>
+          <AddToContactsButton prospect={p} onToast={onToast} />
+          {onAddToSoi && <AddToSoiButton onAdd={onAddToSoi} />}
+        </>
+      } />
 
       {log && (
         <div style={{ marginTop: 22, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "13px 15px" }}>
@@ -65,6 +76,8 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
           ))}
         </div>
       )}
+
+      {footerAction}
     </div>
   );
 }

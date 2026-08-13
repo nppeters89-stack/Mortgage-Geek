@@ -7,6 +7,7 @@ import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
 import { ProspectingContent } from "./prospecting/ProspectingContent";
 import { FollowUpsContent } from "./prospecting/FollowUpsContent";
+import { SoiContent } from "./prospecting/SoiContent";
 import { BestDayFlash, TargetBurst, RecapSeal } from "./Gl2Rewards";
 import { StoryCard } from "./StoryCard";
 import { ALL_KEYS, CONV_SUBS, STREAK_FLOOR, emptyDay, normalizeDay, convOf } from "./gl2Model";
@@ -387,6 +388,7 @@ export function Gl2App({ apiKey }) {
               onForward={goForward} canForward={canForward}
               onSettings={() => setSettingsOpen(true)}
               onOpenClosings={() => setTab("closings")}
+              onOpenSoi={() => setTab("soi")}
               weekConv={weekConv} target={target} syncing={syncing} pulse={pulse}
             />
           )}
@@ -396,8 +398,10 @@ export function Gl2App({ apiKey }) {
           {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
           {tab === "followups" && <FollowUpsContent apiKey={apiKey} />}
           {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
-          {/* Closings is no longer a bottom tab; it opens from the dollar button in the Today header. */}
+          {/* Closings and SOI are not bottom tabs; they open from the dollar and
+              SOI buttons in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
+          {tab === "soi" && <SoiContent apiKey={apiKey} />}
         </div>
 
         <TabBar active={tab} onChange={setTab} />

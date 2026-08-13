@@ -8,7 +8,7 @@ import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, sumKeys } fr
 // page (GeekLogPage) supplies the viewport shell and the persistent TabBar, and
 // opens Settings as an overlay from the gear in the Today header. No em-dashes.
 
-function HeaderButton({ onClick, disabled, ariaLabel, children }) {
+function HeaderButton({ onClick, disabled, ariaLabel, children, width = 34 }) {
   return (
     <div
       onClick={disabled ? undefined : onClick}
@@ -16,7 +16,7 @@ function HeaderButton({ onClick, disabled, ariaLabel, children }) {
       aria-label={ariaLabel}
       aria-disabled={disabled || undefined}
       style={{
-        width: 34, height: 34, borderRadius: 10, flex: "0 0 auto",
+        width, height: 34, borderRadius: 10, flex: "0 0 auto",
         cursor: disabled ? "default" : "pointer", userSelect: "none",
         display: "flex", alignItems: "center", justifyContent: "center",
         boxShadow: `inset 0 0 0 1px ${T.line}`, opacity: disabled ? 0.4 : 1,
@@ -57,7 +57,7 @@ function SyncDot() {
 // ===========================================================================
 // Today
 // ===========================================================================
-export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, onOpenClosings, weekConv, target, syncing, pulse }) {
+export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, onOpenClosings, onOpenSoi, weekConv, target, syncing, pulse }) {
   const convTotal = sumKeys(state, CONV_SUBS);
   const apptTotal = sumKeys(state, APPT_SUBS);
   const contentTotal = sumKeys(state, CONTENT_SUBS);
@@ -80,8 +80,13 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
             </HeaderButton>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {syncing && <SyncDot />}
+          {/* SOI opens the same way Closings does: a header button that switches
+              the tab, not a sixth entry in the bottom TabBar. */}
+          <HeaderButton onClick={onOpenSoi} ariaLabel="SOI" width="auto">
+            <span style={{ padding: "0 10px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, letterSpacing: "0.06em", color: T.dim }}>SOI</span>
+          </HeaderButton>
           <HeaderButton onClick={onOpenClosings} ariaLabel="Closings"><DollarGlyph /></HeaderButton>
           <HeaderButton onClick={onSettings} ariaLabel="Settings"><GearGlyph /></HeaderButton>
           <Wordmark height={24} />

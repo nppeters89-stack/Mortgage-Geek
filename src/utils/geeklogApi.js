@@ -199,11 +199,11 @@ async function prospectsFetch(key, path, init = {}) {
   return body;
 }
 
-// GET /api/prospects — { list, logs, followUps }. list = seed blob; logs and
-// followUps keyed by phone id.
+// GET /api/prospects — { list, logs, followUps, soi }. list = seed blob; logs,
+// followUps and soi are all keyed by phone id.
 export async function fetchProspects(key) {
   const data = await prospectsFetch(key, "");
-  return data || { list: { prospects: [] }, logs: {}, followUps: {} };
+  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {} };
 }
 
 // PUT /api/prospects/log — upsert one contact's log. Awaited write.
@@ -252,5 +252,31 @@ export function saveFollowUpsKeepalive(key, id, touches) {
     });
   } catch {
     /* best-effort; reconcile on next load recovers a lost write */
+  }
+}
+
+// PUT /api/prospects/soi — promote one contact into the sphere of influence
+// (action "add") or take them back out ("remove"). Awaited so the caller can
+// revert its optimistic update when the write fails.
+export async function saveSoi(key, id, action) {
+  return prospectsFetch(key, "/soi", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, action }),
+  });
+}
+
+// Fire-and-forget keepalive variant. Paired with the awaited call above: this one
+// survives the phone locking, that one reports failure.
+export function saveSoiKeepalive(key, id, action) {
+  try {
+    fetch(`/api/prospects/soi`, {
+      method: "PUT",
+      keepalive: true,
+      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      body: JSON.stringify({ id, action }),
+    });
+  } catch {
+    /* best-effort; the next load reads server truth */
   }
 }

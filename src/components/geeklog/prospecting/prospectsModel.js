@@ -123,12 +123,12 @@ export function lastTouchLabel(touches) {
   return { label: days <= 0 ? "Today" : `${days}d ago`, stale: days > STALE_DAYS };
 }
 
-// Qualifying contacts sorted by neglect: never-touched first, then ascending by
-// most-recent touch (longest since last touch at the top = the next right call).
-// Stable within ties (keeps the incoming buyside order).
-export function followUpQueue(prospects, logs, followUps) {
+// Sort by neglect: never-touched first, then ascending by most-recent touch
+// (longest since last touch at the top = the next right call). Stable within ties
+// (keeps the incoming buyside order). Shared by the Follow Ups and SOI queues so
+// both read the same way.
+function byNeglect(prospects, followUps) {
   return prospects
-    .filter((p) => qualifiesForFollowUp(logs[idFromPhone(p.phone)]))
     .map((p, i) => ({ p, i, last: lastTouchTs(followUps[idFromPhone(p.phone)]) }))
     .sort((a, b) => {
       if (a.last === 0 && b.last === 0) return a.i - b.i;
@@ -137,6 +137,35 @@ export function followUpQueue(prospects, logs, followUps) {
       return (a.last - b.last) || (a.i - b.i);
     })
     .map((x) => x.p);
+}
+
+// Follow Ups membership: scored 9+ and not yet promoted. A promoted contact
+// graduates out of this queue and into the SOI view; the call log is untouched,
+// so removing them from SOI drops them straight back in here.
+export function followUpQueue(prospects, logs, followUps, soi = {}) {
+  const qualifying = prospects.filter((p) => {
+    const id = idFromPhone(p.phone);
+    return qualifiesForFollowUp(logs[id]) && !soi[id];
+  });
+  return byNeglect(qualifying, followUps);
+}
+
+// SOI membership: stored, not derived. Every id in the hash that still exists in
+// the prospect list, sorted by the same neglect rule as Follow Ups.
+export function soiQueue(prospects, soi, followUps) {
+  return byNeglect(prospects.filter((p) => !!soi[idFromPhone(p.phone)]), followUps);
+}
+
+// Promotion date for the SOI row, e.g. "Aug 2026". Values arrive from Redis as
+// strings, so coerce before formatting.
+export function formatSoiSince(ts) {
+  const n = Number(ts);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  try {
+    return new Date(n).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+  } catch {
+    return "";
+  }
 }
 
 // Readable touch date for the history rows, e.g. "Aug 10, 2026".

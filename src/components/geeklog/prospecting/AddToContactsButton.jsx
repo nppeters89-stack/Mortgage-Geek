@@ -1,5 +1,5 @@
-import { T, FF } from "../gl2Tokens";
 import { buildVCard, vcardFilename } from "./vcard";
+import { ghostAction } from "./detailActionStyles";
 
 // "Add to Contacts": hands a .vcf to the OS so iOS opens its native Create New
 // Contact screen. Share-first because that is the only path that works from the
@@ -47,8 +47,7 @@ export function AddToContactsButton({ prospect, onToast }) {
   };
 
   return (
-    <button type="button" onClick={handleClick}
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, width: "100%", marginTop: 10, padding: 14, background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 12, fontFamily: FF.body, fontSize: 15.5, fontWeight: 600, cursor: "pointer" }}>
+    <button type="button" onClick={handleClick} style={{ ...ghostAction, marginTop: 10 }}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}>
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
         <circle cx="9" cy="7" r="4" />

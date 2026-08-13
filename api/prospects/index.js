@@ -5,10 +5,12 @@
 // Redis and is returned only to an authorized client; it is never bundled or
 // prerendered.
 //
-// Returns { list, logs }:
-//   list  - the seed blob { version, generated, source, prospects: [...] }
-//   logs  - { [id]: { outcome, score, note, callback, dateCalled, ts } }, keyed
-//           by phone digits, overlaid on the list client-side.
+// Returns { list, logs, followUps, soi }:
+//   list      - the seed blob { version, generated, source, prospects: [...] }
+//   logs      - { [id]: { outcome, score, note, callback, dateCalled, ts } }, keyed
+//               by phone digits, overlaid on the list client-side.
+//   followUps - { [id]: [{ ts, note }, ...] } touch histories.
+//   soi       - { [id]: ts } sphere-of-influence membership and promotion date.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
 
@@ -17,6 +19,7 @@ const LOGGED_SET = "prospects:logged";
 const logKey = (id) => `prospects:log:${id}`;
 const FU_SET = "prospects:fu:ids";
 const fuKey = (id) => `prospects:fu:${id}`;
+const SOI_KEY = "prospects:soi";
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
@@ -50,7 +53,12 @@ export default async function handler(req, res) {
       });
     }
 
-    return jsonResponse(res, 200, { list, logs, followUps });
+    // SOI membership: one HGETALL of id -> promotion timestamp. Stored, not
+    // derived, because promoting is a manual decision. Values come back as
+    // strings; the client coerces.
+    const soi = (await redis.hgetall(SOI_KEY)) || {};
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });
