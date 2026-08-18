@@ -138,7 +138,7 @@ export function SoiContent({ apiKey }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
       <StatusBarCap />
-      <header style={{ position: "sticky", top: 0, zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
+      <header style={{ position: "sticky", top: "calc(8px + env(safe-area-inset-top, 0px))", zIndex: 20, padding: "20px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>SOI</h1>
           <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>

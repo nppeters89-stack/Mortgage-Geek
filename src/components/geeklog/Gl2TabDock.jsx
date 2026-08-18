@@ -26,6 +26,12 @@ const NEAR_BOTTOM = 150;
 const ZONE_SHARE = 0.25;
 const SCROLLABLE_MIN = 40;
 
+// Pinned shown at the very top: the app opens there and the tabs should be
+// waiting. This also covers iOS rubber-band overscroll, whose spring back to the
+// top otherwise reads as a downward delta and hides the bar while the user is
+// sitting at the top of a tab.
+const TOP_PIN = 2;
+
 // Upward movement reveals at twice the rate it hides — the bar is what the
 // downswipe is reaching for.
 const REVEAL_GAIN = 2;
@@ -76,7 +82,8 @@ export function Gl2TabDock({ resetKey, maxWidth = APP_MAX, children }) {
         const range = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
         // A page too short to scroll can never reveal the bar again — keep it.
-        if (range <= SCROLLABLE_MIN) {
+        // And at (or bounced past) the very top, the bar is always shown.
+        if (range <= SCROLLABLE_MIN || y <= TOP_PIN) {
           lastY.current = y;
           apply(0);
           ticking = false;
