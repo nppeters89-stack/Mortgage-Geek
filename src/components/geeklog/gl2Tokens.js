@@ -23,6 +23,9 @@ export const T = {
   gold: "#B8860B", // closings only, internal
   goldMuted: "#8B6914",
   amber: "#C9A23A", // callback status + callback accents (prospecting)
+  cold: "#5B7C99", // steel blue: the Follow Up cockpit's cold pipeline (went quiet)
+  coldWash: "rgba(91,124,153,0.10)", // cold at 10%: cold section fill
+  coldWashLine: "rgba(91,124,153,0.35)", // cold separator / card border
 };
 
 // Phone-width column, centered on desktop. Lives here rather than in Gl2App so

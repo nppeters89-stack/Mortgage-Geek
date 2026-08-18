@@ -5,7 +5,16 @@
 //   { kind: "soi",    id, action: "add" | "remove" }  HSET/HDEL prospects:soi
 //   { kind: "pin",    id, action: "add" | "remove" }  SADD/SREM prospects:pinned
 //   { kind: "rac",    id, action: "add" | "remove" }  SADD/SREM prospects:rac
+//   { kind: "cold",   id, action: "add" | "remove" }  HSET/HDEL prospects:cold
+//   { kind: "dead",   id, action: "add" | "remove" }  HSET/HDEL prospects:dead (+cold)
 //   { kind: "manual", contact }                       HSET prospects:manual + pin
+//
+// cold and dead are the Follow Up cockpit's state hashes (id -> ms timestamp).
+// They live here, not in two new endpoint files, because Vercel's Hobby plan caps
+// a deployment at 12 Serverless Functions and this endpoint exists precisely to
+// keep every "which list is this contact in" write on one route. Dead supersedes
+// cold: adding dead clears cold, and removing dead drops the contact back into
+// cold (Fresh Cold), never straight into the hot pipeline.
 //
 // These began as three routes (soi.js, pin.js, manual.js) and were folded into
 // one because Vercel's Hobby plan caps a deployment at 12 Serverless Functions
@@ -21,6 +30,8 @@ const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
+const COLD_KEY = "prospects:cold";
+const DEAD_KEY = "prospects:dead";
 
 const ACTIONS = new Set(["add", "remove"]);
 const digits = (v) => String(v || "").replace(/\D/g, "");
@@ -62,6 +73,40 @@ async function handleSetFlag(res, { id, action }, setKey) {
   if (action === "add") await redis.sadd(setKey, id);
   else await redis.srem(setKey, id);
   return jsonResponse(res, 200, { id, action });
+}
+
+// Cold: a stored membership hash of id -> the ms timestamp it went quiet. The
+// cold column position is derived from check-in touches, never stored here.
+async function handleCold(res, { id, action }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
+
+  if (action === "add") {
+    const ts = Date.now();
+    await redis.hset(COLD_KEY, { [id]: String(ts) });
+    return jsonResponse(res, 200, { id, action, ts });
+  }
+  await redis.hdel(COLD_KEY, id);
+  return jsonResponse(res, 200, { id, action });
+}
+
+// Dead: the same shape, plus the supersede rule. Adding dead clears any cold
+// membership in the same handler (dead wins). Removing dead (a restore) writes
+// the contact into cold with a fresh timestamp, so a restored contact lands in
+// Fresh Cold rather than reappearing in the hot pipeline.
+async function handleDead(res, { id, action }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
+
+  const ts = Date.now();
+  if (action === "add") {
+    await redis.hset(DEAD_KEY, { [id]: String(ts) });
+    await redis.hdel(COLD_KEY, id);
+    return jsonResponse(res, 200, { id, action, ts });
+  }
+  await redis.hdel(DEAD_KEY, id);
+  await redis.hset(COLD_KEY, { [id]: String(ts) });
+  return jsonResponse(res, 200, { id, action, ts });
 }
 
 // A contact that never came from Excel. Pinned in the same handler: a manual add
@@ -107,8 +152,10 @@ export default async function handler(req, res) {
       case "soi": return await handleSoi(res, body);
       case "pin": return await handleSetFlag(res, body, PINNED_SET);
       case "rac": return await handleSetFlag(res, body, RAC_SET);
+      case "cold": return await handleCold(res, body);
+      case "dead": return await handleDead(res, body);
       case "manual": return await handleManual(res, body.contact);
-      default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac or manual" });
+      default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
     }
   } catch (err) {
     console.error("[prospects/membership] error:", err);

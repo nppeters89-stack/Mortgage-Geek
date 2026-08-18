@@ -1,35 +1,63 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
 import { AddToSoiButton } from "./AddToSoiButton";
 import { AddedToRacButton } from "./AddedToRacButton";
-import { formatTouchDate } from "./prospectsModel";
+import { formatTouchDate, stageTag, goalIndexOf, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
 
-// Contact detail, shared by Follow Ups and SOI: the ContactHeader, a compact
-// read-only "First contact" block from the original call log, a follow-up
-// composer, and the touch history (newest first, each an accordion consistent
-// with the intel block). onLogFollowUp hands the note up; the parent appends the
-// touch and re-renders this view with it on top.
+// Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
+// read-only "First contact" block from the original call log, a composer, and the
+// touch history. The composer has three modes, all optional so the SOI tab keeps
+// its original behavior with no new props:
+//   "plain" (default): one textarea + Log follow up. onLogFollowUp(note).
+//   "stage": a stage selector (defaulting to the next stage) + textarea. Logs the
+//            touch at the chosen stage via onLogFollowUp(note, stage); choosing
+//            the goal stage promotes to SOI in the parent.
+//   "cold":  a cold check-in composer (disabled at the cap) plus Revive to
+//            pipeline. onColdCheckIn(note) and onRevive().
+// showStageTags turns on the red/blue/gray stage tags in the history rows.
 //
-// Both views write touches to the same prospects:fu:{id} key through the same
-// parent handler, so a contact keeps one history across a promotion or a removal.
-// The views differ only in backLabel and which membership action they pass:
-// Follow Ups passes onAddToSoi, SOI passes footerAction (Remove from SOI).
-//
-// The First contact block is already conditional on `log`, so a pinned contact
-// with no call log renders without it and needs no special-casing.
-export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel, inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups" }) {
+// Both Follow Ups and SOI write touches to the same prospects:fu:{id} key through
+// the same parent handler, so a contact keeps one history across a promotion.
+export function FollowUpDetail({
+  prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel,
+  inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
+  composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
+  statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
+}) {
+  const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
-  const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  // Stage defaults to the next stage up, capped at the goal. Re-sync as the
+  // contact's derived stage advances (the parent re-renders this view after each
+  // logged touch), so the selector keeps pointing one stage ahead.
+  const [stageSel, setStageSel] = useState(() => Math.min(stageIndex + 1, goal));
+  useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
 
-  const submit = () => {
+  const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  const atCap = coldCount >= COLD_CHECKIN_CAP;
+
+  const submitPlain = () => {
     const text = note.trim();
     if (!text) return;
     onLogFollowUp(text);
     setNote("");
   };
+  const submitStage = () => {
+    const text = note.trim();
+    if (!text) return;
+    onLogFollowUp(text, stageSel);
+    setNote("");
+  };
+  const submitCold = () => {
+    const text = note.trim();
+    if (!text || atCap) return;
+    onColdCheckIn?.(text);
+    setNote("");
+  };
+
+  const tagColor = (tone) => (tone === "cold" ? T.cold : tone === "dead" ? T.faint : T.redLift);
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -54,6 +82,10 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
         </>
       } />
 
+      {statusLine && (
+        <div style={{ marginTop: 12, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: composerMode === "cold" ? T.cold : T.redLift }}>{statusLine}</div>
+      )}
+
       {log && (
         <div style={{ marginTop: 22, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "13px 15px" }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dim, marginBottom: 6 }}>First contact</div>
@@ -66,28 +98,57 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
         </div>
       )}
 
-      <div style={{ marginTop: 26 }}>
-        <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Log a follow up</h2>
-        <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
-          style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
-        <button type="button" onClick={submit} disabled={!note.trim()}
-          style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? T.green : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
-          Log follow up
-        </button>
-      </div>
+      {/* Composer: plain (SOI), stage selector (active Follow Ups), or cold. */}
+      {composerMode === "cold" ? (
+        <div style={{ marginTop: 26 }}>
+          <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Cold check-in ({Math.min(coldCount + 1, COLD_CHECKIN_CAP)} of {COLD_CHECKIN_CAP})</h2>
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Light touch. What did you send or say..."
+            style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
+          <button type="button" onClick={submitCold} disabled={!note.trim() || atCap}
+            style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: !note.trim() || atCap ? T.surface : T.cold, color: !note.trim() || atCap ? T.faint : T.cream, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: !note.trim() || atCap ? "default" : "pointer" }}>
+            {atCap ? "At 5 of 5 check-ins" : "Log check-in"}
+          </button>
+          {onRevive && (
+            <button type="button" onClick={onRevive}
+              style={{ width: "100%", marginTop: 10, padding: 14, borderRadius: 12, border: `1px solid ${T.greenWashLine}`, background: "none", color: T.green, fontFamily: FF.body, fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+              Revive to pipeline
+            </button>
+          )}
+        </div>
+      ) : (
+        <div style={{ marginTop: 26 }}>
+          <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Log a follow up</h2>
+          {composerMode === "stage" && stages && (
+            <select value={stageSel} onChange={(e) => setStageSel(Number(e.target.value))}
+              style={{ width: "100%", marginBottom: 10, background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: "12px 12px", fontFamily: FF.body, fontSize: 15 }}>
+              {stages.map((label, i) => (i === 0 ? null : <option key={i} value={i}>{label}</option>))}
+            </select>
+          )}
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
+            style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
+          <button type="button" onClick={composerMode === "stage" ? submitStage : submitPlain} disabled={!note.trim()}
+            style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
+            {composerMode === "stage" && stageSel === goal ? "Promote to SOI" : "Log follow up"}
+          </button>
+        </div>
+      )}
 
       {history.length > 0 && (
         <div style={{ marginTop: 24 }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dim, marginBottom: 10 }}>History · {history.length}</div>
-          {history.map((t, i) => (
-            <details key={`${t.ts}-${i}`} style={{ border: `1px solid ${T.line}`, borderRadius: 10, overflow: "hidden", marginBottom: 8 }}>
-              <summary style={{ listStyle: "none", display: "flex", alignItems: "baseline", gap: 10, padding: "12px 14px", cursor: "pointer", background: T.surface }}>
-                <span style={{ flex: "none", fontSize: 12.5, fontWeight: 600, color: T.cream, fontVariantNumeric: "tabular-nums" }}>{formatTouchDate(t.ts)}</span>
-                <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: T.dim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FF.body }}>{t.note}</span>
-              </summary>
-              <div style={{ padding: "12px 14px", fontSize: 14, lineHeight: 1.55, color: T.cream, background: T.bg0, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: FF.body }}>{t.note || "No note"}</div>
-            </details>
-          ))}
+          {history.map((t, i) => {
+            const tag = showStageTags && stages ? stageTag(t, stages) : null;
+            return (
+              <details key={`${t.ts}-${i}`} style={{ border: `1px solid ${T.line}`, borderRadius: 10, overflow: "hidden", marginBottom: 8 }}>
+                <summary style={{ listStyle: "none", display: "flex", alignItems: "baseline", gap: 10, padding: "12px 14px", cursor: "pointer", background: T.surface }}>
+                  <span style={{ flex: "none", fontSize: 12.5, fontWeight: 600, color: T.cream, fontVariantNumeric: "tabular-nums" }}>{formatTouchDate(t.ts)}</span>
+                  {tag && <span style={{ flex: "none", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: tagColor(tag.tone) }}>{tag.label}</span>}
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: T.dim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FF.body }}>{t.note}</span>
+                </summary>
+                <div style={{ padding: "12px 14px", fontSize: 14, lineHeight: 1.55, color: T.cream, background: T.bg0, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: FF.body }}>{t.note || "No note"}</div>
+              </details>
+            );
+          })}
         </div>
       )}
 

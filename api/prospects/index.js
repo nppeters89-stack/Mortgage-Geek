@@ -34,6 +34,16 @@ const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
+const STAGES_KEY = "prospects:fu:stages";
+const CONFIG_KEY = "prospects:fu:config";
+const COLD_KEY = "prospects:cold";
+const DEAD_KEY = "prospects:dead";
+
+// The cockpit falls back to these when the key is absent, so no seeding write is
+// required for the labels or the week target to work on a fresh install. A stored
+// value (set later, without a deploy) overrides them.
+const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
+const DEFAULT_CONFIG = { weekTarget: 15 };
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
@@ -86,7 +96,16 @@ export default async function handler(req, res) {
       if (v && typeof v === "object") manual[id] = v;
     }
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac });
+    // Follow Up cockpit state. stages/config fall back to defaults when unset;
+    // cold/dead are id -> timestamp hashes, empty when nobody has been moved yet.
+    const storedStages = parseStored(await redis.get(STAGES_KEY));
+    const stages = Array.isArray(storedStages) && storedStages.length ? storedStages : DEFAULT_STAGES;
+    const storedConfig = parseStored(await redis.get(CONFIG_KEY));
+    const config = storedConfig && typeof storedConfig === "object" ? { ...DEFAULT_CONFIG, ...storedConfig } : DEFAULT_CONFIG;
+    const cold = (await redis.hgetall(COLD_KEY)) || {};
+    const dead = (await redis.hgetall(DEAD_KEY)) || {};
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });

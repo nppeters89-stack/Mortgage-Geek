@@ -316,6 +316,26 @@ export function saveRacKeepalive(key, id, action) {
   membershipKeepalive(key, { kind: "rac", id, action });
 }
 
+// Move a contact to the cold pipeline ("add") or take them out ("remove"). The
+// cold column position is derived from check-in touches, never sent here.
+export async function saveCold(key, id, action) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "cold", id, action }));
+}
+
+export function saveColdKeepalive(key, id, action) {
+  membershipKeepalive(key, { kind: "cold", id, action });
+}
+
+// Mark a contact dead ("add") or restore them ("remove"). The handler enforces
+// the supersede rule server-side: add clears cold, remove lands them in cold.
+export async function saveDead(key, id, action) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "dead", id, action }));
+}
+
+export function saveDeadKeepalive(key, id, action) {
+  membershipKeepalive(key, { kind: "dead", id, action });
+}
+
 // Create a contact that did not come from Excel. The handler pins it too. Awaited
 // only: this one creates a record, so the caller must see a 409 (duplicate) or a
 // validation error rather than fire and forget.

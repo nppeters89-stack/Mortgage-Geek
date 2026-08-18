@@ -144,18 +144,87 @@ function byNeglect(prospects, followUps) {
     .map((x) => x.p);
 }
 
+// ----- Pipeline stages, cold, and dead (the Follow Up cockpit) -----
+//
+// The whole cockpit derives a contact's state from touch data plus the cold/dead
+// hashes; nothing about position is stored. This is the single implementation of
+// those derivations, imported by the mobile list and (Phase 2) the desktop board.
+
+// The seven pipeline stages, index 0 (New) through 6 (SOI, the goal). The app
+// falls back to these labels when prospects:fu:stages is absent, so labels can
+// change server-side without a deploy without breaking the indices.
+export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
+export const DEFAULT_CONFIG = { weekTarget: 15 };
+
+// The five cold columns, keyed by check-in count (min(count, 4)).
+export const COLD_COLUMNS = ["Fresh Cold", "1 Check-in", "2 Check-ins", "3 Check-ins", "4-5 Check-ins"];
+export const COLD_CHECKIN_CAP = 5;
+
+// Sentinel stages that a touch can carry: a cold check-in and a dead marker. Any
+// stage > 0 is a pipeline stage (index into the stages array).
+export const STAGE_COLD = -1;
+export const STAGE_DEAD = -2;
+
+// The goal (last) stage index for a stages array. Always the SOI column.
+export const goalIndexOf = (stages = DEFAULT_STAGES) => stages.length - 1;
+
+// LEGACY RULE: a touch stored before the cockpit has no stage field. It is
+// treated as stage 1 (Intro Follow Up) everywhere a stage is computed, so nobody
+// already touched is stranded in New. Stored data is never migrated; this is the
+// read-time interpretation.
+const touchStage = (t) => (t && t.stage != null ? t.stage : 1);
+
+// A contact's pipeline stage: the highest positive stage among its touches, or 0
+// (New) if none. EXCEPTION: an id in the SOI hash is at the goal stage regardless
+// of touches, because the soi hash is the single source of truth for SOI.
+export function stageOf(touches, { isSoi = false, goalIndex = goalIndexOf() } = {}) {
+  if (isSoi) return goalIndex;
+  const positives = (touches || []).map(touchStage).filter((s) => s > 0);
+  return positives.length ? Math.max(...positives) : 0;
+}
+
+// Cold check-ins logged (stage -1 touches). The cold column index caps at 4.
+export const coldCount = (touches) => (touches || []).filter((t) => t && t.stage === STAGE_COLD).length;
+export const coldColIndex = (touches) => Math.min(coldCount(touches), COLD_COLUMNS.length - 1);
+
+// State predicates over the cold/dead hashes (id -> ts). Dead supersedes cold.
+export const isDead = (id, dead = {}) => !!dead[id];
+export const isCold = (id, cold = {}, dead = {}) => !!cold[id] && !dead[id];
+
+// The stage tag shown on a history row: a red pipeline label, a blue cold
+// check-in, or a gray dead marker. Returns { label, tone } where tone is one of
+// "stage" | "cold" | "dead".
+export function stageTag(touch, stages = DEFAULT_STAGES) {
+  const s = touch && touch.stage != null ? touch.stage : 1;
+  if (s === STAGE_COLD) return { label: "Cold check-in", tone: "cold" };
+  if (s === STAGE_DEAD) return { label: "Marked dead", tone: "dead" };
+  return { label: stages[s] || stages[1], tone: "stage" };
+}
+
 // Follow Ups membership, the single formula: earned by a 9+ call score OR placed
 // by hand, and not already promoted to SOI. A promoted contact graduates into the
 // SOI view; the call log and the pin are both untouched, so removing them from
-// SOI drops them straight back in here.
+// SOI drops them straight back in here. The cockpit adds two more exclusions:
+// a contact moved to cold lives in the cold pipeline, and a dead contact is gone.
 //
-// `pinned` is a Set of ids (or anything with .has).
+// `pinned` is a Set of ids (or anything with .has). `cold`/`dead` are the hashes.
 const EMPTY_SET = new Set();
+const EMPTY_OBJ = {};
 
-export function followUpQueue(prospects, logs, followUps, soi = {}, pinned = EMPTY_SET) {
+export function followUpQueue(prospects, logs, followUps, soi = {}, pinned = EMPTY_SET, cold = EMPTY_OBJ, dead = EMPTY_OBJ) {
   const members = prospects.filter((p) => {
     const id = idFromPhone(p.phone);
-    return (qualifiesForFollowUp(logs[id]) || pinned.has(id)) && !soi[id];
+    return (qualifiesForFollowUp(logs[id]) || pinned.has(id)) && !soi[id] && !cold[id] && !dead[id];
+  });
+  return byNeglect(members, followUps);
+}
+
+// The cold pipeline: contacts moved to cold and not dead, neglect-sorted so the
+// longest-quiet sit at the top (the next ones to revive or let go).
+export function coldQueue(prospects, followUps, cold = EMPTY_OBJ, dead = EMPTY_OBJ) {
+  const members = prospects.filter((p) => {
+    const id = idFromPhone(p.phone);
+    return !!cold[id] && !dead[id];
   });
   return byNeglect(members, followUps);
 }

@@ -1,7 +1,11 @@
 // PUT /api/prospects/fu — upsert one contact's follow-up touch history.
 //
 // Body { id, touches } where id = phone digits (same id as call logs) and
-// touches is the full updated array [{ ts, note }, ...]. SETs prospects:fu:{id}
+// touches is the full updated array [{ ts, note, stage? }, ...]. `stage` is the
+// Follow Up cockpit's pipeline stage: a positive index into the stages array, -1
+// for a cold check-in, -2 for a dead marker. It is optional and additive: a touch
+// stored before the cockpit simply has no stage field and is read back as stage 1
+// (Intro Follow Up) client-side, so this never rewrites history. SETs prospects:fu:{id}
 // and SADDs the id to prospects:fu:ids so /api/prospects can MGET every history
 // without a SCAN. Single user, last write wins; small payload so it works with
 // keepalive:true. Follow Ups membership is derived (call log score >= 9), never
@@ -22,6 +26,7 @@ function validate(body) {
     if (!Number.isFinite(t.ts)) return "touch.ts must be a number";
     if (t.note != null && typeof t.note !== "string") return "touch.note must be a string";
     if (t.note && t.note.length > 2000) return "touch note too long";
+    if (t.stage != null && !(Number.isInteger(t.stage) && t.stage >= -2 && t.stage <= 20)) return "touch.stage must be an integer";
   }
   return null;
 }
@@ -38,7 +43,13 @@ export default async function handler(req, res) {
     if (err) return jsonResponse(res, 400, { error: err });
 
     const { id, touches } = req.body;
-    const clean = touches.map((t) => ({ ts: t.ts, note: typeof t.note === "string" ? t.note : "" }));
+    // Preserve stage only when present, so a legacy touch (no stage) stays exactly
+    // as it was and is interpreted as stage 1 at read time.
+    const clean = touches.map((t) => {
+      const o = { ts: t.ts, note: typeof t.note === "string" ? t.note : "" };
+      if (Number.isInteger(t.stage)) o.stage = t.stage;
+      return o;
+    });
 
     await redis.set(fuKey(id), JSON.stringify(clean));
     await redis.sadd(FU_SET, id);
