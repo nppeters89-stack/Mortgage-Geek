@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { T } from "./gl2Tokens";
+import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 
 // Auto-hiding dock for the Geek Log TabBar, ported from the main site's
@@ -25,16 +25,16 @@ import { useIsMobile } from "../../utils/hooks";
 // It also stays visible when the content is too short to scroll, which the main
 // site never needs (its pages are long and end in a footer). Without that, a
 // short tab would hide the bar with no way to scroll it back.
-// The main site's fixed thresholds (100px from the top, 150px from the bottom)
-// assume a long marketing page. Geek Log tabs scroll a few hundred pixels, where
-// those two zones overlap and cover the entire range, leaving no band in which
-// the bar can ever be revealed. So they are capped to a share of the actual
-// scrollable distance, which keeps the same feel on long content and still
-// leaves a working middle band on short content.
-const NEAR_TOP = 100;
+// The main site force-hides the toolbar near the top of a page. Geek Log does
+// NOT: the top of a tab is where the tabs are most useful, so the bar stays put
+// there and only the scroll gesture moves it.
+//
+// The near-bottom rule is kept, so the end of a list is never covered. Its
+// threshold is capped to a share of the actual scrollable distance: the main
+// site's flat 150px assumes a long marketing page, and on a tab that only
+// scrolls a couple hundred pixels it would swallow the whole range.
 const NEAR_BOTTOM = 150;
 const ZONE_SHARE = 0.25;
-const SCROLLABLE_MIN = 40;
 
 // Upward movement reveals at twice the rate it hides. The bar is what you are
 // reaching for when you swipe down, so it should not take a full bar-height of
@@ -77,13 +77,11 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
       setOffset(next);
     };
 
-    // A tab whose content does not scroll can never reveal the bar again, so it
-    // starts shown there and hidden everywhere else (matching the main site,
-    // which starts hidden at the top of a long page).
+    // Always starts shown. A tab opens at the top, and that is precisely where
+    // the tabs should be visible.
     const settle = () => {
-      const scrollable = el.scrollHeight - el.clientHeight > SCROLLABLE_MIN;
       lastY.current = el.scrollTop;
-      apply(scrollable ? barH : 0);
+      apply(0);
     };
     settle();
 
@@ -94,13 +92,12 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
       requestAnimationFrame(() => {
         const y = el.scrollTop;
         const range = Math.max(1, el.scrollHeight - el.clientHeight);
-        const topZone = Math.min(NEAR_TOP, range * ZONE_SHARE);
         const botZone = Math.min(NEAR_BOTTOM, range * ZONE_SHARE);
 
         const rawDelta = y - lastY.current;
         const delta = rawDelta < 0 ? rawDelta * REVEAL_GAIN : rawDelta;
         const nearBottom = y >= range - botZone;
-        const next = y < topZone || nearBottom
+        const next = nearBottom
           ? barH
           : Math.max(0, Math.min(barH, offRef.current + delta));
 
@@ -125,9 +122,16 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
     // the screen on iOS. No backdrop-filter either: the TabBar's own background
     // is already 92% opaque, so the blur bought nothing and was the other half of
     // that artifact.
+    // Fixed to the VIEWPORT, exactly like the main site's MobileToolbar, not
+    // absolute inside the column. The column is height:100% of a fixed <main>,
+    // which on iOS standalone resolves to the small viewport and stops short of
+    // the bottom safe-area inset. Anchoring the bar there left a dead strip of
+    // roughly bar height below it. Centered and capped to the app column so it
+    // still lines up on desktop.
     <div
       style={{
-        position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 40,
+        position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
+        width: "100%", maxWidth: APP_MAX, zIndex: 40,
         height: barH || undefined,
         overflow: "hidden",
         pointerEvents: hidden ? "none" : "auto",
