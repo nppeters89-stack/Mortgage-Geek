@@ -145,9 +145,24 @@ export function Gl2App({ apiKey }) {
 
   useEffect(() => { writeCache({ weekStart, target, days: daysMap }); }, [daysMap, target, weekStart]);
 
-  // The single scrolling element for every tab. Gl2TabDock listens to it to
-  // auto-hide the tab bar, the way the main site listens to window scroll.
-  const scrollRef = useRef(null);
+  // iOS standalone can cold-launch with a stale, letterboxed viewport that only
+  // corrects once the document scrolls. The column's 100lvh guarantees at least
+  // a sliver of scroll range, and this nudge exercises it so the correction
+  // happens immediately instead of waiting for the first user swipe. No-op on
+  // desktop and in ordinary browsers.
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 1);
+      window.scrollTo(0, 0);
+    });
+  }, []);
+
+  // Each tab starts at its own top; the document scroller is shared across tabs.
+  const isFirstTab = useRef(true);
+  useEffect(() => {
+    if (isFirstTab.current) { isFirstTab.current = false; return; }
+    window.scrollTo(0, 0);
+  }, [tab]);
 
   // Debounced writes with retry.
   const pending = useRef(new Set());
@@ -371,8 +386,11 @@ export function Gl2App({ apiKey }) {
            reset and body kept the UA default 8px margin. Everything here is
            fixed-position so it mostly did not show, but a full-screen app should
            not be sitting inside a stray margin. */
-        html, body { margin: 0; padding: 0; background: ${T.bg1}; overscroll-behavior: none; }
-        html, body { height: 100%; }
+        /* Reset only — no height locks, no overscroll suppression. The body is
+           the scroller now (matching the main-site pages), and the root
+           background is the canvas that paints any part of the webview the
+           layout doesn't reach. */
+        html, body { margin: 0; padding: 0; background: ${T.bg1}; }
         @keyframes gl-pop { 0% { transform: scale(1); } 38% { transform: scale(1.26); } 100% { transform: scale(1); } }
         @keyframes gl-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
         @keyframes gl-barpulse { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
@@ -388,18 +406,25 @@ export function Gl2App({ apiKey }) {
           @keyframes gl-flash { 0% { opacity: 1; } 100% { opacity: 1; } }
         }
       `}</style>
-      <main style={{ position: "fixed", inset: 0, display: "flex", justifyContent: "center", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
-        {/* Phone-width column, centered on desktop. The gradient full-bleeds on
-            main behind it; the scroll area, tab bar, and overlays live inside. */}
-        {/* 100dvh, not 100%: inside a fixed <main>, a percentage height can
-            resolve against iOS standalone's small viewport, which stops above the
-            bottom safe-area inset and leaves a dead band of background below the
-            column. dvh tracks the real viewport. */}
-        <div style={{ position: "relative", width: "100%", maxWidth: columnMax, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", transition: "max-width 0.2s ease" }}>
-        {/* The scroll area owns the full column height; the tab bar overlays it
-            from Gl2TabDock rather than taking layout space, so content runs to
-            the bottom of the screen the way the main site's PWA does. */}
-        <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
+      {/* DOCUMENT FLOW, not a fixed shell — this is the fix for the iOS
+          standalone dead band at the bottom of the screen, and it makes this
+          route work structurally like every main-site page (minHeight + the
+          BODY as the scroller). The old position:fixed/inset:0 shell meant the
+          document itself could never scroll; iOS standalone can cold-launch
+          with a stale, letterboxed viewport, and with zero document scroll
+          range WebKit never corrects it — leaving a permanent unpainted strip
+          below the layout viewport that no fixed element could reach. A
+          scrollable document heals the viewport and paints content plus the
+          root canvas across the whole webview. */}
+      <main style={{ minHeight: "100dvh", display: "flex", justifyContent: "center", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream }}>
+        {/* Phone-width column, centered on desktop. minHeight is 100lvh (the
+            LARGE viewport) so the document always has at least a sliver of
+            scroll range on a letterboxed cold launch — that sliver is what lets
+            the mount-time scroll nudge below trigger the viewport correction. */}
+        <div style={{ position: "relative", width: "100%", maxWidth: columnMax, minHeight: "100lvh", display: "flex", flexDirection: "column", transition: "max-width 0.2s ease" }}>
+        {/* Content area. Bottom padding keeps the last rows clear of the fixed
+            tab bar; the bar overlays content, exactly like MobileToolbar. */}
+        <div style={{ flex: 1, paddingTop: "calc(8px + env(safe-area-inset-top, 0px))", paddingBottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}>
 
           {tab === "today" && (
             <TodayContent
@@ -426,7 +451,7 @@ export function Gl2App({ apiKey }) {
           {tab === "soi" && <SoiContent apiKey={apiKey} />}
         </div>
 
-        <Gl2TabDock scrollRef={scrollRef} resetKey={tab}>
+        <Gl2TabDock resetKey={tab} maxWidth={columnMax}>
           <TabBar active={tab} onChange={setTab} />
         </Gl2TabDock>
 

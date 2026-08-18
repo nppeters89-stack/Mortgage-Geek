@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { T, FF } from "./gl2Tokens";
+import { T, FF, APP_MAX } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
 import { WeekRewards } from "./Gl2Rewards";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
@@ -273,7 +273,12 @@ export function ClosingsContent({ closings, year }) {
 // ===========================================================================
 export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn, onOpenCorrection }) {
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 20, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)" }}>
+    // Fixed and column-centered, not absolute-in-column: the column flows with
+    // the document now and can be taller than the screen, so inset:0 against it
+    // would park this panel at document top — off-screen when scrolled. zIndex
+    // sits above the tab dock (40) so the panel covers it, as it did before the
+    // dock existed.
+    <div style={{ position: "fixed", top: 0, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: APP_MAX, zIndex: 50, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", overflowY: "auto" }}>
       <div style={{ flex: "0 0 auto", padding: "14px 20px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <HeaderButton onClick={onClose} ariaLabel="Close settings">

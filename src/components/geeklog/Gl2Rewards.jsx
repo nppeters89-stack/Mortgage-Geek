@@ -1,4 +1,4 @@
-import { T, FF } from "./gl2Tokens";
+import { T, FF, APP_MAX } from "./gl2Tokens";
 import { Eyebrow, Card, Wordmark } from "./Gl2Primitives";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, sumKeys, convOf } from "./gl2Model";
 import { monthDay } from "./gl2Week";
@@ -105,7 +105,9 @@ export function RecapSeal({ lastWeek, target, streak, onExport, onDismiss, expor
   );
 
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 55, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", animation: "gl-sealin .4s ease both" }}>
+    // Fixed and column-centered (the column flows with the document now; see
+    // SettingsPanel). Keeps the seal scoped to the phone column on desktop.
+    <div style={{ position: "fixed", top: 0, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: APP_MAX, zIndex: 58, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", animation: "gl-sealin .4s ease both", overflowY: "auto" }}>
       <div style={{ flex: "0 0 auto", padding: "16px 20px 6px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Eyebrow size={11} color={T.greenBright}>Last week, sealed</Eyebrow>
         <Wordmark height={22} />

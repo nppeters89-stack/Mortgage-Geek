@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { T, FF } from "./gl2Tokens";
+import { T, FF, APP_MAX } from "./gl2Tokens";
 import { Wordmark, Eyebrow, Card } from "./Gl2Primitives";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, emptyDay, normalizeDay } from "./gl2Model";
 import { centralDateKey, addDays, monthDay, TRACKING_EPOCH } from "./gl2Week";
@@ -89,7 +89,9 @@ export function CorrectionPanel({ apiKey, onClose, onSaved }) {
   const canSave = day !== null && !saving;
 
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 40, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)" }}>
+    // Fixed and column-centered (the column flows with the document now; see
+    // SettingsPanel). Layers above Settings (50).
+    <div style={{ position: "fixed", top: 0, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: APP_MAX, zIndex: 55, background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, display: "flex", flexDirection: "column", paddingTop: "env(safe-area-inset-top, 0px)", overflowY: "auto" }}>
       <div style={{ flex: "0 0 auto", padding: "14px 20px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <div onClick={onClose} role="button" aria-label="Back to settings" style={{ width: 34, height: 34, borderRadius: 10, cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `inset 0 0 0 1px ${T.line}` }}>
