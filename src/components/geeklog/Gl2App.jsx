@@ -367,7 +367,12 @@ export function Gl2App({ apiKey }) {
   return (
     <>
       <style>{`
-        html, body { background: ${T.bg1}; overscroll-behavior: none; }
+        /* This route deliberately does not inject globalCSS, so it never got a
+           reset and body kept the UA default 8px margin. Everything here is
+           fixed-position so it mostly did not show, but a full-screen app should
+           not be sitting inside a stray margin. */
+        html, body { margin: 0; padding: 0; background: ${T.bg1}; overscroll-behavior: none; }
+        html, body { height: 100%; }
         @keyframes gl-pop { 0% { transform: scale(1); } 38% { transform: scale(1.26); } 100% { transform: scale(1); } }
         @keyframes gl-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
         @keyframes gl-barpulse { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }

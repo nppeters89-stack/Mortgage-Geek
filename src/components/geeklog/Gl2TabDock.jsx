@@ -61,13 +61,16 @@ function Probe({ scrollRef, dockRef }) {
       probe.remove();
       const dock = dockRef.current?.getBoundingClientRect();
       const scroll = scrollRef?.current?.getBoundingClientRect();
+      const mainEl = document.querySelector("main")?.getBoundingClientRect();
+      const col = scrollRef?.current?.parentElement?.getBoundingClientRect();
+      const gap = (r) => (r ? Math.round(ih - r.bottom) : "-");
       setText([
-        `innerHeight ${ih}`,
-        `visualVP ${vv}`,
-        `docEl ${de}`,
-        `safeBottom ${inset}`,
-        `dockBottom ${dock ? Math.round(dock.bottom) : "-"} (gap ${dock ? Math.round(ih - dock.bottom) : "-"})`,
-        `scrollBottom ${scroll ? Math.round(scroll.bottom) : "-"} (gap ${scroll ? Math.round(ih - scroll.bottom) : "-"})`,
+        `innerH ${ih}  visualVP ${vv}  docEl ${de}`,
+        `safeBottom ${inset}  standalone ${window.navigator.standalone === true ? "y" : "n"}`,
+        `main   bottom ${mainEl ? Math.round(mainEl.bottom) : "-"}  gap ${gap(mainEl)}`,
+        `column bottom ${col ? Math.round(col.bottom) : "-"}  gap ${gap(col)}`,
+        `scroll bottom ${scroll ? Math.round(scroll.bottom) : "-"}  gap ${gap(scroll)}`,
+        `dock   bottom ${dock ? Math.round(dock.bottom) : "-"}  gap ${gap(dock)}`,
       ].join("\n"));
     };
     read();
@@ -78,7 +81,9 @@ function Probe({ scrollRef, dockRef }) {
 
   return (
     <pre style={{
-      position: "fixed", left: 6, bottom: 6, zIndex: 9999, margin: 0,
+      // Sits mid-screen on purpose: the bottom-left corner is the exact area
+      // being diagnosed and must stay unobstructed in a screenshot.
+      position: "fixed", left: 6, top: "38%", zIndex: 9999, margin: 0,
       background: "rgba(0,0,0,0.82)", color: "#63E6A0", font: "11px/1.35 ui-monospace, monospace",
       padding: "6px 8px", borderRadius: 6, pointerEvents: "none", whiteSpace: "pre",
     }}>{text}</pre>
@@ -89,7 +94,10 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
   const isMobile = useIsMobile();
   const barRef = useRef(null);
   const dockRef = useRef(null);
-  const probeOn = typeof window !== "undefined" && window.location.search.includes("dockprobe");
+  // TEMPORARY, and on unconditionally on purpose. It was behind ?dockprobe=1,
+  // which is unusable: an installed PWA has no address bar to type it into.
+  // Remove this and the Probe component as soon as the bottom band is diagnosed.
+  const probeOn = true;
   const [barH, setBarH] = useState(0);
   const [offset, setOffset] = useState(0);
   const offRef = useRef(0);
