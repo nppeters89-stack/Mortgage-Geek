@@ -25,9 +25,21 @@ import { useIsMobile } from "../../utils/hooks";
 // It also stays visible when the content is too short to scroll, which the main
 // site never needs (its pages are long and end in a footer). Without that, a
 // short tab would hide the bar with no way to scroll it back.
+// The main site's fixed thresholds (100px from the top, 150px from the bottom)
+// assume a long marketing page. Geek Log tabs scroll a few hundred pixels, where
+// those two zones overlap and cover the entire range, leaving no band in which
+// the bar can ever be revealed. So they are capped to a share of the actual
+// scrollable distance, which keeps the same feel on long content and still
+// leaves a working middle band on short content.
 const NEAR_TOP = 100;
 const NEAR_BOTTOM = 150;
+const ZONE_SHARE = 0.25;
 const SCROLLABLE_MIN = 40;
+
+// Upward movement reveals at twice the rate it hides. The bar is what you are
+// reaching for when you swipe down, so it should not take a full bar-height of
+// travel to arrive.
+const REVEAL_GAIN = 2;
 
 export function Gl2TabDock({ scrollRef, resetKey, children }) {
   const isMobile = useIsMobile();
@@ -38,7 +50,9 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
   const lastY = useRef(0);
 
   // Measure the bar rather than hardcoding a height: the TabBar grows with the
-  // safe-area inset, which differs per device.
+  // safe-area inset, which differs per device. Re-runs on isMobile because the
+  // two branches below render different nodes, and the ref would otherwise stay
+  // pointed at the unmounted one.
   useEffect(() => {
     const el = barRef.current;
     if (!el) return;
@@ -48,7 +62,7 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     const el = scrollRef?.current;
@@ -79,11 +93,17 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
       ticking = true;
       requestAnimationFrame(() => {
         const y = el.scrollTop;
-        const delta = y - lastY.current;
-        const nearBottom = el.clientHeight + y >= el.scrollHeight - NEAR_BOTTOM;
-        const next = y < NEAR_TOP || nearBottom
+        const range = Math.max(1, el.scrollHeight - el.clientHeight);
+        const topZone = Math.min(NEAR_TOP, range * ZONE_SHARE);
+        const botZone = Math.min(NEAR_BOTTOM, range * ZONE_SHARE);
+
+        const rawDelta = y - lastY.current;
+        const delta = rawDelta < 0 ? rawDelta * REVEAL_GAIN : rawDelta;
+        const nearBottom = y >= range - botZone;
+        const next = y < topZone || nearBottom
           ? barH
           : Math.max(0, Math.min(barH, offRef.current + delta));
+
         lastY.current = y;
         apply(next);
         ticking = false;
@@ -100,9 +120,15 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
   const hidden = barH > 0 && offset >= barH;
 
   return (
+    // The clip box gets an explicit height once measured. Leaving it to size
+    // itself from a transformed child left a stray band painted at the bottom of
+    // the screen on iOS. No backdrop-filter either: the TabBar's own background
+    // is already 92% opaque, so the blur bought nothing and was the other half of
+    // that artifact.
     <div
       style={{
         position: "absolute", left: 0, right: 0, bottom: 0, zIndex: 40,
+        height: barH || undefined,
         overflow: "hidden",
         pointerEvents: hidden ? "none" : "auto",
       }}
@@ -112,8 +138,6 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
         style={{
           transform: `translateY(${offset}px)`,
           willChange: "transform",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
           borderTop: `1px solid ${T.line}`,
         }}
       >
