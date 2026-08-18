@@ -386,7 +386,11 @@ export function Gl2App({ apiKey }) {
       <main style={{ position: "fixed", inset: 0, display: "flex", justifyContent: "center", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
         {/* Phone-width column, centered on desktop. The gradient full-bleeds on
             main behind it; the scroll area, tab bar, and overlays live inside. */}
-        <div style={{ position: "relative", width: "100%", maxWidth: columnMax, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", transition: "max-width 0.2s ease" }}>
+        {/* 100dvh, not 100%: inside a fixed <main>, a percentage height can
+            resolve against iOS standalone's small viewport, which stops above the
+            bottom safe-area inset and leaves a dead band of background below the
+            column. dvh tracks the real viewport. */}
+        <div style={{ position: "relative", width: "100%", maxWidth: columnMax, height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", transition: "max-width 0.2s ease" }}>
         {/* The scroll area owns the full column height; the tab bar overlays it
             from Gl2TabDock rather than taking layout space, so content runs to
             the bottom of the screen the way the main site's PWA does. */}

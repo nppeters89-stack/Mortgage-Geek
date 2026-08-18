@@ -41,9 +41,55 @@ const ZONE_SHARE = 0.25;
 // travel to arrive.
 const REVEAL_GAIN = 2;
 
+// Geometry readout for diagnosing bottom-of-screen gaps on a real device, where
+// there are no dev tools. Off unless the URL carries ?dockprobe=1, so it costs
+// nothing in normal use. Reports which box stops short of the viewport bottom:
+// if dockBottom equals innerHeight the bar is flush and any band is elsewhere; if
+// scrollBottom is short, the column is not reaching the bottom.
+function Probe({ scrollRef, dockRef }) {
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    const read = () => {
+      const ih = Math.round(window.innerHeight);
+      const vv = window.visualViewport ? Math.round(window.visualViewport.height) : 0;
+      const de = Math.round(document.documentElement.clientHeight);
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:fixed;bottom:0;height:env(safe-area-inset-bottom,0px);";
+      document.body.appendChild(probe);
+      const inset = Math.round(probe.getBoundingClientRect().height);
+      probe.remove();
+      const dock = dockRef.current?.getBoundingClientRect();
+      const scroll = scrollRef?.current?.getBoundingClientRect();
+      setText([
+        `innerHeight ${ih}`,
+        `visualVP ${vv}`,
+        `docEl ${de}`,
+        `safeBottom ${inset}`,
+        `dockBottom ${dock ? Math.round(dock.bottom) : "-"} (gap ${dock ? Math.round(ih - dock.bottom) : "-"})`,
+        `scrollBottom ${scroll ? Math.round(scroll.bottom) : "-"} (gap ${scroll ? Math.round(ih - scroll.bottom) : "-"})`,
+      ].join("\n"));
+    };
+    read();
+    const t = setInterval(read, 500);
+    window.addEventListener("resize", read);
+    return () => { clearInterval(t); window.removeEventListener("resize", read); };
+  }, [scrollRef, dockRef]);
+
+  return (
+    <pre style={{
+      position: "fixed", left: 6, bottom: 6, zIndex: 9999, margin: 0,
+      background: "rgba(0,0,0,0.82)", color: "#63E6A0", font: "11px/1.35 ui-monospace, monospace",
+      padding: "6px 8px", borderRadius: 6, pointerEvents: "none", whiteSpace: "pre",
+    }}>{text}</pre>
+  );
+}
+
 export function Gl2TabDock({ scrollRef, resetKey, children }) {
   const isMobile = useIsMobile();
   const barRef = useRef(null);
+  const dockRef = useRef(null);
+  const probeOn = typeof window !== "undefined" && window.location.search.includes("dockprobe");
   const [barH, setBarH] = useState(0);
   const [offset, setOffset] = useState(0);
   const offRef = useRef(0);
@@ -128,7 +174,10 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
     // the bottom safe-area inset. Anchoring the bar there left a dead strip of
     // roughly bar height below it. Centered and capped to the app column so it
     // still lines up on desktop.
+    <>
+    {probeOn && <Probe scrollRef={scrollRef} dockRef={dockRef} />}
     <div
+      ref={dockRef}
       style={{
         position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
         width: "100%", maxWidth: APP_MAX, zIndex: 40,
@@ -148,5 +197,6 @@ export function Gl2TabDock({ scrollRef, resetKey, children }) {
         {children}
       </div>
     </div>
+    </>
   );
 }
