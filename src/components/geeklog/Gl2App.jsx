@@ -3,6 +3,7 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T, APP_MAX, COCKPIT_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar } from "./Gl2Primitives";
+import { Gl2TabDock } from "./Gl2TabDock";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
@@ -143,6 +144,10 @@ export function Gl2App({ apiKey }) {
   }, [apiKey]);
 
   useEffect(() => { writeCache({ weekStart, target, days: daysMap }); }, [daysMap, target, weekStart]);
+
+  // The single scrolling element for every tab. Gl2TabDock listens to it to
+  // auto-hide the tab bar, the way the main site listens to window scroll.
+  const scrollRef = useRef(null);
 
   // Debounced writes with retry.
   const pending = useRef(new Set());
@@ -382,7 +387,11 @@ export function Gl2App({ apiKey }) {
         {/* Phone-width column, centered on desktop. The gradient full-bleeds on
             main behind it; the scroll area, tab bar, and overlays live inside. */}
         <div style={{ position: "relative", width: "100%", maxWidth: columnMax, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", transition: "max-width 0.2s ease" }}>
-        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
+        {/* The scroll area owns the full column height; the tab bar overlays it
+            from Gl2TabDock rather than taking layout space, so content runs to
+            the bottom of the screen the way the main site's PWA does. */}
+        <div ref={scrollRef} style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
+
           {tab === "today" && (
             <TodayContent
               state={selectedDay} inc={inc} dec={dec}
@@ -408,7 +417,9 @@ export function Gl2App({ apiKey }) {
           {tab === "soi" && <SoiContent apiKey={apiKey} />}
         </div>
 
-        <TabBar active={tab} onChange={setTab} />
+        <Gl2TabDock scrollRef={scrollRef} resetKey={tab}>
+          <TabBar active={tab} onChange={setTab} />
+        </Gl2TabDock>
 
         {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} onOpenCorrection={() => setCorrectionOpen(true)} />}
 
