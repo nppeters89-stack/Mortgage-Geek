@@ -7,8 +7,8 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive } from "../../../utils/geeklogApi";
-import { sortedQueue, mergeManualContacts } from "./prospectsModel";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive } from "../../../utils/geeklogApi";
+import { sortedQueue, mergeManualContacts, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
 const LOG_DIRTY = "gl2:prospects:dirty";
@@ -73,7 +73,16 @@ export async function loadProspects(apiKey) {
   // pinned and rac are compared with Set.has(), so they must be strings. The API
   // coerces them; this repeats it because a localStorage cache written by an
   // older build can still hold numbers.
-  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac) };
+  // Cockpit state: stages/config fall back to the defaults the server also uses,
+  // so a fresh install renders correctly before the keys are ever written. cold
+  // and dead are id -> ts hashes taken straight from the server (like soi, they
+  // are deliberate taps the user repeats, so no dirty reconcile).
+  const stages = Array.isArray(data.stages) && data.stages.length ? data.stages : DEFAULT_STAGES;
+  const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
+  cache = {
+    prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
+    stages, config, cold: data.cold || {}, dead: data.dead || {},
+  };
   saveLS(cache);
   return cache;
 }
@@ -186,6 +195,57 @@ export function persistRac(apiKey, id, action) {
 
   saveRacKeepalive(apiKey, id, action);
   return saveRac(apiKey, id, action);
+}
+
+// ----- Cold pipeline and dead box (the Follow Up cockpit) -----
+
+export function getCachedCold() {
+  return getCachedProspects()?.cold || {};
+}
+export function getCachedDead() {
+  return getCachedProspects()?.dead || {};
+}
+
+// Write whole cold/dead maps back to the cache. Used to apply an optimistic move
+// and, if the write fails, to put the previous maps back.
+export function setCachedColdDead(cold, dead) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [], cold: {}, dead: {} };
+  cache = { ...c, cold, dead };
+  saveLS(cache);
+  return cache;
+}
+
+// Move a contact to cold ("add") or out of it ("remove"). Optimistic cache write,
+// keepalive for durability, awaited call returned so the caller can revert. The
+// cold column is derived from check-in touches, so nothing about position is
+// written here.
+export function persistCold(apiKey, id, action) {
+  const cold = { ...getCachedCold() };
+  if (action === "add") cold[id] = String(Date.now());
+  else delete cold[id];
+  setCachedColdDead(cold, getCachedDead());
+
+  saveColdKeepalive(apiKey, id, action);
+  return saveCold(apiKey, id, action);
+}
+
+// Mark a contact dead ("add") or restore them ("remove"). Mirrors the server's
+// supersede rule in the cache so the optimistic view matches what will be stored:
+// dead-add clears cold; dead-remove drops them into cold (Fresh Cold).
+export function persistDead(apiKey, id, action) {
+  const cold = { ...getCachedCold() };
+  const dead = { ...getCachedDead() };
+  if (action === "add") {
+    dead[id] = String(Date.now());
+    delete cold[id];
+  } else {
+    delete dead[id];
+    cold[id] = String(Date.now());
+  }
+  setCachedColdDead(cold, dead);
+
+  saveDeadKeepalive(apiKey, id, action);
+  return saveDead(apiKey, id, action);
 }
 
 // Create a manual contact. Not optimistic: the server owns the id normalization

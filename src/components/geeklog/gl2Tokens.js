@@ -23,6 +23,12 @@ export const T = {
   gold: "#B8860B", // closings only, internal
   goldMuted: "#8B6914",
   amber: "#C9A23A", // callback status + callback accents (prospecting)
+  cold: "#5B7C99", // steel blue: the Follow Up cockpit's cold pipeline (went quiet)
+  coldWash: "rgba(91,124,153,0.10)", // cold at 10%: cold section fill
+  coldWashLine: "rgba(91,124,153,0.35)", // cold separator / card border
+  redWashLine: "rgba(226,87,91,0.4)", // lifted-red hairline: SOI badge + goal-column border
+  redWash: "rgba(226,87,91,0.07)", // lifted-red at 7%: dead-box drop highlight
+  colWash: "rgba(255,254,251,0.02)", // near-invisible cream: board column base fill
 };
 
 // Phone-width column, centered on desktop. Lives here rather than in Gl2App so
@@ -30,6 +36,11 @@ export const T = {
 // because it sits within the scroll container) can match the column width without
 // importing Gl2App and creating an import cycle.
 export const APP_MAX = 880;
+
+// The Follow Up cockpit (desktop, viewport >= 900px) needs room for the seven
+// stage columns, so the centered column widens to this on that one tab. Every
+// other tab and all of mobile stay at APP_MAX.
+export const COCKPIT_MAX = 1360;
 
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.
