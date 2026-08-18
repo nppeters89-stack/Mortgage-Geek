@@ -3,6 +3,7 @@ import { T, FF } from "../gl2Tokens";
 import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
 import { AddToSoiButton } from "./AddToSoiButton";
+import { AddedToRacButton } from "./AddedToRacButton";
 import { formatTouchDate } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
 
@@ -19,7 +20,7 @@ import { ghostAction } from "./detailActionStyles";
 //
 // The First contact block is already conditional on `log`, so a pinned contact
 // with no call log renders without it and needs no special-casing.
-export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel, footerAction = null, backLabel = "Follow Ups" }) {
+export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel, inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups" }) {
   const [note, setNote] = useState("");
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
@@ -40,6 +41,7 @@ export function FollowUpDetail({ prospect: p, log, touches, onBack, onLogFollowU
       <ContactHeader prospect={p} callAction={
         <>
           <AddToContactsButton prospect={p} onToast={onToast} />
+          {onToggleRac && <AddedToRacButton inRac={inRac} onToggle={onToggleRac} />}
           {onAddToSoi && <AddToSoiButton onAdd={onAddToSoi} />}
           {onCopyForExcel && (
             <button type="button" onClick={onCopyForExcel} style={{ ...ghostAction, marginTop: 8 }}>

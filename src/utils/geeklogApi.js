@@ -199,11 +199,12 @@ async function prospectsFetch(key, path, init = {}) {
   return body;
 }
 
-// GET /api/prospects — { list, logs, followUps, soi, pinned, manual }. list =
-// seed blob; everything else is keyed by phone id (pinned is a plain id array).
+// GET /api/prospects — { list, logs, followUps, soi, pinned, manual, rac }. list
+// = seed blob; everything else is keyed by phone id (pinned and rac are plain id
+// arrays).
 export async function fetchProspects(key) {
   const data = await prospectsFetch(key, "");
-  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {}, pinned: [], manual: {} };
+  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
 }
 
 // PUT /api/prospects/log — upsert one contact's log. Awaited write.
@@ -303,6 +304,16 @@ export async function savePin(key, id, action) {
 
 export function savePinKeepalive(key, id, action) {
   membershipKeepalive(key, { kind: "pin", id, action });
+}
+
+// Mark a contact as copied into the RAC CRM ("add") or clear the mark
+// ("remove"). Awaited so the caller can revert its optimistic update.
+export async function saveRac(key, id, action) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "rac", id, action }));
+}
+
+export function saveRacKeepalive(key, id, action) {
+  membershipKeepalive(key, { kind: "rac", id, action });
 }
 
 // Create a contact that did not come from Excel. The handler pins it too. Awaited

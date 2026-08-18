@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac } from "./prospectStore";
 import { idFromPhone, soiQueue, isTopScore, formatSoiSince, manualContactTsvRow } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
@@ -22,6 +22,7 @@ export function SoiContent({ apiKey }) {
   const [logs, setLogs] = useState(() => seed?.logs || {});
   const [followUps, setFollowUps] = useState(() => seed?.followUps || {});
   const [soi, setSoi] = useState(() => seed?.soi || {});
+  const [rac, setRac] = useState(() => seed?.rac || []);
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -31,6 +32,8 @@ export function SoiContent({ apiKey }) {
   fuRef.current = followUps;
   const soiRef = useRef(soi);
   soiRef.current = soi;
+  const racRef = useRef(rac);
+  racRef.current = rac;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -48,6 +51,7 @@ export function SoiContent({ apiKey }) {
         setLogs(c.logs);
         setFollowUps(c.followUps);
         setSoi(c.soi || {});
+        setRac(c.rac || []);
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -55,6 +59,7 @@ export function SoiContent({ apiKey }) {
   }, [apiKey]);
 
   const queue = useMemo(() => soiQueue(prospects, soi, followUps), [prospects, soi, followUps]);
+  const racSet = useMemo(() => new Set(rac), [rac]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   // Same handler and same key as Follow Ups: a touch logged here is the same
@@ -64,6 +69,20 @@ export function SoiContent({ apiKey }) {
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast("Follow up logged");
+  }, [apiKey, showToast]);
+
+  // Same RAC toggle as Follow Ups, on the same shared key, so a contact marked in
+  // one view is marked in the other.
+  const toggleRac = useCallback((id) => {
+    const prev = racRef.current;
+    const adding = !prev.includes(id);
+    setRac(adding ? [...prev, id] : prev.filter((x) => x !== id));
+    showToast(adding ? "Added to RAC" : "RAC mark cleared");
+    persistRac(apiKey, id, adding ? "add" : "remove").catch(() => {
+      setRac(prev);
+      setCachedRac(prev);
+      showToast("Could not update RAC");
+    });
   }, [apiKey, showToast]);
 
   // Demote: optimistic, back to the queue, revert both this view and the shared
@@ -101,6 +120,8 @@ export function SoiContent({ apiKey }) {
             () => showToast("Contact row copied"),
             () => showToast("Copy failed"),
           ) : null}
+          inRac={racSet.has(id)}
+          onToggleRac={() => toggleRac(id)}
           backLabel="SOI"
           footerAction={
             <button type="button" onClick={() => handleRemoveFromSoi(id)} style={quietAction}>
@@ -143,6 +164,7 @@ export function SoiContent({ apiKey }) {
                 highlight={isTopScore(logs[id])}
                 meta={since ? `SOI since ${since}` : ""}
                 badge={p.manual ? "manual" : ""}
+                checked={racSet.has(id)}
                 onOpen={() => { setOpenId(id); setView("detail"); }}
               />
             );

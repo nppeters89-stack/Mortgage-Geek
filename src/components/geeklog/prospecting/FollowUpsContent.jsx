@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac } from "./prospectStore";
 import { idFromPhone, followUpQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -20,6 +20,7 @@ export function FollowUpsContent({ apiKey }) {
   const [followUps, setFollowUps] = useState(() => seed?.followUps || {});
   const [soi, setSoi] = useState(() => seed?.soi || {});
   const [pinned, setPinned] = useState(() => seed?.pinned || []);
+  const [rac, setRac] = useState(() => seed?.rac || []);
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -32,6 +33,8 @@ export function FollowUpsContent({ apiKey }) {
   soiRef.current = soi;
   const pinnedRef = useRef(pinned);
   pinnedRef.current = pinned;
+  const racRef = useRef(rac);
+  racRef.current = rac;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -50,6 +53,7 @@ export function FollowUpsContent({ apiKey }) {
         setFollowUps(c.followUps);
         setSoi(c.soi || {});
         setPinned(c.pinned || []);
+        setRac(c.rac || []);
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -57,6 +61,7 @@ export function FollowUpsContent({ apiKey }) {
   }, [apiKey]);
 
   const pinnedSet = useMemo(() => new Set(pinned), [pinned]);
+  const racSet = useMemo(() => new Set(rac), [rac]);
   const queue = useMemo(() => followUpQueue(prospects, logs, followUps, soi, pinnedSet), [prospects, logs, followUps, soi, pinnedSet]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
@@ -130,6 +135,21 @@ export function FollowUpsContent({ apiKey }) {
     showToast(`${contact.name} added to Follow Ups`);
   }, [apiKey, showToast]);
 
+  // Mark or unmark a contact as entered in RAC. Optimistic with a revert, same
+  // shape as the pin write. Stays on the detail: this is a side note about the
+  // contact, not a reason to leave the screen.
+  const toggleRac = useCallback((id) => {
+    const prev = racRef.current;
+    const adding = !prev.includes(id);
+    setRac(adding ? [...prev, id] : prev.filter((x) => x !== id));
+    showToast(adding ? "Added to RAC" : "RAC mark cleared");
+    persistRac(apiKey, id, adding ? "add" : "remove").catch(() => {
+      setRac(prev);
+      setCachedRac(prev);
+      showToast("Could not update RAC");
+    });
+  }, [apiKey, showToast]);
+
   const handleCopyForExcel = useCallback((p) => {
     copyText(manualContactTsvRow(p)).then(
       () => showToast("Contact row copied"),
@@ -152,6 +172,8 @@ export function FollowUpsContent({ apiKey }) {
           onToast={showToast}
           onAddToSoi={() => handleAddToSoi(id)}
           onCopyForExcel={openProspect.manual ? () => handleCopyForExcel(openProspect) : null}
+          inRac={racSet.has(id)}
+          onToggleRac={() => toggleRac(id)}
           footerAction={isPinnedMember(id, pinnedSet, soi) ? (
             <button type="button" onClick={() => { setPin(id, "remove", `${openProspect.name} removed from Follow Ups`); setView("queue"); setOpenId(null); }} style={quietAction}>
               Remove from Follow Ups
@@ -199,6 +221,7 @@ export function FollowUpsContent({ apiKey }) {
                 touches={followUps[id] || []}
                 highlight={isTopScore(logs[id])}
                 badge={p.manual ? "manual" : ""}
+                checked={racSet.has(id)}
                 onOpen={() => { setOpenId(id); setView("detail"); }}
               />
             );

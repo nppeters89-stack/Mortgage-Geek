@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -57,7 +57,7 @@ export async function loadProspects(apiKey) {
   // SOI and pins are taken straight from the server with no dirty reconcile: the
   // reconcile shape carries a value per id and cannot express a removal, and both
   // are deliberate taps the user can simply repeat. Server is authoritative.
-  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: data.pinned || [], manual };
+  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: data.pinned || [], manual, rac: data.rac || [] };
   saveLS(cache);
   return cache;
 }
@@ -145,13 +145,40 @@ export function persistPin(apiKey, id, action) {
   return savePin(apiKey, id, action);
 }
 
+// ----- RAC (the CRM) -----
+
+export function getCachedRac() {
+  return getCachedProspects()?.rac || [];
+}
+
+export function setCachedRac(rac) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  cache = { ...c, rac };
+  saveLS(cache);
+  return cache;
+}
+
+// Mark a contact as copied into RAC, or clear the mark. Same shape as persistPin:
+// optimistic cache write, keepalive for durability, awaited call returned so the
+// caller can revert.
+export function persistRac(apiKey, id, action) {
+  const current = getCachedRac();
+  const next = action === "add"
+    ? (current.includes(id) ? current : [...current, id])
+    : current.filter((x) => x !== id);
+  setCachedRac(next);
+
+  saveRacKeepalive(apiKey, id, action);
+  return saveRac(apiKey, id, action);
+}
+
 // Create a manual contact. Not optimistic: the server owns the id normalization
 // and the duplicate check, so the cache is only updated once it confirms. The
 // server pins it in the same handler, so the pin is applied here too. Resolves
 // with the stored contact.
 export async function persistManualContact(apiKey, input) {
   const { id, contact } = await saveManualContact(apiKey, input);
-  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {} };
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
   const manual = { ...(c.manual || {}), [id]: contact };
   const pinned = c.pinned?.includes(id) ? c.pinned : [...(c.pinned || []), id];
   cache = {

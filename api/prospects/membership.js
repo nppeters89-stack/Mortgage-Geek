@@ -4,6 +4,7 @@
 // Body { kind, ... }:
 //   { kind: "soi",    id, action: "add" | "remove" }  HSET/HDEL prospects:soi
 //   { kind: "pin",    id, action: "add" | "remove" }  SADD/SREM prospects:pinned
+//   { kind: "rac",    id, action: "add" | "remove" }  SADD/SREM prospects:rac
 //   { kind: "manual", contact }                       HSET prospects:manual + pin
 //
 // These began as three routes (soi.js, pin.js, manual.js) and were folded into
@@ -19,6 +20,7 @@ import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.
 const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
+const RAC_SET = "prospects:rac";
 
 const ACTIONS = new Set(["add", "remove"]);
 const digits = (v) => String(v || "").replace(/\D/g, "");
@@ -50,13 +52,15 @@ async function handleSoi(res, { id, action }) {
   return jsonResponse(res, 200, { id, action });
 }
 
-// Manual Follow Ups membership, for contacts with no qualifying call score.
-async function handlePin(res, { id, action }) {
+// A plain membership SET keyed by contact id. Two of these: prospects:pinned
+// (manual Follow Ups membership) and prospects:rac (copied into the CRM). Both
+// are pure flags, so a SET is the whole storage requirement.
+async function handleSetFlag(res, { id, action }, setKey) {
   if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
   if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
 
-  if (action === "add") await redis.sadd(PINNED_SET, id);
-  else await redis.srem(PINNED_SET, id);
+  if (action === "add") await redis.sadd(setKey, id);
+  else await redis.srem(setKey, id);
   return jsonResponse(res, 200, { id, action });
 }
 
@@ -101,9 +105,10 @@ export default async function handler(req, res) {
 
     switch (body.kind) {
       case "soi": return await handleSoi(res, body);
-      case "pin": return await handlePin(res, body);
+      case "pin": return await handleSetFlag(res, body, PINNED_SET);
+      case "rac": return await handleSetFlag(res, body, RAC_SET);
       case "manual": return await handleManual(res, body.contact);
-      default: return jsonResponse(res, 400, { error: "kind must be soi, pin or manual" });
+      default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac or manual" });
     }
   } catch (err) {
     console.error("[prospects/membership] error:", err);
