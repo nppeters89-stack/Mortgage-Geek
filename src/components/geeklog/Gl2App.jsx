@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
-import { T, APP_MAX } from "./gl2Tokens";
+import { T, APP_MAX, COCKPIT_MAX } from "./gl2Tokens";
+import { useIsMobile } from "../../utils/hooks";
 import { TabBar } from "./Gl2Primitives";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
@@ -69,6 +70,10 @@ export function Gl2App({ apiKey }) {
   const [closings, setClosings] = useState(0);
   const [stats, setStats] = useState(null);
   const [tab, setTab] = useState("today");
+  // The Follow Up cockpit widens the centered column on desktop (>= 900px) so the
+  // seven stage columns fit; every other tab and all of mobile stay at APP_MAX.
+  const isNarrow = useIsMobile(899);
+  const columnMax = tab === "followups" && !isNarrow ? COCKPIT_MAX : APP_MAX;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayKey);
@@ -376,7 +381,7 @@ export function Gl2App({ apiKey }) {
       <main style={{ position: "fixed", inset: 0, display: "flex", justifyContent: "center", background: `linear-gradient(180deg, ${T.bg0} 0%, ${T.bg1} 78%)`, color: T.cream, overflow: "hidden" }}>
         {/* Phone-width column, centered on desktop. The gradient full-bleeds on
             main behind it; the scroll area, tab bar, and overlays live inside. */}
-        <div style={{ position: "relative", width: "100%", maxWidth: APP_MAX, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ position: "relative", width: "100%", maxWidth: columnMax, height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", transition: "max-width 0.2s ease" }}>
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "calc(8px + env(safe-area-inset-top, 0px))" }}>
           {tab === "today" && (
             <TodayContent

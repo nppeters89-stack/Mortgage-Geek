@@ -1,22 +1,25 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, setCachedColdDead } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES } from "./prospectsModel";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead } from "./prospectStore";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
+import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { copyText } from "./clipboard";
 import { quietAction } from "./detailActionStyles";
+import { fireConfetti } from "./confetti";
 
-// Follow Ups tab: contacts whose call log scored 9 or 10 (derived membership),
-// sorted by neglect. On mobile this is the list experience, now with the cockpit's
-// pipeline stage on every row, a stage selector in the composer (choosing the goal
-// stage promotes to SOI), and a collapsible Cold Pipeline below the queue for
-// contacts who went quiet. Moving a contact TO cold or dead is a desktop-only
-// gesture (Phase 2); here a cold contact can log check-ins and revive. Dead
-// contacts are excluded from every list. The desktop drag board (viewport >= 900px)
-// arrives in Phase 2; this file stays the list view.
+// Follow Ups tab. On mobile (< 900px) this is the list experience: neglect-sorted
+// queue with the pipeline stage on every row, a stage selector in the composer
+// (choosing the goal stage promotes to SOI), and a collapsible Cold Pipeline.
+// On desktop (>= 900px) it renders the FollowUpCockpit drag board instead, with
+// the shared FollowUpDetail opening in a modal on a card click. Both surfaces
+// write through the same handlers and the same derivations (prospectsModel), so
+// there is one source of truth for stage, cold, and dead. Moving TO cold or dead
+// is a desktop drag gesture; mobile can check in and revive. Dead contacts are
+// excluded from every list.
 export function FollowUpsContent({ apiKey }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
@@ -28,25 +31,30 @@ export function FollowUpsContent({ apiKey }) {
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [dead, setDead] = useState(() => seed?.dead || {});
   const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
+  const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
   const [ready, setReady] = useState(!!seed);
-  const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
-  const fuRef = useRef(followUps);
-  fuRef.current = followUps;
-  const soiRef = useRef(soi);
-  soiRef.current = soi;
-  const pinnedRef = useRef(pinned);
-  pinnedRef.current = pinned;
-  const racRef = useRef(rac);
-  racRef.current = rac;
-  const coldRef = useRef(cold);
-  coldRef.current = cold;
-  const deadRef = useRef(dead);
-  deadRef.current = dead;
+  const fuRef = useRef(followUps); fuRef.current = followUps;
+  const soiRef = useRef(soi); soiRef.current = soi;
+  const pinnedRef = useRef(pinned); pinnedRef.current = pinned;
+  const racRef = useRef(rac); racRef.current = rac;
+  const coldRef = useRef(cold); coldRef.current = cold;
+  const deadRef = useRef(dead); deadRef.current = dead;
 
+  // Desktop cockpit at >= 900px. Read synchronously on first render (Geek Log is
+  // a client-only SPA, so window is always available) to avoid a one-frame flash
+  // of the wide cockpit on a phone.
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 900px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 900px)");
+    const onChange = (e) => setIsDesktop(e.matches);
+    setIsDesktop(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const goalIndex = stages.length - 1;
 
   const showToast = useCallback((msg) => {
@@ -70,6 +78,7 @@ export function FollowUpsContent({ apiKey }) {
         setCold(c.cold || {});
         setDead(c.dead || {});
         setStages(c.stages || DEFAULT_STAGES);
+        setConfig(c.config || DEFAULT_CONFIG);
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -82,9 +91,8 @@ export function FollowUpsContent({ apiKey }) {
   const coldList = useMemo(() => coldQueue(prospects, followUps, cold, dead), [prospects, followUps, cold, dead]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
-  const backToQueue = useCallback(() => { setView("queue"); setOpenId(null); }, []);
+  const closeDetail = useCallback(() => setOpenId(null), []);
 
-  // Why a search hit may not be addable, shown on the row before it is tapped.
   const describeStatus = useCallback((id) => {
     if (soi[id]) return "Already in your SOI";
     if (dead[id]) return "In the dead box";
@@ -94,10 +102,9 @@ export function FollowUpsContent({ apiKey }) {
     return score ? `Logged at ${score}/10` : "";
   }, [logs, soi, cold, dead, pinnedSet]);
 
-  // Log a touch at a chosen stage. Choosing the goal stage promotes to SOI in the
-  // same gesture: the stage touch is written AND the SOI membership is added, so
-  // the contact both graduates and keeps its history. Non-goal touches stay on the
-  // detail so the stage advances in place.
+  // Log a touch at a chosen stage. The goal stage promotes to SOI in the same
+  // gesture (writes the stage touch AND adds SOI membership). Non-goal touches
+  // leave the detail open so the stage advances in place.
   const handleLogFollowUp = useCallback((id, note, stage) => {
     const touch = { ts: Date.now(), note };
     if (Number.isInteger(stage)) touch.stage = stage;
@@ -108,20 +115,14 @@ export function FollowUpsContent({ apiKey }) {
     if (Number.isInteger(stage) && stage === goalIndex) {
       const prev = soiRef.current;
       setSoi({ ...prev, [id]: String(Date.now()) });
-      backToQueue();
+      closeDetail();
       showToast("Promoted to SOI");
-      persistSoi(apiKey, id, "add").catch(() => {
-        setSoi(prev);
-        setCachedSoi(prev);
-        showToast("Could not update SOI");
-      });
+      persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
     } else {
       showToast(Number.isInteger(stage) ? `Logged: ${stages[stage]}` : "Follow up logged");
     }
-  }, [apiKey, showToast, goalIndex, stages, backToQueue]);
+  }, [apiKey, showToast, goalIndex, stages, closeDetail]);
 
-  // A cold check-in: a stage -1 touch. Advances the cold column (derived) and the
-  // pips. Stays on the detail so the pips move in place.
   const handleColdCheckIn = useCallback((id, note) => {
     const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: -1 }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
@@ -129,50 +130,70 @@ export function FollowUpsContent({ apiKey }) {
     showToast(`Check-in ${Math.min(coldCount(next), 5)} of 5 logged`);
   }, [apiKey, showToast]);
 
-  // Revive from cold: cold remove. The contact returns to the hot queue at its
-  // derived stage. Optimistic with a revert, same shape as the SOI write.
-  const handleRevive = useCallback((id) => {
+  // Revive from cold: cold remove, contact returns to the hot queue at its derived
+  // stage. `silent` skips the toast and the detail close, used when a drag lands a
+  // cold card on a different stage column (the stage popover fires next).
+  const handleRevive = useCallback((id, silent = false) => {
     const prev = coldRef.current;
     const next = { ...prev };
     delete next[id];
     setCold(next);
-    backToQueue();
-    const st = stageOf(fuRef.current[id], { goalIndex });
-    showToast(`Revived at ${stages[st]}`);
-    persistCold(apiKey, id, "remove").catch(() => {
-      setCold(prev);
-      setCachedColdDead(prev, deadRef.current);
-      showToast("Could not revive");
-    });
-  }, [apiKey, showToast, goalIndex, stages, backToQueue]);
+    if (!silent) {
+      closeDetail();
+      const st = stageOf(fuRef.current[id], { goalIndex });
+      showToast(`Revived at ${stages[st]}`);
+    }
+    persistCold(apiKey, id, "remove").catch(() => { setCold(prev); setCachedColdDead(prev, deadRef.current); showToast("Could not revive"); });
+  }, [apiKey, showToast, goalIndex, stages, closeDetail]);
 
-  // Promote to SOI via the explicit header button (unchanged path). Optimistic,
-  // then back to the queue where the contact no longer belongs.
+  // Desktop drag: move a hot card to cold.
+  const handleMoveToCold = useCallback((id) => {
+    const prev = coldRef.current;
+    const next = { ...prev, [id]: String(Date.now()) };
+    setCold(next);
+    showToast("Moved to cold");
+    persistCold(apiKey, id, "add").catch(() => { setCold(prev); setCachedColdDead(prev, deadRef.current); showToast("Could not move to cold"); });
+  }, [apiKey, showToast]);
+
+  // Desktop drag: mark a card dead. Writes a stage -2 touch and adds dead; the
+  // server (and the optimistic cache) clear cold, since dead supersedes cold.
+  const handleMarkDead = useCallback((id, note) => {
+    const nextT = [...(fuRef.current[id] || []), { ts: Date.now(), note: note || "", stage: -2 }];
+    setFollowUps((prev) => ({ ...prev, [id]: nextT }));
+    persistFollowUps(apiKey, id, nextT);
+    const prevCold = coldRef.current, prevDead = deadRef.current;
+    const nc = { ...prevCold }; delete nc[id];
+    const nd = { ...prevDead, [id]: String(Date.now()) };
+    setCold(nc); setDead(nd);
+    closeDetail();
+    showToast("Marked dead");
+    persistDead(apiKey, id, "add").catch(() => { setCold(prevCold); setDead(prevDead); setCachedColdDead(prevCold, prevDead); showToast("Could not update"); });
+  }, [apiKey, showToast, closeDetail]);
+
+  // Restore a dead contact: dead remove lands them in Fresh Cold (server + cache).
+  const handleRestore = useCallback((id) => {
+    const prevCold = coldRef.current, prevDead = deadRef.current;
+    const nd = { ...prevDead }; delete nd[id];
+    const nc = { ...prevCold, [id]: String(Date.now()) };
+    setCold(nc); setDead(nd);
+    showToast("Restored to cold");
+    persistDead(apiKey, id, "remove").catch(() => { setCold(prevCold); setDead(prevDead); setCachedColdDead(prevCold, prevDead); showToast("Could not restore"); });
+  }, [apiKey, showToast]);
+
   const handleAddToSoi = useCallback((id) => {
     const prev = soiRef.current;
     setSoi({ ...prev, [id]: String(Date.now()) });
-    backToQueue();
+    closeDetail();
     showToast("Added to SOI");
-    persistSoi(apiKey, id, "add").catch(() => {
-      setSoi(prev);
-      setCachedSoi(prev);
-      showToast("Could not update SOI");
-    });
-  }, [apiKey, showToast, backToQueue]);
+    persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
+  }, [apiKey, showToast, closeDetail]);
 
-  // Pin a contact into Follow Ups, or take them out. Optimistic with a revert.
   const setPin = useCallback((id, action, message) => {
     const prev = pinnedRef.current;
-    const next = action === "add"
-      ? (prev.includes(id) ? prev : [...prev, id])
-      : prev.filter((x) => x !== id);
+    const next = action === "add" ? (prev.includes(id) ? prev : [...prev, id]) : prev.filter((x) => x !== id);
     setPinned(next);
     if (message) showToast(message);
-    persistPin(apiKey, id, action).catch(() => {
-      setPinned(prev);
-      setCachedPinned(prev);
-      showToast("Could not update Follow Ups");
-    });
+    persistPin(apiKey, id, action).catch(() => { setPinned(prev); setCachedPinned(prev); showToast("Could not update Follow Ups"); });
   }, [apiKey, showToast]);
 
   const handlePinFromSheet = useCallback((p) => {
@@ -180,10 +201,7 @@ export function FollowUpsContent({ apiKey }) {
     if (soiRef.current[id]) { showToast(`${p.name} is already in your SOI`); return; }
     if (deadRef.current[id]) { showToast(`${p.name} is in the dead box`); return; }
     if (coldRef.current[id]) { showToast(`${p.name} is in the cold pipeline`); return; }
-    if (qualifiesForFollowUp(logs[id]) || pinnedRef.current.includes(id)) {
-      showToast(`${p.name} is already in Follow Ups`);
-      return;
-    }
+    if (qualifiesForFollowUp(logs[id]) || pinnedRef.current.includes(id)) { showToast(`${p.name} is already in Follow Ups`); return; }
     setPin(id, "add", `${p.name} added to Follow Ups`);
     setSheetOpen(false);
   }, [logs, setPin, showToast]);
@@ -201,76 +219,95 @@ export function FollowUpsContent({ apiKey }) {
     const adding = !prev.includes(id);
     setRac(adding ? [...prev, id] : prev.filter((x) => x !== id));
     showToast(adding ? "Added to RAC" : "RAC mark cleared");
-    persistRac(apiKey, id, adding ? "add" : "remove").catch(() => {
-      setRac(prev);
-      setCachedRac(prev);
-      showToast("Could not update RAC");
-    });
+    persistRac(apiKey, id, adding ? "add" : "remove").catch(() => { setRac(prev); setCachedRac(prev); showToast("Could not update RAC"); });
   }, [apiKey, showToast]);
 
   const handleCopyForExcel = useCallback((p) => {
-    copyText(manualContactTsvRow(p)).then(
-      () => showToast("Contact row copied"),
-      () => showToast("Copy failed"),
-    );
+    copyText(manualContactTsvRow(p)).then(() => showToast("Contact row copied"), () => showToast("Copy failed"));
   }, [showToast]);
 
-  // ----- Detail view (stay here after logging a touch) -----
-  if (view === "detail" && openProspect) {
-    const id = idFromPhone(openProspect.phone);
+  // The shared contact detail, built for either the mobile full page or the
+  // desktop modal (modal adds the confetti on a goal promotion).
+  const buildDetail = useCallback((id, { modal = false } = {}) => {
+    const p = prospects.find((x) => idFromPhone(x.phone) === id);
+    if (!p) return null;
     const isColdContact = !!cold[id] && !dead[id];
     const stageIdx = stageOf(followUps[id], { goalIndex });
-    const detail = isColdContact ? (
+    if (isColdContact) {
+      return (
+        <FollowUpDetail
+          prospect={p} log={logs[id]} touches={followUps[id] || []}
+          onBack={closeDetail} onToast={showToast}
+          inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
+          stages={stages} showStageTags
+          composerMode="cold" coldCount={coldCount(followUps[id])}
+          statusLine={`Cold · ${coldCount(followUps[id])} of 5 · was at ${stages[stageIdx]}`}
+          onColdCheckIn={(note) => handleColdCheckIn(id, note)}
+          onRevive={() => handleRevive(id)}
+        />
+      );
+    }
+    const logTouch = (note, stage) => { handleLogFollowUp(id, note, stage); if (modal && stage === goalIndex) fireConfetti(); };
+    return (
       <FollowUpDetail
-        prospect={openProspect}
-        log={logs[id]}
-        touches={followUps[id] || []}
-        onBack={backToQueue}
+        prospect={p} log={logs[id]} touches={followUps[id] || []}
+        onBack={closeDetail}
+        onLogFollowUp={logTouch}
         onToast={showToast}
-        inRac={racSet.has(id)}
-        onToggleRac={() => toggleRac(id)}
-        stages={stages}
-        showStageTags
-        composerMode="cold"
-        coldCount={coldCount(followUps[id])}
-        statusLine={`Cold · ${coldCount(followUps[id])} of 5 · was at ${stages[stageIdx]}`}
-        onColdCheckIn={(note) => handleColdCheckIn(id, note)}
-        onRevive={() => handleRevive(id)}
-      />
-    ) : (
-      <FollowUpDetail
-        prospect={openProspect}
-        log={logs[id]}
-        touches={followUps[id] || []}
-        onBack={backToQueue}
-        onLogFollowUp={(note, stage) => handleLogFollowUp(id, note, stage)}
-        onToast={showToast}
-        onAddToSoi={() => handleAddToSoi(id)}
-        onCopyForExcel={openProspect.manual ? () => handleCopyForExcel(openProspect) : null}
-        inRac={racSet.has(id)}
-        onToggleRac={() => toggleRac(id)}
-        composerMode="stage"
-        stages={stages}
-        stageIndex={stageIdx}
-        goalIndex={goalIndex}
-        showStageTags
+        onAddToSoi={() => { handleAddToSoi(id); if (modal) fireConfetti(); }}
+        onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
+        inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
+        composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
-          <button type="button" onClick={() => { setPin(id, "remove", `${openProspect.name} removed from Follow Ups`); backToQueue(); }} style={quietAction}>
+          <button type="button" onClick={() => { setPin(id, "remove", `${p.name} removed from Follow Ups`); closeDetail(); }} style={quietAction}>
             Remove from Follow Ups
           </button>
         ) : null}
       />
     );
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, setPin]);
+
+  // ----- Desktop: the cockpit, with the detail in a modal -----
+  if (isDesktop) {
+    return (
+      <div style={{ minHeight: "100%" }}>
+        <StatusBarCap />
+        <FollowUpCockpit
+          prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
+          cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
+          onOpenDetail={setOpenId}
+          onLogTouch={handleLogFollowUp}
+          onColdCheckIn={handleColdCheckIn}
+          onMoveToCold={handleMoveToCold}
+          onMarkDead={handleMarkDead}
+          onRestore={handleRestore}
+          onRevive={(id) => handleRevive(id)}
+          onReviveSilent={(id) => handleRevive(id, true)}
+        />
+        {openProspect && (
+          <div onClick={closeDetail} style={{ position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 55, padding: "40px 20px", overflowY: "auto" }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 560, marginTop: 8 }}>
+              {buildDetail(openId, { modal: true })}
+            </div>
+          </div>
+        )}
+        <Toast msg={toast} />
+      </div>
+    );
+  }
+
+  // ----- Mobile: full-page detail -----
+  if (openProspect) {
     return (
       <>
         <StatusBarCap />
-        {detail}
+        {buildDetail(openId)}
         <Toast msg={toast} />
       </>
     );
   }
 
-  // ----- Queue view -----
+  // ----- Mobile: queue list -----
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
       <StatusBarCap />
@@ -294,9 +331,7 @@ export function FollowUpsContent({ apiKey }) {
       <div style={{ flex: 1, padding: "4px 12px 0" }}>
         {queue.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
-            {ready ? (
-              <>Nothing to follow up yet.<br />Any call you score 9 or 10 lands here automatically.</>
-            ) : "Loading…"}
+            {ready ? (<>Nothing to follow up yet.<br />Any call you score 9 or 10 lands here automatically.</>) : "Loading…"}
           </div>
         ) : (
           queue.map((p) => {
@@ -310,7 +345,7 @@ export function FollowUpsContent({ apiKey }) {
                 stage={stageOf(followUps[id], { goalIndex })}
                 stages={stages}
                 goalIndex={goalIndex}
-                onOpen={() => { setOpenId(id); setView("detail"); }}
+                onOpen={() => setOpenId(id)}
               />
             );
           })
@@ -329,7 +364,7 @@ export function FollowUpsContent({ apiKey }) {
                   <ContactQueueRow key={id} prospect={p}
                     touches={followUps[id] || []}
                     coldCount={coldCount(followUps[id])}
-                    onOpen={() => { setOpenId(id); setView("detail"); }}
+                    onOpen={() => setOpenId(id)}
                   />
                 );
               })}
