@@ -19,6 +19,12 @@
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
 
+// Contact ids are phone digits, which the @upstash/redis SDK happily parses as
+// JSON numbers on the way out of a SET. Everything downstream compares them as
+// strings (Set.has("6155550142") is false against the number 6155550142), so
+// every id read back from Redis is coerced here, at the boundary.
+const toIds = (members) => (members || []).map(String);
+
 const LIST_KEY = "prospects:list:v1";
 const LOGGED_SET = "prospects:logged";
 const logKey = (id) => `prospects:log:${id}`;
@@ -39,7 +45,7 @@ export default async function handler(req, res) {
   try {
     const list = parseStored(await redis.get(LIST_KEY)) || { version: 1, generated: null, source: null, prospects: [] };
 
-    const ids = (await redis.smembers(LOGGED_SET)) || [];
+    const ids = toIds(await redis.smembers(LOGGED_SET));
     const logs = {};
     if (ids.length) {
       const values = await redis.mget(...ids.map(logKey));
@@ -51,7 +57,7 @@ export default async function handler(req, res) {
 
     // Follow-up touch histories, keyed by the same phone-digits id. Membership is
     // derived (score >= 9) client-side, so this only carries histories that exist.
-    const fuIds = (await redis.smembers(FU_SET)) || [];
+    const fuIds = toIds(await redis.smembers(FU_SET));
     const followUps = {};
     if (fuIds.length) {
       const vals = await redis.mget(...fuIds.map(fuKey));
@@ -66,8 +72,10 @@ export default async function handler(req, res) {
     // strings; the client coerces.
     const soi = (await redis.hgetall(SOI_KEY)) || {};
 
-    const pinned = (await redis.smembers(PINNED_SET)) || [];
-    const rac = (await redis.smembers(RAC_SET)) || [];
+    // These two are compared with Set.has() client-side rather than used as
+    // object keys, so the string coercion above is what makes them work at all.
+    const pinned = toIds(await redis.smembers(PINNED_SET));
+    const rac = toIds(await redis.smembers(RAC_SET));
 
     // Manual contacts are stored as JSON strings in one hash. A record that fails
     // to parse is skipped rather than breaking the whole payload.

@@ -16,10 +16,23 @@ const FU_DIRTY = "gl2:prospects:fu:dirty";
 
 let cache = null; // { prospects, logs, followUps, soi }
 
-function loadLS() { try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
+// Normalizes ids on the way in, so a blob written by a build that stored numeric
+// pinned/rac ids cannot resurrect the Set.has() mismatch.
+function loadLS() {
+  try {
+    const r = localStorage.getItem(LS_KEY);
+    if (!r) return null;
+    const c = JSON.parse(r);
+    return c && typeof c === "object" ? { ...c, pinned: toIds(c.pinned), rac: toIds(c.rac) } : null;
+  } catch { return null; }
+}
 function saveLS(obj) { try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch { /* best-effort */ } }
 function getDirty(k) { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]")); } catch { return new Set(); } }
 function writeDirty(k, set) { try { localStorage.setItem(k, JSON.stringify([...set])); } catch { /* best-effort */ } }
+
+// Contact ids must be strings everywhere: pinned and rac are membership-tested
+// with Set.has(), and Redis can hand back phone digits as numbers.
+const toIds = (members) => (Array.isArray(members) ? members.map(String) : []);
 
 export function getCachedProspects() {
   if (!cache) cache = loadLS();
@@ -57,7 +70,10 @@ export async function loadProspects(apiKey) {
   // SOI and pins are taken straight from the server with no dirty reconcile: the
   // reconcile shape carries a value per id and cannot express a removal, and both
   // are deliberate taps the user can simply repeat. Server is authoritative.
-  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: data.pinned || [], manual, rac: data.rac || [] };
+  // pinned and rac are compared with Set.has(), so they must be strings. The API
+  // coerces them; this repeats it because a localStorage cache written by an
+  // older build can still hold numbers.
+  cache = { prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac) };
   saveLS(cache);
   return cache;
 }
