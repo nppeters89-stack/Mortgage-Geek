@@ -6,6 +6,7 @@ import { AddToSoiButton } from "./AddToSoiButton";
 import { AddedToRacButton } from "./AddedToRacButton";
 import { formatTouchDate, stageTag, goalIndexOf, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
+import { copyText } from "./clipboard";
 
 // Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
 // read-only "First contact" block from the original call log, a composer, and the
@@ -52,7 +53,7 @@ export function FollowUpDetail({
   inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
-  motivation = "", onSaveMotivation = null,
+  motivation = "", onSaveMotivation = null, copyPhoneOnTap = false,
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
@@ -93,7 +94,9 @@ export function FollowUpDetail({
         ← {backLabel}
       </button>
 
-      <ContactHeader prospect={p} callAction={
+      <ContactHeader prospect={p}
+        onPhone={copyPhoneOnTap ? () => copyText(p.phone).then(() => onToast?.("Phone number copied"), () => onToast?.("Copy failed")) : null}
+        callAction={
         <>
           <AddToContactsButton prospect={p} onToast={onToast} />
           {onToggleRac && <AddedToRacButton inRac={inRac} onToggle={onToggleRac} />}

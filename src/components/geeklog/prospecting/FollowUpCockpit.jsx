@@ -19,13 +19,22 @@ import { fireConfetti } from "./confetti";
 // mobile list and this board write through exactly one path. Colors from
 // gl2Tokens; no hardcoded hex.
 
+// The RAC check, same visual language as the mobile queue rows: green check
+// beside the name once the contact has been entered into the CRM.
+const RacCheck = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+    role="img" aria-label="In RAC" style={{ flex: "none" }}>
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
 const DAY = 86400000;
 const rel = (ts) => { if (!ts) return "No touches"; const d = Math.round((Date.now() - ts) / DAY); return d <= 0 ? "Today" : d === 1 ? "1d ago" : `${d}d ago`; };
 const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac,
   onOpenDetail, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
@@ -162,7 +171,8 @@ export function FollowUpCockpit({
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.serif, fontSize: 17.5, lineHeight: 1.15, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.15, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
@@ -183,7 +193,8 @@ export function FollowUpCockpit({
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.serif, fontSize: 16, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
         <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
@@ -204,7 +215,7 @@ export function FollowUpCockpit({
   return (
     <div style={{ padding: "18px 26px 40px" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-        <h1 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 30, color: T.cream }}>Follow Up Cockpit</h1>
+        <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
       </div>
 
       {/* Stat strip */}
@@ -315,12 +326,12 @@ function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, o
     return (
       <div style={scrim} onClick={onClose}>
         <div style={box} onClick={stop}>
-          <h3 style={{ fontFamily: FF.serif, fontWeight: 400, fontSize: 26 }}>{"💀"} Buried</h3>
+          <h3 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 22, color: T.cream }}>{"💀"} Buried</h3>
           {deadList.length === 0 ? (
             <div style={{ fontSize: 13, color: T.dim, marginTop: 10 }}>Nobody here. Good.</div>
           ) : deadList.map((p) => (
             <div key={idFromPhone(p.phone)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 2px", borderBottom: `1px solid ${T.line}` }}>
-              <div><div style={{ fontFamily: FF.serif, fontSize: 17, color: T.cream }}>{p.name}</div><div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>{p.brokerage || " "}</div></div>
+              <div><div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16, color: T.cream }}>{p.name}</div><div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>{p.brokerage || " "}</div></div>
               <button type="button" onClick={() => { onRestore(idFromPhone(p.phone)); onClose(); }} style={{ background: "none", border: `1px solid ${T.greenWashLine}`, color: T.green, borderRadius: 8, padding: "7px 13px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>Restore</button>
             </div>
           ))}

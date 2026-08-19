@@ -274,6 +274,7 @@ export function FollowUpsContent({ apiKey }) {
           prospect={p} log={logs[id]} touches={followUps[id] || []}
           onBack={closeDetail} onToast={showToast}
           motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+          copyPhoneOnTap={modal}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -293,6 +294,7 @@ export function FollowUpsContent({ apiKey }) {
         onAddToSoi={() => { handleAddToSoi(id); if (modal) fireConfetti(); }}
         onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+        copyPhoneOnTap={modal}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
@@ -312,7 +314,7 @@ export function FollowUpsContent({ apiKey }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap} motivation={motivation}
+          stagemap={stagemap} motivation={motivation} rac={racSet}
           onOpenDetail={setOpenId}
           onLogTouch={handleLogFollowUp}
           onMoveStage={handleMoveStage}
