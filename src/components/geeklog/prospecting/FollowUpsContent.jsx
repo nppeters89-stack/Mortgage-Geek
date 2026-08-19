@@ -132,11 +132,13 @@ export function FollowUpsContent({ apiKey }) {
 
   // Re-score the first call from Follow Ups. Membership is derived from this
   // score, so setting it below 9 drops the contact from Follow Ups (unless
-  // pinned by hand) - the deliberate downgrade path.
+  // pinned by hand) - the deliberate downgrade path. A hand-added contact has
+  // no call log at all; their first score creates one ("Talked" is the honest
+  // outcome - the conversation is how they earned a score), through the same
+  // /log path Prospecting writes.
   const handleSetScore = useCallback((id, score) => {
     const prev = logsRef.current[id];
-    if (!prev) return;
-    const next = { ...prev, score };
+    const next = prev ? { ...prev, score } : { outcome: "Talked", score, note: "", ts: Date.now() };
     setLogs((l) => ({ ...l, [id]: next }));
     persistLog(apiKey, id, next);
     showToast(score >= 9 ? `Score set to ${score}/10` : `Score ${score}/10. Dropping from Follow Ups`);
@@ -288,7 +290,7 @@ export function FollowUpsContent({ apiKey }) {
           onBack={closeDetail} onToast={showToast}
           motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
           copyPhoneOnTap={modal}
-          onSetScore={logs[id] ? (v) => handleSetScore(id, v) : null}
+          onSetScore={(v) => handleSetScore(id, v)}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -309,7 +311,7 @@ export function FollowUpsContent({ apiKey }) {
         onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         copyPhoneOnTap={modal}
-        onSetScore={logs[id] ? (v) => handleSetScore(id, v) : null}
+        onSetScore={(v) => handleSetScore(id, v)}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (

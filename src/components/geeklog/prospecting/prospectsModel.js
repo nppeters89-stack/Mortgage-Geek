@@ -90,9 +90,13 @@ export function logTsvRow(prospect, log) {
 }
 
 // Header row plus one row per logged contact (Copy log). Returns "" if none.
+// Manual contacts are excluded even once they have a log (a score given in
+// Follow Ups creates one): they are not in the Excel master list this export
+// pastes into, and they have their own "Copy contact for Excel" action.
 export function logTsvAll(prospects, logs) {
   const rows = ["Name\tPhone\tDate Called\tResults\tInteraction Score"];
   for (const p of prospects) {
+    if (p.manual) continue;
     const log = logs[idFromPhone(p.phone)];
     if (log && log.outcome) rows.push(logTsvRow(p, log));
   }
