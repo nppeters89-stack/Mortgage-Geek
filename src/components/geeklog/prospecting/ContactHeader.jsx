@@ -54,7 +54,7 @@ export function ContactHeader({ prospect: p, callAction = null, onPhone = null, 
 
       {onPhone ? (
         <button type="button" onClick={onPhone}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", marginTop: 20, padding: 18, background: T.redLift, color: T.cream, border: "none", borderRadius: 14, fontFamily: FF.body, fontSize: 19, fontWeight: 700, cursor: "pointer" }}>
+          style={{ boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", marginTop: 20, padding: 18, background: T.redLift, color: T.cream, border: "none", borderRadius: 14, fontFamily: FF.body, fontSize: 19, fontWeight: 700, cursor: "pointer" }}>
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}>
             <rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" />
           </svg>
@@ -62,7 +62,7 @@ export function ContactHeader({ prospect: p, callAction = null, onPhone = null, 
         </button>
       ) : (
         <a href={dialHref(p.phone)}
-          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", marginTop: 20, padding: 18, background: T.redLift, color: T.cream, border: "none", borderRadius: 14, fontFamily: FF.body, fontSize: 19, fontWeight: 700, cursor: "pointer", textDecoration: "none" }}>
+          style={{ boxSizing: "border-box", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", marginTop: 20, padding: 18, background: T.redLift, color: T.cream, border: "none", borderRadius: 14, fontFamily: FF.body, fontSize: 19, fontWeight: 700, cursor: "pointer", textDecoration: "none" }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flex: "none" }}>
             <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1L8.1 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.9.5 2.9.7a2 2 0 0 1 1.7 2z" />
           </svg>
