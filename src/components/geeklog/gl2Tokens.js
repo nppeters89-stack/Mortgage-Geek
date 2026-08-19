@@ -40,7 +40,7 @@ export const APP_MAX = 880;
 // The Follow Up cockpit (desktop, viewport >= 900px) needs room for the seven
 // stage columns, so the centered column widens to this on that one tab. Every
 // other tab and all of mobile stay at APP_MAX.
-export const COCKPIT_MAX = 1360;
+export const COCKPIT_MAX = 1880;
 
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.

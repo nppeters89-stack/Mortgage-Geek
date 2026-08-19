@@ -6,12 +6,15 @@ import { fireConfetti } from "./confetti";
 
 // The desktop Follow Up cockpit (viewport >= 900px), matching followup_cockpit
 // preview v3 section by section: a gamified stat strip, the seven-stage hot drag
-// board, a collapsible five-column cold pipeline, and a dead box. All positions
-// are DERIVED from touch data plus the cold/dead hashes; nothing about placement
-// is stored. Drag-and-drop is native HTML5, no library. The interaction grammar:
-// drag rightward across the board to log work at a stage (the goal column also
-// promotes to SOI and bursts confetti); drag down to cold when someone goes quiet
-// and further down to the dead box to let go. A card click opens the shared
+// board, a collapsible five-column cold pipeline, and a dead box. Positions come
+// from touch data plus the cold/dead hashes, EXCEPT hand placements: a drag onto
+// a stage column is a plain move stored in the stagemap hash (no touch logged,
+// works in both directions), and stageOf treats it as the new ratchet base.
+// Drag-and-drop is native HTML5, no library. The interaction grammar: drag a
+// card to any stage to move it; the goal column is the exception, promoting to
+// SOI (with confetti) after asking for the referral note; drag down to cold when
+// someone goes quiet and further down to the dead box to let go. Touches are
+// logged from the card's detail view. A card click opens the shared
 // detail (onOpenDetail). Data mutations run through the parent's handlers so the
 // mobile list and this board write through exactly one path. Colors from
 // gl2Tokens; no hardcoded hex.
@@ -22,15 +25,15 @@ const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget,
-  onOpenDetail, onLogTouch, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap,
+  onOpenDetail, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
   const [pop, setPop] = useState(null); // { type, id, targetStage }
 
   const touchesOf = (id) => followUps[id] || [];
-  const stageFor = (id) => stageOf(touchesOf(id), { isSoi: !!soi[id], goalIndex });
+  const stageFor = (id) => stageOf(touchesOf(id), { isSoi: !!soi[id], goalIndex, override: stagemap[id] });
 
   // Board columns: active pipeline members plus SOI members (SOI sits in the goal
   // column via the stageOf exception), minus cold and dead. Each column oldest
@@ -41,11 +44,11 @@ export function FollowUpCockpit({
       const id = idFromPhone(p.phone);
       if (cold[id] || dead[id]) return;
       if (!(isMember(id, logs, pinnedSet) || soi[id])) return;
-      cols[stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex })].push(p);
+      cols[stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex, override: stagemap[id] })].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
     return cols;
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex]);
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap]);
 
   const coldCols = useMemo(() => {
     const cols = COLD_COLUMNS.map(() => []);
@@ -92,14 +95,25 @@ export function FollowUpCockpit({
     const d = drag.current; if (!d) return;
     const { id, from } = d;
     if (from === "cold") {
-      const derived = stageOf(touchesOf(id), { goalIndex });
-      if (si > 0 && si !== derived) { onReviveSilent(id); setPop({ type: "stage", id, targetStage: si }); }
-      else onRevive(id);
+      // Landing on the card's own derived stage is a plain revive (toasted).
+      // Landing anywhere else revives silently and places the card there; the
+      // goal column opens the promote popover instead of moving.
+      const derived = stageOf(touchesOf(id), { goalIndex, override: stagemap[id] });
+      if (si === goalIndex) { onReviveSilent(id); setPop({ type: "stage", id, targetStage: si }); }
+      else if (si === derived) onRevive(id);
+      else { onReviveSilent(id); onMoveStage(id, si); }
       return;
     }
-    // hot card: dropping on New or its current column is a no-op
-    if (si === 0 || si === stageFor(id)) return;
-    setPop({ type: "stage", id, targetStage: si });
+    if (si === stageFor(id)) return;
+    // An SOI member sits in the goal column by membership; dragging one to an
+    // earlier stage would fight the soi hash. Demote from the SOI tab instead.
+    if (soi[id] && si !== goalIndex) return;
+    // The goal column is a promotion (SOI membership + confetti), so it still
+    // asks how the referral came in. Every other column is a plain move: the
+    // card goes where it was dropped, no touch logged. Log touches from the
+    // card's detail view (or by promoting).
+    if (si === goalIndex) { setPop({ type: "stage", id, targetStage: si }); return; }
+    onMoveStage(id, si);
   };
 
   const dropCold = (ci, stop) => (e) => {
@@ -173,7 +187,7 @@ export function FollowUpCockpit({
     );
   };
 
-  const colShell = (isGoal) => ({ flex: "0 0 240px", background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  const colShell = (isGoal) => ({ flex: "1 0 240px", minWidth: 240, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", minHeight: 64, flex: 1 };
@@ -194,7 +208,7 @@ export function FollowUpCockpit({
         <Stat label="In SOI" color={T.redLift}>{stats.soiCount}</Stat>
       </div>
 
-      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag right to log value adds. Drag down to cold when someone goes quiet, and further down to the dead box to let go. Click any card for the full view.</div>
+      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
 
       {/* Hot board */}
       <div style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>
@@ -223,7 +237,7 @@ export function FollowUpCockpit({
           {COLD_COLUMNS.map((label, ci) => {
             const key = `cold:${ci}`;
             return (
-              <div key={ci} style={{ flex: "0 0 218px", background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={ci} style={{ flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropCold(ci, true)}>
                 <div style={colHead}><span style={colTitle(T.cold)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{coldCols[ci].length}</span></div>
                 <div style={{ ...colBody, background: over === key ? T.coldWash : "transparent" }}>

@@ -177,10 +177,19 @@ const touchStage = (t) => (t && t.stage != null ? t.stage : 1);
 // A contact's pipeline stage: the highest positive stage among its touches, or 0
 // (New) if none. EXCEPTION: an id in the SOI hash is at the goal stage regardless
 // of touches, because the soi hash is the single source of truth for SOI.
-export function stageOf(touches, { isSoi = false, goalIndex = goalIndexOf() } = {}) {
+//
+// `override` is a hand placement from the cockpit's drag board ({ s, ts } from
+// the prospects:fu:stagemap hash): the card sits where it was dropped, in either
+// direction, and the placement becomes the new ratchet base. Only touches logged
+// AFTER the placement can push the stage up from there; older touches are
+// superseded by the drop. No override reproduces the original ratchet exactly.
+export function stageOf(touches, { isSoi = false, goalIndex = goalIndexOf(), override = null } = {}) {
   if (isSoi) return goalIndex;
-  const positives = (touches || []).map(touchStage).filter((s) => s > 0);
-  return positives.length ? Math.max(...positives) : 0;
+  const o = override && Number.isInteger(override.s) && Number.isFinite(override.ts) ? override : null;
+  const eligible = o ? (touches || []).filter((t) => (t?.ts || 0) > o.ts) : (touches || []);
+  const positives = eligible.map(touchStage).filter((s) => s > 0);
+  const base = o ? o.s : 0;
+  return positives.length ? Math.max(base, ...positives) : base;
 }
 
 // Cold check-ins logged (stage -1 touches). The cold column index caps at 4.

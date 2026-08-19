@@ -31,6 +31,7 @@ const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
 const COLD_KEY = "prospects:cold";
+const STAGEMAP_KEY = "prospects:fu:stagemap";
 const DEAD_KEY = "prospects:dead";
 
 const ACTIONS = new Set(["add", "remove"]);
@@ -137,6 +138,27 @@ async function handleManual(res, contact) {
   return jsonResponse(res, 200, { id, contact: record });
 }
 
+// A hand placement from the cockpit drag board: HSET id -> { s, ts }. Unlike a
+// touch, a placement carries no note, never counts toward touch history or
+// staleness, and can move a contact DOWN as well as up; stageOf treats it as the
+// new ratchet base. "remove" clears the placement and the touch ratchet resumes.
+async function handleStageMove(res, { id, action, stage }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
+
+  if (action === "add") {
+    if (!Number.isInteger(stage) || stage < 0 || stage > 30) {
+      return jsonResponse(res, 400, { error: "stage must be an integer stage index" });
+    }
+    const ts = Date.now();
+    await redis.hset(STAGEMAP_KEY, { [id]: JSON.stringify({ s: stage, ts }) });
+    return jsonResponse(res, 200, { id, action, stage, ts });
+  }
+
+  await redis.hdel(STAGEMAP_KEY, id);
+  return jsonResponse(res, 200, { id, action });
+}
+
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
@@ -152,6 +174,7 @@ export default async function handler(req, res) {
       case "soi": return await handleSoi(res, body);
       case "pin": return await handleSetFlag(res, body, PINNED_SET);
       case "rac": return await handleSetFlag(res, body, RAC_SET);
+      case "stage": return await handleStageMove(res, body);
       case "cold": return await handleCold(res, body);
       case "dead": return await handleDead(res, body);
       case "manual": return await handleManual(res, body.contact);

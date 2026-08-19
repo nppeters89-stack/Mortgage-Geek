@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -81,7 +81,7 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {},
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {},
   };
   saveLS(cache);
   return cache;
@@ -227,6 +227,30 @@ export function persistCold(apiKey, id, action) {
 
   saveColdKeepalive(apiKey, id, action);
   return saveCold(apiKey, id, action);
+}
+
+// ----- Stage placements (cockpit drag board) -----
+
+export function getCachedStagemap() {
+  return getCachedProspects()?.stagemap || {};
+}
+
+export function setCachedStagemap(stagemap) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  cache = { ...c, stagemap };
+  saveLS(cache);
+  return cache;
+}
+
+// Record a hand placement: the card moves to `stage` with no touch logged.
+// Same shape as persistCold: optimistic cache write, keepalive for durability,
+// awaited call returned so the caller can revert.
+export function persistStageMove(apiKey, id, stage) {
+  const stagemap = { ...getCachedStagemap(), [id]: { s: stage, ts: Date.now() } };
+  setCachedStagemap(stagemap);
+
+  saveStageMoveKeepalive(apiKey, id, "add", stage);
+  return saveStageMove(apiKey, id, "add", stage);
 }
 
 // Mark a contact dead ("add") or restore them ("remove"). Mirrors the server's

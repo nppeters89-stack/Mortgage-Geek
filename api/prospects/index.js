@@ -38,6 +38,7 @@ const STAGES_KEY = "prospects:fu:stages";
 const CONFIG_KEY = "prospects:fu:config";
 const COLD_KEY = "prospects:cold";
 const DEAD_KEY = "prospects:dead";
+const STAGEMAP_KEY = "prospects:fu:stagemap";
 
 // The cockpit falls back to these when the key is absent, so no seeding write is
 // required for the labels or the week target to work on a fresh install. A stored
@@ -105,7 +106,16 @@ export default async function handler(req, res) {
     const cold = (await redis.hgetall(COLD_KEY)) || {};
     const dead = (await redis.hgetall(DEAD_KEY)) || {};
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead });
+    // Hand placements from the cockpit drag board: id -> { s, ts }. Entries that
+    // fail to parse are skipped rather than breaking the payload.
+    const stagemapRaw = (await redis.hgetall(STAGEMAP_KEY)) || {};
+    const stagemap = {};
+    for (const [id, value] of Object.entries(stagemapRaw)) {
+      const v = parseStored(value);
+      if (v && Number.isInteger(v.s) && Number.isFinite(v.ts)) stagemap[id] = v;
+    }
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });

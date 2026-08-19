@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -29,6 +29,7 @@ export function FollowUpsContent({ apiKey }) {
   const [pinned, setPinned] = useState(() => seed?.pinned || []);
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [cold, setCold] = useState(() => seed?.cold || {});
+  const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [dead, setDead] = useState(() => seed?.dead || {});
   const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
   const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
@@ -42,6 +43,7 @@ export function FollowUpsContent({ apiKey }) {
   const pinnedRef = useRef(pinned); pinnedRef.current = pinned;
   const racRef = useRef(rac); racRef.current = rac;
   const coldRef = useRef(cold); coldRef.current = cold;
+  const stagemapRef = useRef(stagemap); stagemapRef.current = stagemap;
   const deadRef = useRef(dead); deadRef.current = dead;
 
   // Desktop cockpit at >= 900px. Read synchronously on first render (Geek Log is
@@ -73,6 +75,7 @@ export function FollowUpsContent({ apiKey }) {
         setLogs(c.logs);
         setFollowUps(c.followUps);
         setSoi(c.soi || {});
+        setStagemap(c.stagemap || {});
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setCold(c.cold || {});
@@ -123,6 +126,20 @@ export function FollowUpsContent({ apiKey }) {
     }
   }, [apiKey, showToast, goalIndex, stages, closeDetail]);
 
+  // Desktop drag: a hand placement. The card moves to the dropped stage with no
+  // touch logged, in either direction; stageOf treats the placement as the new
+  // ratchet base, so touches logged after it can still advance the card.
+  const handleMoveStage = useCallback((id, si) => {
+    const prev = stagemapRef.current;
+    setStagemap({ ...prev, [id]: { s: si, ts: Date.now() } });
+    showToast(`Moved to ${stages[si]}`);
+    persistStageMove(apiKey, id, si).catch(() => {
+      setStagemap(prev);
+      setCachedStagemap(prev);
+      showToast("Could not move");
+    });
+  }, [apiKey, showToast, stages]);
+
   const handleColdCheckIn = useCallback((id, note) => {
     const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: -1 }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
@@ -140,7 +157,7 @@ export function FollowUpsContent({ apiKey }) {
     setCold(next);
     if (!silent) {
       closeDetail();
-      const st = stageOf(fuRef.current[id], { goalIndex });
+      const st = stageOf(fuRef.current[id], { goalIndex, override: stagemapRef.current[id] });
       showToast(`Revived at ${stages[st]}`);
     }
     persistCold(apiKey, id, "remove").catch(() => { setCold(prev); setCachedColdDead(prev, deadRef.current); showToast("Could not revive"); });
@@ -232,7 +249,7 @@ export function FollowUpsContent({ apiKey }) {
     const p = prospects.find((x) => idFromPhone(x.phone) === id);
     if (!p) return null;
     const isColdContact = !!cold[id] && !dead[id];
-    const stageIdx = stageOf(followUps[id], { goalIndex });
+    const stageIdx = stageOf(followUps[id], { goalIndex, override: stagemap[id] });
     if (isColdContact) {
       return (
         <FollowUpDetail
@@ -265,7 +282,7 @@ export function FollowUpsContent({ apiKey }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {
@@ -275,8 +292,10 @@ export function FollowUpsContent({ apiKey }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
+          stagemap={stagemap}
           onOpenDetail={setOpenId}
           onLogTouch={handleLogFollowUp}
+          onMoveStage={handleMoveStage}
           onColdCheckIn={handleColdCheckIn}
           onMoveToCold={handleMoveToCold}
           onMarkDead={handleMarkDead}
@@ -342,7 +361,7 @@ export function FollowUpsContent({ apiKey }) {
                 highlight={isTopScore(logs[id])}
                 badge={p.manual ? "manual" : ""}
                 checked={racSet.has(id)}
-                stage={stageOf(followUps[id], { goalIndex })}
+                stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
                 stages={stages}
                 goalIndex={goalIndex}
                 onOpen={() => setOpenId(id)}
