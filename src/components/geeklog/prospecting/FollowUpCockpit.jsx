@@ -237,10 +237,13 @@ export function FollowUpCockpit({
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { boxSizing: "border-box", padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", overflowX: "hidden", minHeight: 64, flex: 1 };
-  // The two-across body for busy ultrawide columns: two tracks inside a 440px
-  // border-box column body is 204px per track, a full card each. alignItems
-  // start keeps cards their natural height.
-  const wideBody = { ...colBody, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", justifyItems: "start", alignItems: "start", alignContent: "start" };
+  // The two-across body for busy ultrawide columns is deliberately NOT a CSS
+  // grid: it is a row of two independent flex stacks, the same primitive as the
+  // single-stack columns that render correctly on every screen. (The grid
+  // version showed vertical overlap on some monitors; twin stacks make that
+  // structurally impossible - each half is just a normal card stack.)
+  const wideBody = { ...colBody, flexDirection: "row", alignItems: "flex-start" };
+  const halfStack = { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 };
 
   return (
     <div style={{ padding: "18px 26px 40px" }}>
@@ -282,7 +285,14 @@ export function FollowUpCockpit({
               </button>
               {!shut && (
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
-                  {board[si].map((p) => hotCard(p))}
+                  {wide ? (
+                    <>
+                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
+                    </>
+                  ) : (
+                    board[si].map((p) => hotCard(p))
+                  )}
                 </div>
               )}
             </div>
