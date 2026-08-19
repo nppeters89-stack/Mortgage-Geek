@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -81,7 +81,7 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {},
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {},
   };
   saveLS(cache);
   return cache;
@@ -251,6 +251,31 @@ export function persistStageMove(apiKey, id, stage) {
 
   saveStageMoveKeepalive(apiKey, id, "add", stage);
   return saveStageMove(apiKey, id, "add", stage);
+}
+
+// ----- Motivation notes -----
+
+export function getCachedMotivation() {
+  return getCachedProspects()?.motivation || {};
+}
+
+export function setCachedMotivation(motivation) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  cache = { ...c, motivation };
+  saveLS(cache);
+  return cache;
+}
+
+// Save (or clear, with empty text) a contact's motivation note. Optimistic cache
+// write, keepalive for durability, awaited call returned for revert.
+export function persistMotivation(apiKey, id, text) {
+  const motivation = { ...getCachedMotivation() };
+  const value = (text || "").trim();
+  if (value) motivation[id] = value; else delete motivation[id];
+  setCachedMotivation(motivation);
+
+  saveMotivationKeepalive(apiKey, id, value);
+  return saveMotivation(apiKey, id, value);
 }
 
 // Mark a contact dead ("add") or restore them ("remove"). Mirrors the server's

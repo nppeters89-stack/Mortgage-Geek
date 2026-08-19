@@ -318,6 +318,16 @@ export function saveRacKeepalive(key, id, action) {
 
 // Move a contact to the cold pipeline ("add") or take them out ("remove"). The
 // cold column position is derived from check-in touches, never sent here.
+// Save a contact's motivation note (empty text clears it). Awaited so the
+// caller can revert its optimistic update.
+export async function saveMotivation(key, id, text) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "motivation", id, action: "add", text }));
+}
+
+export function saveMotivationKeepalive(key, id, text) {
+  membershipKeepalive(key, { kind: "motivation", id, action: "add", text });
+}
+
 // Record a hand placement from the cockpit drag board ("add" with a stage
 // index) or clear one ("remove"). A placement moves the card without logging a
 // touch. Awaited so the caller can revert its optimistic update.

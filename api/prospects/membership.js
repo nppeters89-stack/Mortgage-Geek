@@ -32,6 +32,7 @@ const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
+const MOTIVATION_KEY = "prospects:motivation";
 const DEAD_KEY = "prospects:dead";
 
 const ACTIONS = new Set(["add", "remove"]);
@@ -159,6 +160,23 @@ async function handleStageMove(res, { id, action, stage }) {
   return jsonResponse(res, 200, { id, action });
 }
 
+// Per-contact motivation note: why this prospect would switch. One HASH of id to
+// plain text, separate from the seed list (which a re-seed replaces wholesale)
+// and from touch history (it is a standing fact, not an event). "add" with text
+// upserts; "add" with empty text or "remove" clears.
+async function handleMotivation(res, { id, action, text }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
+
+  const value = typeof text === "string" ? text.trim().slice(0, 2000) : "";
+  if (action === "remove" || !value) {
+    await redis.hdel(MOTIVATION_KEY, id);
+    return jsonResponse(res, 200, { id, action: "remove" });
+  }
+  await redis.hset(MOTIVATION_KEY, { [id]: value });
+  return jsonResponse(res, 200, { id, action, text: value });
+}
+
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
@@ -175,6 +193,7 @@ export default async function handler(req, res) {
       case "pin": return await handleSetFlag(res, body, PINNED_SET);
       case "rac": return await handleSetFlag(res, body, RAC_SET);
       case "stage": return await handleStageMove(res, body);
+      case "motivation": return await handleMotivation(res, body);
       case "cold": return await handleCold(res, body);
       case "dead": return await handleDead(res, body);
       case "manual": return await handleManual(res, body.contact);

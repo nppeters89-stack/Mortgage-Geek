@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation } from "./prospectStore";
 import { idFromPhone, soiQueue, isTopScore, formatSoiSince, manualContactTsvRow } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
@@ -23,6 +23,7 @@ export function SoiContent({ apiKey }) {
   const [followUps, setFollowUps] = useState(() => seed?.followUps || {});
   const [soi, setSoi] = useState(() => seed?.soi || {});
   const [rac, setRac] = useState(() => seed?.rac || []);
+  const [motivation, setMotivation] = useState(() => seed?.motivation || {});
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -34,6 +35,7 @@ export function SoiContent({ apiKey }) {
   soiRef.current = soi;
   const racRef = useRef(rac);
   racRef.current = rac;
+  const motivationRef = useRef(motivation); motivationRef.current = motivation;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -52,6 +54,7 @@ export function SoiContent({ apiKey }) {
         setFollowUps(c.followUps);
         setSoi(c.soi || {});
         setRac(c.rac || []);
+        setMotivation(c.motivation || {});
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -69,6 +72,21 @@ export function SoiContent({ apiKey }) {
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast("Follow up logged");
+  }, [apiKey, showToast]);
+
+  // Same motivation note as Follow Ups, on the same shared key.
+  const handleSaveMotivation = useCallback((id, text) => {
+    const prev = motivationRef.current;
+    const next = { ...prev };
+    const value = (text || "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setMotivation(next);
+    showToast(value ? "Motivation saved" : "Motivation cleared");
+    persistMotivation(apiKey, id, value).catch(() => {
+      setMotivation(prev);
+      setCachedMotivation(prev);
+      showToast("Could not save motivation");
+    });
   }, [apiKey, showToast]);
 
   // Same RAC toggle as Follow Ups, on the same shared key, so a contact marked in
@@ -116,6 +134,7 @@ export function SoiContent({ apiKey }) {
           onBack={() => { setView("queue"); setOpenId(null); }}
           onLogFollowUp={(note) => handleLogFollowUp(id, note)}
           onToast={showToast}
+          motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
           onCopyForExcel={openProspect.manual ? () => copyText(manualContactTsvRow(openProspect)).then(
             () => showToast("Contact row copied"),
             () => showToast("Copy failed"),

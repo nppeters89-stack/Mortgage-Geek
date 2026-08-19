@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -30,6 +30,7 @@ export function FollowUpsContent({ apiKey }) {
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
+  const [motivation, setMotivation] = useState(() => seed?.motivation || {});
   const [dead, setDead] = useState(() => seed?.dead || {});
   const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
   const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
@@ -44,6 +45,7 @@ export function FollowUpsContent({ apiKey }) {
   const racRef = useRef(rac); racRef.current = rac;
   const coldRef = useRef(cold); coldRef.current = cold;
   const stagemapRef = useRef(stagemap); stagemapRef.current = stagemap;
+  const motivationRef = useRef(motivation); motivationRef.current = motivation;
   const deadRef = useRef(dead); deadRef.current = dead;
 
   // Desktop cockpit at >= 900px. Read synchronously on first render (Geek Log is
@@ -76,6 +78,7 @@ export function FollowUpsContent({ apiKey }) {
         setFollowUps(c.followUps);
         setSoi(c.soi || {});
         setStagemap(c.stagemap || {});
+        setMotivation(c.motivation || {});
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setCold(c.cold || {});
@@ -125,6 +128,21 @@ export function FollowUpsContent({ apiKey }) {
       showToast(Number.isInteger(stage) ? `Logged: ${stages[stage]}` : "Follow up logged");
     }
   }, [apiKey, showToast, goalIndex, stages, closeDetail]);
+
+  // Save (or clear) a contact's motivation note.
+  const handleSaveMotivation = useCallback((id, text) => {
+    const prev = motivationRef.current;
+    const next = { ...prev };
+    const value = (text || "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setMotivation(next);
+    showToast(value ? "Motivation saved" : "Motivation cleared");
+    persistMotivation(apiKey, id, value).catch(() => {
+      setMotivation(prev);
+      setCachedMotivation(prev);
+      showToast("Could not save motivation");
+    });
+  }, [apiKey, showToast]);
 
   // Desktop drag: a hand placement. The card moves to the dropped stage with no
   // touch logged, in either direction; stageOf treats the placement as the new
@@ -255,6 +273,7 @@ export function FollowUpsContent({ apiKey }) {
         <FollowUpDetail
           prospect={p} log={logs[id]} touches={followUps[id] || []}
           onBack={closeDetail} onToast={showToast}
+          motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -273,6 +292,7 @@ export function FollowUpsContent({ apiKey }) {
         onToast={showToast}
         onAddToSoi={() => { handleAddToSoi(id); if (modal) fireConfetti(); }}
         onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
+        motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
@@ -282,7 +302,7 @@ export function FollowUpsContent({ apiKey }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {

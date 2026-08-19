@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from "react";
 import { T, FF } from "../gl2Tokens";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
 
@@ -155,9 +155,12 @@ export function FollowUpCockpit({
     const ts = lastTouchTs(followUps[id]);
     const count = (followUps[id] || []).length;
     const atGoal = stageFor(id) === goalIndex;
+    // Same green wash the mobile queue rows use for a 10/10 interaction score:
+    // the hottest leads stay visibly hot on the board.
+    const top = isTopScore(logs[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ fontFamily: FF.serif, fontSize: 17.5, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 9, fontSize: 11, color: T.faint }}>
