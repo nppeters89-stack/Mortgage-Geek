@@ -4,7 +4,7 @@ import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
 import { AddToSoiButton } from "./AddToSoiButton";
 import { AddedToRacButton } from "./AddedToRacButton";
-import { formatTouchDate, stageTag, goalIndexOf, COLD_CHECKIN_CAP } from "./prospectsModel";
+import { formatTouchDate, stageTag, goalIndexOf, heatColor, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
 import { copyText } from "./clipboard";
 
@@ -53,7 +53,7 @@ export function FollowUpDetail({
   inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
-  motivation = "", onSaveMotivation = null, copyPhoneOnTap = false,
+  motivation = "", onSaveMotivation = null, copyPhoneOnTap = false, onSetScore = null,
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
@@ -128,6 +128,27 @@ export function FollowUpDetail({
             {log.score ? ` · ${log.score}/10` : ""}
           </div>
           {log.note && <div style={{ fontSize: 13.5, color: T.dim, marginTop: 6, lineHeight: 1.5, fontFamily: FF.body, whiteSpace: "pre-wrap" }}>{log.note}</div>}
+          {onSetScore && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.lineSoft}` }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dim }}>Interaction score</span>
+                {!!log.score && <span style={{ fontSize: 13, fontWeight: 700, color: heatColor(log.score), fontVariantNumeric: "tabular-nums" }}>{log.score}/10</span>}
+              </div>
+              <div style={{ display: "flex", gap: 5, marginTop: 9 }}>
+                {Array.from({ length: 10 }, (_, i) => {
+                  const v = i + 1;
+                  const on = (log.score || 0) >= v;
+                  return (
+                    <button key={v} type="button" onClick={() => v !== log.score && onSetScore(v)} aria-label={`Set score to ${v}`}
+                      style={{ flex: 1, height: 26, borderRadius: 7, border: `1px solid ${on ? heatColor(v) : T.line}`, background: on ? heatColor(v) : "transparent", color: on ? T.bg1 : T.faint, fontFamily: FF.body, fontSize: 11, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+                      {v}
+                    </button>
+                  );
+                })}
+              </div>
+              <div style={{ fontSize: 11, color: T.faint, marginTop: 7, lineHeight: 1.45 }}>Membership follows the score: below 9 drops this contact from Follow Ups (unless pinned by hand).</div>
+            </div>
+          )}
         </div>
       )}
 

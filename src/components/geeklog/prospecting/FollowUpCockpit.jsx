@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from "react";
 import { T, FF, stageRampColor } from "../gl2Tokens";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
 
@@ -177,16 +177,19 @@ export function FollowUpCockpit({
     const top = isTopScore(logs[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ width: "100%", maxWidth: 320, minWidth: 0, background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 9, fontSize: 11, color: T.faint }}>
-          <span>{count} touch{count === 1 ? "" : "es"}</span>
-          <span style={{ color: isStale(ts) ? T.amber : T.faint }}>{rel(ts)}</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{count} touch{count === 1 ? "" : "es"}</span>
+          <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
+            {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
+            <span style={{ color: isStale(ts) ? T.amber : T.faint }}>{rel(ts)}</span>
+          </span>
         </div>
         {atGoal && <span style={{ display: "inline-block", marginTop: 8, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.redLift, border: `1px solid ${T.redWashLine}`, borderRadius: 5, padding: "2px 7px" }}>SPHERE OF INFLUENCE</span>}
       </div>
@@ -199,7 +202,7 @@ export function FollowUpCockpit({
     const ts = lastTouchTs(followUps[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ width: "100%", maxWidth: 320, minWidth: 0, background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        style={{ width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
@@ -208,6 +211,7 @@ export function FollowUpCockpit({
         <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
           <ColdPips count={n} />
+          {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontSize: 10, fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
           <span style={{ fontSize: 10, color: T.faint }}>{rel(ts)}</span>
         </div>
         {n >= COLD_CHECKIN_CAP && <div style={{ marginTop: 7, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.amber, textTransform: "uppercase" }}>Consider the dead box</div>}
@@ -217,7 +221,7 @@ export function FollowUpCockpit({
 
   // Busy columns (6+ cards) double up: the column widens and the cards flow in
   // two across, halving the vertical footprint.
-  const colShell = (isGoal, wide) => ({ flex: wide ? "2 0 470px" : "1 0 240px", minWidth: wide ? 470 : 240, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  const colShell = (isGoal, wide) => ({ flex: wide ? "2 0 440px" : "1 0 220px", minWidth: wide ? 440 : 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", minHeight: 64, flex: 1 };
@@ -261,7 +265,7 @@ export function FollowUpCockpit({
                 <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
               </button>
               {!shut && (
-                <div style={{ ...colBody, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", alignContent: "start" } : {}), background: over === key ? T.lineSoft : "transparent" }}>
+                <div style={{ ...colBody, ...(wide ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", justifyItems: "start", alignContent: "start" } : {}), background: over === key ? T.lineSoft : "transparent" }}>
                   {board[si].map((p) => hotCard(p))}
                 </div>
               )}

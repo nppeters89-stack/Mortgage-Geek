@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -40,6 +40,7 @@ export function FollowUpsContent({ apiKey }) {
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
   const fuRef = useRef(followUps); fuRef.current = followUps;
+  const logsRef = useRef(logs); logsRef.current = logs;
   const soiRef = useRef(soi); soiRef.current = soi;
   const pinnedRef = useRef(pinned); pinnedRef.current = pinned;
   const racRef = useRef(rac); racRef.current = rac;
@@ -128,6 +129,18 @@ export function FollowUpsContent({ apiKey }) {
       showToast(Number.isInteger(stage) ? `Logged: ${stages[stage]}` : "Follow up logged");
     }
   }, [apiKey, showToast, goalIndex, stages, closeDetail]);
+
+  // Re-score the first call from Follow Ups. Membership is derived from this
+  // score, so setting it below 9 drops the contact from Follow Ups (unless
+  // pinned by hand) - the deliberate downgrade path.
+  const handleSetScore = useCallback((id, score) => {
+    const prev = logsRef.current[id];
+    if (!prev) return;
+    const next = { ...prev, score };
+    setLogs((l) => ({ ...l, [id]: next }));
+    persistLog(apiKey, id, next);
+    showToast(score >= 9 ? `Score set to ${score}/10` : `Score ${score}/10. Dropping from Follow Ups`);
+  }, [apiKey, showToast]);
 
   // Save (or clear) a contact's motivation note.
   const handleSaveMotivation = useCallback((id, text) => {
@@ -275,6 +288,7 @@ export function FollowUpsContent({ apiKey }) {
           onBack={closeDetail} onToast={showToast}
           motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
           copyPhoneOnTap={modal}
+          onSetScore={logs[id] ? (v) => handleSetScore(id, v) : null}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -295,6 +309,7 @@ export function FollowUpsContent({ apiKey }) {
         onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         copyPhoneOnTap={modal}
+        onSetScore={logs[id] ? (v) => handleSetScore(id, v) : null}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
@@ -304,7 +319,7 @@ export function FollowUpsContent({ apiKey }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {
@@ -383,6 +398,7 @@ export function FollowUpsContent({ apiKey }) {
                 highlight={isTopScore(logs[id])}
                 badge={p.manual ? "manual" : ""}
                 checked={racSet.has(id)}
+                score={logs[id]?.score || null}
                 stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
                 stages={stages}
                 goalIndex={goalIndex}
