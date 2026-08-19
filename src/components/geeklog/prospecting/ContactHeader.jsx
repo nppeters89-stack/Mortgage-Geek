@@ -12,10 +12,12 @@ import { mutedBadge } from "./ContactQueueRow";
 // below it. Follow Ups passes Add to Contacts; Prospecting passes nothing and
 // renders exactly as before.
 //
-// onPhone swaps the tel: anchor for a button running the given handler. The
-// desktop cockpit passes a copy-to-clipboard action (no phone to dial from a
-// desk, and the number is headed into the CRM); everywhere else dials.
-export function ContactHeader({ prospect: p, callAction = null, onPhone = null }) {
+// onPhone swaps the tel: anchor for a button running the given handler, and
+// onEmail makes the email line clickable the same way. The desktop cockpit
+// passes copy-to-clipboard actions for both (no phone to dial from a desk, and
+// both values are headed into the CRM); everywhere else the phone dials and the
+// email stays plain text.
+export function ContactHeader({ prospect: p, callAction = null, onPhone = null, onEmail = null }) {
   const notes = p.notes || "";
   const sub = [p.brokerage, p.lineType ? `${p.lineType} line` : ""].filter(Boolean).join(" · ");
 
@@ -34,7 +36,17 @@ export function ContactHeader({ prospect: p, callAction = null, onPhone = null }
         </div>
         {p.email && (
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 500, paddingTop: 4, color: T.cream, wordBreak: "break-all", fontFamily: FF.body }}>{p.email}</div>
+            {onEmail ? (
+              <button type="button" onClick={onEmail} title="Copy email"
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", padding: "4px 0 0", cursor: "pointer", textAlign: "left", fontSize: 14, fontWeight: 500, color: T.cream, wordBreak: "break-all", fontFamily: FF.body }}>
+                {p.email}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T.dim} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flex: "none" }}>
+                  <rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h8" />
+                </svg>
+              </button>
+            ) : (
+              <div style={{ fontSize: 14, fontWeight: 500, paddingTop: 4, color: T.cream, wordBreak: "break-all", fontFamily: FF.body }}>{p.email}</div>
+            )}
             <div style={{ fontSize: 10.5, color: T.faint, textTransform: "uppercase", letterSpacing: "0.07em", marginTop: 2 }}>Email</div>
           </div>
         )}

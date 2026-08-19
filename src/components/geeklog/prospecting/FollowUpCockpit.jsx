@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from "react";
-import { T, FF } from "../gl2Tokens";
+import { T, FF, stageRampColor } from "../gl2Tokens";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
@@ -40,6 +40,14 @@ export function FollowUpCockpit({
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
   const [pop, setPop] = useState(null); // { type, id, targetStage }
+  // Collapsed stage columns (indices). Collapsing hides the card list; the
+  // header stays a drop target, so a card can still be dragged onto it.
+  const [collapsedCols, setCollapsedCols] = useState(() => new Set());
+  const toggleCol = (si) => setCollapsedCols((prev) => {
+    const next = new Set(prev);
+    if (next.has(si)) next.delete(si); else next.add(si);
+    return next;
+  });
 
   const touchesOf = (id) => followUps[id] || [];
   const stageFor = (id) => stageOf(touchesOf(id), { isSoi: !!soi[id], goalIndex, override: stagemap[id] });
@@ -207,7 +215,9 @@ export function FollowUpCockpit({
     );
   };
 
-  const colShell = (isGoal) => ({ flex: "1 0 240px", minWidth: 240, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  // Busy columns (6+ cards) double up: the column widens and the cards flow in
+  // two across, halving the vertical footprint.
+  const colShell = (isGoal, wide) => ({ flex: wide ? "2 0 470px" : "1 0 240px", minWidth: wide ? 470 : 240, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", minHeight: 64, flex: 1 };
@@ -235,12 +245,26 @@ export function FollowUpCockpit({
         {stages.map((label, si) => {
           const isGoal = si === goalIndex;
           const key = `hot:${si}`;
+          const ramp = stageRampColor(si, stages.length);
+          const shut = collapsedCols.has(si);
+          const wide = !shut && board[si].length >= 6;
           return (
-            <div key={si} style={{ ...colShell(isGoal), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
-              <div style={colHead}><span style={colTitle(isGoal ? T.redLift : T.dim)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{board[si].length}</span></div>
-              <div style={{ ...colBody, background: over === key ? T.lineSoft : "transparent" }}>
-                {board[si].map((p) => hotCard(p))}
-              </div>
+            <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
+              {/* Header doubles as the collapse toggle, color-coded to the same
+                  dark-red-to-neon-yellow ramp as the mobile stage notches. */}
+              <button type="button" onClick={() => toggleCol(si)} aria-expanded={!shut}
+                style={{ ...colHead, width: "100%", background: "none", border: "none", cursor: "pointer", fontFamily: FF.body, alignItems: "center", borderBottom: shut ? "none" : `1px solid ${T.line}` }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                  <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
+                  <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+                </span>
+                <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
+              </button>
+              {!shut && (
+                <div style={{ ...colBody, ...(wide ? { display: "grid", gridTemplateColumns: "1fr 1fr", alignContent: "start" } : {}), background: over === key ? T.lineSoft : "transparent" }}>
+                  {board[si].map((p) => hotCard(p))}
+                </div>
+              )}
             </div>
           );
         })}

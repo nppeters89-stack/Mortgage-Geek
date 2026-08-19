@@ -96,6 +96,7 @@ export function FollowUpDetail({
 
       <ContactHeader prospect={p}
         onPhone={copyPhoneOnTap ? () => copyText(p.phone).then(() => onToast?.("Phone number copied"), () => onToast?.("Copy failed")) : null}
+        onEmail={copyPhoneOnTap && p.email ? () => copyText(p.email).then(() => onToast?.("Email copied"), () => onToast?.("Copy failed")) : null}
         callAction={
         <>
           <AddToContactsButton prospect={p} onToast={onToast} />
