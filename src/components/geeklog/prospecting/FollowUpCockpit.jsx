@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor } from "../gl2Tokens";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
@@ -43,6 +43,16 @@ export function FollowUpCockpit({
   // Collapsed stage columns (indices). Collapsing hides the card list; the
   // header stays a drop target, so a card can still be dragged onto it.
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
+  // Two-across only on screens that genuinely fit it. Below the gate every
+  // column is a single stack and the board scrolls sideways - columns never
+  // compress into a squeezed, overlapping middle state.
+  const [ultra, setUltra] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1600px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1600px)");
+    const onChange = (e) => setUltra(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
   const toggleCol = (si) => setCollapsedCols((prev) => {
     const next = new Set(prev);
     if (next.has(si)) next.delete(si); else next.add(si);
@@ -177,7 +187,7 @@ export function FollowUpCockpit({
     const top = isTopScore(logs[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
@@ -202,7 +212,7 @@ export function FollowUpCockpit({
     const ts = lastTouchTs(followUps[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        style={{ boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
@@ -219,19 +229,18 @@ export function FollowUpCockpit({
     );
   };
 
-  // Busy columns (6+ cards) take a double share of the free width, but their
-  // minimum is the same as any other column - no forced 440px that a mid-width
-  // screen cannot afford. How many cards sit side by side is decided by the
-  // card grid below, from the width the column actually gets.
-  const colShell = (isGoal, busy) => ({ flex: busy ? "2 0 220px" : "1 0 220px", minWidth: 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  // Busy columns (6+ cards) go two-across on ultrawide screens (the gate
+  // above); everywhere else every column is a single 220px stack. border-box
+  // throughout: this route has no global reset, and content-box arithmetic is
+  // what let cards paint wider than their tracks.
+  const colShell = (isGoal, wide) => ({ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 220px", minWidth: wide ? 440 : 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
-  const colBody = { padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", minHeight: 64, flex: 1 };
-  // Hot columns lay cards out with auto-fill: each track is at least a full
-  // card wide (200px), so side-by-side cards can never overlap - a column that
-  // cannot fit two tracks simply stacks single-file. alignItems start keeps
-  // cards their natural height instead of stretching to the row's tallest.
-  const hotBody = { ...colBody, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", justifyItems: "start", alignItems: "start", alignContent: "start" };
+  const colBody = { boxSizing: "border-box", padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", overflowX: "hidden", minHeight: 64, flex: 1 };
+  // The two-across body for busy ultrawide columns: two tracks inside a 440px
+  // border-box column body is 204px per track, a full card each. alignItems
+  // start keeps cards their natural height.
+  const wideBody = { ...colBody, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", justifyItems: "start", alignItems: "start", alignContent: "start" };
 
   return (
     <div style={{ padding: "18px 26px 40px" }}>
@@ -258,9 +267,9 @@ export function FollowUpCockpit({
           const key = `hot:${si}`;
           const ramp = stageRampColor(si, stages.length);
           const shut = collapsedCols.has(si);
-          const busy = !shut && board[si].length >= 6;
+          const wide = !shut && ultra && board[si].length >= 6;
           return (
-            <div key={si} style={{ ...colShell(isGoal, busy), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
+            <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
                   dark-red-to-neon-yellow ramp as the mobile stage notches. */}
               <button type="button" onClick={() => toggleCol(si)} aria-expanded={!shut}
@@ -272,7 +281,7 @@ export function FollowUpCockpit({
                 <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
               </button>
               {!shut && (
-                <div style={{ ...hotBody, background: over === key ? T.lineSoft : "transparent" }}>
+                <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
                   {board[si].map((p) => hotCard(p))}
                 </div>
               )}
@@ -292,7 +301,7 @@ export function FollowUpCockpit({
           {COLD_COLUMNS.map((label, ci) => {
             const key = `cold:${ci}`;
             return (
-              <div key={ci} style={{ flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={ci} style={{ boxSizing: "border-box", flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropCold(ci, true)}>
                 <div style={colHead}><span style={colTitle(T.cold)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{coldCols[ci].length}</span></div>
                 <div style={{ ...colBody, background: over === key ? T.coldWash : "transparent" }}>
