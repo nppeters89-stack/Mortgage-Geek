@@ -219,12 +219,19 @@ export function FollowUpCockpit({
     );
   };
 
-  // Busy columns (6+ cards) double up: the column widens and the cards flow in
-  // two across, halving the vertical footprint.
-  const colShell = (isGoal, wide) => ({ flex: wide ? "2 0 440px" : "1 0 220px", minWidth: wide ? 440 : 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  // Busy columns (6+ cards) take a double share of the free width, but their
+  // minimum is the same as any other column - no forced 440px that a mid-width
+  // screen cannot afford. How many cards sit side by side is decided by the
+  // card grid below, from the width the column actually gets.
+  const colShell = (isGoal, busy) => ({ flex: busy ? "2 0 220px" : "1 0 220px", minWidth: 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", minHeight: 64, flex: 1 };
+  // Hot columns lay cards out with auto-fill: each track is at least a full
+  // card wide (200px), so side-by-side cards can never overlap - a column that
+  // cannot fit two tracks simply stacks single-file. alignItems start keeps
+  // cards their natural height instead of stretching to the row's tallest.
+  const hotBody = { ...colBody, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", justifyItems: "start", alignItems: "start", alignContent: "start" };
 
   return (
     <div style={{ padding: "18px 26px 40px" }}>
@@ -251,9 +258,9 @@ export function FollowUpCockpit({
           const key = `hot:${si}`;
           const ramp = stageRampColor(si, stages.length);
           const shut = collapsedCols.has(si);
-          const wide = !shut && board[si].length >= 6;
+          const busy = !shut && board[si].length >= 6;
           return (
-            <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
+            <div key={si} style={{ ...colShell(isGoal, busy), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
                   dark-red-to-neon-yellow ramp as the mobile stage notches. */}
               <button type="button" onClick={() => toggleCol(si)} aria-expanded={!shut}
@@ -265,7 +272,7 @@ export function FollowUpCockpit({
                 <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
               </button>
               {!shut && (
-                <div style={{ ...colBody, ...(wide ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", justifyItems: "start", alignContent: "start" } : {}), background: over === key ? T.lineSoft : "transparent" }}>
+                <div style={{ ...hotBody, background: over === key ? T.lineSoft : "transparent" }}>
                   {board[si].map((p) => hotCard(p))}
                 </div>
               )}
