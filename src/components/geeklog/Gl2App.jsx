@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
-import { T, APP_MAX, COCKPIT_MAX } from "./gl2Tokens";
+import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar } from "./Gl2Primitives";
 import { Gl2TabDock } from "./Gl2TabDock";
@@ -71,10 +71,11 @@ export function Gl2App({ apiKey }) {
   const [closings, setClosings] = useState(0);
   const [stats, setStats] = useState(null);
   const [tab, setTab] = useState("today");
-  // The Follow Up cockpit widens the centered column on desktop (>= 900px) so the
-  // seven stage columns fit; every other tab and all of mobile stay at APP_MAX.
+  // The desktop Follow Up cockpit (>= 900px) runs full-bleed: no width cap, the
+  // board owns the whole screen. Every other tab and all of mobile stay at
+  // APP_MAX.
   const isNarrow = useIsMobile(899);
-  const columnMax = tab === "followups" && !isNarrow ? COCKPIT_MAX : APP_MAX;
+  const columnMax = tab === "followups" && !isNarrow ? "100%" : APP_MAX;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayKey);

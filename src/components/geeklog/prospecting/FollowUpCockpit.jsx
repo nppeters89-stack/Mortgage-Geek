@@ -177,9 +177,9 @@ export function FollowUpCockpit({
     const top = isTopScore(logs[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ width: "100%", maxWidth: 320, minWidth: 0, background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.15, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
@@ -199,9 +199,9 @@ export function FollowUpCockpit({
     const ts = lastTouchTs(followUps[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        style={{ width: "100%", maxWidth: 320, minWidth: 0, background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
@@ -355,7 +355,7 @@ function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, o
             <div style={{ fontSize: 13, color: T.dim, marginTop: 10 }}>Nobody here. Good.</div>
           ) : deadList.map((p) => (
             <div key={idFromPhone(p.phone)} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 2px", borderBottom: `1px solid ${T.line}` }}>
-              <div><div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16, color: T.cream }}>{p.name}</div><div style={{ fontSize: 11, color: T.dim, marginTop: 2 }}>{p.brokerage || " "}</div></div>
+              <div style={{ minWidth: 0, paddingRight: 10 }}><div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16, color: T.cream, overflowWrap: "break-word" }}>{p.name}</div><div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || " "}</div></div>
               <button type="button" onClick={() => { onRestore(idFromPhone(p.phone)); onClose(); }} style={{ background: "none", border: `1px solid ${T.greenWashLine}`, color: T.green, borderRadius: 8, padding: "7px 13px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>Restore</button>
             </div>
           ))}

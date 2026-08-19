@@ -40,11 +40,6 @@ export const T = {
 // importing Gl2App and creating an import cycle.
 export const APP_MAX = 880;
 
-// The Follow Up cockpit (desktop, viewport >= 900px) needs room for the seven
-// stage columns, so the centered column widens to this on that one tab. Every
-// other tab and all of mobile stay at APP_MAX.
-export const COCKPIT_MAX = 1880;
-
 // Stage-notch gradient for the follow-up pipeline: kindles from dark red
 // through neon orange into neon yellow on the goal notch. Indexed by notch
 // position via stageRampColor so any stage count maps onto the ramp (identity
