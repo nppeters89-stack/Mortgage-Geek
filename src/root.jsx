@@ -97,6 +97,12 @@ export function Layout({ children }) {
   const isGeekLog = pathname.replace(/\/+$/, "") === "/geek-log";
   const manifestHref = isGeekLog ? "/geeklog.webmanifest" : "/manifest.json";
   const appleTouchHref = isGeekLog ? "/geeklog/icon-180.png" : "/favicons/apple-touch-icon.png?v=cream";
+  // Browser-tab favicon follows the same split: green Geek Log icon on
+  // /geek-log, red-tile MG everywhere else. (The Geek Log set has no 16px
+  // cut; the 32 scales down fine.)
+  const favicon32Href = isGeekLog ? "/geeklog/icon-32.png" : "/favicons/favicon-32.png";
+  const favicon16Href = isGeekLog ? "/geeklog/icon-32.png" : "/favicons/favicon-16.png";
+  const faviconHref = isGeekLog ? "/geeklog/icon-48.png" : "/favicons/favicon.png";
   const appName = isGeekLog ? "Geek Log" : "Mortgage Geek";
 
   return (
@@ -115,10 +121,11 @@ export function Layout({ children }) {
         {/* PWA Manifest (Geek Log installs its own) */}
         <link rel="manifest" href={manifestHref} />
 
-        {/* Browser tab favicon: red-tile MG (reads on light + dark tabs). */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16.png" />
-        <link rel="icon" type="image/png" href="/favicons/favicon.png" />
+        {/* Browser tab favicon: red-tile MG (reads on light + dark tabs), or the
+            green Geek Log icon on /geek-log. */}
+        <link rel="icon" type="image/png" sizes="32x32" href={favicon32Href} />
+        <link rel="icon" type="image/png" sizes="16x16" href={favicon16Href} />
+        <link rel="icon" type="image/png" href={faviconHref} />
         {/* iOS / PWA home-screen icon: cream MG variant, or the Geek Log icon on /geek-log. */}
         <link rel="apple-touch-icon" sizes="180x180" href={appleTouchHref} />
 
