@@ -45,6 +45,17 @@ export const APP_MAX = 880;
 // other tab and all of mobile stay at APP_MAX.
 export const COCKPIT_MAX = 1880;
 
+// Stage-notch gradient for the follow-up pipeline: kindles from dark red
+// through neon orange into neon yellow on the goal notch. Indexed by notch
+// position via stageRampColor so any stage count maps onto the ramp (identity
+// at the default seven).
+export const STAGE_RAMP = ["#8A1B1F", "#B02318", "#D63A0F", "#F25400", "#FF7A00", "#FFAE00", "#FFE600"];
+export const stageRampColor = (i, n = STAGE_RAMP.length) => {
+  if (n <= 1) return STAGE_RAMP[STAGE_RAMP.length - 1];
+  const t = Math.max(0, Math.min(1, i / (n - 1)));
+  return STAGE_RAMP[Math.round(t * (STAGE_RAMP.length - 1))];
+};
+
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.
 export const SCORE_HEAT = [

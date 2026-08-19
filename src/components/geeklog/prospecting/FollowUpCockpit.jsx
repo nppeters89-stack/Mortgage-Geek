@@ -25,7 +25,7 @@ const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation,
   onOpenDetail, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
@@ -161,7 +161,10 @@ export function FollowUpCockpit({
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
-        <div style={{ fontFamily: FF.serif, fontSize: 17.5, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{ fontFamily: FF.serif, fontSize: 17.5, lineHeight: 1.15, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
+        </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: 9, fontSize: 11, color: T.faint }}>
           <span>{count} touch{count === 1 ? "" : "es"}</span>
@@ -179,7 +182,10 @@ export function FollowUpCockpit({
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
-        <div style={{ fontFamily: FF.serif, fontSize: 16, color: T.cream }}>{p.name}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{ fontFamily: FF.serif, fontSize: 16, color: T.cream, minWidth: 0 }}>{p.name}</div>
+          {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
+        </div>
         <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
           <ColdPips count={n} />

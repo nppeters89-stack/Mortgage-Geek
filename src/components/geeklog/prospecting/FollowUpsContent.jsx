@@ -312,7 +312,7 @@ export function FollowUpsContent({ apiKey }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap}
+          stagemap={stagemap} motivation={motivation}
           onOpenDetail={setOpenId}
           onLogTouch={handleLogFollowUp}
           onMoveStage={handleMoveStage}
