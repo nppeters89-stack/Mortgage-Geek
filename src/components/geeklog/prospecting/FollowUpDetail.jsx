@@ -7,6 +7,7 @@ import { AddedToRacButton } from "./AddedToRacButton";
 import { formatTouchDate, stageTag, goalIndexOf, heatColor, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
 import { copyText } from "./clipboard";
+import { MotivationBox } from "./MotivationBox";
 
 // Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
 // read-only "First contact" block from the original call log, a composer, and the
@@ -46,32 +47,6 @@ function ScoreRow({ score, onSet }) {
       </div>
       <div style={{ fontSize: 11, color: T.faint, marginTop: 7, lineHeight: 1.45 }}>Membership follows the score: below 9 drops this contact from Follow Ups (unless pinned by hand).</div>
     </>
-  );
-}
-
-// The motivation note: why this prospect would switch. Deliberately loud (neon
-// orange) so an empty box reads as "you have not asked yet" during a call. Saves
-// on the button or on blur; empty text clears the note.
-function MotivationBox({ value, onSave }) {
-  const [text, setText] = useState(value || "");
-  useEffect(() => { setText(value || ""); }, [value]);
-  const dirty = text.trim() !== (value || "").trim();
-
-  const save = () => { if (dirty) onSave(text.trim()); };
-
-  return (
-    <div style={{ marginTop: 14, border: `1.5px solid ${T.orangeWashLine}`, borderRadius: 12, background: T.orangeWash, padding: "12px 14px" }}>
-      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.orange }}>Motivation to switch</div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} onBlur={save}
-        placeholder="Why would they move their business to you? Ask on the next call."
-        style={{ width: "100%", marginTop: 8, minHeight: 56, resize: "vertical", background: "transparent", color: T.cream, border: "none", outline: "none", padding: 0, fontFamily: FF.body, fontSize: 14.5, lineHeight: 1.5 }} />
-      {dirty && (
-        <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={save}
-          style={{ marginTop: 8, padding: "8px 16px", borderRadius: 9, border: "none", background: T.orange, color: T.bg1, fontFamily: FF.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-          Save motivation
-        </button>
-      )}
-    </div>
   );
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactCard } from "./ContactCard";
-import { getCachedProspects, loadProspects, persistLog } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation } from "./prospectStore";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
   outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
@@ -24,6 +24,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => (seed?.prospects ? sortedQueue(seed.prospects) : []));
   const [logs, setLogs] = useState(() => seed?.logs || {});
+  const [motivation, setMotivation] = useState(() => seed?.motivation || {});
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -33,6 +34,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const toastTimer = useRef(null);
   const logsRef = useRef(logs);
   logsRef.current = logs;
+  const motivationRef = useRef(motivation); motivationRef.current = motivation;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -49,6 +51,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
         if (cancelled) return;
         setProspects(c.prospects);
         setLogs(c.logs);
+        setMotivation(c.motivation || {});
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -69,6 +72,22 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
     setView("queue");
     setOpenId(null);
   }, [apiKey, showToast, onTalkedLogged]);
+
+  // Same motivation note as Follow Ups, on the same shared key - entered here
+  // during the call, waiting in Follow Ups when the contact graduates.
+  const handleSaveMotivation = useCallback((id, text) => {
+    const prev = motivationRef.current;
+    const next = { ...prev };
+    const value = (text || "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setMotivation(next);
+    showToast(value ? "Motivation saved" : "Motivation cleared");
+    persistMotivation(apiKey, id, value).catch(() => {
+      setMotivation(prev);
+      setCachedMotivation(prev);
+      showToast("Could not save motivation");
+    });
+  }, [apiKey, showToast]);
 
   const copy = useCallback((text, msg, emptyMsg) => {
     if (!text) { showToast(emptyMsg || "Nothing to copy"); return; }
@@ -114,6 +133,8 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           onBack={() => { setView("queue"); setOpenId(null); }}
           onSave={(log) => handleSave(id, log)}
           onCopyOne={(log) => copy(logTsvRow(openProspect, log), `Copied row for ${openProspect.name}`)}
+          motivation={motivation[id] || ""}
+          onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         />
         <Toast msg={toast} />
       </>

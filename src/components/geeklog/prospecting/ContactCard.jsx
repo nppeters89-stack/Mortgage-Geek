@@ -2,6 +2,7 @@ import { useState } from "react";
 import { T, FF } from "../gl2Tokens";
 import { OUTCOMES, heatColor } from "./prospectsModel";
 import { ContactHeader } from "./ContactHeader";
+import { MotivationBox } from "./MotivationBox";
 
 // Contact card / detail view: the shared ContactHeader (name, brokerage, buysides,
 // email, Call button, intel) plus the call-log controls (outcome chips, 1-10 heat
@@ -15,7 +16,7 @@ const tomorrowISO = () => {
   return d.toISOString().slice(0, 10);
 };
 
-export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne }) {
+export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, motivation = "", onSaveMotivation = null }) {
   const [outcome, setOutcome] = useState(log?.outcome || "");
   const [score, setScore] = useState(log?.score || 0);
   const [note, setNote] = useState(log?.note || "");
@@ -43,6 +44,10 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne }) {
       </button>
 
       <ContactHeader prospect={p} />
+
+      {/* Motivation lands here first: gathered DURING the call, so it is already
+          on file when a 9+ score sends the contact to Follow Ups. */}
+      {onSaveMotivation && <MotivationBox value={motivation} onSave={onSaveMotivation} />}
 
       <div style={{ marginTop: 26 }}>
         <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Log this call</h2>
