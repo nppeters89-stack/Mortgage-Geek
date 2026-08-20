@@ -139,12 +139,12 @@ export function Layout({ children }) {
         <meta name="theme-color" content="#131416" />
         <meta name="application-name" content={appName} />
 
-        {/* Open Graph + Twitter — site-wide static bits (per-page title/description/
-            url come from route meta). */}
+        {/* Open Graph + Twitter site-wide static bits. Per-page title, description,
+            url, AND image come from route meta (buildMeta), which owns og:image /
+            twitter:image as a single source so a per-route image (a tool's icon)
+            overrides the default without a duplicate tag. */}
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:image" content="https://mortgagegeek.ai/favicons/icon-512.png" />
 
         {/* Schema.org Person + FinancialService — hardcoded so they're in the raw HTML for crawlers. */}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: PERSON_JSONLD }} />
