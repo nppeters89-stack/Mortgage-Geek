@@ -20,7 +20,7 @@ import { fireConfetti } from "./confetti";
 // there is one source of truth for stage, cold, and dead. Moving TO cold or dead
 // is a desktop drag gesture; mobile can check in and revive. Dead contacts are
 // excluded from every list.
-export function FollowUpsContent({ apiKey }) {
+export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
   const [logs, setLogs] = useState(() => seed?.logs || {});
@@ -333,6 +333,7 @@ export function FollowUpsContent({ apiKey }) {
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
           stagemap={stagemap} motivation={motivation} rac={racSet}
           onOpenDetail={setOpenId}
+          onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}
           onMoveStage={handleMoveStage}
           onColdCheckIn={handleColdCheckIn}

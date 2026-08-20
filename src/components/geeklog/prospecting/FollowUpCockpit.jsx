@@ -35,7 +35,7 @@ const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinn
 
 export function FollowUpCockpit({
   prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac,
-  onOpenDetail, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
+  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
@@ -99,7 +99,7 @@ export function FollowUpCockpit({
     let streak = 0; const d = new Date();
     if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
     while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
-    const week = all.filter((t) => Date.now() - t.ts < 7 * DAY).length;
+    const week = all.filter((t) => t.stage !== -3 && Date.now() - t.ts < 7 * DAY).length;
     const activeMembers = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && !soi[id] && isMember(id, logs, pinnedSet); });
     const cov = activeMembers.length ? Math.round(activeMembers.filter((p) => { const ts = lastTouchTs(followUps[idFromPhone(p.phone)]); return ts && !isStale(ts); }).length / activeMembers.length * 100) : 100;
     const soiCount = prospects.filter((p) => { const id = idFromPhone(p.phone); return soi[id] && !dead[id]; }).length;
@@ -275,14 +275,25 @@ export function FollowUpCockpit({
             <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
                   dark-red-to-neon-yellow ramp as the mobile stage notches. */}
-              <button type="button" onClick={() => toggleCol(si)} aria-expanded={!shut}
-                style={{ ...colHead, width: "100%", background: "none", border: "none", cursor: "pointer", fontFamily: FF.body, alignItems: "center", borderBottom: shut ? "none" : `1px solid ${T.line}` }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                  <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
-                  <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
-                </span>
-                <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
-              </button>
+              <div style={{ display: "flex", alignItems: "stretch", borderBottom: shut ? "none" : `1px solid ${T.line}` }}>
+                <button type="button" onClick={() => toggleCol(si)} aria-expanded={!shut}
+                  style={{ ...colHead, flex: 1, minWidth: 0, background: "none", border: "none", cursor: "pointer", fontFamily: FF.body, alignItems: "center", borderBottom: "none" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                    <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
+                    <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+                  </span>
+                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
+                </button>
+                {/* The goal column doubles as the door to the SOI cockpit. A
+                    sibling, not a child: buttons cannot nest. Drop behavior is
+                    untouched - it lives on the column shell. */}
+                {isGoal && onOpenSoi && (
+                  <button type="button" onClick={onOpenSoi} title="Open the SOI cockpit" aria-label="Open the SOI cockpit"
+                    style={{ flex: "none", alignSelf: "center", margin: "0 10px 0 0", background: "none", border: `1px solid ${T.line}`, borderRadius: 999, padding: "3px 10px", color: T.amber, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: FF.body }}>
+                    →
+                  </button>
+                )}
+              </div>
               {!shut && (
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
                   {wide ? (

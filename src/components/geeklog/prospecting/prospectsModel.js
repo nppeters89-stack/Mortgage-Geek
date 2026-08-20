@@ -158,7 +158,7 @@ function byNeglect(prospects, followUps) {
 // falls back to these labels when prospects:fu:stages is absent, so labels can
 // change server-side without a deploy without breaking the indices.
 export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
-export const DEFAULT_CONFIG = { weekTarget: 15 };
+export const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
 // The five cold columns, keyed by check-in count (min(count, 4)).
 export const COLD_COLUMNS = ["Fresh Cold", "1 Check-in", "2 Check-ins", "3 Check-ins", "4-5 Check-ins"];
@@ -168,6 +168,9 @@ export const COLD_CHECKIN_CAP = 5;
 // stage > 0 is a pipeline stage (index into the stages array).
 export const STAGE_COLD = -1;
 export const STAGE_DEAD = -2;
+// A referral event: the partner sent business. Lives in the same fu history as
+// every other touch, so it survives promotion, demotion, and re-seeds alike.
+export const STAGE_REFERRAL = -3;
 
 // The goal (last) stage index for a stages array. Always the SOI column.
 export const goalIndexOf = (stages = DEFAULT_STAGES) => stages.length - 1;
@@ -211,6 +214,7 @@ export function stageTag(touch, stages = DEFAULT_STAGES) {
   const s = touch && touch.stage != null ? touch.stage : 1;
   if (s === STAGE_COLD) return { label: "Cold check-in", tone: "cold" };
   if (s === STAGE_DEAD) return { label: "Marked dead", tone: "dead" };
+  if (s === STAGE_REFERRAL) return { label: "Referral", tone: "ref" };
   return { label: stages[s] || stages[1], tone: "stage" };
 }
 
@@ -263,6 +267,38 @@ export function formatSoiSince(ts) {
   } catch {
     return "";
   }
+}
+
+// ----- SOI cockpit clocks (two timers per partner: last touch, last referral) -----
+//
+// The quadrant view derives everything from the fu history plus two config
+// knobs. touchesBy is what Nick DID (everything except referral events);
+// referralsOf is what the partner sent back. Quadrant indices match the
+// preview: 0 Producing & Connected, 1 Producing & Overdue, 2 Quiet & Connected,
+// 3 Quiet & Drifting.
+
+export const touchesBy = (touches) => (touches || []).filter((t) => t && t.stage !== STAGE_REFERRAL);
+export const referralsOf = (touches) => (touches || []).filter((t) => t && t.stage === STAGE_REFERRAL);
+
+// Null (not lastTouchTs's 0) when there is nothing: the timer chips render
+// "Never" off null, and 0 would read as twenty thousand days since epoch.
+export const lastTouchByTs = (touches) => lastTouchTs(touchesBy(touches)) || null;
+export const lastReferralTs = (touches) => lastTouchTs(referralsOf(touches)) || null;
+
+export function touchOverdue(touches, config = DEFAULT_CONFIG) {
+  const ts = lastTouchByTs(touches);
+  if (!ts) return true;
+  return Date.now() - ts > (config.touchOverdueDays ?? DEFAULT_CONFIG.touchOverdueDays) * DAY_MS;
+}
+
+export function producing(touches, config = DEFAULT_CONFIG) {
+  const ts = lastReferralTs(touches);
+  if (!ts) return false;
+  return Date.now() - ts <= (config.refQuietDays ?? DEFAULT_CONFIG.refQuietDays) * DAY_MS;
+}
+
+export function quadrantOf(touches, config = DEFAULT_CONFIG) {
+  return producing(touches, config) ? (touchOverdue(touches, config) ? 1 : 0) : (touchOverdue(touches, config) ? 3 : 2);
 }
 
 // ----- Manual contacts -----

@@ -56,6 +56,7 @@ export function FollowUpDetail({
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
   motivation = "", onSaveMotivation = null, copyPhoneOnTap = false, onSetScore = null,
+  onLogReferral = null,
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
@@ -63,6 +64,7 @@ export function FollowUpDetail({
   // contact's derived stage advances (the parent re-renders this view after each
   // logged touch), so the selector keeps pointing one stage ahead.
   const [stageSel, setStageSel] = useState(() => Math.min(stageIndex + 1, goal));
+  const [refMode, setRefMode] = useState(false); // "soi" composer: touch vs referral tab
   useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
 
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -80,6 +82,12 @@ export function FollowUpDetail({
     onLogFollowUp(text, stageSel);
     setNote("");
   };
+  const submitSoi = () => {
+    const text = note.trim();
+    if (!text) return;
+    if (refMode) onLogReferral?.(text); else onLogFollowUp(text);
+    setNote("");
+  };
   const submitCold = () => {
     const text = note.trim();
     if (!text || atCap) return;
@@ -87,7 +95,7 @@ export function FollowUpDetail({
     setNote("");
   };
 
-  const tagColor = (tone) => (tone === "cold" ? T.cold : tone === "dead" ? T.faint : T.redLift);
+  const tagColor = (tone) => (tone === "cold" ? T.cold : tone === "dead" ? T.faint : tone === "ref" ? T.amber : T.redLift);
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -118,7 +126,7 @@ export function FollowUpDetail({
       {onSaveMotivation && <MotivationBox value={motivation} onSave={onSaveMotivation} />}
 
       {statusLine && (
-        <div style={{ marginTop: 12, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: composerMode === "cold" ? T.cold : T.redLift }}>{statusLine}</div>
+        <div style={{ marginTop: 12, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: composerMode === "cold" ? T.cold : composerMode === "soi" ? T.amber : T.redLift }}>{statusLine}</div>
       )}
 
       {log && (
@@ -146,8 +154,28 @@ export function FollowUpDetail({
         </div>
       )}
 
-      {/* Composer: plain (SOI), stage selector (active Follow Ups), or cold. */}
-      {composerMode === "cold" ? (
+      {/* Composer: soi (two-mode touch/referral), cold, stage, or plain. */}
+      {composerMode === "soi" ? (
+        <div style={{ marginTop: 26 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button type="button" onClick={() => setRefMode(false)}
+              style={{ flex: 1, padding: 11, borderRadius: 10, border: `1px solid ${refMode ? T.line : T.cream}`, background: refMode ? T.surface : T.cream, color: refMode ? T.dim : T.bg1, fontFamily: FF.body, fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
+              Log touch
+            </button>
+            <button type="button" onClick={() => setRefMode(true)}
+              style={{ flex: 1, padding: 11, borderRadius: 10, border: `1px solid ${refMode ? T.amber : T.line}`, background: refMode ? T.amber : T.surface, color: refMode ? T.bg1 : T.dim, fontFamily: FF.body, fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
+              Log referral
+            </button>
+          </div>
+          <textarea value={note} onChange={(e) => setNote(e.target.value)}
+            placeholder={refMode ? "Who did they send? Client name and context." : "What did this touch look like..."}
+            style={{ width: "100%", marginTop: 12, minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
+          <button type="button" onClick={submitSoi} disabled={!note.trim()}
+            style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: !note.trim() ? T.surface : refMode ? T.amber : T.green, color: !note.trim() ? T.faint : refMode ? T.bg1 : T.cream, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
+            {refMode ? "Log referral" : "Log touch"}
+          </button>
+        </div>
+      ) : composerMode === "cold" ? (
         <div style={{ marginTop: 26 }}>
           <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Cold check-in ({Math.min(coldCount + 1, COLD_CHECKIN_CAP)} of {COLD_CHECKIN_CAP})</h2>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Light touch. What did you send or say..."
@@ -186,11 +214,13 @@ export function FollowUpDetail({
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dim, marginBottom: 10 }}>History · {history.length}</div>
           {history.map((t, i) => {
             const tag = showStageTags && stages ? stageTag(t, stages) : null;
+            const isRef = t.stage === -3;
             return (
-              <details key={`${t.ts}-${i}`} style={{ border: `1px solid ${T.line}`, borderRadius: 10, overflow: "hidden", marginBottom: 8 }}>
+              <details key={`${t.ts}-${i}`} style={{ border: `1px solid ${T.line}`, borderLeft: isRef ? `3px solid ${T.amber}` : `1px solid ${T.line}`, borderRadius: 10, overflow: "hidden", marginBottom: 8, background: isRef ? "rgba(201,162,58,0.05)" : "transparent" }}>
                 <summary style={{ listStyle: "none", display: "flex", alignItems: "baseline", gap: 10, padding: "12px 14px", cursor: "pointer", background: T.surface }}>
                   <span style={{ flex: "none", fontSize: 12.5, fontWeight: 600, color: T.cream, fontVariantNumeric: "tabular-nums" }}>{formatTouchDate(t.ts)}</span>
-                  {tag && <span style={{ flex: "none", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: tagColor(tag.tone) }}>{tag.label}</span>}
+                  {isRef && !tag && <span style={{ flex: "none", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: T.amber }}>{"★"} Referral</span>}
+                  {tag && <span style={{ flex: "none", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: tagColor(tag.tone) }}>{tag.tone === "ref" ? `${"★"} ${tag.label}` : tag.label}</span>}
                   <span style={{ flex: 1, minWidth: 0, fontSize: 13, color: T.dim, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: FF.body }}>{t.note}</span>
                 </summary>
                 <div style={{ padding: "12px 14px", fontSize: 14, lineHeight: 1.55, color: T.cream, background: T.bg0, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: FF.body }}>{t.note || "No note"}</div>

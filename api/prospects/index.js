@@ -45,7 +45,7 @@ const MOTIVATION_KEY = "prospects:motivation";
 // required for the labels or the week target to work on a fresh install. A stored
 // value (set later, without a deploy) overrides them.
 const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
-const DEFAULT_CONFIG = { weekTarget: 15 };
+const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
