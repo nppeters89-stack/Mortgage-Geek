@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation } from "./prospectStore";
-import { idFromPhone, soiQueue, isTopScore, formatSoiSince, manualContactTsvRow } from "./prospectsModel";
+import { idFromPhone, soiQueue, formatSoiSince, manualContactTsvRow, referralsOf, quadrantOf, lastTouchByTs, STAGE_REFERRAL, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
-import { ContactQueueRow } from "./ContactQueueRow";
+import { SoiCockpit, SoiPartnerContent, SOI_GROUPS, soiGroupColor } from "./SoiCockpit";
+import { fireConfetti } from "./confetti";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { quietAction } from "./detailActionStyles";
 
@@ -12,11 +13,13 @@ import { quietAction } from "./detailActionStyles";
 // a referral. Unlike Follow Ups, membership is stored (a Redis hash of id to
 // promotion date), not derived from the call score.
 //
-// Everything else is deliberately the same feature: the same queue row, the same
-// detail component, the same neglect sort, and the same touch history key. A
-// promotion moves no data, so removing someone drops them back into Follow Ups
-// with every touch intact.
-export function SoiContent({ apiKey }) {
+// Two clocks drive the whole view: last touch (what Nick did) and last referral
+// (what the partner sent, stage -3 in the same fu history). Desktop (>= 900px)
+// renders the SoiCockpit quadrant grid; mobile renders the same data as
+// priority groups. The detail is the shared FollowUpDetail with the two-mode
+// touch/referral composer. A promotion moves no data, so removing someone drops
+// them back into Follow Ups with every touch - and every referral - intact.
+export function SoiContent({ apiKey, onOpenFollowUps }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
   const [logs, setLogs] = useState(() => seed?.logs || {});
@@ -24,6 +27,8 @@ export function SoiContent({ apiKey }) {
   const [soi, setSoi] = useState(() => seed?.soi || {});
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
+  const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
+  const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -36,6 +41,17 @@ export function SoiContent({ apiKey }) {
   const racRef = useRef(rac);
   racRef.current = rac;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
+  const goalIndex = stages.length - 1;
+
+  // Same responsive branch as the Follow Up cockpit: quadrants at >= 900px.
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 900px)").matches);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 900px)");
+    const onChange = (e) => setIsDesktop(e.matches);
+    setIsDesktop(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -55,6 +71,8 @@ export function SoiContent({ apiKey }) {
         setSoi(c.soi || {});
         setRac(c.rac || []);
         setMotivation(c.motivation || {});
+        setStages(Array.isArray(c.stages) && c.stages.length ? c.stages : DEFAULT_STAGES);
+        setConfig(c.config || DEFAULT_CONFIG);
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -65,13 +83,23 @@ export function SoiContent({ apiKey }) {
   const racSet = useMemo(() => new Set(rac), [rac]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
-  // Same handler and same key as Follow Ups: a touch logged here is the same
-  // history the Follow Ups view would show.
+  // Same key as Follow Ups; SOI touches carry the goal stage so the ratchet
+  // keeps reading SOI members at the goal even if they are later demoted.
   const handleLogFollowUp = useCallback((id, note) => {
-    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note }];
+    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: goalIndex }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
-    showToast("Follow up logged");
+    showToast("Touch logged");
+  }, [apiKey, showToast, goalIndex]);
+
+  // A referral event: stage -3 in the same history, so it survives promotion,
+  // demotion, and re-seeds. Gold treatment everywhere, confetti here.
+  const handleLogReferral = useCallback((id, note, name) => {
+    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: STAGE_REFERRAL }];
+    setFollowUps((prev) => ({ ...prev, [id]: next }));
+    persistFollowUps(apiKey, id, next);
+    fireConfetti();
+    showToast(name ? `Referral logged for ${name}` : "Referral logged");
   }, [apiKey, showToast]);
 
   // Same motivation note as Follow Ups, on the same shared key.
@@ -121,33 +149,71 @@ export function SoiContent({ apiKey }) {
     });
   }, [apiKey, showToast]);
 
-  // ----- Detail view -----
+  // The shared detail, used by the mobile full page and the desktop modal.
+  const buildDetail = (id, { modal = false } = {}) => {
+    const p = prospects.find((x) => idFromPhone(x.phone) === id);
+    if (!p) return null;
+    const refCount = referralsOf(followUps[id] || []).length;
+    const since = formatSoiSince(soi[id]);
+    return (
+      <FollowUpDetail
+        prospect={p}
+        log={logs[id]}
+        touches={followUps[id] || []}
+        onBack={() => { setView("queue"); setOpenId(null); }}
+        composerMode="soi"
+        onLogFollowUp={(note) => handleLogFollowUp(id, note)}
+        onLogReferral={(note) => handleLogReferral(id, note, p.name)}
+        statusLine={`${since ? `SOI since ${since}` : "SOI"} · ${refCount} referral${refCount === 1 ? "" : "s"}`}
+        onToast={showToast}
+        copyPhoneOnTap={modal}
+        motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+        onCopyForExcel={p.manual ? () => copyText(manualContactTsvRow(p)).then(
+          () => showToast("Contact row copied"),
+          () => showToast("Copy failed"),
+        ) : null}
+        inRac={racSet.has(id)}
+        onToggleRac={() => toggleRac(id)}
+        backLabel="SOI"
+        showStageTags stages={stages}
+        footerAction={
+          <button type="button" onClick={() => handleRemoveFromSoi(id)} style={quietAction}>
+            Remove from SOI
+          </button>
+        }
+      />
+    );
+  };
+
+  // ----- Desktop: the quadrant cockpit, detail in a modal -----
+  if (isDesktop) {
+    return (
+      <div style={{ minHeight: "100%" }}>
+        <StatusBarCap />
+        <SoiCockpit
+          prospects={prospects} soi={soi} followUps={followUps} config={config} racSet={racSet}
+          onOpenDetail={(id) => { setOpenId(id); setView("detail"); }}
+          onOpenFollowUps={onOpenFollowUps}
+        />
+        {view === "detail" && openProspect && (
+          <div onClick={() => { setView("queue"); setOpenId(null); }} style={{ position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 55, padding: "40px 20px", overflowY: "auto" }}>
+            <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 560, marginTop: 8 }}>
+              {buildDetail(openId, { modal: true })}
+            </div>
+          </div>
+        )}
+        <Toast msg={toast} />
+      </div>
+    );
+  }
+
+  // ----- Mobile: full-page detail -----
   if (view === "detail" && openProspect) {
     const id = idFromPhone(openProspect.phone);
     return (
       <>
         <StatusBarCap />
-        <FollowUpDetail
-          prospect={openProspect}
-          log={logs[id]}
-          touches={followUps[id] || []}
-          onBack={() => { setView("queue"); setOpenId(null); }}
-          onLogFollowUp={(note) => handleLogFollowUp(id, note)}
-          onToast={showToast}
-          motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
-          onCopyForExcel={openProspect.manual ? () => copyText(manualContactTsvRow(openProspect)).then(
-            () => showToast("Contact row copied"),
-            () => showToast("Copy failed"),
-          ) : null}
-          inRac={racSet.has(id)}
-          onToggleRac={() => toggleRac(id)}
-          backLabel="SOI"
-          footerAction={
-            <button type="button" onClick={() => handleRemoveFromSoi(id)} style={quietAction}>
-              Remove from SOI
-            </button>
-          }
-        />
+        {buildDetail(id)}
         <Toast msg={toast} />
       </>
     );
@@ -166,7 +232,7 @@ export function SoiContent({ apiKey }) {
         </div>
       </header>
 
-      <div style={{ flex: 1, padding: "4px 12px 0" }}>
+      <div style={{ flex: 1, padding: "4px 14px 0" }}>
         {queue.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? (
@@ -174,20 +240,31 @@ export function SoiContent({ apiKey }) {
             ) : "Loading…"}
           </div>
         ) : (
-          queue.map((p) => {
-            const id = idFromPhone(p.phone);
-            const since = formatSoiSince(soi[id]);
-            return (
-              <ContactQueueRow key={id} prospect={p}
-                touches={followUps[id] || []}
-                highlight={isTopScore(logs[id])}
-                meta={since ? `SOI since ${since}` : ""}
-                badge={p.manual ? "manual" : ""}
-                checked={racSet.has(id)}
-                onOpen={() => { setOpenId(id); setView("detail"); }}
-              />
-            );
-          })
+          <>
+            {SOI_GROUPS.map(({ qi, label, tone }) => {
+              const items = queue
+                .filter((p) => quadrantOf(followUps[idFromPhone(p.phone)] || [], config) === qi)
+                .sort((a, b) => (lastTouchByTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchByTs(followUps[idFromPhone(b.phone)]) || 0));
+              if (!items.length) return null;
+              return (
+                <div key={qi}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: soiGroupColor(tone), padding: "18px 4px 4px" }}>{label}</div>
+                  {items.map((p) => {
+                    const id = idFromPhone(p.phone);
+                    return (
+                      <div key={id} role="button" tabIndex={0}
+                        onClick={() => { setOpenId(id); setView("detail"); }}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(id); setView("detail"); } }}
+                        style={{ padding: "13px 4px", borderBottom: `1px solid ${T.line}`, cursor: "pointer" }}>
+                        <SoiPartnerContent prospect={p} touches={followUps[id] || []} config={config} inRac={racSet.has(id)} nameSize={19} />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            <div style={{ fontSize: 12, color: T.faint, padding: "16px 4px", lineHeight: 1.6 }}>Sorted by priority: partners you owe a thank-you touch first, then drifting, then the rest. Desktop shows the full quadrant view.</div>
+          </>
         )}
       </div>
 
