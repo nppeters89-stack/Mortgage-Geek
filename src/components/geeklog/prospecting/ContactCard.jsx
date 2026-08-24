@@ -2,6 +2,7 @@ import { useState } from "react";
 import { T, FF } from "../gl2Tokens";
 import { OUTCOMES, heatColor } from "./prospectsModel";
 import { ContactHeader } from "./ContactHeader";
+import { AddToContactsButton } from "./AddToContactsButton";
 import { MotivationBox } from "./MotivationBox";
 
 // Contact card / detail view: the shared ContactHeader (name, brokerage, buysides,
@@ -16,7 +17,7 @@ const tomorrowISO = () => {
   return d.toISOString().slice(0, 10);
 };
 
-export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, motivation = "", onSaveMotivation = null }) {
+export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToast = null, motivation = "", onSaveMotivation = null }) {
   const [outcome, setOutcome] = useState(log?.outcome || "");
   const [score, setScore] = useState(log?.score || 0);
   const [note, setNote] = useState(log?.note || "");
@@ -43,7 +44,7 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, motiv
         ← Queue
       </button>
 
-      <ContactHeader prospect={p} />
+      <ContactHeader prospect={p} callAction={<AddToContactsButton prospect={p} onToast={onToast} />} />
 
       {/* Motivation lands here first: gathered DURING the call, so it is already
           on file when a 9+ score sends the contact to Follow Ups. */}

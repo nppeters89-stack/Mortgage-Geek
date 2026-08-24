@@ -133,6 +133,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           onBack={() => { setView("queue"); setOpenId(null); }}
           onSave={(log) => handleSave(id, log)}
           onCopyOne={(log) => copy(logTsvRow(openProspect, log), `Copied row for ${openProspect.name}`)}
+          onToast={showToast}
           motivation={motivation[id] || ""}
           onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         />
