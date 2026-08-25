@@ -100,6 +100,12 @@ export function Layout({ children }) {
   // Browser-tab favicon follows the same split: green Geek Log icon on
   // /geek-log, red-tile MG everywhere else. (The Geek Log set has no 16px
   // cut; the 32 scales down fine.)
+  // The Geek Log is an app, not a document: pinch and double-tap zoom are only
+  // ever accidental there (and focusing a sub-16px input auto-zooms iOS). The
+  // marketing site keeps normal zoom for accessibility.
+  const viewportContent = isGeekLog
+    ? "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    : "width=device-width, initial-scale=1.0, viewport-fit=cover";
   const favicon32Href = isGeekLog ? "/geeklog/icon-32.png" : "/favicons/favicon-32.png";
   const favicon16Href = isGeekLog ? "/geeklog/icon-32.png" : "/favicons/favicon-16.png";
   const faviconHref = isGeekLog ? "/geeklog/icon-48.png" : "/favicons/favicon.png";
@@ -109,7 +115,7 @@ export function Layout({ children }) {
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <meta name="viewport" content={viewportContent} />
         {/* title + description + og/twitter title/description/url are now provided
             per-route via `meta` exports (root defaults below, pages override), so
             they prerender into each route's static HTML. */}

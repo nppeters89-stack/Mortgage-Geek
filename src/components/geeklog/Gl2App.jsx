@@ -392,6 +392,8 @@ export function Gl2App({ apiKey }) {
            background is the canvas that paints any part of the webview the
            layout doesn't reach. */
         html, body { margin: 0; padding: 0; background: ${T.bg1}; }
+        /* Kill double-tap-to-zoom on every tap target; taps fire immediately. */
+        html, body { touch-action: manipulation; }
         @keyframes gl-pop { 0% { transform: scale(1); } 38% { transform: scale(1.26); } 100% { transform: scale(1); } }
         @keyframes gl-blink { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
         @keyframes gl-barpulse { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }

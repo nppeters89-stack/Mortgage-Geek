@@ -158,7 +158,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
             <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: conversationsToday > 0 ? T.greenBright : T.cream }}>{conversationsToday}</div>
             <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Conversations</div>
           </div>
-          <div style={{ flex: 1, background: callsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${callsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
+          <div style={{ flex: 1, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "8px 13px" }}>
             <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{callsToday}</div>
             <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Calls today</div>
           </div>
