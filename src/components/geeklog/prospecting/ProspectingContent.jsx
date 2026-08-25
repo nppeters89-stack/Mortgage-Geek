@@ -153,6 +153,20 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
             <strong style={{ color: T.redLift, fontWeight: 600 }}>{loggedCount}</strong> logged · {shown.length} in queue
           </div>
         </div>
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <div style={{ flex: 1, background: callsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${callsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: callsToday > 0 ? T.greenBright : T.cream }}>{callsToday}</div>
+            <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Calls today</div>
+          </div>
+          <div style={{ flex: 1, background: conversationsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${conversationsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: conversationsToday > 0 ? T.greenBright : T.cream }}>{conversationsToday}</div>
+            <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Conversations</div>
+          </div>
+          <button type="button" onClick={() => copy(logTsvAll(prospects, logs), `${loggedCount} rows copied`, "No calls logged yet")}
+            style={{ flex: "none", padding: "0 16px", borderRadius: 12, border: `1px solid ${T.line}`, background: T.bg0, color: T.cream, fontFamily: FF.body, fontSize: 13.5, fontWeight: 600, cursor: "pointer" }}>
+            Copy log
+          </button>
+        </div>
         <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 10, padding: "10px 12px" }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={T.faint} strokeWidth="2.4"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
           <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name or brokerage" autoComplete="off"
@@ -204,21 +218,6 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
             );
           })
         )}
-      </div>
-
-      <div style={{ position: "sticky", bottom: 0, zIndex: 10, display: "flex", gap: 10, padding: "12px 16px", background: `linear-gradient(rgba(19,20,22,0), ${T.bg1} 40%)` }}>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "9px 14px" }}>
-          <span style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{callsToday}</span>
-          <span style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em" }}>Calls today</span>
-        </div>
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "9px 14px" }}>
-          <span style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{conversationsToday}</span>
-          <span style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em" }}>Conversations</span>
-        </div>
-        <button type="button" onClick={() => copy(logTsvAll(prospects, logs), `${loggedCount} rows copied`, "No calls logged yet")}
-          style={{ flex: "none", padding: "0 18px", borderRadius: 12, border: `1px solid ${T.line}`, background: T.bg0, color: T.cream, fontFamily: FF.body, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
-          Copy log
-        </button>
       </div>
 
       <Toast msg={toast} />
