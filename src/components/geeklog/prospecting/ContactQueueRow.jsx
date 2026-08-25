@@ -1,4 +1,4 @@
-import { T, FF } from "../gl2Tokens";
+import { T, FF, staleColor } from "../gl2Tokens";
 import { lastTouchLabel, heatColor } from "./prospectsModel";
 import { StageDots, ColdPips } from "./StageDots";
 
@@ -17,7 +17,7 @@ export const mutedBadge = {
 // promotion date there) and what the caller passes for `highlight`.
 export function ContactQueueRow({ prospect: p, touches = [], highlight = false, meta = "", badge = "", checked = false, onOpen, stage = null, stages = null, goalIndex, coldCount = null, score = null }) {
   const count = touches.length;
-  const { label, stale } = lastTouchLabel(touches);
+  const { label, days } = lastTouchLabel(touches);
   const showStage = stage != null && Array.isArray(stages);
   const showCold = coldCount != null;
 
@@ -59,7 +59,7 @@ export function ContactQueueRow({ prospect: p, touches = [], highlight = false, 
         <span style={{ flex: "none", fontSize: 11, fontWeight: 600, padding: "4px 9px", borderRadius: 6, color: T.dim, background: "rgba(255,254,251,0.08)" }}>{count} touch{count === 1 ? "" : "es"}</span>
       )}
       <div style={{ flex: "none", textAlign: "right" }}>
-        <div style={{ fontSize: 12.5, fontWeight: 600, color: stale ? T.amber : T.dim, fontVariantNumeric: "tabular-nums" }}>{label}</div>
+        <div style={{ fontSize: 12.5, fontWeight: 600, color: staleColor(days, T.dim), fontVariantNumeric: "tabular-nums" }}>{label}</div>
         <div style={{ fontSize: 10, color: T.faint, letterSpacing: "0.06em", textTransform: "uppercase" }}>last touch</div>
       </div>
     </div>

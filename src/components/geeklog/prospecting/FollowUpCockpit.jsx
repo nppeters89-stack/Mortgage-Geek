@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { T, FF, stageRampColor } from "../gl2Tokens";
+import { T, FF, stageRampColor, staleColor } from "../gl2Tokens";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
@@ -31,6 +31,8 @@ const RacCheck = () => (
 const DAY = 86400000;
 const rel = (ts) => { if (!ts) return "No touches"; const d = Math.round((Date.now() - ts) / DAY); return d <= 0 ? "Today" : d === 1 ? "1d ago" : `${d}d ago`; };
 const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
+// Days since a timestamp, for the urgency ramp (null = never).
+const dSince = (ts) => (ts ? Math.floor((Date.now() - ts) / DAY) : null);
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
 export function FollowUpCockpit({
@@ -198,7 +200,7 @@ export function FollowUpCockpit({
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{count} touch{count === 1 ? "" : "es"}</span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
             {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
-            <span style={{ color: isStale(ts) ? T.amber : T.faint }}>{rel(ts)}</span>
+            <span style={{ color: staleColor(dSince(ts), T.faint) }}>{rel(ts)}</span>
           </span>
         </div>
         {atGoal && <span style={{ display: "inline-block", marginTop: 8, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.redLift, border: `1px solid ${T.redWashLine}`, borderRadius: 5, padding: "2px 7px" }}>SPHERE OF INFLUENCE</span>}

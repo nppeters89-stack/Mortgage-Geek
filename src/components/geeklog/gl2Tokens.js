@@ -51,6 +51,32 @@ export const stageRampColor = (i, n = STAGE_RAMP.length) => {
   return STAGE_RAMP[Math.round(t * (STAGE_RAMP.length - 1))];
 };
 
+// Last-touch urgency ramp for the Follow Ups surfaces. Under 7 days the label
+// stays the surface's own gray (the caller passes it); from 7 days it kindles
+// neon yellow, through neon orange at 10, to neon red at 14 and beyond. Never
+// touched at all is the far end of overdue, so null reads neon red too.
+const STALE_ANCHORS = [
+  [7, [0xff, 0xe6, 0x00]],  // neon yellow
+  [10, [0xff, 0x7a, 0x00]], // neon orange
+  [14, [0xff, 0x31, 0x31]], // neon red
+];
+export function staleColor(days, freshColor) {
+  if (days == null) return "#FF3131";
+  if (days < STALE_ANCHORS[0][0]) return freshColor;
+  const last = STALE_ANCHORS[STALE_ANCHORS.length - 1];
+  if (days >= last[0]) return "#FF3131";
+  for (let i = 0; i < STALE_ANCHORS.length - 1; i++) {
+    const [d0, c0] = STALE_ANCHORS[i];
+    const [d1, c1] = STALE_ANCHORS[i + 1];
+    if (days <= d1) {
+      const t = (days - d0) / (d1 - d0);
+      const mix = c0.map((v, k) => Math.round(v + (c1[k] - v) * t));
+      return `#${mix.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+    }
+  }
+  return "#FF3131";
+}
+
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.
 export const SCORE_HEAT = [

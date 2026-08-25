@@ -127,9 +127,9 @@ export function lastTouchTs(touches) {
 // or more than STALE_DAYS since the last touch.
 export function lastTouchLabel(touches) {
   const ts = lastTouchTs(touches);
-  if (!ts) return { label: "No touches yet", stale: true };
+  if (!ts) return { label: "No touches yet", stale: true, days: null };
   const days = Math.floor((Date.now() - ts) / DAY_MS);
-  return { label: days <= 0 ? "Today" : `${days}d ago`, stale: days > STALE_DAYS };
+  return { label: days <= 0 ? "Today" : `${days}d ago`, stale: days > STALE_DAYS, days };
 }
 
 // Sort by neglect: never-touched first, then ascending by most-recent touch
