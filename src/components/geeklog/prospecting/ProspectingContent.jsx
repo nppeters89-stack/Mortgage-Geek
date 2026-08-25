@@ -154,13 +154,13 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           </div>
         </div>
         <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          <div style={{ flex: 1, background: callsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${callsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
-            <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: callsToday > 0 ? T.greenBright : T.cream }}>{callsToday}</div>
-            <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Calls today</div>
-          </div>
           <div style={{ flex: 1, background: conversationsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${conversationsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
             <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: conversationsToday > 0 ? T.greenBright : T.cream }}>{conversationsToday}</div>
             <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Conversations</div>
+          </div>
+          <div style={{ flex: 1, background: callsToday > 0 ? T.greenWash : T.surface, border: `1px solid ${callsToday > 0 ? T.greenWashLine : T.line}`, borderRadius: 12, padding: "8px 13px" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{callsToday}</div>
+            <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 1 }}>Calls today</div>
           </div>
           <button type="button" onClick={() => copy(logTsvAll(prospects, logs), `${loggedCount} rows copied`, "No calls logged yet")}
             style={{ flex: "none", padding: "0 16px", borderRadius: 12, border: `1px solid ${T.line}`, background: T.bg0, color: T.cream, fontFamily: FF.body, fontSize: 13.5, fontWeight: 600, cursor: "pointer" }}>
