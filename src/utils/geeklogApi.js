@@ -327,6 +327,15 @@ export function saveWhaleKeepalive(key, id, action) {
   membershipKeepalive(key, { kind: "whale", id, action });
 }
 
+// Flag a contact as a hot lead ("add") or cool them off ("remove").
+export async function saveFire(key, id, action) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "fire", id, action }));
+}
+
+export function saveFireKeepalive(key, id, action) {
+  membershipKeepalive(key, { kind: "fire", id, action });
+}
+
 // Save a contact's motivation note (empty text clears it). Awaited so the
 // caller can revert its optimistic update.
 export async function saveMotivation(key, id, text) {

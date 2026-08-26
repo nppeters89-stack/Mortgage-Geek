@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -29,6 +29,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const [pinned, setPinned] = useState(() => seed?.pinned || []);
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [whale, setWhale] = useState(() => seed?.whale || []);
+  const [fire, setFire] = useState(() => seed?.fire || []);
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
@@ -46,6 +47,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const pinnedRef = useRef(pinned); pinnedRef.current = pinned;
   const racRef = useRef(rac); racRef.current = rac;
   const whaleRef = useRef(whale); whaleRef.current = whale;
+  const fireRef = useRef(fire); fireRef.current = fire;
   const coldRef = useRef(cold); coldRef.current = cold;
   const stagemapRef = useRef(stagemap); stagemapRef.current = stagemap;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
@@ -85,6 +87,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setWhale(c.whale || []);
+        setFire(c.fire || []);
         setCold(c.cold || {});
         setDead(c.dead || {});
         setStages(c.stages || DEFAULT_STAGES);
@@ -98,6 +101,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const pinnedSet = useMemo(() => new Set(pinned), [pinned]);
   const racSet = useMemo(() => new Set(rac), [rac]);
   const whaleSet = useMemo(() => new Set(whale), [whale]);
+  const fireSet = useMemo(() => new Set(fire), [fire]);
   const queue = useMemo(() => followUpQueue(prospects, logs, followUps, soi, pinnedSet, cold, dead), [prospects, logs, followUps, soi, pinnedSet, cold, dead]);
   const coldList = useMemo(() => coldQueue(prospects, followUps, cold, dead), [prospects, followUps, cold, dead]);
 
@@ -171,6 +175,19 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     persistWhale(apiKey, id, adding ? "add" : "remove").catch(() => {
       setWhale(prev);
       setCachedWhale(prev);
+      showToast("Could not update");
+    });
+  }, [apiKey, showToast]);
+
+  // Flag or unflag a hot lead. A marker only - no pipeline move.
+  const toggleFire = useCallback((id) => {
+    const prev = fireRef.current;
+    const adding = !prev.includes(id);
+    setFire(adding ? [...prev, id] : prev.filter((x) => x !== id));
+    showToast(adding ? "Marked as a hot lead 🔥" : "Cooled off");
+    persistFire(apiKey, id, adding ? "add" : "remove").catch(() => {
+      setFire(prev);
+      setCachedFire(prev);
       showToast("Could not update");
     });
   }, [apiKey, showToast]);
@@ -323,6 +340,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           copyPhoneOnTap={modal}
           onSetScore={(v) => handleSetScore(id, v)}
           isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
+          isFire={fireSet.has(id)} onToggleFire={() => toggleFire(id)}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -345,6 +363,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         copyPhoneOnTap={modal}
         onSetScore={(v) => handleSetScore(id, v)}
         isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
+        isFire={fireSet.has(id)} onToggleFire={() => toggleFire(id)}
         whaleMode={whaleSet.has(id)}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={whaleSet.has(id) ? WHALE_COLUMNS : stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
@@ -355,7 +374,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, whaleSet, closeDetail, showToast, toggleRac, toggleWhale, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, whaleSet, fireSet, closeDetail, showToast, toggleRac, toggleWhale, toggleFire, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {
@@ -365,7 +384,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet}
+          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet} fireSet={fireSet}
           onOpenDetail={setOpenId}
           onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}
@@ -436,6 +455,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                 badge={p.manual ? "manual" : ""}
                 checked={racSet.has(id)}
                 whale={whaleSet.has(id)}
+                fire={fireSet.has(id)}
                 score={logs[id]?.score || null}
                 stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
                 stages={stages}
@@ -462,6 +482,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                     badge={p.manual ? "manual" : ""}
                     checked={racSet.has(id)}
                     whale
+                    fire={fireSet.has(id)}
                     score={logs[id]?.score || null}
                     stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
                     stages={WHALE_COLUMNS}

@@ -35,6 +35,7 @@ const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
 const WHALE_SET = "prospects:whale";
+const FIRE_SET = "prospects:fire";
 const STAGES_KEY = "prospects:fu:stages";
 const CONFIG_KEY = "prospects:fu:config";
 const COLD_KEY = "prospects:cold";
@@ -90,6 +91,7 @@ export default async function handler(req, res) {
     const pinned = toIds(await redis.smembers(PINNED_SET));
     const rac = toIds(await redis.smembers(RAC_SET));
     const whale = toIds(await redis.smembers(WHALE_SET));
+    const fire = toIds(await redis.smembers(FIRE_SET));
 
     // Manual contacts are stored as JSON strings in one hash. A record that fails
     // to parse is skipped rather than breaking the whole payload.
@@ -126,7 +128,7 @@ export default async function handler(req, res) {
       if (value != null) motivation[id] = String(value);
     }
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale });
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale, fire });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });

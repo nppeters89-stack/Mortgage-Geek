@@ -31,6 +31,7 @@ const PINNED_SET = "prospects:pinned";
 const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
 const WHALE_SET = "prospects:whale";
+const FIRE_SET = "prospects:fire";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
@@ -194,6 +195,7 @@ export default async function handler(req, res) {
       case "pin": return await handleSetFlag(res, body, PINNED_SET);
       case "rac": return await handleSetFlag(res, body, RAC_SET);
       case "whale": return await handleSetFlag(res, body, WHALE_SET);
+      case "fire": return await handleSetFlag(res, body, FIRE_SET);
       case "stage": return await handleStageMove(res, body);
       case "motivation": return await handleMotivation(res, body);
       case "cold": return await handleCold(res, body);

@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -23,7 +23,7 @@ function loadLS() {
     const r = localStorage.getItem(LS_KEY);
     if (!r) return null;
     const c = JSON.parse(r);
-    return c && typeof c === "object" ? { ...c, pinned: toIds(c.pinned), rac: toIds(c.rac), whale: toIds(c.whale) } : null;
+    return c && typeof c === "object" ? { ...c, pinned: toIds(c.pinned), rac: toIds(c.rac), whale: toIds(c.whale), fire: toIds(c.fire) } : null;
   } catch { return null; }
 }
 function saveLS(obj) { try { localStorage.setItem(LS_KEY, JSON.stringify(obj)); } catch { /* best-effort */ } }
@@ -81,7 +81,7 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale),
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire),
   };
   saveLS(cache);
   return cache;
@@ -275,6 +275,30 @@ export function persistWhale(apiKey, id, action) {
 
   saveWhaleKeepalive(apiKey, id, action);
   return saveWhale(apiKey, id, action);
+}
+
+// ----- Fire flag (hot leads) -----
+
+export function getCachedFire() {
+  return getCachedProspects()?.fire || [];
+}
+
+export function setCachedFire(fire) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  cache = { ...c, fire };
+  saveLS(cache);
+  return cache;
+}
+
+export function persistFire(apiKey, id, action) {
+  const current = getCachedFire();
+  const next = action === "add"
+    ? (current.includes(id) ? current : [...current, id])
+    : current.filter((x) => x !== id);
+  setCachedFire(next);
+
+  saveFireKeepalive(apiKey, id, action);
+  return saveFire(apiKey, id, action);
 }
 
 // ----- Motivation notes -----
