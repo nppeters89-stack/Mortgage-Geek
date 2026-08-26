@@ -151,7 +151,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // /log path Prospecting writes.
   const handleSetScore = useCallback((id, score) => {
     const prev = logsRef.current[id];
-    const next = prev ? { ...prev, score } : { outcome: "Talked", score, note: "", ts: Date.now() };
+    // No ts on the synthetic log: the score describes a conversation that
+    // happened at some unknown point before the contact was added by hand, so
+    // it must not count as a call or conversation "today". Undated logs are
+    // skipped by every today-counter and date label (the !ts guards).
+    const next = prev ? { ...prev, score } : { outcome: "Talked", score, note: "" };
     setLogs((l) => ({ ...l, [id]: next }));
     persistLog(apiKey, id, next);
     showToast(score >= 9 ? `Score set to ${score}/10` : `Score ${score}/10. Dropping from Follow Ups`);

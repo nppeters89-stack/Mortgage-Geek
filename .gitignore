@@ -25,3 +25,5 @@ build/
 # Prospecting seed data (PII from Nick's master realtor list; NEVER commit).
 # The seed script reads this from a local path and PUTs it to Redis.
 prospects_seed*.json
+.vercel
+.env*

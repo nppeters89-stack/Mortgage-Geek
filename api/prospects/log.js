@@ -46,7 +46,10 @@ export default async function handler(req, res) {
       note: typeof log.note === "string" ? log.note : "",
       callback: log.callback || "",
       dateCalled: log.dateCalled || "",
-      ts: Number.isFinite(log.ts) ? log.ts : Date.now(),
+      // A log without a ts stays without one (stored null): it represents a
+      // conversation whose date is unknown - a hand-added contact scored after
+      // the fact - and must not read as activity on the day it was typed in.
+      ts: Number.isFinite(log.ts) ? log.ts : null,
     };
 
     await redis.set(logKey(id), JSON.stringify(record));
