@@ -432,7 +432,7 @@ export function Gl2App({ apiKey }) {
 
         {/* Content area. Bottom padding keeps the last rows clear of the fixed
             tab bar; the bar overlays content, exactly like MobileToolbar. */}
-        <div style={{ flex: 1, paddingTop: isNarrow ? "calc(8px + env(safe-area-inset-top, 0px))" : 0, paddingBottom: isNarrow ? "calc(96px + env(safe-area-inset-bottom, 0px))" : 24 }}>
+        <div style={{ flex: 1, paddingTop: isNarrow ? "calc(8px + env(safe-area-inset-top, 0px))" : 18, paddingBottom: isNarrow ? "calc(96px + env(safe-area-inset-bottom, 0px))" : 24 }}>
 
           {tab === "today" && (
             <TodayContent

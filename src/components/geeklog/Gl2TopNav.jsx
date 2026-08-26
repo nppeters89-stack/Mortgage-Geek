@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { T, FF } from "./gl2Tokens";
-import { TabGlyph, MgMark } from "./Gl2Primitives";
+import { TabGlyph } from "./Gl2Primitives";
 import { getCachedProspects } from "./prospecting/prospectStore";
-import { idFromPhone, followUpQueue, DEFAULT_STAGES } from "./prospecting/prospectsModel";
+import { idFromPhone, followUpQueue, lastTouchTs } from "./prospecting/prospectsModel";
 
 // Desktop top-bar navigation (design option 3c, translated into the Geek Log's
 // own system: Figtree and gl2Tokens in place of the sketch's Poppins and raw
@@ -23,21 +23,26 @@ const TABS = [
   { id: "followups", label: "Follow Ups" },
 ];
 
-function followUpCount() {
+const DUE_MS = 7 * 86400000;
+function followUpsDue() {
   const c = getCachedProspects();
   if (!c) return 0;
   const pinned = new Set(c.pinned || []);
   const whale = new Set(c.whale || []);
-  const stages = Array.isArray(c.stages) && c.stages.length ? c.stages : DEFAULT_STAGES;
   return followUpQueue(c.prospects || [], c.logs || {}, c.followUps || {}, c.soi || {}, pinned, c.cold || {}, c.dead || {})
-    .filter((p) => !whale.has(idFromPhone(p.phone))).length;
+    .filter((p) => {
+      const id = idFromPhone(p.phone);
+      if (whale.has(id)) return false;
+      const ts = lastTouchTs(c.followUps?.[id]);
+      return !ts || Date.now() - ts >= DUE_MS;
+    }).length;
 }
 
 export function Gl2TopNav({ active, onChange }) {
   // Re-derives when the active tab changes - every tab switch re-renders the
   // nav, so the badge tracks queue mutations closely enough without a store
   // subscription.
-  const badge = useMemo(() => followUpCount(), [active]);
+  const badge = useMemo(() => followUpsDue(), [active]);
 
   return (
     <nav aria-label="Main" style={{ flex: "0 0 auto", height: 66, background: T.bg1, borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "stretch", padding: "0 28px", gap: 0 }}>
@@ -48,12 +53,10 @@ export function Gl2TopNav({ active, onChange }) {
         .gl2-topnav-tab[aria-current="page"]:hover { box-shadow: inset 0 -2px 0 ${T.greenBright}; }
       `}</style>
 
-      {/* Logo lockup */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto", marginRight: 34 }}>
-        <MgMark height={30} />
-        <span style={{ fontFamily: FF.mark1, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", textTransform: "uppercase", color: T.cream, whiteSpace: "nowrap" }}>
-          Mortgage <span style={{ color: T.red }}>Geek</span>
-        </span>
+      {/* The green Geek Log app icon, alone - no wordmark. 96px source at 30px
+          render keeps it sharp on retina; explicit dimensions per the CLS rule. */}
+      <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto", marginRight: 34 }}>
+        <img src="/geeklog/icon-96.png" alt="Geek Log" width={30} height={30} style={{ display: "block", borderRadius: 8 }} />
       </div>
 
       {/* Tabs: labels always visible, icon left, 2px underline slot reserved on
