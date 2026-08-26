@@ -4,6 +4,7 @@ import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar } from "./Gl2Primitives";
 import { Gl2TabDock } from "./Gl2TabDock";
+import { Gl2TopNav } from "./Gl2TopNav";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
 import { YtdContent } from "./Gl2Ytd";
@@ -425,9 +426,13 @@ export function Gl2App({ apiKey }) {
             scroll range on a letterboxed cold launch — that sliver is what lets
             the mount-time scroll nudge below trigger the viewport correction. */}
         <div style={{ position: "relative", width: "100%", maxWidth: columnMax, minHeight: "100lvh", display: "flex", flexDirection: "column", transition: "max-width 0.2s ease" }}>
+        {/* Desktop (>= 900px): top-bar navigation replaces the bottom TabBar
+            entirely - conditional render, so only one nav landmark exists. */}
+        {!isNarrow && <Gl2TopNav active={tab} onChange={setTab} />}
+
         {/* Content area. Bottom padding keeps the last rows clear of the fixed
             tab bar; the bar overlays content, exactly like MobileToolbar. */}
-        <div style={{ flex: 1, paddingTop: "calc(8px + env(safe-area-inset-top, 0px))", paddingBottom: "calc(96px + env(safe-area-inset-bottom, 0px))" }}>
+        <div style={{ flex: 1, paddingTop: isNarrow ? "calc(8px + env(safe-area-inset-top, 0px))" : 0, paddingBottom: isNarrow ? "calc(96px + env(safe-area-inset-bottom, 0px))" : 24 }}>
 
           {tab === "today" && (
             <TodayContent
@@ -454,9 +459,11 @@ export function Gl2App({ apiKey }) {
           {tab === "soi" && <SoiContent apiKey={apiKey} onOpenFollowUps={() => setTab("followups")} />}
         </div>
 
-        <Gl2TabDock resetKey={tab} maxWidth={columnMax}>
-          <TabBar active={tab} onChange={setTab} />
-        </Gl2TabDock>
+        {isNarrow && (
+          <Gl2TabDock resetKey={tab} maxWidth={columnMax}>
+            <TabBar active={tab} onChange={setTab} />
+          </Gl2TabDock>
+        )}
 
         {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} onOpenCorrection={() => setCorrectionOpen(true)} />}
 
