@@ -258,7 +258,7 @@ export function FollowUpCockpit({
   // above); everywhere else every column is a single 220px stack. border-box
   // throughout: this route has no global reset, and content-box arithmetic is
   // what let cards paint wider than their tracks.
-  const colShell = (isGoal, wide) => ({ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 220px", minWidth: wide ? 440 : 220, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
+  const colShell = (isGoal, wide) => ({ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 220px", minWidth: wide ? 440 : 220, maxWidth: wide ? 470 : 300, background: T.colWash, border: `1px solid ${isGoal ? T.redWashLine : T.line}`, borderRadius: 14, display: "flex", flexDirection: "column", maxHeight: "56vh" });
   const colHead = { padding: "12px 14px 9px", borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "baseline", justifyContent: "space-between" };
   const colTitle = (color) => ({ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color });
   const colBody = { boxSizing: "border-box", padding: 10, display: "flex", flexDirection: "column", gap: 9, overflowY: "auto", overflowX: "hidden", minHeight: 64, flex: 1 };
@@ -350,7 +350,7 @@ export function FollowUpCockpit({
             // mechanism as the hot board.
             const wide = ultra && whaleCols[wi].length >= 6;
             return (
-              <div key={wi} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={wi} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, maxWidth: wide ? 470 : 300, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropWhale(wi)}>
                 <div style={colHead}>
                   <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
@@ -387,7 +387,7 @@ export function FollowUpCockpit({
             const key = `cold:${ci}`;
             const wide = ultra && coldCols[ci].length >= 6;
             return (
-              <div key={ci} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={ci} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, maxWidth: wide ? 470 : 300, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropCold(ci, true)}>
                 <div style={colHead}><span style={colTitle(T.cold)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{coldCols[ci].length}</span></div>
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.coldWash : "transparent" }}>
