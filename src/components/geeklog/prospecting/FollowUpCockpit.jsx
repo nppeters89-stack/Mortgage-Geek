@@ -208,7 +208,6 @@ export function FollowUpCockpit({
     const id = idFromPhone(p.phone);
     const ts = lastTouchTs(followUps[id]);
     const count = (followUps[id] || []).length;
-    const atGoal = stageFor(id) === goalIndex;
     // Same green wash the mobile queue rows use for a 10/10 interaction score:
     // the hottest leads stay visibly hot on the board.
     const top = isTopScore(logs[id]);
@@ -216,7 +215,7 @@ export function FollowUpCockpit({
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{whaleSet?.has(id) ? " 🐳" : ""}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
@@ -228,7 +227,6 @@ export function FollowUpCockpit({
             <span style={{ color: staleColor(dSince(ts), T.faint) }}>{rel(ts)}</span>
           </span>
         </div>
-        {atGoal && <span style={{ display: "inline-block", marginTop: 8, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.redLift, border: `1px solid ${T.redWashLine}`, borderRadius: 5, padding: "2px 7px" }}>SPHERE OF INFLUENCE</span>}
       </div>
     );
   };

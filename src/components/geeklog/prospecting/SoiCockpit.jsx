@@ -65,7 +65,7 @@ export function SoiPartnerContent({ prospect: p, touches, config, inRac, nameSiz
   return (
     <>
       <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-        <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: nameSize, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</span>
+        <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: nameSize, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name} {"🤝"}</span>
         {inRac && (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label="In RAC" style={{ flex: "none" }}>
             <path d="M20 6L9 17l-5-5" />
