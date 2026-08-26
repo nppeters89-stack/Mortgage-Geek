@@ -432,7 +432,10 @@ export function Gl2App({ apiKey }) {
 
         {/* Content area. Bottom padding keeps the last rows clear of the fixed
             tab bar; the bar overlays content, exactly like MobileToolbar. */}
-        <div style={{ flex: 1, paddingTop: isNarrow ? "calc(8px + env(safe-area-inset-top, 0px))" : 18, paddingBottom: isNarrow ? "calc(96px + env(safe-area-inset-bottom, 0px))" : 24 }}>
+        <div style={{ flex: 1, // The 18px of desktop breathing room stays off the Prospecting tab: its
+            // solid sticky header against the column gradient turned the gap into a
+            // visible gray band. Prospecting's own header carries the spacing.
+            paddingTop: isNarrow ? "calc(8px + env(safe-area-inset-top, 0px))" : tab === "prospecting" ? 0 : 18, paddingBottom: isNarrow ? "calc(96px + env(safe-area-inset-bottom, 0px))" : 24 }}>
 
           {tab === "today" && (
             <TodayContent
