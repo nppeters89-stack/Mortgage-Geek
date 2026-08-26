@@ -271,7 +271,7 @@ export function FollowUpCockpit({
   const halfStack = { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 9 };
 
   return (
-    <div style={{ padding: "18px 26px 40px" }}>
+    <div style={{ padding: "2px 26px 40px" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
       </div>
