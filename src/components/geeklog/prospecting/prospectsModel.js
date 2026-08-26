@@ -109,6 +109,15 @@ const DAY_MS = 86400000;
 export const FOLLOWUP_MIN_SCORE = 9;
 export const STALE_DAYS = 14;
 
+// A follow-up is DUE once the last touch is 7+ days old (or never happened) -
+// the same threshold where the urgency ramp starts kindling, so every due
+// count agrees with the yellow-through-red labels.
+export const DUE_DAYS = 7;
+export const isDueForTouch = (touches) => {
+  const ts = lastTouchTs(touches);
+  return !ts || Date.now() - ts >= DUE_DAYS * DAY_MS;
+};
+
 export const qualifiesForFollowUp = (log) => !!(log && log.score >= FOLLOWUP_MIN_SCORE);
 
 // A perfect call. Both 9s and 10s qualify for follow up, but a 10 is the strongest

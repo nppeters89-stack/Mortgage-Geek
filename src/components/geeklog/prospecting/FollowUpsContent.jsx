@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -106,6 +106,9 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // order in both halves.
   const hotList = useMemo(() => queue.filter((p) => !whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
   const whaleList = useMemo(() => queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
+  // The header badge counts follow-ups actually DUE (7+ days or never touched),
+  // matching the desktop top-nav badge.
+  const dueCount = useMemo(() => hotList.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)])).length, [hotList, followUps]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const closeDetail = useCallback(() => setOpenId(null), []);
@@ -402,7 +405,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Ups</h1>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
-              <strong style={{ color: T.redLift, fontWeight: 600 }}>{hotList.length}</strong> to work
+              <strong style={{ color: T.redLift, fontWeight: 600 }}>{dueCount}</strong> due
             </div>
             <button type="button" onClick={() => setSheetOpen(true)} aria-label="Add to Follow Ups"
               style={{ flex: "none", width: 34, height: 34, borderRadius: 10, background: "none", border: "none", boxShadow: `inset 0 0 0 1px ${T.line}`, color: T.dim, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>

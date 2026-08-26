@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { T, FF } from "./gl2Tokens";
 import { TabGlyph } from "./Gl2Primitives";
 import { getCachedProspects } from "./prospecting/prospectStore";
-import { idFromPhone, followUpQueue, lastTouchTs } from "./prospecting/prospectsModel";
+import { idFromPhone, followUpQueue, isDueForTouch } from "./prospecting/prospectsModel";
 
 // Desktop top-bar navigation (design option 3c, translated into the Geek Log's
 // own system: Figtree and gl2Tokens in place of the sketch's Poppins and raw
@@ -23,7 +23,6 @@ const TABS = [
   { id: "followups", label: "Follow Ups" },
 ];
 
-const DUE_MS = 7 * 86400000;
 function followUpsDue() {
   const c = getCachedProspects();
   if (!c) return 0;
@@ -32,9 +31,7 @@ function followUpsDue() {
   return followUpQueue(c.prospects || [], c.logs || {}, c.followUps || {}, c.soi || {}, pinned, c.cold || {}, c.dead || {})
     .filter((p) => {
       const id = idFromPhone(p.phone);
-      if (whale.has(id)) return false;
-      const ts = lastTouchTs(c.followUps?.[id]);
-      return !ts || Date.now() - ts >= DUE_MS;
+      return !whale.has(id) && isDueForTouch(c.followUps?.[id]);
     }).length;
 }
 
@@ -45,7 +42,7 @@ export function Gl2TopNav({ active, onChange }) {
   const badge = useMemo(() => followUpsDue(), [active]);
 
   return (
-    <nav aria-label="Main" style={{ flex: "0 0 auto", height: 66, background: T.bg1, borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "stretch", padding: "0 28px", gap: 0 }}>
+    <nav aria-label="Main" style={{ flex: "0 0 auto", height: 66, background: T.bg1, borderBottom: `1px solid ${T.line}`, display: "flex", alignItems: "stretch", justifyContent: "center", padding: "0 28px", gap: 0 }}>
       <style>{`
         .gl2-topnav-tab:focus-visible { outline: 2px solid ${T.greenBright}; outline-offset: 2px; border-radius: 6px; }
         .gl2-topnav-tab:hover .gl2-topnav-ink { color: ${T.cream}; }
@@ -91,7 +88,6 @@ export function Gl2TopNav({ active, onChange }) {
         })}
       </div>
 
-      <div style={{ flex: 1 }} />
     </nav>
   );
 }
