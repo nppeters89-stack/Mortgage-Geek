@@ -346,8 +346,11 @@ export function FollowUpCockpit({
           {WHALE_COLUMNS.map((label, wi) => {
             const key = `whale:${wi}`;
             const ramp = whaleRampColor(wi, WHALE_COLUMNS.length);
+            // Busy columns (6+) double up on ultrawide screens, same twin-stack
+            // mechanism as the hot board.
+            const wide = ultra && whaleCols[wi].length >= 6;
             return (
-              <div key={wi} style={{ boxSizing: "border-box", flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={wi} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropWhale(wi)}>
                 <div style={colHead}>
                   <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
@@ -356,8 +359,15 @@ export function FollowUpCockpit({
                   </span>
                   <span style={{ fontSize: 12, color: T.faint }}>{whaleCols[wi].length}</span>
                 </div>
-                <div style={{ ...colBody, background: over === key ? T.whaleWash : "transparent" }}>
-                  {whaleCols[wi].map((p) => hotCard(p))}
+                <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.whaleWash : "transparent" }}>
+                  {wide ? (
+                    <>
+                      <div style={halfStack}>{whaleCols[wi].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{whaleCols[wi].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
+                    </>
+                  ) : (
+                    whaleCols[wi].map((p) => hotCard(p))
+                  )}
                 </div>
               </div>
             );
@@ -375,12 +385,20 @@ export function FollowUpCockpit({
         <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
           {COLD_COLUMNS.map((label, ci) => {
             const key = `cold:${ci}`;
+            const wide = ultra && coldCols[ci].length >= 6;
             return (
-              <div key={ci} style={{ boxSizing: "border-box", flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+              <div key={ci} style={{ boxSizing: "border-box", flex: wide ? "2 0 440px" : "1 0 218px", minWidth: wide ? 440 : 218, background: "transparent", border: `1px solid ${T.coldWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropCold(ci, true)}>
                 <div style={colHead}><span style={colTitle(T.cold)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{coldCols[ci].length}</span></div>
-                <div style={{ ...colBody, background: over === key ? T.coldWash : "transparent" }}>
-                  {coldCols[ci].map((p) => coldCard(p))}
+                <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.coldWash : "transparent" }}>
+                  {wide ? (
+                    <>
+                      <div style={halfStack}>{coldCols[ci].filter((_, i) => i % 2 === 0).map((p) => coldCard(p))}</div>
+                      <div style={halfStack}>{coldCols[ci].filter((_, i) => i % 2 === 1).map((p) => coldCard(p))}</div>
+                    </>
+                  ) : (
+                    coldCols[ci].map((p) => coldCard(p))
+                  )}
                 </div>
               </div>
             );
