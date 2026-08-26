@@ -100,6 +100,12 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const whaleSet = useMemo(() => new Set(whale), [whale]);
   const queue = useMemo(() => followUpQueue(prospects, logs, followUps, soi, pinnedSet, cold, dead), [prospects, logs, followUps, soi, pinnedSet, cold, dead]);
   const coldList = useMemo(() => coldQueue(prospects, followUps, cold, dead), [prospects, followUps, cold, dead]);
+
+  // Mobile mirrors the desktop board's exclusivity: whales leave the main list
+  // for their own tray. queue is already neglect-sorted, so a filter keeps the
+  // order in both halves.
+  const hotList = useMemo(() => queue.filter((p) => !whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
+  const whaleList = useMemo(() => queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const closeDetail = useCallback(() => setOpenId(null), []);
@@ -395,7 +401,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Ups</h1>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
-              <strong style={{ color: T.redLift, fontWeight: 600 }}>{queue.length}</strong> to work
+              <strong style={{ color: T.redLift, fontWeight: 600 }}>{hotList.length}</strong> to work
             </div>
             <button type="button" onClick={() => setSheetOpen(true)} aria-label="Add to Follow Ups"
               style={{ flex: "none", width: 34, height: 34, borderRadius: 10, background: "none", border: "none", boxShadow: `inset 0 0 0 1px ${T.line}`, color: T.dim, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -408,12 +414,12 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
       </header>
 
       <div style={{ flex: 1, padding: "4px 12px 0" }}>
-        {queue.length === 0 ? (
+        {hotList.length === 0 && whaleList.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? (<>Nothing to follow up yet.<br />Any call you score 9 or 10 lands here automatically.</>) : "Loading…"}
           </div>
         ) : (
-          queue.map((p) => {
+          hotList.map((p) => {
             const id = idFromPhone(p.phone);
             return (
               <ContactQueueRow key={id} prospect={p}
@@ -430,6 +436,34 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
               />
             );
           })
+        )}
+
+        {whaleList.length > 0 && (
+          <details style={{ margin: "14px 0 0", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, overflow: "hidden" }}>
+            <summary style={{ listStyle: "none", cursor: "pointer", padding: "13px 14px", background: T.whaleWash, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.whale }}>{"🐳"} Whale Pipeline · {whaleList.length}</span>
+              <span style={{ fontSize: 11, color: T.faint }}>top producers</span>
+            </summary>
+            <div style={{ padding: "2px 12px 6px" }}>
+              {whaleList.map((p) => {
+                const id = idFromPhone(p.phone);
+                return (
+                  <ContactQueueRow key={id} prospect={p}
+                    touches={followUps[id] || []}
+                    highlight={isTopScore(logs[id])}
+                    badge={p.manual ? "manual" : ""}
+                    checked={racSet.has(id)}
+                    whale
+                    score={logs[id]?.score || null}
+                    stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
+                    stages={stages}
+                    goalIndex={goalIndex}
+                    onOpen={() => setOpenId(id)}
+                  />
+                );
+              })}
+            </div>
+          </details>
         )}
 
         {coldList.length > 0 && (
