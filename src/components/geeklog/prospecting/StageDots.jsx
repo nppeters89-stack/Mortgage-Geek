@@ -1,4 +1,4 @@
-import { T, stageRampColor } from "../gl2Tokens";
+import { T, stageRampColor, whaleRampColor } from "../gl2Tokens";
 import { goalIndexOf } from "./prospectsModel";
 
 // The seven-stage progress indicator: one pill per pipeline stage, lit through
@@ -6,12 +6,16 @@ import { goalIndexOf } from "./prospectsModel";
 // ramp, so the row kindles from dark red through neon orange into neon yellow on
 // the goal notch. Stage 0 (New) leaves every pill empty. Shared by the mobile
 // queue row and the desktop board. Colors from gl2Tokens.
-export function StageDots({ stage, stages, goalIndex = goalIndexOf(stages) }) {
+export function StageDots({ stage, stages, goalIndex = goalIndexOf(stages), whale = false }) {
+  const ramp = whale ? whaleRampColor : stageRampColor;
+  // Whale pills light through the CURRENT column inclusive of index 0 (Value
+  // Add 1 is a real first column, unlike the main pipeline's empty New).
+  const litThrough = whale ? stage : (stage > 0 ? stage : -1);
   return (
     <span style={{ display: "flex", gap: 4 }} aria-hidden="true">
       {stages.map((_, i) => {
-        const on = i <= stage && stage > 0;
-        return <span key={i} style={{ width: 16, height: 5, borderRadius: 3, background: on ? stageRampColor(i, stages.length) : T.bg0 }} />;
+        const on = i <= litThrough;
+        return <span key={i} style={{ width: 16, height: 5, borderRadius: 3, background: on ? ramp(i, stages.length) : T.bg0 }} />;
       })}
     </span>
   );

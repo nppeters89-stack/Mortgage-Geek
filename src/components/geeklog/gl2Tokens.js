@@ -54,6 +54,15 @@ export const stageRampColor = (i, n = STAGE_RAMP.length) => {
   return STAGE_RAMP[Math.round(t * (STAGE_RAMP.length - 1))];
 };
 
+// Whale-notch gradient: light neon blue kindling into a rich violet on the
+// seventh value add. Same mapper shape as the stage ramp.
+export const WHALE_RAMP = ["#5BE7FF", "#57C8FF", "#5FA8FF", "#7287FF", "#8A66F5", "#9C4DE0", "#8B2FC9"];
+export const whaleRampColor = (i, n = WHALE_RAMP.length) => {
+  if (n <= 1) return WHALE_RAMP[WHALE_RAMP.length - 1];
+  const t = Math.max(0, Math.min(1, i / (n - 1)));
+  return WHALE_RAMP[Math.round(t * (WHALE_RAMP.length - 1))];
+};
+
 // Last-touch urgency ramp for the Follow Ups surfaces. Under 7 days the label
 // stays the surface's own gray (the caller passes it); from 7 days it kindles
 // neon yellow, through neon orange at 10, to neon red at 14 and beyond. Never

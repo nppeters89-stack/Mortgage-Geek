@@ -41,7 +41,7 @@ export function ContactQueueRow({ prospect: p, touches = [], highlight = false, 
         {meta && <div style={{ fontSize: 11, color: T.faint, marginTop: 3, letterSpacing: "0.03em" }}>{meta}</div>}
         {showStage && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-            <StageDots stage={stage} stages={stages} goalIndex={goalIndex} />
+            <StageDots stage={stage} stages={stages} goalIndex={goalIndex} whale={whale} />
             <span style={{ fontSize: 11.5, color: T.dim }}>{stages[stage]}</span>
           </div>
         )}
