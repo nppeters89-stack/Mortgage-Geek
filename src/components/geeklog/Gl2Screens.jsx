@@ -27,15 +27,6 @@ function HeaderButton({ onClick, disabled, ariaLabel, children, width = 34 }) {
   );
 }
 
-function GearGlyph() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="3.2" stroke={T.dim} strokeWidth="1.6" />
-      <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" stroke={T.dim} strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function DollarGlyph() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -88,8 +79,12 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
             <span style={{ padding: "0 10px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, letterSpacing: "0.06em", color: T.dim }}>SOI</span>
           </HeaderButton>
           <HeaderButton onClick={onOpenClosings} ariaLabel="Closings"><DollarGlyph /></HeaderButton>
-          <HeaderButton onClick={onSettings} ariaLabel="Settings"><GearGlyph /></HeaderButton>
-          <Wordmark height={24} />
+          {/* The green Geek Log icon replaces the wordmark AND the gear: it is
+              the app's mark and the door to Settings in one. */}
+          <button type="button" onClick={onSettings} aria-label="Settings"
+            style={{ flex: "0 0 auto", background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex" }}>
+            <img src="/geeklog/icon-96.png" alt="" width={28} height={28} style={{ display: "block", borderRadius: 7 }} />
+          </button>
         </div>
       </div>
 

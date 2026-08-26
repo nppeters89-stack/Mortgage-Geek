@@ -50,12 +50,6 @@ export function Gl2TopNav({ active, onChange }) {
         .gl2-topnav-tab[aria-current="page"]:hover { box-shadow: inset 0 -2px 0 ${T.greenBright}; }
       `}</style>
 
-      {/* The green Geek Log app icon, alone - no wordmark. 96px source at 30px
-          render keeps it sharp on retina; explicit dimensions per the CLS rule. */}
-      <div style={{ display: "flex", alignItems: "center", flex: "0 0 auto", marginRight: 34 }}>
-        <img src="/geeklog/icon-96.png" alt="Geek Log" width={30} height={30} style={{ display: "block", borderRadius: 8 }} />
-      </div>
-
       {/* Tabs: labels always visible, icon left, 2px underline slot reserved on
           every tab so nothing shifts on state change. */}
       <div style={{ display: "flex", alignItems: "stretch", gap: 4 }}>

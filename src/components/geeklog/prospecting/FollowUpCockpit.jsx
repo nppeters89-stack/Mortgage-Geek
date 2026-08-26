@@ -272,6 +272,9 @@ export function FollowUpCockpit({
 
   return (
     <div style={{ padding: "18px 26px 40px" }}>
+      {/* Top diagnostics center as a block on ultrawide screens; the boards
+          below keep the full width. */}
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
       </div>
@@ -287,6 +290,7 @@ export function FollowUpCockpit({
       </div>
 
       <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Open a card and tap the whale by the name to move a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
+      </div>
 
       {/* Hot board */}
       <div style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>

@@ -112,7 +112,9 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
   };
 
   return (
-    <div style={{ padding: "18px 26px 40px" }}>
+    // Full-bleed tab, centered content: the cockpit caps at 1440 and centers,
+    // so ultrawide screens frame the quadrants instead of stretching them.
+    <div style={{ maxWidth: 1440, margin: "0 auto", padding: "18px 26px 40px" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Sphere of Influence</h1>
         <button type="button" onClick={onOpenFollowUps}

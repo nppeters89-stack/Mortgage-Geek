@@ -76,7 +76,7 @@ export function Gl2App({ apiKey }) {
   // board owns the whole screen. Every other tab and all of mobile stay at
   // APP_MAX.
   const isNarrow = useIsMobile(899);
-  const columnMax = tab === "followups" && !isNarrow ? "100%" : APP_MAX;
+  const columnMax = (tab === "followups" || tab === "soi") && !isNarrow ? "100%" : APP_MAX;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayKey);
