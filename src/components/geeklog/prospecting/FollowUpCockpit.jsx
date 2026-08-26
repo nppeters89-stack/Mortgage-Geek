@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { T, FF, stageRampColor, staleColor } from "../gl2Tokens";
+import { T, FF, stageRampColor, whaleRampColor, staleColor } from "../gl2Tokens";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
@@ -345,10 +345,17 @@ export function FollowUpCockpit({
         <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
           {WHALE_COLUMNS.map((label, wi) => {
             const key = `whale:${wi}`;
+            const ramp = whaleRampColor(wi, WHALE_COLUMNS.length);
             return (
               <div key={wi} style={{ boxSizing: "border-box", flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
                 onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropWhale(wi)}>
-                <div style={colHead}><span style={colTitle(T.whale)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{whaleCols[wi].length}</span></div>
+                <div style={colHead}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                    <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
+                    <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+                  </span>
+                  <span style={{ fontSize: 12, color: T.faint }}>{whaleCols[wi].length}</span>
+                </div>
                 <div style={{ ...colBody, background: over === key ? T.whaleWash : "transparent" }}>
                   {whaleCols[wi].map((p) => hotCard(p))}
                 </div>
