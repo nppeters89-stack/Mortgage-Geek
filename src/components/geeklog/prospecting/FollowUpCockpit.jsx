@@ -1,5 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { T, FF, stageRampColor, whaleRampColor, staleColor } from "../gl2Tokens";
+import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
+import { Stat, Ring } from "./StatCards";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
@@ -291,6 +292,9 @@ export function FollowUpCockpit({
       {/* Stat strip: activity on the left (streak, week bar, today), the work
           signal in the middle (due now), capture and pipeline health right. */}
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        {/* Due now leads and shouts: red hue, red number - it is the reason to
+            be on this screen at all. */}
+        <Stat label="Due now" accent={T.redLift} color={T.redLift} wash={stats.due > 0 ? T.redWash : null}>{stats.due}</Stat>
         <Stat label="Day streak" accent={stats.streak >= 3 ? T.greenBright : T.redLift}
           color={stats.streak >= 3 ? T.greenBright : T.cream}>
           <span style={{ color: T.redLift, marginRight: 7 }}>{"▲"}</span>{stats.streak}
@@ -303,13 +307,12 @@ export function FollowUpCockpit({
           {stats.week}<span style={{ fontSize: 12, color: T.faint }}> / {weekTarget}</span>
         </Stat>
         <Stat label="Touches today" accent={stats.today > 0 ? T.greenBright : T.line} color={stats.today > 0 ? T.greenBright : T.cream}>{stats.today}</Stat>
-        <Stat label="Due now" accent={stats.due > 0 ? T.amber : T.greenBright} color={stats.due > 0 ? T.amber : T.greenBright}>{stats.due}</Stat>
         <Stat label="14 day coverage" accent={stats.cov < 70 ? T.amber : T.green} color={stats.cov < 70 ? T.amber : T.green}
           extra={<Ring pct={stats.cov} color={stats.cov < 70 ? T.amber : T.green} />}>{stats.cov}%</Stat>
-        <Stat label="Motivation on file" accent={T.orange} color={T.orange} extra={<Ring pct={stats.motPct} color={T.orange} />}>{stats.motPct}%</Stat>
         <Stat label="In RAC" accent={T.green} color={T.green} extra={<Ring pct={stats.racPct} color={T.green} />}>{stats.racPct}%</Stat>
+        <Stat label="Motivation on file" accent={T.orange} color={T.orange} extra={<Ring pct={stats.motPct} color={T.orange} />}>{stats.motPct}%</Stat>
         <Stat label="Whales" accent={T.whale} color={T.whale}>{"🐳"} {stats.whales}</Stat>
-        <Stat label="In SOI" accent={T.redLift} color={T.redLift}>{"🤝"} {stats.soiCount}</Stat>
+        <Stat label="In SOI" accent={STAGE_RAMP[STAGE_RAMP.length - 1]} color={STAGE_RAMP[STAGE_RAMP.length - 1]}>{"🤝"} {stats.soiCount}</Stat>
       </div>
 
       <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Open a card and tap the whale by the name to move a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
@@ -456,38 +459,6 @@ export function FollowUpCockpit({
   );
 }
 
-// A stat card with a colored accent edge; `extra` renders to the right of the
-// number (rings) or under it (bars).
-function Stat({ label, children, extra = null, color = "inherit", accent = null }) {
-  const ring = extra && extra.type === Ring;
-  return (
-    <div style={{ position: "relative", overflow: "hidden", background: T.surface, border: `1px solid ${T.line}`, borderLeft: `3px solid ${accent || T.line}`, borderRadius: 12, padding: "10px 14px", minWidth: 118 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: 20, fontWeight: 700, fontVariantNumeric: "tabular-nums", display: "flex", alignItems: "center", color, lineHeight: 1.15 }}>{children}</div>
-          <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.07em", marginTop: 3, whiteSpace: "nowrap" }}>{label}</div>
-          {!ring && extra}
-        </div>
-        {ring && extra}
-      </div>
-    </div>
-  );
-}
-
-// A small progress donut. strokeDasharray against the circumference does the
-// percentage; the track sits underneath in the card base color.
-function Ring({ pct, color, size = 34 }) {
-  const r = (size - 5) / 2;
-  const c = 2 * Math.PI * r;
-  const filled = Math.max(0, Math.min(100, pct)) / 100 * c;
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true" style={{ flex: "none", transform: "rotate(-90deg)" }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={T.bg0} strokeWidth="4" />
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="4" strokeLinecap="round"
-        strokeDasharray={`${filled} ${c - filled}`} style={{ transition: "stroke-dasharray .5s ease" }} />
-    </svg>
-  );
-}
 
 // The lightweight action popover for the drag gestures (log a stage touch, log a
 // cold check-in, mark dead) and the buried restore list. The full contact detail

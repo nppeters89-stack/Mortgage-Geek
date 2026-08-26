@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { T, FF } from "../gl2Tokens";
+import { Stat } from "./StatCards";
 import { idFromPhone, soiQueue, touchesBy, referralsOf, lastTouchByTs, lastReferralTs, touchOverdue, producing, quadrantOf, DEFAULT_CONFIG } from "./prospectsModel";
 
 // The desktop SOI cockpit (>= 900px), matching soi_cockpit_preview: a stat
@@ -125,10 +126,11 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
 
       {/* Stat strip */}
       <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
-        <Stat label="Partners">{stats.total}</Stat>
-        <Stat label={`Referrals ${config.refQuietDays ?? DEFAULT_CONFIG.refQuietDays}d`} color={T.amber}>{stats.refs90}</Stat>
-        <Stat label="Owe a thank you" color={T.redLift}>{stats.owe}</Stat>
-        <Stat label="Avg since touch">{stats.avg}d</Stat>
+        {/* Owe a thank you leads and shouts, the SOI counterpart of Due now. */}
+        <Stat label="Owe a thank you" accent={T.redLift} color={T.redLift} wash={stats.owe > 0 ? T.redWash : null}>{stats.owe}</Stat>
+        <Stat label="Partners" accent={T.line} color={T.cream}>{stats.total}</Stat>
+        <Stat label={`Referrals ${config.refQuietDays ?? DEFAULT_CONFIG.refQuietDays}d`} accent={T.amber} color={T.amber}>{stats.refs90}</Stat>
+        <Stat label="Avg since touch" accent={T.line} color={T.cream}>{stats.avg}d</Stat>
       </div>
 
       <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Cards place themselves by the two clocks: last touch and last referral. Nobody gets dragged; log activity and they move on their own. Top right is always today's call list.</div>
@@ -157,11 +159,3 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
   );
 }
 
-function Stat({ label, children, color = "inherit" }) {
-  return (
-    <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "10px 16px", minWidth: 130 }}>
-      <div style={{ fontSize: 19, fontWeight: 700, fontVariantNumeric: "tabular-nums", color }}>{children}</div>
-      <div style={{ fontSize: 10, color: T.faint, textTransform: "uppercase", letterSpacing: "0.07em", marginTop: 2 }}>{label}</div>
-    </div>
-  );
-}
