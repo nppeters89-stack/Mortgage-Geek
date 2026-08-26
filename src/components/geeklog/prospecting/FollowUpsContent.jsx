@@ -309,6 +309,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
           copyPhoneOnTap={modal}
           onSetScore={(v) => handleSetScore(id, v)}
+          isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
           inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
@@ -330,6 +331,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
         copyPhoneOnTap={modal}
         onSetScore={(v) => handleSetScore(id, v)}
+        isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
         composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
@@ -339,7 +341,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, closeDetail, showToast, toggleRac, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, whaleSet, closeDetail, showToast, toggleRac, toggleWhale, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {
@@ -350,7 +352,6 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
           stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet}
-          onToggleWhale={toggleWhale}
           onOpenDetail={setOpenId}
           onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}

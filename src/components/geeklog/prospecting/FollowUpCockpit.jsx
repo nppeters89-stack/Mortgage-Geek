@@ -37,7 +37,7 @@ const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinn
 
 export function FollowUpCockpit({
   prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet,
-  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent, onToggleWhale,
+  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
@@ -219,11 +219,6 @@ export function FollowUpCockpit({
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{whaleSet?.has(id) ? " 🐳" : ""}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
-          <button type="button" title={whaleSet?.has(id) ? "Remove from whale pipeline" : "Move to whale pipeline"}
-            onClick={(e) => { e.stopPropagation(); onToggleWhale(id); }} draggable={false} onDragStart={(e) => e.preventDefault()}
-            style={{ flex: "none", marginLeft: "auto", background: whaleSet?.has(id) ? T.whaleWash : "none", border: `1px solid ${whaleSet?.has(id) ? T.whaleWashLine : T.line}`, borderRadius: 7, padding: "1px 6px", fontSize: 12, cursor: "pointer", lineHeight: 1.5, filter: whaleSet?.has(id) ? "none" : "grayscale(1) opacity(0.55)" }}>
-            {"🐳"}
-          </button>
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
@@ -293,7 +288,7 @@ export function FollowUpCockpit({
         <Stat label="In SOI" color={T.redLift}>{stats.soiCount}</Stat>
       </div>
 
-      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. The whale button moves a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
+      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Open a card and tap the whale by the name to move a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
 
       {/* Hot board */}
       <div style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>
@@ -347,7 +342,7 @@ export function FollowUpCockpit({
       <details open style={{ margin: "6px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
         <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.whaleWash }}>
           <span style={colTitle(T.whale)}>{"🐳"} Whale Pipeline · {whaleTotal}</span>
-          <span style={{ fontSize: 11.5, color: T.faint }}>Top producers, nurtured on their own track. Drag between value adds; the whale button on a card sends them here.</span>
+          <span style={{ fontSize: 11.5, color: T.faint }}>Top producers, nurtured on their own track. Drag between value adds; the whale button beside the name in an open card sends them here.</span>
         </summary>
         <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
           {WHALE_COLUMNS.map((label, wi) => {

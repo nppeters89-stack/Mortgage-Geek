@@ -17,14 +17,23 @@ import { mutedBadge } from "./ContactQueueRow";
 // passes copy-to-clipboard actions for both (no phone to dial from a desk, and
 // both values are headed into the CRM); everywhere else the phone dials and the
 // email stays plain text.
-export function ContactHeader({ prospect: p, callAction = null, onPhone = null, onEmail = null }) {
+// isWhale/onToggleWhale render the minimal whale toggle beside the name: gray
+// until flagged, aqua-lit once a whale. Follow Ups passes it (mobile detail and
+// cockpit modal alike); surfaces that omit it render no button.
+export function ContactHeader({ prospect: p, callAction = null, onPhone = null, onEmail = null, isWhale = false, onToggleWhale = null }) {
   const notes = p.notes || "";
   const sub = [p.brokerage, p.lineType ? `${p.lineType} line` : ""].filter(Boolean).join(" · ");
 
   return (
     <>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
         <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 34, lineHeight: 1.1, color: T.cream }}>{p.name}</span>
+        {onToggleWhale && (
+          <button type="button" title={isWhale ? "Remove from whale pipeline" : "Move to whale pipeline"} onClick={onToggleWhale}
+            style={{ flex: "none", background: isWhale ? T.whaleWash : "none", border: `1px solid ${isWhale ? T.whaleWashLine : T.line}`, borderRadius: 8, padding: "2px 8px", fontSize: 15, cursor: "pointer", lineHeight: 1.5, filter: isWhale ? "none" : "grayscale(1) opacity(0.55)" }}>
+            {"🐳"}
+          </button>
+        )}
         {p.manual && <span style={mutedBadge}>manual</span>}
       </div>
       {sub && <div style={{ color: T.dim, fontSize: 14, marginTop: 6, fontFamily: FF.body }}>{sub}</div>}

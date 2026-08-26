@@ -56,7 +56,7 @@ export function FollowUpDetail({
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
   motivation = "", onSaveMotivation = null, copyPhoneOnTap = false, onSetScore = null,
-  onLogReferral = null,
+  onLogReferral = null, isWhale = false, onToggleWhale = null,
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
@@ -105,6 +105,7 @@ export function FollowUpDetail({
       </button>
 
       <ContactHeader prospect={p}
+        isWhale={isWhale} onToggleWhale={onToggleWhale}
         onPhone={copyPhoneOnTap ? () => copyText(p.phone).then(() => onToast?.("Phone number copied"), () => onToast?.("Copy failed")) : null}
         onEmail={copyPhoneOnTap && p.email ? () => copyText(p.email).then(() => onToast?.("Email copied"), () => onToast?.("Copy failed")) : null}
         callAction={
