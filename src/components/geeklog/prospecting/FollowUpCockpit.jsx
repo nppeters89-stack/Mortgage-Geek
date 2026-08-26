@@ -36,6 +36,19 @@ const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
 const dSince = (ts) => (ts ? Math.floor((Date.now() - ts) / DAY) : null);
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
+
+// Occasional border pulse for hot leads: a comet of warm light laps the card
+// border, then rests. The masked ring shows only the border band; the oversized
+// square inside carries the conic tail and spins. Decorative only; the keyframes
+// are neutralized under prefers-reduced-motion in Gl2App's style block.
+function FirePulse() {
+  return (
+    <div aria-hidden="true" style={{ position: "absolute", inset: 0, borderRadius: 11, padding: 2, pointerEvents: "none", WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)", WebkitMaskComposite: "xor", mask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)", maskComposite: "exclude" }}>
+      <div style={{ position: "absolute", left: "50%", top: "50%", width: "300%", aspectRatio: "1 / 1", marginLeft: "-150%", marginTop: "-150%", background: `conic-gradient(transparent 0deg 300deg, ${T.orange} 354deg, transparent 360deg)`, animation: "gl-fire-orbit 6s linear infinite", opacity: 0 }} />
+    </div>
+  );
+}
+
 export function FollowUpCockpit({
   prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet,
   onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
@@ -228,10 +241,7 @@ export function FollowUpCockpit({
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${hot ? T.orangeWashLine : top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
-        {/* Persistent subtle shimmer on hot leads: a warm light sweep every few
-            seconds. Decorative only; disabled under prefers-reduced-motion via
-            the keyframe override in Gl2App's style block. */}
-        {hot && <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `linear-gradient(105deg, transparent 38%, ${T.orangeWash} 50%, transparent 62%)`, backgroundSize: "250% 100%", animation: "gl-fire-shimmer 3.2s linear infinite" }} />}
+        {hot && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
           {rac?.has(id) && <RacCheck />}
@@ -255,9 +265,10 @@ export function FollowUpCockpit({
     const ts = lastTouchTs(followUps[id]);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        {fireSet?.has(id) && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{fireSet?.has(id) ? " 🔥" : ""}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>

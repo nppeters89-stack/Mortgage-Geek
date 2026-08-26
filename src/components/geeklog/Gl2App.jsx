@@ -402,14 +402,14 @@ export function Gl2App({ apiKey }) {
         @keyframes gl-burstfade { 0% { opacity: 0; } 14% { opacity: 1; } 74% { opacity: 1; } 100% { opacity: 0; } }
         @keyframes gl-flash { 0% { opacity: 0; transform: translateY(-8px); } 12% { opacity: 1; transform: none; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-6px); } }
         @keyframes gl-sealin { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes gl-fire-shimmer { 0% { background-position: 125% 0; } 100% { background-position: -125% 0; } }
+        @keyframes gl-fire-orbit { 0% { transform: rotate(0deg); opacity: 0; } 5% { opacity: 0.85; } 30% { opacity: 0.85; } 36% { transform: rotate(360deg); opacity: 0; } 100% { transform: rotate(360deg); opacity: 0; } }
         @media (prefers-reduced-motion: reduce) {
           @keyframes gl-pop { from { transform: none; } to { transform: none; } }
           @keyframes gl-blink { from { opacity: 0.7; } to { opacity: 0.7; } }
           @keyframes gl-barpulse { from { opacity: 0; } to { opacity: 0; } }
           @keyframes gl-burst { from { opacity: 0; } to { opacity: 0; } }
           @keyframes gl-flash { 0% { opacity: 1; } 100% { opacity: 1; } }
-          @keyframes gl-fire-shimmer { from { background-position: 0 0; } to { background-position: 0 0; } }
+          @keyframes gl-fire-orbit { from { transform: rotate(0deg); opacity: 0; } to { transform: rotate(0deg); opacity: 0; } }
         }
       `}</style>
       {/* DOCUMENT FLOW, not a fixed shell — this is the fix for the iOS
