@@ -57,13 +57,17 @@ export function FollowUpDetail({
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
   motivation = "", onSaveMotivation = null, copyPhoneOnTap = false, onSetScore = null,
   onLogReferral = null, isWhale = false, onToggleWhale = null,
+  // whaleMode swaps the stage composer onto the whale pipeline's own axis: all
+  // seven value-add columns are selectable (the main dropdown hides New), and
+  // the last column is just another value add - never the SOI promotion.
+  whaleMode = false,
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
   // Stage defaults to the next stage up, capped at the goal. Re-sync as the
   // contact's derived stage advances (the parent re-renders this view after each
   // logged touch), so the selector keeps pointing one stage ahead.
-  const [stageSel, setStageSel] = useState(() => Math.min(stageIndex + 1, goal));
+  const [stageSel, setStageSel] = useState(() => (whaleMode ? Math.min(stageIndex + 1, goal) : Math.min(stageIndex + 1, goal)));
   const [refMode, setRefMode] = useState(false); // "soi" composer: touch vs referral tab
   useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
 
@@ -198,14 +202,14 @@ export function FollowUpDetail({
           {composerMode === "stage" && stages && (
             <select value={stageSel} onChange={(e) => setStageSel(Number(e.target.value))}
               style={{ width: "100%", marginBottom: 10, background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: "12px 12px", fontFamily: FF.body, fontSize: 15 }}>
-              {stages.map((label, i) => (i === 0 ? null : <option key={i} value={i}>{label}</option>))}
+              {stages.map((label, i) => (!whaleMode && i === 0 ? null : <option key={i} value={i}>{label}</option>))}
             </select>
           )}
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
             style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
           <button type="button" onClick={composerMode === "stage" ? submitStage : submitPlain} disabled={!note.trim()}
-            style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
-            {composerMode === "stage" && stageSel === goal ? "Promote to SOI" : "Log follow up"}
+            style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && !whaleMode && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
+            {composerMode === "stage" && !whaleMode && stageSel === goal ? "Promote to SOI" : "Log follow up"}
           </button>
         </div>
       )}

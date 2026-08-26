@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -129,14 +129,14 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
 
-    if (Number.isInteger(stage) && stage === goalIndex) {
+    if (Number.isInteger(stage) && stage === goalIndex && !whaleRef.current.includes(id)) {
       const prev = soiRef.current;
       setSoi({ ...prev, [id]: String(Date.now()) });
       closeDetail();
       showToast("Promoted to SOI");
       persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
     } else {
-      showToast(Number.isInteger(stage) ? `Logged: ${stages[stage]}` : "Follow up logged");
+      showToast(Number.isInteger(stage) ? `Logged: ${(whaleRef.current.includes(id) ? WHALE_COLUMNS : stages)[stage]}` : "Follow up logged");
     }
   }, [apiKey, showToast, goalIndex, stages, closeDetail]);
 
@@ -189,7 +189,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const handleMoveStage = useCallback((id, si) => {
     const prev = stagemapRef.current;
     setStagemap({ ...prev, [id]: { s: si, ts: Date.now() } });
-    showToast(`Moved to ${stages[si]}`);
+    showToast(`Moved to ${(whaleRef.current.includes(id) ? WHALE_COLUMNS : stages)[si]}`);
     persistStageMove(apiKey, id, si).catch(() => {
       setStagemap(prev);
       setCachedStagemap(prev);
@@ -338,8 +338,9 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         copyPhoneOnTap={modal}
         onSetScore={(v) => handleSetScore(id, v)}
         isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
+        whaleMode={whaleSet.has(id)}
         inRac={racSet.has(id)} onToggleRac={() => toggleRac(id)}
-        composerMode="stage" stages={stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
+        composerMode="stage" stages={whaleSet.has(id) ? WHALE_COLUMNS : stages} stageIndex={stageIdx} goalIndex={goalIndex} showStageTags
         footerAction={isPinnedMember(id, pinnedSet, soi) ? (
           <button type="button" onClick={() => { setPin(id, "remove", `${p.name} removed from Follow Ups`); closeDetail(); }} style={quietAction}>
             Remove from Follow Ups
@@ -456,7 +457,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                     whale
                     score={logs[id]?.score || null}
                     stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
-                    stages={stages}
+                    stages={WHALE_COLUMNS}
                     goalIndex={goalIndex}
                     onOpen={() => setOpenId(id)}
                   />
