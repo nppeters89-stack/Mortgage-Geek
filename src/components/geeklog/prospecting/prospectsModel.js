@@ -2,6 +2,7 @@
 // outcome vocabulary, and the Excel TSV builders. No React, no I/O.
 
 import { T, SCORE_HEAT } from "../gl2Tokens";
+import { centralDateKey } from "../gl2Week";
 
 // Contact id = phone digits only (matches the Redis prospects:log:{id} key and
 // the server's validation).
@@ -38,11 +39,14 @@ export const heatColor = (score) => SCORE_HEAT[Math.min(10, Math.max(1, score)) 
 export const INTEL_MIN = 60;
 export const hasIntelDot = (p) => typeof p.notes === "string" && p.notes.length >= INTEL_MIN;
 
+// "Today" is the Central business day, the same convention the Today tracker
+// counts by (centralDateKey), NOT the device's local midnight. Device-local
+// comparison made a late-evening Central call read as "today" the next morning
+// on any device whose clock sat in a later timezone - a phantom 1 on the
+// Calls today / Conversations boxes with nothing logged yet.
 export function isToday(ts) {
   if (!ts) return false;
-  const d = new Date(ts);
-  const n = new Date();
-  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
+  return centralDateKey(new Date(ts)) === centralDateKey();
 }
 
 // Queue sorted ascending by buysides (work the bottom of the list up; whales
