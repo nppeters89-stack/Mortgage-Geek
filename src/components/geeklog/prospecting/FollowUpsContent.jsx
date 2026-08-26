@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -28,6 +28,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const [soi, setSoi] = useState(() => seed?.soi || {});
   const [pinned, setPinned] = useState(() => seed?.pinned || []);
   const [rac, setRac] = useState(() => seed?.rac || []);
+  const [whale, setWhale] = useState(() => seed?.whale || []);
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
@@ -44,6 +45,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const soiRef = useRef(soi); soiRef.current = soi;
   const pinnedRef = useRef(pinned); pinnedRef.current = pinned;
   const racRef = useRef(rac); racRef.current = rac;
+  const whaleRef = useRef(whale); whaleRef.current = whale;
   const coldRef = useRef(cold); coldRef.current = cold;
   const stagemapRef = useRef(stagemap); stagemapRef.current = stagemap;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
@@ -82,6 +84,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         setMotivation(c.motivation || {});
         setPinned(c.pinned || []);
         setRac(c.rac || []);
+        setWhale(c.whale || []);
         setCold(c.cold || {});
         setDead(c.dead || {});
         setStages(c.stages || DEFAULT_STAGES);
@@ -94,6 +97,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
 
   const pinnedSet = useMemo(() => new Set(pinned), [pinned]);
   const racSet = useMemo(() => new Set(rac), [rac]);
+  const whaleSet = useMemo(() => new Set(whale), [whale]);
   const queue = useMemo(() => followUpQueue(prospects, logs, followUps, soi, pinnedSet, cold, dead), [prospects, logs, followUps, soi, pinnedSet, cold, dead]);
   const coldList = useMemo(() => coldQueue(prospects, followUps, cold, dead), [prospects, followUps, cold, dead]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
@@ -142,6 +146,20 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     setLogs((l) => ({ ...l, [id]: next }));
     persistLog(apiKey, id, next);
     showToast(score >= 9 ? `Score set to ${score}/10` : `Score ${score}/10. Dropping from Follow Ups`);
+  }, [apiKey, showToast]);
+
+  // Flag or unflag a whale. A whale leaves the hot board for the whale
+  // pipeline; unflagging drops them back at their derived stage.
+  const toggleWhale = useCallback((id) => {
+    const prev = whaleRef.current;
+    const adding = !prev.includes(id);
+    setWhale(adding ? [...prev, id] : prev.filter((x) => x !== id));
+    showToast(adding ? "Moved to the whale pipeline 🐳" : "Removed from the whale pipeline");
+    persistWhale(apiKey, id, adding ? "add" : "remove").catch(() => {
+      setWhale(prev);
+      setCachedWhale(prev);
+      showToast("Could not update");
+    });
   }, [apiKey, showToast]);
 
   // Save (or clear) a contact's motivation note.
@@ -331,7 +349,8 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap} motivation={motivation} rac={racSet}
+          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet}
+          onToggleWhale={toggleWhale}
           onOpenDetail={setOpenId}
           onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}
@@ -401,6 +420,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                 highlight={isTopScore(logs[id])}
                 badge={p.manual ? "manual" : ""}
                 checked={racSet.has(id)}
+                whale={whaleSet.has(id)}
                 score={logs[id]?.score || null}
                 stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
                 stages={stages}

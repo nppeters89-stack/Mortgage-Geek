@@ -23,6 +23,9 @@ export const T = {
   gold: "#B8860B", // closings only, internal
   goldMuted: "#8B6914",
   amber: "#C9A23A", // callback status + callback accents (prospecting)
+  whale: "#4FB3D9", // aqua: the whale pipeline (top producers nurtured separately)
+  whaleWash: "rgba(79,179,217,0.10)",
+  whaleWashLine: "rgba(79,179,217,0.4)",
   cold: "#5B7C99", // steel blue: the Follow Up cockpit's cold pipeline (went quiet)
   coldWash: "rgba(91,124,153,0.10)", // cold at 10%: cold section fill
   coldWashLine: "rgba(91,124,153,0.35)", // cold separator / card border

@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, staleColor } from "../gl2Tokens";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
 
@@ -36,8 +36,8 @@ const dSince = (ts) => (ts ? Math.floor((Date.now() - ts) / DAY) : null);
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac,
-  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet,
+  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent, onToggleWhale,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
@@ -71,13 +71,29 @@ export function FollowUpCockpit({
     const cols = stages.map(() => []);
     prospects.forEach((p) => {
       const id = idFromPhone(p.phone);
-      if (cold[id] || dead[id]) return;
+      if (cold[id] || dead[id] || whaleSet?.has(id)) return;
       if (!(isMember(id, logs, pinnedSet) || soi[id])) return;
       cols[stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex, override: stagemap[id] })].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
     return cols;
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap]);
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet]);
+
+  // Whale board: whales not cold and not dead, placed by the same stage ratchet
+  // as the hot board (same stagemap drags), mapped onto the seven value-add
+  // columns. Exclusive: these contacts do not appear on the hot board.
+  const whaleCols = useMemo(() => {
+    const cols = WHALE_COLUMNS.map(() => []);
+    prospects.forEach((p) => {
+      const id = idFromPhone(p.phone);
+      if (!whaleSet?.has(id) || cold[id] || dead[id]) return;
+      const si = Math.min(stageOf(followUps[id] || [], { goalIndex, override: stagemap[id] }), WHALE_COLUMNS.length - 1);
+      cols[si].push(p);
+    });
+    cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
+    return cols;
+  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet]);
+  const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
   const coldCols = useMemo(() => {
     const cols = COLD_COLUMNS.map(() => []);
@@ -160,6 +176,15 @@ export function FollowUpCockpit({
     }
   };
 
+  const dropWhale = (wi) => (e) => {
+    e.preventDefault(); e.stopPropagation(); setOver(null);
+    const d = drag.current; if (!d) return;
+    const { id, from } = d;
+    if (from === "cold") { onReviveSilent(id); if (wi !== stageOf(followUps[id] || [], { goalIndex, override: stagemap[id] })) onMoveStage(id, wi); return; }
+    if (wi === stageOf(followUps[id] || [], { goalIndex, override: stagemap[id] })) return;
+    onMoveStage(id, wi);
+  };
+
   const dropDead = (e) => {
     e.preventDefault(); setOver(null);
     const d = drag.current; if (!d) return;
@@ -191,9 +216,14 @@ export function FollowUpCockpit({
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
         style={{ boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{whaleSet?.has(id) ? " 🐳" : ""}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
+          <button type="button" title={whaleSet?.has(id) ? "Remove from whale pipeline" : "Move to whale pipeline"}
+            onClick={(e) => { e.stopPropagation(); onToggleWhale(id); }} draggable={false} onDragStart={(e) => e.preventDefault()}
+            style={{ flex: "none", marginLeft: "auto", background: whaleSet?.has(id) ? T.whaleWash : "none", border: `1px solid ${whaleSet?.has(id) ? T.whaleWashLine : T.line}`, borderRadius: 7, padding: "1px 6px", fontSize: 12, cursor: "pointer", lineHeight: 1.5, filter: whaleSet?.has(id) ? "none" : "grayscale(1) opacity(0.55)" }}>
+            {"🐳"}
+          </button>
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
@@ -263,7 +293,7 @@ export function FollowUpCockpit({
         <Stat label="In SOI" color={T.redLift}>{stats.soiCount}</Stat>
       </div>
 
-      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
+      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. The whale button moves a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
 
       {/* Hot board */}
       <div style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>
@@ -312,6 +342,28 @@ export function FollowUpCockpit({
           );
         })}
       </div>
+
+      {/* Whale pipeline: exclusive tray for top producers, above cold. */}
+      <details open style={{ margin: "6px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
+        <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.whaleWash }}>
+          <span style={colTitle(T.whale)}>{"🐳"} Whale Pipeline · {whaleTotal}</span>
+          <span style={{ fontSize: 11.5, color: T.faint }}>Top producers, nurtured on their own track. Drag between value adds; the whale button on a card sends them here.</span>
+        </summary>
+        <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
+          {WHALE_COLUMNS.map((label, wi) => {
+            const key = `whale:${wi}`;
+            return (
+              <div key={wi} style={{ boxSizing: "border-box", flex: "1 0 218px", minWidth: 218, background: "transparent", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, display: "flex", flexDirection: "column", maxHeight: "40vh" }}
+                onDragOver={allowStop(key)} onDragLeave={() => setOver(null)} onDrop={dropWhale(wi)}>
+                <div style={colHead}><span style={colTitle(T.whale)}>{label}</span><span style={{ fontSize: 12, color: T.faint }}>{whaleCols[wi].length}</span></div>
+                <div style={{ ...colBody, background: over === key ? T.whaleWash : "transparent" }}>
+                  {whaleCols[wi].map((p) => hotCard(p))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </details>
 
       {/* Cold pipeline */}
       <details open style={{ margin: "6px 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tray" ? T.coldWash : "transparent" }}

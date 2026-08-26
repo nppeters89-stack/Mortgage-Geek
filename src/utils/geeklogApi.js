@@ -318,6 +318,15 @@ export function saveRacKeepalive(key, id, action) {
 
 // Move a contact to the cold pipeline ("add") or take them out ("remove"). The
 // cold column position is derived from check-in touches, never sent here.
+// Flag a contact as a whale ("add") or unflag ("remove"). Awaited for revert.
+export async function saveWhale(key, id, action) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "whale", id, action }));
+}
+
+export function saveWhaleKeepalive(key, id, action) {
+  membershipKeepalive(key, { kind: "whale", id, action });
+}
+
 // Save a contact's motivation note (empty text clears it). Awaited so the
 // caller can revert its optimistic update.
 export async function saveMotivation(key, id, text) {

@@ -160,6 +160,11 @@ function byNeglect(prospects, followUps) {
 export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
 export const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
+// The whale pipeline's seven value-add columns. Whales ride the same stage
+// machinery as the hot board (same stageOf ratchet, same stagemap drags); these
+// are just the labels their seven columns wear.
+export const WHALE_COLUMNS = ["Value Add 1", "Value Add 2", "Value Add 3", "Value Add 4", "Value Add 5", "Value Add 6", "Value Add 7"];
+
 // The five cold columns, keyed by check-in count (min(count, 4)).
 export const COLD_COLUMNS = ["Fresh Cold", "1 Check-in", "2 Check-ins", "3 Check-ins", "4-5 Check-ins"];
 export const COLD_CHECKIN_CAP = 5;

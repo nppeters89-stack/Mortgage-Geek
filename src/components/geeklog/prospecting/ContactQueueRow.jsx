@@ -15,7 +15,7 @@ export const mutedBadge = {
 // Extracted from the Follow Ups queue so the SOI queue reads identically; the
 // only difference between the two is the optional `meta` line (SOI shows the
 // promotion date there) and what the caller passes for `highlight`.
-export function ContactQueueRow({ prospect: p, touches = [], highlight = false, meta = "", badge = "", checked = false, onOpen, stage = null, stages = null, goalIndex, coldCount = null, score = null }) {
+export function ContactQueueRow({ prospect: p, touches = [], highlight = false, meta = "", badge = "", checked = false, whale = false, onOpen, stage = null, stages = null, goalIndex, coldCount = null, score = null }) {
   const count = touches.length;
   const { label, days } = lastTouchLabel(touches);
   const showStage = stage != null && Array.isArray(stages);
@@ -28,7 +28,7 @@ export function ContactQueueRow({ prospect: p, touches = [], highlight = false, 
       style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${highlight ? T.greenWashLine : T.line}`, cursor: "pointer", borderRadius: 8, background: highlight ? T.greenWash : "transparent" }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 7, minWidth: 0 }}>
-          <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</span>
+          <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}{whale ? " 🐳" : ""}</span>
           {checked && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
               role="img" aria-label="In RAC" style={{ flex: "none", alignSelf: "center" }}>
