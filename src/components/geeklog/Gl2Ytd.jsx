@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { T, FF } from "./gl2Tokens";
-import { Wordmark, Eyebrow, Card } from "./Gl2Primitives";
+import { SettingsMark, Eyebrow, Card } from "./Gl2Primitives";
 import { WeekGroup } from "./Gl2Screens";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, sumKeys } from "./gl2Model";
 import { monthDay, rangeLabel, weekStartFor, centralDateKey } from "./gl2Week";
@@ -23,7 +23,7 @@ const METRICS = [
   { id: "events", label: "Events", subs: EVENTS_SUBS, unit: "events" },
 ];
 
-export function YtdContent({ apiKey, year }) {
+export function YtdContent({ apiKey, year, onSettings }) {
   const [weeks, setWeeks] = useState(null); // null = loading, [] = no data
   const [selected, setSelected] = useState(null); // weekStart key
   const [metric, setMetric] = useState("conversations");
@@ -92,7 +92,7 @@ export function YtdContent({ apiKey, year }) {
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>This Year</div>
           <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>Completed weeks</div>
         </div>
-        <Wordmark height={24} />
+        <SettingsMark onClick={onSettings} />
       </div>
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 13 }}>

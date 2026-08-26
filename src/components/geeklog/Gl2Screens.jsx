@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { T, FF, APP_MAX } from "./gl2Tokens";
-import { Wordmark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
+import { Wordmark, SettingsMark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
 import { WeekRewards } from "./Gl2Rewards";
 import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
 
@@ -81,10 +81,7 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
           <HeaderButton onClick={onOpenClosings} ariaLabel="Closings"><DollarGlyph /></HeaderButton>
           {/* The green Geek Log icon replaces the wordmark AND the gear: it is
               the app's mark and the door to Settings in one. */}
-          <button type="button" onClick={onSettings} aria-label="Settings"
-            style={{ flex: "0 0 auto", background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex" }}>
-            <img src="/geeklog/icon-96.png" alt="" width={28} height={28} style={{ display: "block", borderRadius: 7 }} />
-          </button>
+          <SettingsMark onClick={onSettings} />
         </div>
       </div>
 
@@ -144,7 +141,7 @@ export function WeekGroup({ title, total, subs, week }) {
   );
 }
 
-export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExport, exporting, rewards }) {
+export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExport, exporting, rewards, onSettings }) {
   const convTotal = sumKeys(week, CONV_SUBS);
   const apptTotal = sumKeys(week, APPT_SUBS);
   const contentTotal = sumKeys(week, CONTENT_SUBS);
@@ -158,7 +155,7 @@ export function WeekContent({ week, days, todayIndex, target, rangeLabel, onExpo
           <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em", color: T.cream }}>This Week</div>
           <div style={{ fontFamily: FF.body, fontWeight: 500, fontSize: 11.5, color: T.dimmer, marginTop: 1 }}>{rangeLabel}</div>
         </div>
-        <Wordmark height={24} />
+        <SettingsMark onClick={onSettings} />
       </div>
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 13 }}>

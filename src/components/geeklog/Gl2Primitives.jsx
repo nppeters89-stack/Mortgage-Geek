@@ -27,6 +27,17 @@ export function MgMark({ height }) {
   );
 }
 
+// The green Geek Log icon doubling as the Settings door - the header mark on
+// Today, Week, and YTD. One component so the size and behavior cannot drift.
+export function SettingsMark({ onClick, size = 28 }) {
+  return (
+    <button type="button" onClick={onClick} aria-label="Settings"
+      style={{ flex: "0 0 auto", background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex" }}>
+      <img src="/geeklog/icon-96.png" alt="" width={size} height={size} style={{ display: "block", borderRadius: 7 }} />
+    </button>
+  );
+}
+
 export function Wordmark({ height = 24 }) {
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: height * 0.24 }}>

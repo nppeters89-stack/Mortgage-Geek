@@ -448,11 +448,11 @@ export function Gl2App({ apiKey }) {
             />
           )}
           {tab === "week" && (
-            <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} />
+            <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} onSettings={() => setSettingsOpen(true)} />
           )}
           {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
           {tab === "followups" && <FollowUpsContent apiKey={apiKey} onOpenSoi={() => setTab("soi")} />}
-          {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} />}
+          {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} onSettings={() => setSettingsOpen(true)} />}
           {/* Closings and SOI are not bottom tabs; they open from the dollar and
               SOI buttons in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
