@@ -146,6 +146,18 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
       showToast("Promoted to SOI");
       persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
     } else {
+      // The dropdown is authoritative: when the ratchet alone would not land
+      // the card on the chosen stage (a lower stage than the ratchet, or a
+      // backdated touch older than an existing hand placement), pin the stage
+      // as a placement - the same mechanism as a cockpit drag.
+      if (Number.isInteger(stage)) {
+        const derived = stageOf(next, { goalIndex, override: stagemapRef.current[id] });
+        if (derived !== stage) {
+          const prevMap = stagemapRef.current;
+          setStagemap({ ...prevMap, [id]: { s: stage, ts: Date.now() } });
+          persistStageMove(apiKey, id, stage).catch(() => { setStagemap(prevMap); setCachedStagemap(prevMap); });
+        }
+      }
       showToast(Number.isInteger(stage) ? `Logged: ${(whaleRef.current.includes(id) ? WHALE_COLUMNS : stages)[stage]}` : "Follow up logged");
     }
   }, [apiKey, showToast, goalIndex, stages, closeDetail]);
