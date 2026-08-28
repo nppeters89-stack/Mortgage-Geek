@@ -389,7 +389,7 @@ export function FollowUpCockpit({
 
   return (
     <div style={{ padding: "2px 26px 40px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 18, marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
           <HudHelp />
