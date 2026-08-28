@@ -70,9 +70,9 @@ export function FollowUpCockpit({
   // Collapsed stage columns (indices). Collapsing hides the card list; the
   // header stays a drop target, so a card can still be dragged onto it.
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
-  // "Work the queue": narrows the hot board to cards whose touch clock has
-  // expired. Whale, cold and dead sections are unaffected.
-  const [dueOnly, setDueOnly] = useState(false);
+  // Rail filter (2B): narrows the hot board. Whale, cold and dead sections
+  // are unaffected; the goal column is a doorway and stays whole.
+  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire"
   // Two-across only on screens that genuinely fit it. Below the gate every
   // column is a single stack and the board scrolls sideways - columns never
   // compress into a squeezed, overlapping middle state.
@@ -104,9 +104,20 @@ export function FollowUpCockpit({
       cols[stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex, override: stagemap[id] })].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
-    return cols.map((c) => fireFirst(c, fireSet));
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet]);
-  const visBoard = useMemo(() => (dueOnly ? board.map((c, si) => c.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)], dueDaysFor(si)))) : board), [board, dueOnly, followUps]);
+    const ranked = cols.map((c) => fireFirst(c, fireSet));
+    if (!activeFilter) return ranked;
+    // Rail filter: due keeps each column's own stage-aware clock. Header
+    // counts follow the filter; the rail's segment counts do not.
+    const match = (p, si) => {
+      const id = idFromPhone(p.phone);
+      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(si));
+      if (activeFilter === "rac") return !rac?.has(id);
+      if (activeFilter === "mot") return !!motivation?.[id];
+      if (activeFilter === "fire") return fireSet?.has(id);
+      return true;
+    };
+    return ranked.map((c, si) => (si === goalIndex ? c : c.filter((p) => match(p, si))));
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet, activeFilter, rac, motivation]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
   // as the hot board (same stagemap drags), mapped onto the seven value-add
@@ -182,11 +193,13 @@ export function FollowUpCockpit({
     // Data-capture coverage across the whole live pipeline (hot + whales + SOI):
     // motivation on file, and entered into RAC.
     const livePool = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && (isMember(id, logs, pinnedSet) || soi[id]); });
-    const motPct = livePool.length ? Math.round(livePool.filter((p) => !!motivation?.[idFromPhone(p.phone)]).length / livePool.length * 100) : 0;
-    const racPct = livePool.length ? Math.round(livePool.filter((p) => rac?.has(idFromPhone(p.phone))).length / livePool.length * 100) : 0;
+    const motCount = livePool.filter((p) => !!motivation?.[idFromPhone(p.phone)]).length;
+    const racMissing = livePool.filter((p) => !rac?.has(idFromPhone(p.phone))).length;
+    const motPct = livePool.length ? Math.round(motCount / livePool.length * 100) : 0;
+    const racPct = livePool.length ? Math.round((livePool.length - racMissing) / livePool.length * 100) : 0;
     const whales = whaleMembers.length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex]);
 
   // ----- drag plumbing -----
@@ -347,7 +360,7 @@ export function FollowUpCockpit({
         </div>
       </div>
 
-      <TriageHud stats={stats} weekTarget={weekTarget} dueOnly={dueOnly} onToggleDueOnly={() => setDueOnly((v) => !v)}
+      <TriageHud stats={stats} weekTarget={weekTarget} activeFilter={activeFilter} onSetFilter={setActiveFilter}
         coldTotal={coldTotal} deadCount={deadList.length} onJump={jumpTo} />
 
       {/* Hot board */}
@@ -357,7 +370,7 @@ export function FollowUpCockpit({
           const key = `hot:${si}`;
           const ramp = stageRampColor(si, stages.length);
           const shut = collapsedCols.has(si);
-          const wide = !shut && !isGoal && ultra && visBoard[si].length >= 6;
+          const wide = !shut && !isGoal && ultra && board[si].length >= 6;
           return (
             <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
@@ -369,7 +382,7 @@ export function FollowUpCockpit({
                     <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
                     <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
                   </span>
-                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{visBoard[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
+                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
                 </button>
                 {/* The goal column doubles as the door to the SOI cockpit. A
                     sibling, not a child: buttons cannot nest. Drop behavior is
@@ -397,11 +410,11 @@ export function FollowUpCockpit({
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
                   {wide ? (
                     <>
-                      <div style={halfStack}>{visBoard[si].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
-                      <div style={halfStack}>{visBoard[si].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
                     </>
                   ) : (
-                    visBoard[si].map((p) => hotCard(p))
+                    board[si].map((p) => hotCard(p))
                   )}
                 </div>
                 )
@@ -410,6 +423,16 @@ export function FollowUpCockpit({
           );
         })}
       </div>
+
+      {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && (
+        <div style={{ textAlign: "center", padding: "2px 0 18px", fontSize: 12.5, color: T.dim, fontFamily: FF.body }}>
+          Nothing matches this filter.{" "}
+          <button type="button" onClick={() => setActiveFilter(null)}
+            style={{ background: "none", border: "none", color: T.greenBright, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+            Show all
+          </button>
+        </div>
+      )}
 
       {/* Whale pipeline: exclusive tray for top producers, above cold. */}
       <details ref={whaleRef} open style={{ margin: "6px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>

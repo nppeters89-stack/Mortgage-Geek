@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
 import { COV_TARGET, RAC_TARGET, MOT_TARGET } from "./prospectsModel";
 
-// Triage HUD (CD handoff 1A): the cockpit's ten-card diagnostic strip replaced
-// by one three-zone panel. Zone 1 is the work owed (the only red on the strip),
-// zone 2 is whether Nick is working it, zone 3 is what data is missing. Whales
-// and SOI are pipeline composition, not diagnostics, so they live on the footer
-// line below the panel. SoiCockpit keeps the old Stat/Ring cards; this panel is
-// this screen's own instrument.
+// Triage HUD (CD handoff 1A + the 2B filter rail): the cockpit's diagnostics as
+// one instrument. Zone 1 is the work owed (the only red on the strip), zone 2
+// is whether Nick is working it (with the pipeline composition pinned to its
+// bottom edge), zone 3 is what data is missing. The rail docked underneath
+// filters the hot board: due / missing RAC / has motivation / fire-flagged.
+// SoiCockpit keeps the old Stat/Ring cards; this panel is this screen's own.
 
 // The old instructions paragraph, moved behind a ? by the title: read once, it
 // no longer costs a permanent row.
@@ -37,6 +37,9 @@ export function HudHelp() {
 const eyebrow = (color) => ({ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color });
 const zonePad = { padding: "16px 20px 17px", display: "flex", flexDirection: "column" };
 
+// Accent hex at 14% alpha for the rail's lit-tab background.
+const wash14 = (hex) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},0.14)`;
+
 // One data-on-file gauge row: label, target-ticked bar, value. The tick is a
 // sibling of the clipped fill (the track clips, the row does not) so a target
 // at 100% is not sheared off.
@@ -55,9 +58,9 @@ function GaugeRow({ label, pct, color, target }) {
   );
 }
 
-export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTotal, deadCount, onJump }) {
+export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTotal, deadCount, onJump }) {
   // Same matchMedia pattern as the cockpit's ultra hook: below 1200px the three
-  // zones stack and the dividers rotate from right edges to bottom edges.
+  // zones stack, the dividers rotate to bottom edges, and the rail wraps.
   const [wide, setWide] = useState(() => typeof window !== "undefined" && window.matchMedia("(min-width: 1200px)").matches);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1200px)");
@@ -65,12 +68,11 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
-  const [hov, setHov] = useState(false);
+  const [hovSeg, setHovSeg] = useState(null);
 
   const divider = wide ? { borderRight: `1px solid ${T.line}` } : { borderBottom: `1px solid ${T.line}` };
   const dayMax = Math.max(1, ...stats.dayCounts);
   const weekPct = Math.min(100, (stats.week / (weekTarget || 1)) * 100);
-  const pillOff = stats.due === 0;
 
   // Worst first: ascending by percentage, so the gap to close sits on top.
   const gauges = [
@@ -79,88 +81,119 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
     { label: "Touched in 14d", pct: stats.cov, color: stats.cov < COV_TARGET ? T.amber : T.green, target: COV_TARGET },
   ].sort((a, b) => a.pct - b.pct);
 
+  // Rail segments. Counts are absolute (unfiltered pools) so the rail stays a
+  // menu, not a mirror. Fire uses ramp yellow: orange is the motivation signal.
+  const segs = [
+    { key: "due", glyph: "◗", label: "Due today", accent: T.redLift, count: stats.due },
+    { key: "rac", glyph: "✓", label: "Missing RAC", accent: T.amber, count: stats.racMissing },
+    { key: "mot", glyph: "●", label: "Motivation", accent: T.orange, count: stats.motCount },
+    { key: "fire", glyph: "🔥", label: "Hot", accent: STAGE_RAMP[5], count: stats.hotLeads },
+  ];
+
   const footBtn = (color) => ({ background: "none", border: "none", padding: 0, fontFamily: FF.body, fontSize: 11.5, color, cursor: "pointer" });
 
   return (
     <div style={{ fontFamily: FF.body, marginBottom: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: wide ? "320px auto 360px" : "1fr", width: wide ? "fit-content" : "auto", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", boxSizing: "border-box" }}>
+      {/* One bordered container: the three-zone grid plus the docked rail. */}
+      <div style={{ width: wide ? "fit-content" : "auto", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", boxSizing: "border-box" }}>
+        <div style={{ display: "grid", gridTemplateColumns: wide ? "320px auto 360px" : "1fr", boxSizing: "border-box" }}>
 
-        {/* Zone 1 — Needs you now. The only red on the strip: work owed. */}
-        <div style={{ ...zonePad, ...divider, background: T.redWash, gap: 10 }}>
-          <div style={eyebrow(T.redLift)}>Needs you now</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
-            <div style={{ fontSize: 54, fontWeight: 700, lineHeight: 0.85, fontVariantNumeric: "tabular-nums", color: stats.due > 0 ? T.redLift : T.dim }}>{stats.due}</div>
-            <div style={{ paddingBottom: 3, fontSize: 12.5, lineHeight: 1.35, color: T.dim }}>past their<br />touch clock</div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button type="button" disabled={pillOff} aria-pressed={dueOnly} onClick={onToggleDueOnly}
-              onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-              style={{ background: hov && !pillOff ? "rgba(226,87,91,0.22)" : "rgba(226,87,91,0.14)", border: `1px solid ${T.redLiftLine}`, borderRadius: 999, padding: "7px 13px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, color: T.redLiftHi, cursor: pillOff ? "default" : "pointer", opacity: pillOff ? 0.45 : 1 }}>
-              {dueOnly ? "Showing due only ✕" : "Work the queue →"}
-            </button>
-            <span style={{ fontSize: 12, color: T.dim }}>
+          {/* Zone 1 — Needs you now. The only red on the strip: work owed. */}
+          <div style={{ ...zonePad, ...divider, background: T.redWash, gap: 10 }}>
+            <div style={eyebrow(T.redLift)}>Needs you now</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+              <div style={{ fontSize: 54, fontWeight: 700, lineHeight: 0.85, fontVariantNumeric: "tabular-nums", color: stats.due > 0 ? T.redLift : T.dim }}>{stats.due}</div>
+              <div style={{ paddingBottom: 3, fontSize: 12.5, lineHeight: 1.35, color: T.dim }}>past their<br />touch clock</div>
+            </div>
+            <div style={{ fontSize: 12, color: T.dim }}>
               {stats.hotLeads} {"🔥"} hot{stats.due > 0 ? ` · oldest ${stats.oldestDue === null ? "never touched" : `${stats.oldestDue}d`}` : ""}
-            </span>
+            </div>
+          </div>
+
+          {/* Zone 2 — Am I working it, with pipeline composition on its floor. */}
+          <div style={{ ...zonePad, ...divider, gap: 11 }}>
+            <div style={eyebrow(T.greenBright)}>Am I working it</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+                <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.today}</span>
+                <span style={{ fontSize: 12, color: T.dim }}>today</span>
+              </div>
+              <div role="img" aria-label={`Touches per day over the last 14 days: ${stats.dayCounts.join(", ")}`}
+                style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 40 }}>
+                {stats.dayCounts.map((n, i) => (
+                  <div key={i} style={{ width: 9, borderRadius: 2, height: `${Math.max(8, (n / dayMax) * 100)}%`, background: n === 0 ? T.faint : i === 13 ? T.greenBright : i >= 7 ? "rgba(47,191,113,0.55)" : "rgba(47,191,113,0.35)" }} />
+                ))}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7, minWidth: 210 }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 11.5, color: T.dim }}>This week</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: stats.week >= weekTarget ? T.greenBright : T.cream }}>
+                    {stats.week} <span style={{ color: T.dimmer, fontWeight: 500 }}>/ {weekTarget} goal</span>
+                  </span>
+                </div>
+                <div style={{ position: "relative", height: 6, background: T.bg0, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${weekPct}%`, background: stats.week >= weekTarget ? T.greenBright : `linear-gradient(90deg, ${T.redLift}, ${T.amber})`, borderRadius: 3, transition: "width .4s" }} />
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 11.5, color: T.dim }}>Day streak</span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    {Array.from({ length: 7 }, (_, i) => (
+                      <span key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i < Math.min(stats.streak, 7) ? T.greenBright : "rgba(255,254,251,0.14)" }} />
+                    ))}
+                    <span style={{ marginLeft: 5, fontSize: 12.5, fontWeight: 700, color: T.cream }}>{stats.streak}</span>
+                  </span>
+                </div>
+                <div style={{ fontSize: 11.5, color: T.dimmer }}>last 14 days · touches per day</div>
+              </div>
+            </div>
+            <div style={{ marginTop: "auto", paddingTop: 11, borderTop: `1px solid ${T.line}`, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11.5, color: T.faint }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Pipeline</span>
+              <span style={{ color: T.dim }}>{stats.activeCount} active</span>
+              <button type="button" style={footBtn(T.whale)} onClick={() => onJump("whale")}>{stats.whales} {"🐳"} whales</button>
+              <button type="button" style={footBtn(STAGE_RAMP[STAGE_RAMP.length - 1])} onClick={() => onJump("soi")}>{stats.soiCount} {"🤝"} SOI</button>
+              <button type="button" style={footBtn(T.cold)} onClick={() => onJump("cold")}>{coldTotal} cold</button>
+              <span>{deadCount} buried</span>
+            </div>
+          </div>
+
+          {/* Zone 3 — Data on file, worst first. Orange is the missing-data nag. */}
+          <div style={{ ...zonePad, gap: 9 }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+              <div style={eyebrow(T.dim)}>Data on file · {stats.liveCount} live</div>
+              <div style={{ fontSize: 11, color: T.dimmer }}>worst first</div>
+            </div>
+            {gauges.map((g) => <GaugeRow key={g.label} label={g.label} pct={g.pct} color={g.color} target={g.target} />)}
+            <div style={{ marginTop: 2, fontSize: 11, color: T.dimmer }}>Ticks are the target.</div>
           </div>
         </div>
 
-        {/* Zone 2 — Am I working it. */}
-        <div style={{ ...zonePad, ...divider, gap: 11 }}>
-          <div style={eyebrow(T.greenBright)}>Am I working it</div>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-              <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.today}</span>
-              <span style={{ fontSize: 12, color: T.dim }}>today</span>
+        {/* The 2B rail: docked to the panel, filters the hot board. */}
+        <div role="group" aria-label="Filter the board"
+          style={{ borderTop: `1px solid ${T.line}`, background: "rgba(255,254,251,0.02)", display: "flex", alignItems: "stretch", flexWrap: wide ? "nowrap" : "wrap" }}>
+          {wide && (
+            <div style={{ padding: "0 18px", display: "flex", alignItems: "center", borderRight: `1px solid ${T.line}`, fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer, whiteSpace: "nowrap" }}>
+              Filter the board
             </div>
-            <div role="img" aria-label={`Touches per day over the last 14 days: ${stats.dayCounts.join(", ")}`}
-              style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 40 }}>
-              {stats.dayCounts.map((n, i) => (
-                <div key={i} style={{ width: 9, borderRadius: 2, height: `${Math.max(8, (n / dayMax) * 100)}%`, background: n === 0 ? T.faint : i === 13 ? T.greenBright : i >= 7 ? "rgba(47,191,113,0.55)" : "rgba(47,191,113,0.35)" }} />
-              ))}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7, minWidth: 210 }}>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11.5, color: T.dim }}>This week</span>
-                <span style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: stats.week >= weekTarget ? T.greenBright : T.cream }}>
-                  {stats.week} <span style={{ color: T.dimmer, fontWeight: 500 }}>/ {weekTarget} goal</span>
-                </span>
-              </div>
-              <div style={{ position: "relative", height: 6, background: T.bg0, borderRadius: 3, overflow: "hidden" }}>
-                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${weekPct}%`, background: stats.week >= weekTarget ? T.greenBright : `linear-gradient(90deg, ${T.redLift}, ${T.amber})`, borderRadius: 3, transition: "width .4s" }} />
-              </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontSize: 11.5, color: T.dim }}>Day streak</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  {Array.from({ length: 7 }, (_, i) => (
-                    <span key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i < Math.min(stats.streak, 7) ? T.greenBright : "rgba(255,254,251,0.14)" }} />
-                  ))}
-                  <span style={{ marginLeft: 5, fontSize: 12.5, fontWeight: 700, color: T.cream }}>{stats.streak}</span>
-                </span>
-              </div>
-              <div style={{ fontSize: 11.5, color: T.dimmer }}>last 14 days · touches per day</div>
-            </div>
-          </div>
+          )}
+          {segs.map((seg) => {
+            const active = activeFilter === seg.key;
+            const off = !seg.count;
+            return (
+              <button key={seg.key} type="button" disabled={off} aria-pressed={active}
+                onClick={() => onSetFilter(active ? null : seg.key)}
+                onMouseEnter={() => setHovSeg(seg.key)} onMouseLeave={() => setHovSeg(null)}
+                style={{ flex: wide ? 1 : "1 0 50%", minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 9, padding: "14px 12px", border: "none", borderRight: `1px solid ${T.line}`, borderTop: `2px solid ${active ? seg.accent : "transparent"}`, background: active ? wash14(seg.accent) : hovSeg === seg.key && !off ? T.lineSoft : "rgba(255,254,251,0.02)", cursor: off ? "default" : "pointer", fontFamily: FF.body, opacity: off ? 0.45 : 1 }}>
+                <span aria-hidden="true" style={{ fontSize: 11, color: active ? seg.accent : T.dimmer }}>{seg.glyph}</span>
+                <span style={{ fontSize: 13, marginLeft: -3, color: active ? seg.accent : T.dim, fontWeight: active ? 700 : 600 }}>{seg.label}</span>
+                <span style={{ fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: active ? seg.accent : T.dimmer }}>{seg.count}</span>
+              </button>
+            );
+          })}
+          <button type="button" onClick={() => onSetFilter(null)}
+            style={{ flex: wide ? "none" : "1 0 100%", padding: wide ? "0 18px" : "12px 18px", border: "none", background: "none", fontSize: 12, color: T.dimmer, cursor: "pointer", fontFamily: FF.body }}>
+            All {stats.activeCount} ✕
+          </button>
         </div>
-
-        {/* Zone 3 — Data on file, worst first. Orange is the missing-data nag. */}
-        <div style={{ ...zonePad, gap: 9 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-            <div style={eyebrow(T.dim)}>Data on file · {stats.liveCount} live</div>
-            <div style={{ fontSize: 11, color: T.dimmer }}>worst first</div>
-          </div>
-          {gauges.map((g) => <GaugeRow key={g.label} label={g.label} pct={g.pct} color={g.color} target={g.target} />)}
-          <div style={{ marginTop: 2, fontSize: 11, color: T.dimmer }}>Ticks are the target.</div>
-        </div>
-      </div>
-
-      {/* Footer: pipeline composition, not diagnostics. The section names jump. */}
-      <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "10px 4px 0", fontSize: 11.5, color: T.faint }}>
-        <span>Pipeline</span>
-        <span style={{ color: T.dim }}>{stats.activeCount} active</span>
-        <button type="button" style={footBtn(T.whale)} onClick={() => onJump("whale")}>{stats.whales} {"🐳"} whales</button>
-        <button type="button" style={footBtn(STAGE_RAMP[STAGE_RAMP.length - 1])} onClick={() => onJump("soi")}>{stats.soiCount} {"🤝"} SOI</button>
-        <button type="button" style={footBtn(T.cold)} onClick={() => onJump("cold")}>{coldTotal} cold</button>
-        <span>{deadCount} buried</span>
       </div>
     </div>
   );
