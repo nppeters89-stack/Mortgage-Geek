@@ -357,7 +357,7 @@ export function FollowUpCockpit({
           const key = `hot:${si}`;
           const ramp = stageRampColor(si, stages.length);
           const shut = collapsedCols.has(si);
-          const wide = !shut && ultra && visBoard[si].length >= 6;
+          const wide = !shut && !isGoal && ultra && visBoard[si].length >= 6;
           return (
             <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
@@ -382,6 +382,18 @@ export function FollowUpCockpit({
                 )}
               </div>
               {!shut && (
+                isGoal ? (
+                  /* SOI members are managed in their own cockpit; the goal
+                     column reads as a doorway: the handshake count, click
+                     anywhere to go. Still a drop target for promotions. */
+                  <button type="button" onClick={onOpenSoi || undefined} title="Open the SOI cockpit"
+                    style={{ background: over === key ? T.lineSoft : "transparent", border: "none", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7, padding: "30px 14px 32px", cursor: onOpenSoi ? "pointer" : "default", fontFamily: FF.body }}>
+                    <span aria-hidden="true" style={{ fontSize: 27, lineHeight: 1 }}>{"🤝"}</span>
+                    <span style={{ fontSize: 36, fontWeight: 700, lineHeight: 1, color: ramp, fontVariantNumeric: "tabular-nums" }}>{board[si].length}</span>
+                    <span style={{ fontSize: 11.5, color: T.dim }}>partner{board[si].length === 1 ? "" : "s"} in SOI</span>
+                    <span style={{ fontSize: 11, color: T.faint }}>Manage in the SOI cockpit →</span>
+                  </button>
+                ) : (
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
                   {wide ? (
                     <>
@@ -392,6 +404,7 @@ export function FollowUpCockpit({
                     visBoard[si].map((p) => hotCard(p))
                   )}
                 </div>
+                )
               )}
             </div>
           );
