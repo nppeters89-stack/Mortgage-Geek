@@ -30,6 +30,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [whale, setWhale] = useState(() => seed?.whale || []);
   const [fire, setFire] = useState(() => seed?.fire || []);
+  const [addedat, setAddedat] = useState(() => seed?.addedat || {});
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
@@ -87,7 +88,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setWhale(c.whale || []);
-        setFire(c.fire || []);
+        setFire(c.fire || []); setAddedat(c.addedat || {});
         setCold(c.cold || {});
         setDead(c.dead || {});
         setStages(c.stages || DEFAULT_STAGES);
@@ -132,9 +133,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // Log a touch at a chosen stage. The goal stage promotes to SOI in the same
   // gesture (writes the stage touch AND adds SOI membership). Non-goal touches
   // leave the detail open so the stage advances in place.
-  const handleLogFollowUp = useCallback((id, note, stage, ts) => {
+  const handleLogFollowUp = useCallback((id, note, stage, ts, talked) => {
     const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note };
     if (Number.isInteger(stage)) touch.stage = stage;
+    if (talked === true) touch.talked = true;
     const next = [...(fuRef.current[id] || []), touch];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
@@ -236,8 +238,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     });
   }, [apiKey, showToast, stages]);
 
-  const handleColdCheckIn = useCallback((id, note, ts) => {
-    const next = [...(fuRef.current[id] || []), { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: -1 }];
+  const handleColdCheckIn = useCallback((id, note, ts, talked) => {
+    const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: -1 };
+    if (talked === true) touch.talked = true;
+    const next = [...(fuRef.current[id] || []), touch];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast(`Check-in ${Math.min(coldCount(next), 5)} of 5 logged`);
@@ -360,12 +364,12 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
           statusLine={`Cold · ${coldCount(followUps[id])} of 5 · was at ${stages[stageIdx]}`}
-          onColdCheckIn={(note, ts) => handleColdCheckIn(id, note, ts)}
+          onColdCheckIn={(note, ts, talked) => handleColdCheckIn(id, note, ts, talked)}
           onRevive={() => handleRevive(id)}
         />
       );
     }
-    const logTouch = (note, stage, ts) => { handleLogFollowUp(id, note, stage, ts); if (modal && stage === goalIndex) fireConfetti(); };
+    const logTouch = (note, stage, ts, talked) => { handleLogFollowUp(id, note, stage, ts, talked); if (modal && stage === goalIndex) fireConfetti(); };
     return (
       <FollowUpDetail
         prospect={p} log={logs[id]} touches={followUps[id] || []}
@@ -399,7 +403,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet} fireSet={fireSet}
+          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet} fireSet={fireSet} addedat={addedat}
           onOpenDetail={setOpenId}
           onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}

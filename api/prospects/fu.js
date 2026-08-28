@@ -27,6 +27,7 @@ function validate(body) {
     if (t.note != null && typeof t.note !== "string") return "touch.note must be a string";
     if (t.note && t.note.length > 2000) return "touch note too long";
     if (t.stage != null && !(Number.isInteger(t.stage) && t.stage >= -3 && t.stage <= 20)) return "touch.stage must be an integer"; // -3 = referral event
+    if (t.talked != null && typeof t.talked !== "boolean") return "touch.talked must be a boolean";
   }
   return null;
 }
@@ -48,6 +49,7 @@ export default async function handler(req, res) {
     const clean = touches.map((t) => {
       const o = { ts: t.ts, note: typeof t.note === "string" ? t.note : "" };
       if (Number.isInteger(t.stage)) o.stage = t.stage;
+      if (t.talked === true) o.talked = true; // a live conversation happened on this touch
       return o;
     });
 

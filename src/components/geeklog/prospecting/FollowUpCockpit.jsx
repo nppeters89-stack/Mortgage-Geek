@@ -51,7 +51,7 @@ function FirePulse() {
 }
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet, addedat,
   onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
@@ -210,8 +210,31 @@ export function FollowUpCockpit({
     const racPct = livePool.length ? Math.round((livePool.length - racMissing) / livePool.length * 100) : 0;
     const whales = whaleMembers.length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length };
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex]);
+    // Weekly scoreboard (4A). Week runs Monday 00:00 local to now. Join date is
+    // the stored addedat, falling back to the earliest touch or the first-call
+    // log for members who predate the field.
+    const wkD = new Date(); wkD.setHours(0, 0, 0, 0);
+    const dayStart = wkD.getTime();
+    wkD.setDate(wkD.getDate() - ((wkD.getDay() + 6) % 7));
+    const weekStart = wkD.getTime();
+    const weekLabel = `week of ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][wkD.getDay()]} ${wkD.getDate()}`;
+    const joinTs = (id) => {
+      const stored = Number(addedat?.[id]);
+      if (Number.isFinite(stored) && stored > 0) return stored;
+      const first = (followUps[id] || []).reduce((m, t) => (t.ts && (!m || t.ts < m) ? t.ts : m), 0);
+      return first || logs[id]?.ts || 0;
+    };
+    const joins = livePool.map((p) => joinTs(idFromPhone(p.phone))).filter(Boolean);
+    const addedToday = joins.filter((t) => t >= dayStart).length;
+    const addedWeek = joins.filter((t) => t >= weekStart).length;
+    // A conversation: a touch marked "We talked", or a scored first call. One
+    // definition, applied to both the power bar and the ratio.
+    const talkedWeek = all.filter((t) => t.talked === true && t.ts >= weekStart).length;
+    const scoredCallsWeek = Object.values(logs).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
+    const convosWeek = talkedWeek + scoredCallsWeek;
+    const ratioPct = addedWeek ? Math.round((convosWeek / addedWeek) * 100) : 0;
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
   const startDrag = (id, from) => (e) => {
@@ -282,10 +305,10 @@ export function FollowUpCockpit({
   };
 
   const closePop = () => setPop(null);
-  const savePop = (note, ts) => {
+  const savePop = (note, ts, talked) => {
     if (!pop) return;
-    if (pop.type === "stage") { onLogTouch(pop.id, note, pop.targetStage, ts); if (pop.targetStage === goalIndex) fireConfetti(); }
-    else if (pop.type === "cold") onColdCheckIn(pop.id, note, ts);
+    if (pop.type === "stage") { onLogTouch(pop.id, note, pop.targetStage, ts, talked); if (pop.targetStage === goalIndex) fireConfetti(); }
+    else if (pop.type === "cold") onColdCheckIn(pop.id, note, ts, talked);
     else if (pop.type === "dead") onMarkDead(pop.id, note);
     closePop();
   };
@@ -548,6 +571,7 @@ export function FollowUpCockpit({
 function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, onClose, onRestore }) {
   const [note, setNote] = useState("");
   const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
+  const [talked, setTalked] = useState(false);
   const scrim = { position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 };
   const box = { background: T.bg0, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 460, maxHeight: "86vh", overflowY: "auto", padding: 22 };
   const ta = { width: "100%", marginTop: 12, minHeight: 80, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 14.5, lineHeight: 1.5 };
@@ -588,10 +612,18 @@ function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, o
         {pop.type === "dead" && <div style={{ fontSize: 13, color: T.dim, marginTop: 10 }}>They leave the pipeline entirely. History is kept and you can restore them later from the buried list.</div>}
         <textarea autoFocus value={note} onChange={(e) => setNote(e.target.value)} style={ta}
           placeholder={pop.type === "cold" ? "Light touch. What did you send or say..." : goal ? "How did the referral come in..." : pop.type === "dead" ? "Optional. Why are you letting go..." : "What did this touch look like..."} />
-        {pop.type !== "dead" && <div style={{ marginTop: 10 }}><LoggedDatePicker value={loggedOn} onChange={setLoggedOn} /></div>}
+        {pop.type !== "dead" && (
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <LoggedDatePicker value={loggedOn} onChange={setLoggedOn} />
+            <label style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FF.body, fontSize: 11.5, color: talked ? T.greenBright : T.dim, cursor: "pointer" }}>
+              <input type="checkbox" checked={talked} onChange={(e) => setTalked(e.target.checked)} style={{ accentColor: T.green, width: 15, height: 15, margin: 0 }} />
+              We talked
+            </label>
+          </div>
+        )}
         <div style={row}>
           <button type="button" onClick={onClose} style={btn("none", T.dim, `1px solid ${T.line}`)}>Cancel</button>
-          <button type="button" onClick={() => onSave(note.trim(), tsForLoggedDate(loggedOn))} disabled={pop.type !== "dead" && !note.trim()}
+          <button type="button" onClick={() => onSave(note.trim(), tsForLoggedDate(loggedOn), talked)} disabled={pop.type !== "dead" && !note.trim()}
             style={btn(pop.type !== "dead" && !note.trim() ? T.surface : pop.type === "cold" ? T.cold : pop.type === "dead" ? T.redLift : goal ? T.redLift : T.green, pop.type !== "dead" && !note.trim() ? T.faint : T.cream)}>
             {pop.type === "cold" ? "Log check-in" : pop.type === "dead" ? "Mark dead" : goal ? "Promote" : "Log touch"}
           </button>

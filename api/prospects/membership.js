@@ -32,6 +32,7 @@ const MANUAL_KEY = "prospects:manual";
 const RAC_SET = "prospects:rac";
 const WHALE_SET = "prospects:whale";
 const FIRE_SET = "prospects:fire";
+const ADDED_KEY = "prospects:addedat";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
@@ -115,6 +116,16 @@ async function handleDead(res, { id, action }) {
 
 // A contact that never came from Excel. Pinned in the same handler: a manual add
 // is a Follow Ups candidate by definition, so the client cannot half-complete it.
+// Join date for the Follow Ups queue: id -> ms, first write wins (the guard
+// makes a re-send or a backfill unable to overwrite the original date).
+async function handleAdded(res, { id, ts }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  const t = Number.isFinite(ts) ? ts : Date.now();
+  const existing = await redis.hget(ADDED_KEY, id);
+  if (existing == null) await redis.hset(ADDED_KEY, { [id]: String(t) });
+  return jsonResponse(res, 200, { id, ts: existing != null ? Number(existing) : t });
+}
+
 async function handleManual(res, contact) {
   const err = validateContact(contact);
   if (err) return jsonResponse(res, 400, { error: err });
@@ -200,6 +211,7 @@ export default async function handler(req, res) {
       case "motivation": return await handleMotivation(res, body);
       case "cold": return await handleCold(res, body);
       case "dead": return await handleDead(res, body);
+      case "added": return await handleAdded(res, body);
       case "manual": return await handleManual(res, body.contact);
       default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
     }

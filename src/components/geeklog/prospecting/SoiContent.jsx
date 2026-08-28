@@ -85,8 +85,10 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
 
   // Same key as Follow Ups; SOI touches carry the goal stage so the ratchet
   // keeps reading SOI members at the goal even if they are later demoted.
-  const handleLogFollowUp = useCallback((id, note, ts) => {
-    const next = [...(fuRef.current[id] || []), { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: goalIndex }];
+  const handleLogFollowUp = useCallback((id, note, ts, talked) => {
+    const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: goalIndex };
+    if (talked === true) touch.talked = true;
+    const next = [...(fuRef.current[id] || []), touch];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast("Touch logged");
@@ -162,7 +164,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
         touches={followUps[id] || []}
         onBack={() => { setView("queue"); setOpenId(null); }}
         composerMode="soi"
-        onLogFollowUp={(note, _stage, ts) => handleLogFollowUp(id, note, ts)}
+        onLogFollowUp={(note, _stage, ts, talked) => handleLogFollowUp(id, note, ts, talked)}
         onLogReferral={(note, ts) => handleLogReferral(id, note, p.name, ts)}
         statusLine={`${since ? `SOI since ${since}` : "SOI"} · ${refCount} referral${refCount === 1 ? "" : "s"}`}
         onToast={showToast}

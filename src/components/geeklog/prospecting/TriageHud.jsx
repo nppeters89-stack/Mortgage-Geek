@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
-import { COV_TARGET, RAC_TARGET, MOT_TARGET } from "./prospectsModel";
+import { COV_TARGET, RAC_TARGET, MOT_TARGET, CONVO_TARGET } from "./prospectsModel";
 
 // Triage HUD (CD handoff 1A + the 2B filter rail): the cockpit's diagnostics as
 // one instrument. Zone 1 is the work owed (the only red on the strip), zone 2
@@ -71,8 +71,9 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
   const [hovSeg, setHovSeg] = useState(null);
 
   const divider = wide ? { borderRight: `1px solid ${T.line}` } : { borderBottom: `1px solid ${T.line}` };
-  const dayMax = Math.max(1, ...stats.dayCounts);
-  const weekPct = Math.min(100, (stats.week / (weekTarget || 1)) * 100);
+  // Power bar: clamped fill, color ramped by progress so it reads as a gauge.
+  const convoPct = Math.min(100, (stats.convosWeek / CONVO_TARGET) * 100);
+  const convoFill = convoPct >= 100 ? T.greenBright : convoPct >= 50 ? `linear-gradient(90deg, ${T.orange}, ${T.amber})` : `linear-gradient(90deg, ${T.redLift}, ${T.orange})`;
 
   // Worst first: ascending by percentage, so the gap to close sits on top.
   const gauges = [
@@ -111,39 +112,42 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
           </div>
 
           {/* Zone 2 — Am I working it, with pipeline composition on its floor. */}
-          <div style={{ ...zonePad, ...divider, gap: 11 }}>
-            <div style={eyebrow(T.greenBright)}>Am I working it</div>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-                <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.today}</span>
-                <span style={{ fontSize: 12, color: T.dim }}>today</span>
+          <div style={{ ...zonePad, ...divider, gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+              <div style={eyebrow(T.greenBright)}>Am I working it</div>
+              <div style={{ fontSize: 11, color: T.faint }}>{stats.weekLabel}</div>
+            </div>
+            {/* Three numbers, hairline-split. Added today is the only green and
+                the only daily figure; the wk suffixes keep the timeframes honest. */}
+            <div style={{ display: "flex", alignItems: "stretch" }}>
+              <div style={{ flex: 1, paddingRight: 16, borderRight: `1px solid ${T.line}` }}>
+                <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.greenBright }}>{stats.addedToday}</div>
+                <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.greenBright }}>Added today</div>
               </div>
-              <div role="img" aria-label={`Touches per day over the last 14 days: ${stats.dayCounts.join(", ")}`}
-                style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 40 }}>
-                {stats.dayCounts.map((n, i) => (
-                  <div key={i} style={{ width: 9, borderRadius: 2, height: `${Math.max(8, (n / dayMax) * 100)}%`, background: n === 0 ? T.faint : i === 13 ? T.greenBright : i >= 7 ? "rgba(47,191,113,0.55)" : "rgba(47,191,113,0.35)" }} />
+              <div style={{ flex: 1, padding: "0 16px", borderRight: `1px solid ${T.line}` }}>
+                <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.week}</div>
+                <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Follow ups · wk</div>
+              </div>
+              <div style={{ flex: 1.25, paddingLeft: 16 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                  <span style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.amber }}>{stats.ratioPct}%</span>
+                  <span style={{ fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>{stats.addedWeek === 0 ? "no new adds this week" : `${stats.convosWeek} of ${stats.addedWeek} added`}</span>
+                </div>
+                <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Conversion ratio · wk</div>
+              </div>
+            </div>
+            {/* Conversations power bar. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dim }}>Conversations this week</span>
+                <span style={{ fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.convosWeek} <span style={{ fontSize: 11.5, fontWeight: 400, color: T.faint }}>/ {CONVO_TARGET} goal</span></span>
+              </div>
+              <div role="progressbar" aria-valuenow={Math.min(stats.convosWeek, CONVO_TARGET)} aria-valuemin={0} aria-valuemax={CONVO_TARGET} aria-label={`Conversations this week toward a weekly goal of ${CONVO_TARGET}`}
+                style={{ position: "relative", height: 12, background: T.bg0, borderRadius: 6, overflow: "hidden" }}>
+                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 6, width: `${convoPct}%`, transition: "width .5s ease", background: convoFill }} />
+                {[25, 50, 75].map((q) => (
+                  <div key={q} style={{ position: "absolute", top: 0, bottom: 0, width: 1, left: `${q}%`, background: "rgba(255,254,251,0.14)" }} />
                 ))}
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, minWidth: 210 }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 11.5, color: T.dim }}>This week</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: stats.week >= weekTarget ? T.greenBright : T.cream }}>
-                    {stats.week} <span style={{ color: T.dimmer, fontWeight: 500 }}>/ {weekTarget} goal</span>
-                  </span>
-                </div>
-                <div style={{ position: "relative", height: 6, background: T.bg0, borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${weekPct}%`, background: stats.week >= weekTarget ? T.greenBright : `linear-gradient(90deg, ${T.redLift}, ${T.amber})`, borderRadius: 3, transition: "width .4s" }} />
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 11.5, color: T.dim }}>Day streak</span>
-                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    {Array.from({ length: 7 }, (_, i) => (
-                      <span key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: i < Math.min(stats.streak, 7) ? T.greenBright : "rgba(255,254,251,0.14)" }} />
-                    ))}
-                    <span style={{ marginLeft: 5, fontSize: 12.5, fontWeight: 700, color: T.cream }}>{stats.streak}</span>
-                  </span>
-                </div>
-                <div style={{ fontSize: 11.5, color: T.dimmer }}>last 14 days · touches per day</div>
               </div>
             </div>
             <div style={{ marginTop: "auto", paddingTop: 11, borderTop: `1px solid ${T.line}`, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11.5, color: T.faint }}>

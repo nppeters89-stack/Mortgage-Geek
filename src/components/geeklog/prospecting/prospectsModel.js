@@ -49,6 +49,7 @@ export const hasIntelDot = (p) => typeof p.notes === "string" && p.notes.length 
 export const COV_TARGET = 90; // 14-day touch coverage
 export const RAC_TARGET = 100; // everyone live should be in RAC
 export const MOT_TARGET = 80; // motivation on file
+export const CONVO_TARGET = 100; // weekly conversations goal
 
 export function isToday(ts) {
   if (!ts) return false;

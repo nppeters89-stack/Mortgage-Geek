@@ -7,8 +7,8 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive } from "../../../utils/geeklogApi";
-import { sortedQueue, mergeManualContacts, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt } from "../../../utils/geeklogApi";
+import { sortedQueue, mergeManualContacts, qualifiesForFollowUp, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
 const LOG_DIRTY = "gl2:prospects:dirty";
@@ -81,10 +81,22 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire),
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire), addedat: data.addedat || {},
   };
   saveLS(cache);
   return cache;
+}
+
+// Queue join date: written once, the first time a contact qualifies for Follow
+// Ups (score >= 9) or is pinned in by hand. Server side is first-write-wins, so
+// a repeat is harmless. Read by the cockpit's Added today / this week stats.
+export function persistAddedAt(apiKey, id) {
+  const c = getCachedProspects();
+  if (!c || (c.addedat && c.addedat[id] != null)) return;
+  const ts = Date.now();
+  cache = { ...c, addedat: { ...(c.addedat || {}), [id]: String(ts) } };
+  saveLS(cache);
+  saveAddedAt(apiKey, id, ts).catch(() => {});
 }
 
 // Optimistic write of a call log: update the cache, keepalive PUT (survives the
@@ -93,6 +105,7 @@ export function persistLog(apiKey, id, log) {
   const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {} };
   cache = { ...c, logs: { ...c.logs, [id]: log } };
   saveLS(cache);
+  if (qualifiesForFollowUp(log)) persistAddedAt(apiKey, id);
   const d = getDirty(LOG_DIRTY); d.add(id); writeDirty(LOG_DIRTY, d);
   saveProspectLogKeepalive(apiKey, id, log);
   saveProspectLog(apiKey, id, log).then(() => { const dd = getDirty(LOG_DIRTY); dd.delete(id); writeDirty(LOG_DIRTY, dd); }).catch(() => {});
@@ -165,6 +178,7 @@ export function persistPin(apiKey, id, action) {
     ? (current.includes(id) ? current : [...current, id])
     : current.filter((x) => x !== id);
   setCachedPinned(next);
+  if (action === "add") persistAddedAt(apiKey, id);
 
   savePinKeepalive(apiKey, id, action);
   return savePin(apiKey, id, action);

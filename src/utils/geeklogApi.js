@@ -328,6 +328,11 @@ export function saveWhaleKeepalive(key, id, action) {
 }
 
 // Flag a contact as a hot lead ("add") or cool them off ("remove").
+// Join-date write for the Follow Ups queue (first write wins server-side).
+export async function saveAddedAt(key, id, ts) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "added", id, ts }));
+}
+
 export async function saveFire(key, id, action) {
   return prospectsFetch(key, "/membership", membershipBody({ kind: "fire", id, action }));
 }

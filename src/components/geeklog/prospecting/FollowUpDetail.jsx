@@ -72,34 +72,36 @@ export function FollowUpDetail({
   const [refMode, setRefMode] = useState(false); // "soi" composer: touch vs referral tab
   // The day this touch actually happened: today unless backdated.
   const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
+  // A live conversation happened on this touch (feeds the weekly scoreboard).
+  const [talked, setTalked] = useState(false);
   useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
 
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
   const atCap = coldCount >= COLD_CHECKIN_CAP;
 
-  const submitDone = () => { setNote(""); setLoggedOn(todayLocalISO()); };
+  const submitDone = () => { setNote(""); setLoggedOn(todayLocalISO()); setTalked(false); };
   const submitPlain = () => {
     const text = note.trim();
     if (!text) return;
-    onLogFollowUp(text, null, tsForLoggedDate(loggedOn));
+    onLogFollowUp(text, null, tsForLoggedDate(loggedOn), talked);
     submitDone();
   };
   const submitStage = () => {
     const text = note.trim();
     if (!text) return;
-    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn));
+    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn), talked);
     submitDone();
   };
   const submitSoi = () => {
     const text = note.trim();
     if (!text) return;
-    if (refMode) onLogReferral?.(text, tsForLoggedDate(loggedOn)); else onLogFollowUp(text, null, tsForLoggedDate(loggedOn));
+    if (refMode) onLogReferral?.(text, tsForLoggedDate(loggedOn)); else onLogFollowUp(text, null, tsForLoggedDate(loggedOn), talked);
     submitDone();
   };
   const submitCold = () => {
     const text = note.trim();
     if (!text || atCap) return;
-    onColdCheckIn?.(text, tsForLoggedDate(loggedOn));
+    onColdCheckIn?.(text, tsForLoggedDate(loggedOn), talked);
     submitDone();
   };
 
@@ -180,7 +182,13 @@ export function FollowUpDetail({
           <textarea value={note} onChange={(e) => setNote(e.target.value)}
             placeholder={refMode ? "Who did they send? Client name and context." : "What did this touch look like..."}
             style={{ width: "100%", marginTop: 12, minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
-          <div style={{ marginTop: 10 }}><LoggedDatePicker value={loggedOn} onChange={setLoggedOn} /></div>
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <LoggedDatePicker value={loggedOn} onChange={setLoggedOn} />
+            {!refMode && <label style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FF.body, fontSize: 11.5, color: talked ? T.greenBright : T.dim, cursor: "pointer" }}>
+              <input type="checkbox" checked={talked} onChange={(e) => setTalked(e.target.checked)} style={{ accentColor: T.green, width: 15, height: 15, margin: 0 }} />
+              We talked
+            </label>}
+          </div>
           <button type="button" onClick={submitSoi} disabled={!note.trim()}
             style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: !note.trim() ? T.surface : refMode ? T.amber : T.green, color: !note.trim() ? T.faint : refMode ? T.bg1 : T.cream, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
             {refMode ? "Log referral" : "Log touch"}
@@ -191,7 +199,13 @@ export function FollowUpDetail({
           <h2 style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 22, marginBottom: 12, color: T.cream }}>Cold check-in ({Math.min(coldCount + 1, COLD_CHECKIN_CAP)} of {COLD_CHECKIN_CAP})</h2>
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Light touch. What did you send or say..."
             style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
-          <div style={{ marginTop: 10 }}><LoggedDatePicker value={loggedOn} onChange={setLoggedOn} /></div>
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <LoggedDatePicker value={loggedOn} onChange={setLoggedOn} />
+            <label style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FF.body, fontSize: 11.5, color: talked ? T.greenBright : T.dim, cursor: "pointer" }}>
+              <input type="checkbox" checked={talked} onChange={(e) => setTalked(e.target.checked)} style={{ accentColor: T.green, width: 15, height: 15, margin: 0 }} />
+              We talked
+            </label>
+          </div>
           <button type="button" onClick={submitCold} disabled={!note.trim() || atCap}
             style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: !note.trim() || atCap ? T.surface : T.cold, color: !note.trim() || atCap ? T.faint : T.cream, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: !note.trim() || atCap ? "default" : "pointer" }}>
             {atCap ? "At 5 of 5 check-ins" : "Log check-in"}
@@ -214,7 +228,13 @@ export function FollowUpDetail({
           )}
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
             style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
-          <div style={{ marginTop: 10 }}><LoggedDatePicker value={loggedOn} onChange={setLoggedOn} /></div>
+          <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <LoggedDatePicker value={loggedOn} onChange={setLoggedOn} />
+            <label style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FF.body, fontSize: 11.5, color: talked ? T.greenBright : T.dim, cursor: "pointer" }}>
+              <input type="checkbox" checked={talked} onChange={(e) => setTalked(e.target.checked)} style={{ accentColor: T.green, width: 15, height: 15, margin: 0 }} />
+              We talked
+            </label>
+          </div>
           <button type="button" onClick={composerMode === "stage" ? submitStage : submitPlain} disabled={!note.trim()}
             style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && !whaleMode && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
             {composerMode === "stage" && !whaleMode && stageSel === goal ? "Promote to SOI" : "Log follow up"}
