@@ -31,6 +31,8 @@ export const T = {
   coldWashLine: "rgba(91,124,153,0.35)", // cold separator / card border
   redWashLine: "rgba(226,87,91,0.4)", // lifted-red hairline: SOI badge + goal-column border
   redWash: "rgba(226,87,91,0.07)", // lifted-red at 7%: dead-box drop highlight
+  redLiftHi: "#FF7E82", // brightest lifted red: HUD action pill label
+  redLiftLine: "rgba(226,87,91,0.45)", // its border (redWashLine at 0.45)
   colWash: "rgba(255,254,251,0.02)", // near-invisible cream: board column base fill
   orange: "#FF7A00", // neon orange: the motivation field, deliberately loud so it never gets skipped
   orangeWash: "rgba(255,122,0,0.08)", // orange at 8%: motivation box fill

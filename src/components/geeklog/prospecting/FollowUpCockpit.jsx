@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
-import { Stat, Ring } from "./StatCards";
+import { TriageHud, HudHelp } from "./TriageHud";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
@@ -54,11 +54,24 @@ export function FollowUpCockpit({
   onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
+  const boardRef = useRef(null);
+  const whaleRef = useRef(null);
+  const coldRef = useRef(null);
+  // Footer jump: window.scrollTo, not scrollIntoView, so the smooth scroll owns
+  // the whole viewport instead of fighting the horizontal board scrollers.
+  const jumpTo = (which) => {
+    const el = which === "whale" ? whaleRef.current : which === "cold" ? coldRef.current : boardRef.current;
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
+  };
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
   const [pop, setPop] = useState(null); // { type, id, targetStage }
   // Collapsed stage columns (indices). Collapsing hides the card list; the
   // header stays a drop target, so a card can still be dragged onto it.
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
+  // "Work the queue": narrows the hot board to cards whose touch clock has
+  // expired. Whale, cold and dead sections are unaffected.
+  const [dueOnly, setDueOnly] = useState(false);
   // Two-across only on screens that genuinely fit it. Below the gate every
   // column is a single stack and the board scrolls sideways - columns never
   // compress into a squeezed, overlapping middle state.
@@ -92,6 +105,7 @@ export function FollowUpCockpit({
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
     return cols.map((c) => fireFirst(c, fireSet));
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet]);
+  const visBoard = useMemo(() => (dueOnly ? board.map((c) => c.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)]))) : board), [board, dueOnly, followUps]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
   // as the hot board (same stagemap drags), mapped onto the seven value-add
@@ -140,7 +154,22 @@ export function FollowUpCockpit({
     // Due now: the working queue (not whales, not SOI) whose clock has crossed
     // 7 days or never started - the same definition as the nav badge.
     const hotMembers = activeMembers.filter((p) => !whaleSet?.has(idFromPhone(p.phone)));
-    const due = hotMembers.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)])).length;
+    const dueMembers = hotMembers.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)]));
+    const due = dueMembers.length;
+    // Days since last touch for the most neglected due card. A never-touched
+    // card is more neglected than any touched one, so it wins as null.
+    let oldestDue = null;
+    if (dueMembers.length) {
+      const tss = dueMembers.map((p) => lastTouchTs(followUps[idFromPhone(p.phone)]) || null);
+      oldestDue = tss.includes(null) ? null : Math.floor((Date.now() - Math.min(...tss)) / DAY);
+    }
+    // Touches per day for the last 14 calendar days, oldest first, index 13 =
+    // today. Same -3 referral exclusion as week/today.
+    const dayCounts = Array.from({ length: 14 }, (_, i) => {
+      const dd = new Date(); dd.setDate(dd.getDate() - (13 - i));
+      const k = dd.toDateString();
+      return all.filter((t) => t.stage !== -3 && dayKey(t.ts) === k).length;
+    });
     // Data-capture coverage across the whole live pipeline (hot + whales + SOI):
     // motivation on file, and entered into RAC.
     const livePool = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && (isMember(id, logs, pinnedSet) || soi[id]); });
@@ -148,7 +177,7 @@ export function FollowUpCockpit({
     const racPct = livePool.length ? Math.round(livePool.filter((p) => rac?.has(idFromPhone(p.phone))).length / livePool.length * 100) : 0;
     const whales = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; }).length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, whales, hotLeads };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac]);
 
   // ----- drag plumbing -----
@@ -303,46 +332,23 @@ export function FollowUpCockpit({
   return (
     <div style={{ padding: "2px 26px 40px" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-        <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
+          <HudHelp />
+        </div>
       </div>
 
-      {/* Stat strip: activity on the left (streak, week bar, today), the work
-          signal in the middle (due now), capture and pipeline health right. */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-        {/* Due now leads and shouts: red hue, red number - it is the reason to
-            be on this screen at all. */}
-        <Stat label="Due now" accent={T.redLift} color={T.redLift} wash={stats.due > 0 ? T.redWash : null}>{stats.due}</Stat>
-        <Stat label="Hot leads" accent={T.orange} color={T.orange} wash={stats.hotLeads > 0 ? T.orangeWash : null}>{"🔥"} {stats.hotLeads}</Stat>
-        <Stat label="Day streak" accent={stats.streak >= 3 ? T.greenBright : T.redLift}
-          color={stats.streak >= 3 ? T.greenBright : T.cream}>
-          <span style={{ color: T.redLift, marginRight: 7 }}>{"▲"}</span>{stats.streak}
-        </Stat>
-        <Stat label="Touches this week" accent={stats.week >= weekTarget ? T.greenBright : T.redLift}
-          color={stats.week >= weekTarget ? T.greenBright : T.cream}
-          extra={<div style={{ height: 5, background: T.bg0, borderRadius: 3, marginTop: 8, overflow: "hidden", minWidth: 110 }}>
-            <div style={{ height: "100%", width: `${Math.min(100, (stats.week / weekTarget) * 100)}%`, background: stats.week >= weekTarget ? T.greenBright : `linear-gradient(90deg, ${T.redLift}, ${T.amber})`, borderRadius: 3, transition: "width .4s" }} />
-          </div>}>
-          {stats.week}<span style={{ fontSize: 12, color: T.faint }}> / {weekTarget}</span>
-        </Stat>
-        <Stat label="Touches today" accent={stats.today > 0 ? T.greenBright : T.line} color={stats.today > 0 ? T.greenBright : T.cream}>{stats.today}</Stat>
-        <Stat label="14 day coverage" accent={stats.cov < 70 ? T.amber : T.green} color={stats.cov < 70 ? T.amber : T.green}
-          extra={<Ring pct={stats.cov} color={stats.cov < 70 ? T.amber : T.green} />}>{stats.cov}%</Stat>
-        <Stat label="In RAC" accent={T.green} color={T.green} extra={<Ring pct={stats.racPct} color={T.green} />}>{stats.racPct}%</Stat>
-        <Stat label="Motivation on file" accent={T.orange} color={T.orange} extra={<Ring pct={stats.motPct} color={T.orange} />}>{stats.motPct}%</Stat>
-        <Stat label="Whales" accent={T.whale} color={T.whale}>{"🐳"} {stats.whales}</Stat>
-        <Stat label="In SOI" accent={STAGE_RAMP[STAGE_RAMP.length - 1]} color={STAGE_RAMP[STAGE_RAMP.length - 1]}>{"🤝"} {stats.soiCount}</Stat>
-      </div>
-
-      <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Drag a card to any stage to move it, no touch logged. Open a card and tap the whale by the name to move a top producer to their own pipeline. Drop on the goal column to promote to SOI. Drag down to cold when someone goes quiet, further down to the dead box to let go. Click any card for the full view and to log touches.</div>
+      <TriageHud stats={stats} weekTarget={weekTarget} dueOnly={dueOnly} onToggleDueOnly={() => setDueOnly((v) => !v)}
+        coldTotal={coldTotal} deadCount={deadList.length} onJump={jumpTo} />
 
       {/* Hot board */}
-      <div style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>
+      <div ref={boardRef} style={{ display: "flex", gap: 14, alignItems: "flex-start", overflowX: "auto", paddingBottom: 18 }}>
         {stages.map((label, si) => {
           const isGoal = si === goalIndex;
           const key = `hot:${si}`;
           const ramp = stageRampColor(si, stages.length);
           const shut = collapsedCols.has(si);
-          const wide = !shut && ultra && board[si].length >= 6;
+          const wide = !shut && ultra && visBoard[si].length >= 6;
           return (
             <div key={si} style={{ ...colShell(isGoal, wide), outline: over === key ? `2px solid ${T.line}` : "none" }} onDragOver={allow(key)} onDragLeave={() => setOver(null)} onDrop={dropHot(si)}>
               {/* Header doubles as the collapse toggle, color-coded to the same
@@ -354,7 +360,7 @@ export function FollowUpCockpit({
                     <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
                     <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
                   </span>
-                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
+                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{visBoard[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
                 </button>
                 {/* The goal column doubles as the door to the SOI cockpit. A
                     sibling, not a child: buttons cannot nest. Drop behavior is
@@ -370,11 +376,11 @@ export function FollowUpCockpit({
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.lineSoft : "transparent" }}>
                   {wide ? (
                     <>
-                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
-                      <div style={halfStack}>{board[si].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{visBoard[si].filter((_, i) => i % 2 === 0).map((p) => hotCard(p))}</div>
+                      <div style={halfStack}>{visBoard[si].filter((_, i) => i % 2 === 1).map((p) => hotCard(p))}</div>
                     </>
                   ) : (
-                    board[si].map((p) => hotCard(p))
+                    visBoard[si].map((p) => hotCard(p))
                   )}
                 </div>
               )}
@@ -384,7 +390,7 @@ export function FollowUpCockpit({
       </div>
 
       {/* Whale pipeline: exclusive tray for top producers, above cold. */}
-      <details open style={{ margin: "6px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
+      <details ref={whaleRef} open style={{ margin: "6px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
         <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.whaleWash }}>
           <span style={colTitle(T.whale)}>{"🐳"} Whale Pipeline · {whaleTotal}</span>
           <span style={{ fontSize: 11.5, color: T.faint }}>Top producers, nurtured on their own track. Drag between value adds; the whale button beside the name in an open card sends them here.</span>
@@ -423,7 +429,7 @@ export function FollowUpCockpit({
       </details>
 
       {/* Cold pipeline */}
-      <details open style={{ margin: "6px 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tray" ? T.coldWash : "transparent" }}
+      <details ref={coldRef} open style={{ margin: "6px 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tray" ? T.coldWash : "transparent" }}
         onDragOver={allow("tray")} onDragLeave={() => setOver(null)} onDrop={dropCold(null, false)}>
         <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.coldWash }}>
           <span style={colTitle(T.cold)}>Cold Pipeline · {coldTotal}</span>

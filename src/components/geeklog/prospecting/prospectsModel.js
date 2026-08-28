@@ -44,6 +44,12 @@ export const hasIntelDot = (p) => typeof p.notes === "string" && p.notes.length 
 // comparison made a late-evening Central call read as "today" the next morning
 // on any device whose clock sat in a later timezone - a phantom 1 on the
 // Calls today / Conversations boxes with nothing logged yet.
+// Coverage targets for the cockpit's data-on-file gauges. A percentage without
+// a target tick reads as trivia; these are the lines to beat.
+export const COV_TARGET = 90; // 14-day touch coverage
+export const RAC_TARGET = 100; // everyone live should be in RAC
+export const MOT_TARGET = 80; // motivation on file
+
 export function isToday(ts) {
   if (!ts) return false;
   return centralDateKey(new Date(ts)) === centralDateKey();
