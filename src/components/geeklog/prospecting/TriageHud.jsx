@@ -106,10 +106,7 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
 
         {/* Zone 2 — Am I working it. */}
         <div style={{ ...zonePad, ...divider, gap: 11 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16 }}>
-            <div style={eyebrow(T.greenBright)}>Am I working it</div>
-            <div style={{ fontSize: 11.5, color: T.dimmer }}>last 14 days · touches per day</div>
-          </div>
+          <div style={eyebrow(T.greenBright)}>Am I working it</div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
               <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.today}</span>
@@ -140,6 +137,7 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
                   <span style={{ marginLeft: 5, fontSize: 12.5, fontWeight: 700, color: T.cream }}>{stats.streak}</span>
                 </span>
               </div>
+              <div style={{ fontSize: 11.5, color: T.dimmer }}>last 14 days · touches per day</div>
             </div>
           </div>
         </div>
