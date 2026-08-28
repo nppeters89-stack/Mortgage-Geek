@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
-import { TriageHud, HudHelp } from "./TriageHud";
+import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
@@ -232,7 +232,9 @@ export function FollowUpCockpit({
     const talkedWeek = all.filter((t) => t.talked === true && t.ts >= weekStart).length;
     const scoredCallsWeek = Object.values(logs).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
     const convosWeek = talkedWeek + scoredCallsWeek;
-    const ratioPct = addedWeek ? Math.round((convosWeek / addedWeek) * 100) : 0;
+    // Of this week's conversations, how many turned into queue adds. Always a
+    // share of the conversations, so it cannot exceed 100.
+    const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
     return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
@@ -387,11 +389,12 @@ export function FollowUpCockpit({
 
   return (
     <div style={{ padding: "2px 26px 40px" }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Up Cockpit</h1>
           <HudHelp />
         </div>
+        <ConvoBar convosWeek={stats.convosWeek} />
       </div>
 
       <TriageHud stats={stats} weekTarget={weekTarget} activeFilter={activeFilter} onSetFilter={setActiveFilter}

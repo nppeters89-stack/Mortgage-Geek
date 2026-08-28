@@ -58,6 +58,28 @@ function GaugeRow({ label, pct, color, target }) {
   );
 }
 
+// Conversations power bar in its own box, sitting on the title line above the
+// panel. Fill ramps by progress so it reads as a gauge, capped at the goal.
+export function ConvoBar({ convosWeek }) {
+  const pct = Math.min(100, (convosWeek / CONVO_TARGET) * 100);
+  const fill = pct >= 100 ? T.greenBright : pct >= 50 ? `linear-gradient(90deg, ${T.orange}, ${T.amber})` : `linear-gradient(90deg, ${T.redLift}, ${T.orange})`;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: "0 1 380px", minWidth: 280, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "10px 14px", fontFamily: FF.body, boxSizing: "border-box" }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dim, whiteSpace: "nowrap" }}>Conversations this week</span>
+        <span style={{ fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{convosWeek} <span style={{ fontSize: 11.5, fontWeight: 400, color: T.faint }}>/ {CONVO_TARGET} goal</span></span>
+      </div>
+      <div role="progressbar" aria-valuenow={Math.min(convosWeek, CONVO_TARGET)} aria-valuemin={0} aria-valuemax={CONVO_TARGET} aria-label={`Conversations this week toward a weekly goal of ${CONVO_TARGET}`}
+        style={{ position: "relative", height: 12, background: T.bg0, borderRadius: 6, overflow: "hidden" }}>
+        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 6, width: `${pct}%`, transition: "width .5s ease", background: fill }} />
+        {[25, 50, 75].map((q) => (
+          <div key={q} style={{ position: "absolute", top: 0, bottom: 0, width: 1, left: `${q}%`, background: "rgba(255,254,251,0.14)" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTotal, deadCount, onJump }) {
   // Same matchMedia pattern as the cockpit's ultra hook: below 1200px the three
   // zones stack, the dividers rotate to bottom edges, and the rail wraps.
@@ -71,9 +93,6 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
   const [hovSeg, setHovSeg] = useState(null);
 
   const divider = wide ? { borderRight: `1px solid ${T.line}` } : { borderBottom: `1px solid ${T.line}` };
-  // Power bar: clamped fill, color ramped by progress so it reads as a gauge.
-  const convoPct = Math.min(100, (stats.convosWeek / CONVO_TARGET) * 100);
-  const convoFill = convoPct >= 100 ? T.greenBright : convoPct >= 50 ? `linear-gradient(90deg, ${T.orange}, ${T.amber})` : `linear-gradient(90deg, ${T.redLift}, ${T.orange})`;
 
   // Worst first: ascending by percentage, so the gap to close sits on top.
   const gauges = [
@@ -131,23 +150,9 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
               <div style={{ flex: 1.25, paddingLeft: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                   <span style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.amber }}>{stats.ratioPct}%</span>
-                  <span style={{ fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>{stats.addedWeek === 0 ? "no new adds this week" : `${stats.convosWeek} of ${stats.addedWeek} added`}</span>
+                  <span style={{ fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>{stats.convosWeek === 0 ? "no conversations this week" : `${stats.addedWeek} of ${stats.convosWeek} convos`}</span>
                 </div>
                 <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Conversion ratio · wk</div>
-              </div>
-            </div>
-            {/* Conversations power bar. */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dim }}>Conversations this week</span>
-                <span style={{ fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.convosWeek} <span style={{ fontSize: 11.5, fontWeight: 400, color: T.faint }}>/ {CONVO_TARGET} goal</span></span>
-              </div>
-              <div role="progressbar" aria-valuenow={Math.min(stats.convosWeek, CONVO_TARGET)} aria-valuemin={0} aria-valuemax={CONVO_TARGET} aria-label={`Conversations this week toward a weekly goal of ${CONVO_TARGET}`}
-                style={{ position: "relative", height: 12, background: T.bg0, borderRadius: 6, overflow: "hidden" }}>
-                <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 6, width: `${convoPct}%`, transition: "width .5s ease", background: convoFill }} />
-                {[25, 50, 75].map((q) => (
-                  <div key={q} style={{ position: "absolute", top: 0, bottom: 0, width: 1, left: `${q}%`, background: "rgba(255,254,251,0.14)" }} />
-                ))}
               </div>
             </div>
             <div style={{ marginTop: "auto", paddingTop: 11, borderTop: `1px solid ${T.line}`, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11.5, color: T.faint }}>
