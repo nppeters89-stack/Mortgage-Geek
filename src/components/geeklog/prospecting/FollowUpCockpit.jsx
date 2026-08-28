@@ -131,8 +131,19 @@ export function FollowUpCockpit({
       cols[si].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
-    return cols.map((c) => fireFirst(c, fireSet));
-  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet]);
+    const ranked = cols.map((c) => fireFirst(c, fireSet));
+    if (!activeFilter) return ranked;
+    // Same rail filter as the hot board; due runs on the whale 30-day clock.
+    const match = (p) => {
+      const id = idFromPhone(p.phone);
+      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(0, true));
+      if (activeFilter === "rac") return !rac?.has(id);
+      if (activeFilter === "mot") return !!motivation?.[id];
+      if (activeFilter === "fire") return fireSet?.has(id);
+      return true;
+    };
+    return ranked.map((c) => c.filter(match));
+  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
   const coldCols = useMemo(() => {
@@ -424,7 +435,7 @@ export function FollowUpCockpit({
         })}
       </div>
 
-      {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && (
+      {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && whaleCols.every((c) => !c.length) && (
         <div style={{ textAlign: "center", padding: "2px 0 18px", fontSize: 12.5, color: T.dim, fontFamily: FF.body }}>
           Nothing matches this filter.{" "}
           <button type="button" onClick={() => setActiveFilter(null)}
@@ -473,7 +484,8 @@ export function FollowUpCockpit({
         </div>
       </details>
 
-      {/* Cold pipeline */}
+      {/* Cold pipeline: leaves the view while a rail filter is on. */}
+      {!activeFilter && <>
       <details ref={coldRef} open style={{ margin: "6px 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tray" ? T.coldWash : "transparent" }}
         onDragOver={allow("tray")} onDragLeave={() => setOver(null)} onDrop={dropCold(null, false)}>
         <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.coldWash }}>
@@ -503,6 +515,7 @@ export function FollowUpCockpit({
           })}
         </div>
       </details>
+      </>}
 
       {/* Dead box */}
       <div onDragOver={allow("dead")} onDragLeave={() => setOver(null)} onDrop={dropDead}
