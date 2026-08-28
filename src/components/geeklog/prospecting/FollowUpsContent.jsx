@@ -132,8 +132,8 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // Log a touch at a chosen stage. The goal stage promotes to SOI in the same
   // gesture (writes the stage touch AND adds SOI membership). Non-goal touches
   // leave the detail open so the stage advances in place.
-  const handleLogFollowUp = useCallback((id, note, stage) => {
-    const touch = { ts: Date.now(), note };
+  const handleLogFollowUp = useCallback((id, note, stage, ts) => {
+    const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note };
     if (Number.isInteger(stage)) touch.stage = stage;
     const next = [...(fuRef.current[id] || []), touch];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
@@ -224,8 +224,8 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     });
   }, [apiKey, showToast, stages]);
 
-  const handleColdCheckIn = useCallback((id, note) => {
-    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: -1 }];
+  const handleColdCheckIn = useCallback((id, note, ts) => {
+    const next = [...(fuRef.current[id] || []), { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: -1 }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast(`Check-in ${Math.min(coldCount(next), 5)} of 5 logged`);
@@ -348,12 +348,12 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           stages={stages} showStageTags
           composerMode="cold" coldCount={coldCount(followUps[id])}
           statusLine={`Cold · ${coldCount(followUps[id])} of 5 · was at ${stages[stageIdx]}`}
-          onColdCheckIn={(note) => handleColdCheckIn(id, note)}
+          onColdCheckIn={(note, ts) => handleColdCheckIn(id, note, ts)}
           onRevive={() => handleRevive(id)}
         />
       );
     }
-    const logTouch = (note, stage) => { handleLogFollowUp(id, note, stage); if (modal && stage === goalIndex) fireConfetti(); };
+    const logTouch = (note, stage, ts) => { handleLogFollowUp(id, note, stage, ts); if (modal && stage === goalIndex) fireConfetti(); };
     return (
       <FollowUpDetail
         prospect={p} log={logs[id]} touches={followUps[id] || []}

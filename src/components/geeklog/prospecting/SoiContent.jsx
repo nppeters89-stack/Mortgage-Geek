@@ -85,8 +85,8 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
 
   // Same key as Follow Ups; SOI touches carry the goal stage so the ratchet
   // keeps reading SOI members at the goal even if they are later demoted.
-  const handleLogFollowUp = useCallback((id, note) => {
-    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: goalIndex }];
+  const handleLogFollowUp = useCallback((id, note, ts) => {
+    const next = [...(fuRef.current[id] || []), { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: goalIndex }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     showToast("Touch logged");
@@ -94,8 +94,8 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
 
   // A referral event: stage -3 in the same history, so it survives promotion,
   // demotion, and re-seeds. Gold treatment everywhere, confetti here.
-  const handleLogReferral = useCallback((id, note, name) => {
-    const next = [...(fuRef.current[id] || []), { ts: Date.now(), note, stage: STAGE_REFERRAL }];
+  const handleLogReferral = useCallback((id, note, name, ts) => {
+    const next = [...(fuRef.current[id] || []), { ts: Number.isFinite(ts) ? ts : Date.now(), note, stage: STAGE_REFERRAL }];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
     fireConfetti();
@@ -162,8 +162,8 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
         touches={followUps[id] || []}
         onBack={() => { setView("queue"); setOpenId(null); }}
         composerMode="soi"
-        onLogFollowUp={(note) => handleLogFollowUp(id, note)}
-        onLogReferral={(note) => handleLogReferral(id, note, p.name)}
+        onLogFollowUp={(note, _stage, ts) => handleLogFollowUp(id, note, ts)}
+        onLogReferral={(note, ts) => handleLogReferral(id, note, p.name, ts)}
         statusLine={`${since ? `SOI since ${since}` : "SOI"} · ${refCount} referral${refCount === 1 ? "" : "s"}`}
         onToast={showToast}
         copyPhoneOnTap={modal}

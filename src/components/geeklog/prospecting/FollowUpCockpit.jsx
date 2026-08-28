@@ -3,6 +3,7 @@ import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from ".
 import { TriageHud, HudHelp } from "./TriageHud";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
+import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
 
 // The desktop Follow Up cockpit (viewport >= 900px), matching followup_cockpit
@@ -257,10 +258,10 @@ export function FollowUpCockpit({
   };
 
   const closePop = () => setPop(null);
-  const savePop = (note) => {
+  const savePop = (note, ts) => {
     if (!pop) return;
-    if (pop.type === "stage") { onLogTouch(pop.id, note, pop.targetStage); if (pop.targetStage === goalIndex) fireConfetti(); }
-    else if (pop.type === "cold") onColdCheckIn(pop.id, note);
+    if (pop.type === "stage") { onLogTouch(pop.id, note, pop.targetStage, ts); if (pop.targetStage === goalIndex) fireConfetti(); }
+    else if (pop.type === "cold") onColdCheckIn(pop.id, note, ts);
     else if (pop.type === "dead") onMarkDead(pop.id, note);
     closePop();
   };
@@ -497,6 +498,7 @@ export function FollowUpCockpit({
 // is a separate, shared component the parent renders on a card click.
 function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, onClose, onRestore }) {
   const [note, setNote] = useState("");
+  const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
   const scrim = { position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: 20 };
   const box = { background: T.bg0, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 460, maxHeight: "86vh", overflowY: "auto", padding: 22 };
   const ta = { width: "100%", marginTop: 12, minHeight: 80, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 14.5, lineHeight: 1.5 };
@@ -537,9 +539,10 @@ function CockpitPopover({ pop, stages, goalIndex, deadList, followUps, onSave, o
         {pop.type === "dead" && <div style={{ fontSize: 13, color: T.dim, marginTop: 10 }}>They leave the pipeline entirely. History is kept and you can restore them later from the buried list.</div>}
         <textarea autoFocus value={note} onChange={(e) => setNote(e.target.value)} style={ta}
           placeholder={pop.type === "cold" ? "Light touch. What did you send or say..." : goal ? "How did the referral come in..." : pop.type === "dead" ? "Optional. Why are you letting go..." : "What did this touch look like..."} />
+        {pop.type !== "dead" && <div style={{ marginTop: 10 }}><LoggedDatePicker value={loggedOn} onChange={setLoggedOn} /></div>}
         <div style={row}>
           <button type="button" onClick={onClose} style={btn("none", T.dim, `1px solid ${T.line}`)}>Cancel</button>
-          <button type="button" onClick={() => onSave(note.trim())} disabled={pop.type !== "dead" && !note.trim()}
+          <button type="button" onClick={() => onSave(note.trim(), tsForLoggedDate(loggedOn))} disabled={pop.type !== "dead" && !note.trim()}
             style={btn(pop.type !== "dead" && !note.trim() ? T.surface : pop.type === "cold" ? T.cold : pop.type === "dead" ? T.redLift : goal ? T.redLift : T.green, pop.type !== "dead" && !note.trim() ? T.faint : T.cream)}>
             {pop.type === "cold" ? "Log check-in" : pop.type === "dead" ? "Mark dead" : goal ? "Promote" : "Log touch"}
           </button>
