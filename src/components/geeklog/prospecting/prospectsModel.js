@@ -123,9 +123,15 @@ export const STALE_DAYS = 14;
 // the same threshold where the urgency ramp starts kindling, so every due
 // count agrees with the yellow-through-red labels.
 export const DUE_DAYS = 7;
-export const isDueForTouch = (touches) => {
+// Stage-aware cadence: the two value-add stages breathe slower than the 7-day
+// default, and whales run a 30-day nurture clock (due the day after it laps).
+// Indexes match DEFAULT_STAGES: 2 = Value Add & Social, 3 = Value Add.
+export const STAGE_DUE_DAYS = { 2: 10, 3: 14 };
+export const WHALE_DUE_DAYS = 31;
+export const dueDaysFor = (stageIndex, isWhale = false) => (isWhale ? WHALE_DUE_DAYS : STAGE_DUE_DAYS[stageIndex] ?? DUE_DAYS);
+export const isDueForTouch = (touches, dueDays = DUE_DAYS) => {
   const ts = lastTouchTs(touches);
-  return !ts || Date.now() - ts >= DUE_DAYS * DAY_MS;
+  return !ts || Date.now() - ts >= dueDays * DAY_MS;
 };
 
 export const qualifiesForFollowUp = (log) => !!(log && log.score >= FOLLOWUP_MIN_SCORE);

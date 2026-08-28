@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
 
@@ -105,7 +105,7 @@ export function FollowUpCockpit({
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
     return cols.map((c) => fireFirst(c, fireSet));
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet]);
-  const visBoard = useMemo(() => (dueOnly ? board.map((c) => c.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)]))) : board), [board, dueOnly, followUps]);
+  const visBoard = useMemo(() => (dueOnly ? board.map((c, si) => c.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)], dueDaysFor(si)))) : board), [board, dueOnly, followUps]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
   // as the hot board (same stagemap drags), mapped onto the seven value-add
@@ -154,13 +154,21 @@ export function FollowUpCockpit({
     // Due now: the working queue (not whales, not SOI) whose clock has crossed
     // 7 days or never started - the same definition as the nav badge.
     const hotMembers = activeMembers.filter((p) => !whaleSet?.has(idFromPhone(p.phone)));
-    const dueMembers = hotMembers.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)]));
-    const due = dueMembers.length;
+    const dueMembers = hotMembers.filter((p) => {
+      const id = idFromPhone(p.phone);
+      const fu = followUps[id];
+      return isDueForTouch(fu, dueDaysFor(stageOf(fu || [], { goalIndex, override: stagemap[id] })));
+    });
+    // Whales count toward due on their own 30-day nurture clock.
+    const whaleMembers = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; });
+    const dueWhales = whaleMembers.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)], dueDaysFor(0, true)));
+    const dueAll = [...dueMembers, ...dueWhales];
+    const due = dueAll.length;
     // Days since last touch for the most neglected due card. A never-touched
     // card is more neglected than any touched one, so it wins as null.
     let oldestDue = null;
-    if (dueMembers.length) {
-      const tss = dueMembers.map((p) => lastTouchTs(followUps[idFromPhone(p.phone)]) || null);
+    if (dueAll.length) {
+      const tss = dueAll.map((p) => lastTouchTs(followUps[idFromPhone(p.phone)]) || null);
       oldestDue = tss.includes(null) ? null : Math.floor((Date.now() - Math.min(...tss)) / DAY);
     }
     // Touches per day for the last 14 calendar days, oldest first, index 13 =
@@ -175,10 +183,10 @@ export function FollowUpCockpit({
     const livePool = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && (isMember(id, logs, pinnedSet) || soi[id]); });
     const motPct = livePool.length ? Math.round(livePool.filter((p) => !!motivation?.[idFromPhone(p.phone)]).length / livePool.length * 100) : 0;
     const racPct = livePool.length ? Math.round(livePool.filter((p) => rac?.has(idFromPhone(p.phone))).length / livePool.length * 100) : 0;
-    const whales = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; }).length;
+    const whales = whaleMembers.length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
     return { streak, week, today, cov, soiCount, due, motPct, racPct, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length };
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac]);
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex]);
 
   // ----- drag plumbing -----
   const startDrag = (id, from) => (e) => {
@@ -282,7 +290,7 @@ export function FollowUpCockpit({
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{count} touch{count === 1 ? "" : "es"}</span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
             {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
-            <span style={{ color: staleColor(dSince(ts), T.faint) }}>{rel(ts)}</span>
+            <span style={{ color: staleColor(dSince(ts), T.faint, dueDaysFor(stageFor(id), whaleSet?.has(id))) }}>{rel(ts)}</span>
           </span>
         </div>
       </div>

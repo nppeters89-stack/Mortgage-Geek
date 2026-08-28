@@ -65,25 +65,24 @@ export const whaleRampColor = (i, n = WHALE_RAMP.length) => {
   return WHALE_RAMP[Math.round(t * (WHALE_RAMP.length - 1))];
 };
 
-// Last-touch urgency ramp for the Follow Ups surfaces. Under 7 days the label
-// stays the surface's own gray (the caller passes it); from 7 days it kindles
-// neon yellow, through neon orange at 10, to neon red at 14 and beyond. Never
-// touched at all is the far end of overdue, so null reads neon red too.
-const STALE_ANCHORS = [
-  [7, [0xff, 0xe6, 0x00]],  // neon yellow
-  [10, [0xff, 0x7a, 0x00]], // neon orange
-  [14, [0xff, 0x31, 0x31]], // neon red
-];
-export function staleColor(days, freshColor) {
+// Last-touch urgency ramp for the Follow Ups surfaces. Under the due day the
+// label stays the surface's own gray (the caller passes it); at the due day it
+// kindles neon yellow, through neon orange three days on, to neon red seven
+// days past due and beyond. The due day is stage-aware (dueDaysFor in
+// prospectsModel): 7 by default, 10 for Value Add & Social, 14 for Value Add,
+// 31 for whales. Never touched at all is the far end of overdue, so null reads
+// neon red too.
+const STALE_RAMP = [[0, [0xff, 0xe6, 0x00]], [3, [0xff, 0x7a, 0x00]], [7, [0xff, 0x31, 0x31]]]; // offsets from the due day
+export function staleColor(days, freshColor, dueDay = 7) {
   if (days == null) return "#FF3131";
-  if (days < STALE_ANCHORS[0][0]) return freshColor;
-  const last = STALE_ANCHORS[STALE_ANCHORS.length - 1];
-  if (days >= last[0]) return "#FF3131";
-  for (let i = 0; i < STALE_ANCHORS.length - 1; i++) {
-    const [d0, c0] = STALE_ANCHORS[i];
-    const [d1, c1] = STALE_ANCHORS[i + 1];
-    if (days <= d1) {
-      const t = (days - d0) / (d1 - d0);
+  const over = days - dueDay;
+  if (over < 0) return freshColor;
+  if (over >= STALE_RAMP[STALE_RAMP.length - 1][0]) return "#FF3131";
+  for (let i = 0; i < STALE_RAMP.length - 1; i++) {
+    const [d0, c0] = STALE_RAMP[i];
+    const [d1, c1] = STALE_RAMP[i + 1];
+    if (over <= d1) {
+      const t = (over - d0) / (d1 - d0);
       const mix = c0.map((v, k) => Math.round(v + (c1[k] - v) * t));
       return `#${mix.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
     }

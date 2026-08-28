@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -112,7 +112,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const whaleList = useMemo(() => fireFirst(queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), fireSet), [queue, whaleSet, fireSet]);
   // The header badge counts follow-ups actually DUE (7+ days or never touched),
   // matching the desktop top-nav badge.
-  const dueCount = useMemo(() => hotList.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)])).length, [hotList, followUps]);
+  const dueCount = useMemo(() => [...hotList, ...whaleList].filter((p) => {
+    const id = idFromPhone(p.phone);
+    return isDueForTouch(followUps[id], dueDaysFor(stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)));
+  }).length, [hotList, whaleList, followUps, goalIndex, stagemap, whaleSet]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const closeDetail = useCallback(() => setOpenId(null), []);
