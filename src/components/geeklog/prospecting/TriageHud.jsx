@@ -83,7 +83,7 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
 
   return (
     <div style={{ fontFamily: FF.body, marginBottom: 16 }}>
-      <div style={{ display: "grid", gridTemplateColumns: wide ? "320px 1fr 360px" : "1fr", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", boxSizing: "border-box" }}>
+      <div style={{ display: "grid", gridTemplateColumns: wide ? "320px auto 360px" : "1fr", width: wide ? "fit-content" : "auto", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", boxSizing: "border-box" }}>
 
         {/* Zone 1 — Needs you now. The only red on the strip: work owed. */}
         <div style={{ ...zonePad, ...divider, background: T.redWash, gap: 10 }}>
@@ -107,7 +107,7 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
         {/* Zone 2 — Am I working it. */}
         <div style={{ ...zonePad, ...divider, gap: 11 }}>
           <div style={eyebrow(T.greenBright)}>Am I working it</div>
-          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 26 }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 26 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
               <span style={{ fontSize: 30, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.today}</span>
               <span style={{ fontSize: 12, color: T.dim }}>today</span>
@@ -118,7 +118,7 @@ export function TriageHud({ stats, weekTarget, dueOnly, onToggleDueOnly, coldTot
                 <div key={i} style={{ width: 9, borderRadius: 2, height: `${Math.max(8, (n / dayMax) * 100)}%`, background: n === 0 ? T.faint : i === 13 ? T.greenBright : i >= 7 ? "rgba(47,191,113,0.55)" : "rgba(47,191,113,0.35)" }} />
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: "0 1 460px", minWidth: 210 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 7, minWidth: 210 }}>
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 11.5, color: T.dim }}>This week</span>
                 <span style={{ fontSize: 12.5, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: stats.week >= weekTarget ? T.greenBright : T.cream }}>
