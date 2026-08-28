@@ -57,45 +57,68 @@ export default async function handler(req, res) {
   }
 
   try {
-    const list = parseStored(await redis.get(LIST_KEY)) || { version: 1, generated: null, source: null, prospects: [] };
+    // Every Upstash REST call is a full HTTP round trip, so serializing these
+    // reads was most of this endpoint's latency. Wave 1 fires every independent
+    // read at once; wave 2 holds the two MGETs that need their SMEMBERS first.
+    const [
+      listRaw, loggedIdsRaw, fuIdsRaw, soiRaw, pinnedRaw, racRaw, whaleRaw, fireRaw,
+      manualHash, storedStagesRaw, storedConfigRaw, coldRaw, deadRaw, stagemapHash, motivationHash,
+    ] = await Promise.all([
+      redis.get(LIST_KEY),
+      redis.smembers(LOGGED_SET),
+      redis.smembers(FU_SET),
+      redis.hgetall(SOI_KEY),
+      redis.smembers(PINNED_SET),
+      redis.smembers(RAC_SET),
+      redis.smembers(WHALE_SET),
+      redis.smembers(FIRE_SET),
+      redis.hgetall(MANUAL_KEY),
+      redis.get(STAGES_KEY),
+      redis.get(CONFIG_KEY),
+      redis.hgetall(COLD_KEY),
+      redis.hgetall(DEAD_KEY),
+      redis.hgetall(STAGEMAP_KEY),
+      redis.hgetall(MOTIVATION_KEY),
+    ]);
 
-    const ids = toIds(await redis.smembers(LOGGED_SET));
+    const list = parseStored(listRaw) || { version: 1, generated: null, source: null, prospects: [] };
+
+    const ids = toIds(loggedIdsRaw);
+    const fuIds = toIds(fuIdsRaw);
+    const [logValues, fuValues] = await Promise.all([
+      ids.length ? redis.mget(...ids.map(logKey)) : [],
+      fuIds.length ? redis.mget(...fuIds.map(fuKey)) : [],
+    ]);
+
     const logs = {};
-    if (ids.length) {
-      const values = await redis.mget(...ids.map(logKey));
-      ids.forEach((id, i) => {
-        const v = parseStored(values[i]);
-        if (v) logs[id] = v;
-      });
-    }
+    ids.forEach((id, i) => {
+      const v = parseStored(logValues[i]);
+      if (v) logs[id] = v;
+    });
 
     // Follow-up touch histories, keyed by the same phone-digits id. Membership is
     // derived (score >= 9) client-side, so this only carries histories that exist.
-    const fuIds = toIds(await redis.smembers(FU_SET));
     const followUps = {};
-    if (fuIds.length) {
-      const vals = await redis.mget(...fuIds.map(fuKey));
-      fuIds.forEach((id, i) => {
-        const v = parseStored(vals[i]);
-        if (Array.isArray(v)) followUps[id] = v;
-      });
-    }
+    fuIds.forEach((id, i) => {
+      const v = parseStored(fuValues[i]);
+      if (Array.isArray(v)) followUps[id] = v;
+    });
 
-    // SOI membership: one HGETALL of id -> promotion timestamp. Stored, not
-    // derived, because promoting is a manual decision. Values come back as
-    // strings; the client coerces.
-    const soi = (await redis.hgetall(SOI_KEY)) || {};
+    // SOI membership: id -> promotion timestamp. Stored, not derived, because
+    // promoting is a manual decision. Values come back as strings; the client
+    // coerces.
+    const soi = soiRaw || {};
 
-    // These two are compared with Set.has() client-side rather than used as
-    // object keys, so the string coercion above is what makes them work at all.
-    const pinned = toIds(await redis.smembers(PINNED_SET));
-    const rac = toIds(await redis.smembers(RAC_SET));
-    const whale = toIds(await redis.smembers(WHALE_SET));
-    const fire = toIds(await redis.smembers(FIRE_SET));
+    // These are compared with Set.has() client-side rather than used as object
+    // keys, so the string coercion above is what makes them work at all.
+    const pinned = toIds(pinnedRaw);
+    const rac = toIds(racRaw);
+    const whale = toIds(whaleRaw);
+    const fire = toIds(fireRaw);
 
     // Manual contacts are stored as JSON strings in one hash. A record that fails
     // to parse is skipped rather than breaking the whole payload.
-    const manualRaw = (await redis.hgetall(MANUAL_KEY)) || {};
+    const manualRaw = manualHash || {};
     const manual = {};
     for (const [id, value] of Object.entries(manualRaw)) {
       const v = parseStored(value);
@@ -104,16 +127,16 @@ export default async function handler(req, res) {
 
     // Follow Up cockpit state. stages/config fall back to defaults when unset;
     // cold/dead are id -> timestamp hashes, empty when nobody has been moved yet.
-    const storedStages = parseStored(await redis.get(STAGES_KEY));
+    const storedStages = parseStored(storedStagesRaw);
     const stages = Array.isArray(storedStages) && storedStages.length ? storedStages : DEFAULT_STAGES;
-    const storedConfig = parseStored(await redis.get(CONFIG_KEY));
+    const storedConfig = parseStored(storedConfigRaw);
     const config = storedConfig && typeof storedConfig === "object" ? { ...DEFAULT_CONFIG, ...storedConfig } : DEFAULT_CONFIG;
-    const cold = (await redis.hgetall(COLD_KEY)) || {};
-    const dead = (await redis.hgetall(DEAD_KEY)) || {};
+    const cold = coldRaw || {};
+    const dead = deadRaw || {};
 
     // Hand placements from the cockpit drag board: id -> { s, ts }. Entries that
     // fail to parse are skipped rather than breaking the payload.
-    const stagemapRaw = (await redis.hgetall(STAGEMAP_KEY)) || {};
+    const stagemapRaw = stagemapHash || {};
     const stagemap = {};
     for (const [id, value] of Object.entries(stagemapRaw)) {
       const v = parseStored(value);
@@ -122,7 +145,7 @@ export default async function handler(req, res) {
 
     // Motivation notes: id -> plain text. Values coerced to strings (Upstash
     // auto-parses anything JSON-shaped, including bare numbers).
-    const motivationRaw = (await redis.hgetall(MOTIVATION_KEY)) || {};
+    const motivationRaw = motivationHash || {};
     const motivation = {};
     for (const [id, value] of Object.entries(motivationRaw)) {
       if (value != null) motivation[id] = String(value);

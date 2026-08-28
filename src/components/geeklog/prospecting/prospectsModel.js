@@ -337,6 +337,17 @@ export function mergeManualContacts(seeded, manual) {
 // phone digits. Deliberately wider than the Prospecting search (which does not
 // match on phone), because this is how Nick finds someone he only has a number
 // for. Empty query returns nothing: the sheet is a lookup, not a browser.
+// Stable partition: fire-flagged contacts float to the front, neglect order
+// preserved inside each half. Used by every surface that renders the 🔥 flag so
+// hot leads are the first thing seen, not just decorated.
+export function fireFirst(list, fireSet) {
+  if (!fireSet || !fireSet.size) return list;
+  const flagged = [];
+  const rest = [];
+  list.forEach((p) => (fireSet.has(idFromPhone(p.phone)) ? flagged : rest).push(p));
+  return flagged.length ? [...flagged, ...rest] : list;
+}
+
 export function searchContacts(prospects, query) {
   const raw = (query || "").trim();
   if (!raw) return [];

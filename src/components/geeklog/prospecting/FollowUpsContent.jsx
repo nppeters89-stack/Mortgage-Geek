@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -106,10 +106,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const coldList = useMemo(() => coldQueue(prospects, followUps, cold, dead), [prospects, followUps, cold, dead]);
 
   // Mobile mirrors the desktop board's exclusivity: whales leave the main list
-  // for their own tray. queue is already neglect-sorted, so a filter keeps the
-  // order in both halves.
-  const hotList = useMemo(() => queue.filter((p) => !whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
-  const whaleList = useMemo(() => queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), [queue, whaleSet]);
+  // for their own tray. queue is already neglect-sorted; fire-flagged hot leads
+  // float to the top of each half, neglect order kept within each group.
+  const hotList = useMemo(() => fireFirst(queue.filter((p) => !whaleSet.has(idFromPhone(p.phone))), fireSet), [queue, whaleSet, fireSet]);
+  const whaleList = useMemo(() => fireFirst(queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), fireSet), [queue, whaleSet, fireSet]);
   // The header badge counts follow-ups actually DUE (7+ days or never touched),
   // matching the desktop top-nav badge.
   const dueCount = useMemo(() => hotList.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)])).length, [hotList, followUps]);

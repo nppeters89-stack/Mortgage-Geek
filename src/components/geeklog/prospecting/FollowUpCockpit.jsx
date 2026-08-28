@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { Stat, Ring } from "./StatCards";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { fireConfetti } from "./confetti";
 
@@ -90,8 +90,8 @@ export function FollowUpCockpit({
       cols[stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex, override: stagemap[id] })].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
-    return cols;
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet]);
+    return cols.map((c) => fireFirst(c, fireSet));
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
   // as the hot board (same stagemap drags), mapped onto the seven value-add
@@ -105,8 +105,8 @@ export function FollowUpCockpit({
       cols[si].push(p);
     });
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
-    return cols;
-  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet]);
+    return cols.map((c) => fireFirst(c, fireSet));
+  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
   const coldCols = useMemo(() => {
@@ -147,8 +147,9 @@ export function FollowUpCockpit({
     const motPct = livePool.length ? Math.round(livePool.filter((p) => !!motivation?.[idFromPhone(p.phone)]).length / livePool.length * 100) : 0;
     const racPct = livePool.length ? Math.round(livePool.filter((p) => rac?.has(idFromPhone(p.phone))).length / livePool.length * 100) : 0;
     const whales = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; }).length;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, whales };
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, motivation, rac]);
+    const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, whales, hotLeads };
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac]);
 
   // ----- drag plumbing -----
   const startDrag = (id, from) => (e) => {
@@ -311,6 +312,7 @@ export function FollowUpCockpit({
         {/* Due now leads and shouts: red hue, red number - it is the reason to
             be on this screen at all. */}
         <Stat label="Due now" accent={T.redLift} color={T.redLift} wash={stats.due > 0 ? T.redWash : null}>{stats.due}</Stat>
+        <Stat label="Hot leads" accent={T.orange} color={T.orange} wash={stats.hotLeads > 0 ? T.orangeWash : null}>{"🔥"} {stats.hotLeads}</Stat>
         <Stat label="Day streak" accent={stats.streak >= 3 ? T.greenBright : T.redLift}
           color={stats.streak >= 3 ? T.greenBright : T.cream}>
           <span style={{ color: T.redLift, marginRight: 7 }}>{"▲"}</span>{stats.streak}
