@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactCard } from "./ContactCard";
-import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation, persistInstagram, setCachedInstagram } from "./prospectStore";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
   outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
@@ -25,6 +25,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const [prospects, setProspects] = useState(() => (seed?.prospects ? sortedQueue(seed.prospects) : []));
   const [logs, setLogs] = useState(() => seed?.logs || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
+  const [instagram, setInstagram] = useState(() => seed?.instagram || {});
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -35,6 +36,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const logsRef = useRef(logs);
   logsRef.current = logs;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
+  const instagramRef = useRef(instagram); instagramRef.current = instagram;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -52,6 +54,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
         setProspects(c.prospects);
         setLogs(c.logs);
         setMotivation(c.motivation || {});
+        setInstagram(c.instagram || {});
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -86,6 +89,20 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
       setMotivation(prev);
       setCachedMotivation(prev);
       showToast("Could not save motivation");
+    });
+  }, [apiKey, showToast]);
+
+  const handleSaveInstagram = useCallback((id, handle) => {
+    const prev = instagramRef.current;
+    const next = { ...prev };
+    const value = (handle || "").replace(/^@+/, "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setInstagram(next);
+    showToast(value ? "Instagram saved" : "Instagram cleared");
+    persistInstagram(apiKey, id, value).catch((err) => {
+      setInstagram(prev);
+      setCachedInstagram(prev);
+      showToast(err?.message && !String(err.message).startsWith("Request failed") ? err.message : "Could not save Instagram");
     });
   }, [apiKey, showToast]);
 
@@ -136,6 +153,8 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           onToast={showToast}
           motivation={motivation[id] || ""}
           onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+          instagram={instagram[id] || ""}
+          onSaveInstagram={(handle) => handleSaveInstagram(id, handle)}
         />
         <Toast msg={toast} />
       </>

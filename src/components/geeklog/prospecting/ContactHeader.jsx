@@ -1,6 +1,7 @@
 import { T, FF } from "../gl2Tokens";
 import { dialHref } from "./prospectsModel";
 import { mutedBadge } from "./ContactQueueRow";
+import { InstagramHandle } from "./InstagramHandle";
 
 // Shared contact header for the Prospecting card and the Follow Ups detail: serif
 // name, brokerage + line type, buysides, email, a full-width tel: Call button, and
@@ -20,7 +21,7 @@ import { mutedBadge } from "./ContactQueueRow";
 // isWhale/onToggleWhale render the minimal whale toggle beside the name: gray
 // until flagged, aqua-lit once a whale. Follow Ups passes it (mobile detail and
 // cockpit modal alike); surfaces that omit it render no button.
-export function ContactHeader({ prospect: p, callAction = null, onPhone = null, onEmail = null, isWhale = false, onToggleWhale = null, isFire = false, onToggleFire = null }) {
+export function ContactHeader({ prospect: p, callAction = null, onPhone = null, onEmail = null, isWhale = false, onToggleWhale = null, isFire = false, onToggleFire = null, instagram = "", onSaveInstagram = null }) {
   const notes = p.notes || "";
   const sub = [p.brokerage, p.lineType ? `${p.lineType} line` : ""].filter(Boolean).join(" · ");
 
@@ -43,6 +44,8 @@ export function ContactHeader({ prospect: p, callAction = null, onPhone = null, 
         {p.manual && <span style={mutedBadge}>manual</span>}
       </div>
       {sub && <div style={{ color: T.dim, fontSize: 14, marginTop: 6, fontFamily: FF.body }}>{sub}</div>}
+
+      {onSaveInstagram && <InstagramHandle value={instagram} onSave={onSaveInstagram} />}
 
       <div style={{ display: "flex", gap: 22, marginTop: 16 }}>
         <div>

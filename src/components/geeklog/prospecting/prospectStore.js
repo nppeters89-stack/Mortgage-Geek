@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveInstagram, saveInstagramKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, qualifiesForFollowUp, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -81,7 +81,7 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire), addedat: data.addedat || {},
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, instagram: data.instagram || {}, whale: toIds(data.whale), fire: toIds(data.fire), addedat: data.addedat || {},
   };
   saveLS(cache);
   return cache;
@@ -338,6 +338,31 @@ export function persistMotivation(apiKey, id, text) {
 
   saveMotivationKeepalive(apiKey, id, value);
   return saveMotivation(apiKey, id, value);
+}
+
+// ----- Instagram handles -----
+
+export function getCachedInstagram() {
+  return getCachedProspects()?.instagram || {};
+}
+
+export function setCachedInstagram(instagram) {
+  const c = getCachedProspects() || { prospects: [], logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  cache = { ...c, instagram };
+  saveLS(cache);
+  return cache;
+}
+
+// Save (or clear, with empty handle) a contact's Instagram handle. Same
+// optimistic + awaited + keepalive path as motivation.
+export function persistInstagram(apiKey, id, handle) {
+  const instagram = { ...getCachedInstagram() };
+  const value = (handle || "").replace(/^@+/, "").trim();
+  if (value) instagram[id] = value; else delete instagram[id];
+  setCachedInstagram(instagram);
+
+  saveInstagramKeepalive(apiKey, id, value);
+  return saveInstagram(apiKey, id, value);
 }
 
 // Mark a contact dead ("add") or restore them ("remove"). Mirrors the server's

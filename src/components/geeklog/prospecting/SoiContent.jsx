@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation, persistInstagram, setCachedInstagram } from "./prospectStore";
 import { idFromPhone, soiQueue, formatSoiSince, manualContactTsvRow, referralsOf, quadrantOf, lastTouchByTs, STAGE_REFERRAL, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
@@ -27,6 +27,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
   const [soi, setSoi] = useState(() => seed?.soi || {});
   const [rac, setRac] = useState(() => seed?.rac || []);
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
+  const [instagram, setInstagram] = useState(() => seed?.instagram || {});
   const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
   const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
   const [ready, setReady] = useState(!!seed);
@@ -41,6 +42,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
   const racRef = useRef(rac);
   racRef.current = rac;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
+  const instagramRef = useRef(instagram); instagramRef.current = instagram;
   const goalIndex = stages.length - 1;
 
   // Same responsive branch as the Follow Up cockpit: quadrants at >= 900px.
@@ -71,6 +73,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
         setSoi(c.soi || {});
         setRac(c.rac || []);
         setMotivation(c.motivation || {});
+        setInstagram(c.instagram || {});
         setStages(Array.isArray(c.stages) && c.stages.length ? c.stages : DEFAULT_STAGES);
         setConfig(c.config || DEFAULT_CONFIG);
         setReady(true);
@@ -116,6 +119,20 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
       setMotivation(prev);
       setCachedMotivation(prev);
       showToast("Could not save motivation");
+    });
+  }, [apiKey, showToast]);
+
+  const handleSaveInstagram = useCallback((id, handle) => {
+    const prev = instagramRef.current;
+    const next = { ...prev };
+    const value = (handle || "").replace(/^@+/, "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setInstagram(next);
+    showToast(value ? "Instagram saved" : "Instagram cleared");
+    persistInstagram(apiKey, id, value).catch((err) => {
+      setInstagram(prev);
+      setCachedInstagram(prev);
+      showToast(err?.message && !String(err.message).startsWith("Request failed") ? err.message : "Could not save Instagram");
     });
   }, [apiKey, showToast]);
 
@@ -170,6 +187,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
         onToast={showToast}
         copyPhoneOnTap={modal}
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+        instagram={instagram[id] || ""} onSaveInstagram={(handle) => handleSaveInstagram(id, handle)}
         onCopyForExcel={p.manual ? () => copyText(manualContactTsvRow(p)).then(
           () => showToast("Contact row copied"),
           () => showToast("Copy failed"),

@@ -18,6 +18,7 @@
 //               prospects:list:v1 so a re-seed cannot destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
+import { seedInstagramHandles } from "./_instagramSeed.js";
 
 // Contact ids are phone digits, which the @upstash/redis SDK happily parses as
 // JSON numbers on the way out of a SET. Everything downstream compares them as
@@ -43,6 +44,7 @@ const COLD_KEY = "prospects:cold";
 const DEAD_KEY = "prospects:dead";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
+const INSTAGRAM_KEY = "prospects:instagram";
 
 // The cockpit falls back to these when the key is absent, so no seeding write is
 // required for the labels or the week target to work on a fresh install. A stored
@@ -63,7 +65,7 @@ export default async function handler(req, res) {
     // read at once; wave 2 holds the two MGETs that need their SMEMBERS first.
     const [
       listRaw, loggedIdsRaw, fuIdsRaw, soiRaw, pinnedRaw, racRaw, whaleRaw, fireRaw,
-      manualHash, storedStagesRaw, storedConfigRaw, coldRaw, deadRaw, stagemapHash, motivationHash, addedatHash,
+      manualHash, storedStagesRaw, storedConfigRaw, coldRaw, deadRaw, stagemapHash, motivationHash, addedatHash, instagramHash,
     ] = await Promise.all([
       redis.get(LIST_KEY),
       redis.smembers(LOGGED_SET),
@@ -81,6 +83,7 @@ export default async function handler(req, res) {
       redis.hgetall(STAGEMAP_KEY),
       redis.hgetall(MOTIVATION_KEY),
       redis.hgetall(ADDED_KEY),
+      redis.hgetall(INSTAGRAM_KEY),
     ]);
 
     const list = parseStored(listRaw) || { version: 1, generated: null, source: null, prospects: [] };
@@ -153,7 +156,17 @@ export default async function handler(req, res) {
       if (value != null) motivation[id] = String(value);
     }
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale, fire, addedat: addedatHash || {} });
+    // Instagram handles: id -> handle with no @. Same hash shape as motivation.
+    // After the read, HSETNX verified handles for exact seed-list names that
+    // still have no value (never overwrite a user-typed handle).
+    const instagramRaw = instagramHash || {};
+    const instagram = {};
+    for (const [id, value] of Object.entries(instagramRaw)) {
+      if (value != null) instagram[id] = String(value);
+    }
+    await seedInstagramHandles(redis, INSTAGRAM_KEY, list.prospects, instagram);
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale, fire, addedat: addedatHash || {}, instagram });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });
