@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistInstagram, setCachedInstagram, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -34,6 +34,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
+  const [instagram, setInstagram] = useState(() => seed?.instagram || {});
   const [dead, setDead] = useState(() => seed?.dead || {});
   const [stages, setStages] = useState(() => seed?.stages || DEFAULT_STAGES);
   const [config, setConfig] = useState(() => seed?.config || DEFAULT_CONFIG);
@@ -52,6 +53,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const coldRef = useRef(cold); coldRef.current = cold;
   const stagemapRef = useRef(stagemap); stagemapRef.current = stagemap;
   const motivationRef = useRef(motivation); motivationRef.current = motivation;
+  const instagramRef = useRef(instagram); instagramRef.current = instagram;
   const deadRef = useRef(dead); deadRef.current = dead;
 
   // Desktop cockpit at >= 900px. Read synchronously on first render (Geek Log is
@@ -85,6 +87,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         setSoi(c.soi || {});
         setStagemap(c.stagemap || {});
         setMotivation(c.motivation || {});
+        setInstagram(c.instagram || {});
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setWhale(c.whale || []);
@@ -224,6 +227,20 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     });
   }, [apiKey, showToast]);
 
+  const handleSaveInstagram = useCallback((id, handle) => {
+    const prev = instagramRef.current;
+    const next = { ...prev };
+    const value = (handle || "").replace(/^@+/, "").trim();
+    if (value) next[id] = value; else delete next[id];
+    setInstagram(next);
+    showToast(value ? "Instagram saved" : "Instagram cleared");
+    persistInstagram(apiKey, id, value).catch((err) => {
+      setInstagram(prev);
+      setCachedInstagram(prev);
+      showToast(err?.message && !String(err.message).startsWith("Request failed") ? err.message : "Could not save Instagram");
+    });
+  }, [apiKey, showToast]);
+
   // Desktop drag: a hand placement. The card moves to the dropped stage with no
   // touch logged, in either direction; stageOf treats the placement as the new
   // ratchet base, so touches logged after it can still advance the card.
@@ -356,6 +373,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           prospect={p} log={logs[id]} touches={followUps[id] || []}
           onBack={closeDetail} onToast={showToast}
           motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+          instagram={instagram[id] || ""} onSaveInstagram={(handle) => handleSaveInstagram(id, handle)}
           copyPhoneOnTap={modal}
           onSetScore={(v) => handleSetScore(id, v)}
           isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
@@ -379,6 +397,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         onAddToSoi={() => { handleAddToSoi(id); if (modal) fireConfetti(); }}
         onCopyForExcel={p.manual ? () => handleCopyForExcel(p) : null}
         motivation={motivation[id] || ""} onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+        instagram={instagram[id] || ""} onSaveInstagram={(handle) => handleSaveInstagram(id, handle)}
         copyPhoneOnTap={modal}
         onSetScore={(v) => handleSetScore(id, v)}
         isWhale={whaleSet.has(id)} onToggleWhale={() => toggleWhale(id)}
@@ -393,7 +412,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, whaleSet, fireSet, closeDetail, showToast, toggleRac, toggleWhale, toggleFire, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, instagram, racSet, pinnedSet, whaleSet, fireSet, closeDetail, showToast, toggleRac, toggleWhale, toggleFire, handleColdCheckIn, handleRevive, handleLogFollowUp, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSaveInstagram, handleSetScore, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {
