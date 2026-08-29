@@ -8,6 +8,7 @@
 //   { kind: "cold",   id, action: "add" | "remove" }  HSET/HDEL prospects:cold
 //   { kind: "dead",   id, action: "add" | "remove" }  HSET/HDEL prospects:dead (+cold)
 //   { kind: "manual", contact }                       HSET prospects:manual + pin
+//   { kind: "instagram", id, action: "add", handle }  HSET/HDEL prospects:instagram
 //
 // cold and dead are the Follow Up cockpit's state hashes (id -> ms timestamp).
 // They live here, not in two new endpoint files, because Vercel's Hobby plan caps
@@ -25,6 +26,7 @@
 // replaced wholesale on every re-seed from Excel and would destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
+import { INSTAGRAM_HANDLE_RE, normalizeInstagramHandle } from "./_instagramSeed.js";
 
 const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
@@ -36,6 +38,7 @@ const ADDED_KEY = "prospects:addedat";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
+const INSTAGRAM_KEY = "prospects:instagram";
 const DEAD_KEY = "prospects:dead";
 
 const ACTIONS = new Set(["add", "remove"]);
@@ -190,6 +193,25 @@ async function handleMotivation(res, { id, action, text }) {
   return jsonResponse(res, 200, { id, action, text: value });
 }
 
+// Per-contact Instagram handle, no @. Same hash shape as motivation. "add"
+// with a handle upserts after stripping a leading @; empty handle or "remove"
+// clears. Charset is Instagram's: letters, numbers, periods, underscores.
+async function handleInstagram(res, { id, action, handle }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
+
+  const value = normalizeInstagramHandle(handle);
+  if (action === "remove" || !value) {
+    await redis.hdel(INSTAGRAM_KEY, id);
+    return jsonResponse(res, 200, { id, action: "remove" });
+  }
+  if (!INSTAGRAM_HANDLE_RE.test(value)) {
+    return jsonResponse(res, 400, { error: "handle must use letters, numbers, periods, and underscores only" });
+  }
+  await redis.hset(INSTAGRAM_KEY, { [id]: value });
+  return jsonResponse(res, 200, { id, action, handle: value });
+}
+
 export default async function handler(req, res) {
   if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
@@ -209,11 +231,12 @@ export default async function handler(req, res) {
       case "fire": return await handleSetFlag(res, body, FIRE_SET);
       case "stage": return await handleStageMove(res, body);
       case "motivation": return await handleMotivation(res, body);
+      case "instagram": return await handleInstagram(res, body);
       case "cold": return await handleCold(res, body);
       case "dead": return await handleDead(res, body);
       case "added": return await handleAdded(res, body);
       case "manual": return await handleManual(res, body.contact);
-      default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
+      default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead, instagram or manual" });
     }
   } catch (err) {
     console.error("[prospects/membership] error:", err);
