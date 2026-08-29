@@ -17,7 +17,7 @@ const tomorrowISO = () => {
   return d.toISOString().slice(0, 10);
 };
 
-export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToast = null, motivation = "", onSaveMotivation = null }) {
+export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToast = null, motivation = "", onSaveMotivation = null, instagram = "", onSaveInstagram = null }) {
   const [outcome, setOutcome] = useState(log?.outcome || "");
   const [score, setScore] = useState(log?.score || 0);
   const [note, setNote] = useState(log?.note || "");
@@ -44,7 +44,7 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
         ← Queue
       </button>
 
-      <ContactHeader prospect={p} callAction={<AddToContactsButton prospect={p} onToast={onToast} />} />
+      <ContactHeader prospect={p} callAction={<AddToContactsButton prospect={p} onToast={onToast} />} instagram={instagram} onSaveInstagram={onSaveInstagram} />
 
       {/* Motivation lands here first: gathered DURING the call, so it is already
           on file when a 9+ score sends the contact to Follow Ups. */}
