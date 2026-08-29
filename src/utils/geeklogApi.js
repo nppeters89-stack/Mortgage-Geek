@@ -204,7 +204,9 @@ async function prospectsFetch(key, path, init = {}) {
 // arrays).
 export async function fetchProspects(key) {
   const data = await prospectsFetch(key, "");
-  return data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  const next = data || { list: { prospects: [] }, logs: {}, followUps: {}, soi: {}, pinned: [], manual: {}, rac: [] };
+  if (!next.instagram) next.instagram = {};
+  return next;
 }
 
 // PUT /api/prospects/log — upsert one contact's log. Awaited write.
@@ -349,6 +351,17 @@ export async function saveMotivation(key, id, text) {
 
 export function saveMotivationKeepalive(key, id, text) {
   membershipKeepalive(key, { kind: "motivation", id, action: "add", text });
+}
+
+// Save a contact's Instagram handle (empty handle clears it). Same durability
+// pair as motivation: awaited so the caller can revert, keepalive so a lock
+// mid-save still lands.
+export async function saveInstagram(key, id, handle) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "instagram", id, action: "add", handle }));
+}
+
+export function saveInstagramKeepalive(key, id, handle) {
+  membershipKeepalive(key, { kind: "instagram", id, action: "add", handle });
 }
 
 // Record a hand placement from the cockpit drag board ("add" with a stage
