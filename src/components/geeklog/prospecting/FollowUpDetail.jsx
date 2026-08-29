@@ -56,7 +56,7 @@ export function FollowUpDetail({
   inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
-  motivation = "", onSaveMotivation = null, copyPhoneOnTap = false, onSetScore = null,
+  motivation = "", onSaveMotivation = null, instagram = "", onSaveInstagram = null, copyPhoneOnTap = false, onSetScore = null,
   onLogReferral = null, isWhale = false, onToggleWhale = null, isFire = false, onToggleFire = null,
   // whaleMode swaps the stage composer onto the whale pipeline's own axis: all
   // seven value-add columns are selectable (the main dropdown hides New), and
@@ -117,6 +117,7 @@ export function FollowUpDetail({
       <ContactHeader prospect={p}
         isWhale={isWhale} onToggleWhale={onToggleWhale}
         isFire={isFire} onToggleFire={onToggleFire}
+        instagram={instagram} onSaveInstagram={onSaveInstagram}
         onPhone={copyPhoneOnTap ? () => copyText(p.phone).then(() => onToast?.("Phone number copied"), () => onToast?.("Copy failed")) : null}
         onEmail={copyPhoneOnTap && p.email ? () => copyText(p.email).then(() => onToast?.("Email copied"), () => onToast?.("Copy failed")) : null}
         callAction={
