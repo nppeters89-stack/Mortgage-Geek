@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
-import { TabBar } from "./Gl2Primitives";
+import { TabBar, StatsToggle } from "./Gl2Primitives";
 import { Gl2TabDock } from "./Gl2TabDock";
 import { Gl2TopNav } from "./Gl2TopNav";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
@@ -72,6 +72,8 @@ export function Gl2App({ apiKey }) {
   const [closings, setClosings] = useState(0);
   const [stats, setStats] = useState(null);
   const [tab, setTab] = useState("today");
+  // Stats folds the old Week and YTD tabs into one; this picks the view.
+  const [statsView, setStatsView] = useState("week");
   // The desktop Follow Up cockpit (>= 900px) runs full-bleed: no width cap, the
   // board owns the whole screen. Every other tab and all of mobile stay at
   // APP_MAX.
@@ -452,12 +454,18 @@ export function Gl2App({ apiKey }) {
               weekConv={weekConv} target={target} streak={streak} syncing={syncing} pulse={pulse}
             />
           )}
-          {tab === "week" && (
-            <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} onSettings={() => setSettingsOpen(true)} />
+          {tab === "stats" && (
+            <>
+              <StatsToggle view={statsView} onChange={setStatsView} />
+              {statsView === "week" ? (
+                <WeekContent week={weekTotals} days={perDayConv} todayIndex={todayIndex} target={target} rangeLabel={rLabel} onExport={() => doExport()} exporting={exporting} rewards={weekRewards} onSettings={() => setSettingsOpen(true)} />
+              ) : (
+                <YtdContent apiKey={apiKey} year={year} onSettings={() => setSettingsOpen(true)} />
+              )}
+            </>
           )}
           {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
           {tab === "followups" && <FollowUpsContent apiKey={apiKey} onOpenSoi={() => setTab("soi")} />}
-          {tab === "ytd" && <YtdContent apiKey={apiKey} year={year} onSettings={() => setSettingsOpen(true)} />}
           {/* Closings and SOI are not bottom tabs; they open from the dollar and
               SOI buttons in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}

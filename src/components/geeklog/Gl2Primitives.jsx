@@ -221,6 +221,27 @@ export function DayStrip({ days, todayIndex, size = 34 }) {
 
 // The five nav glyphs, 24-viewBox rendered at 22px, stroke:currentColor so they
 // take the tab's color. Recreated from the supplied SVG assets.
+// Week / Year toggle inside the Stats tab (the Week and YTD tabs folded into
+// one). Same pill treatment as the active TabBar tab.
+export function StatsToggle({ view, onChange }) {
+  const opts = [{ id: "week", label: "This Week" }, { id: "year", label: "This Year" }];
+  return (
+    <div role="tablist" aria-label="Stats range" style={{ display: "flex", justifyContent: "center", padding: "0 20px 12px" }}>
+      <div style={{ display: "flex", gap: 4, padding: 4, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999 }}>
+        {opts.map((o) => {
+          const on = view === o.id;
+          return (
+            <button key={o.id} type="button" role="tab" aria-selected={on} onClick={() => onChange(o.id)}
+              style={{ border: "none", borderRadius: 999, padding: "7px 16px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer", background: on ? withAlpha(T.greenBright, 0.15) : "none", color: on ? T.greenBright : T.dim, transition: "background 180ms ease-out, color 180ms ease-out" }}>
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function TabGlyph({ id, size = 22 }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true, style: { display: "block", flex: "none" } };
   switch (id) {
@@ -228,8 +249,7 @@ export function TabGlyph({ id, size = 22 }) {
       return (<svg {...common}><rect x="3.25" y="4.75" width="17.5" height="16" rx="3.2" /><path d="M3.25 9.6h17.5M8.2 3.1v3.4M15.8 3.1v3.4" /><circle cx="12" cy="15.1" r="1.85" fill="currentColor" stroke="none" /></svg>);
     case "prospecting":
       return (<svg {...common}><circle cx="9.4" cy="8.6" r="3.3" /><path d="M3.6 19.9c0-3.25 2.6-5.4 5.8-5.4s5.8 2.15 5.8 5.4" /><path d="M18.6 7.1v5M16.1 9.6h5" /></svg>);
-    case "week":
-      return (<svg {...common}><rect x="3.25" y="4.75" width="17.5" height="16" rx="3.2" /><path d="M3.25 9.6h17.5M9.2 9.6v11.15M14.8 9.6v11.15M8.2 3.1v3.4M15.8 3.1v3.4" /></svg>);
+    case "stats":
     case "ytd":
       return (<svg {...common}><path d="M3.6 16.9 9.2 11.3l3.4 3.4 7.8-7.8" /><path d="M15.4 6.9h5v5" /><path d="M3.6 20.6h17" /></svg>);
     case "followups":
@@ -243,8 +263,7 @@ export function TabBar({ active, onChange }) {
   const tabs = [
     { id: "today", label: "Today" },
     { id: "prospecting", label: "Prospects" },
-    { id: "week", label: "Week" },
-    { id: "ytd", label: "YTD" },
+    { id: "stats", label: "Stats" },
     { id: "followups", label: "Follow Ups" },
   ];
   const tint = withAlpha(T.greenBright, 0.15);

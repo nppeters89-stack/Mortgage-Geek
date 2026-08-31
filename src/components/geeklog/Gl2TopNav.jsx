@@ -18,8 +18,7 @@ import { idFromPhone, followUpQueue, isDueForTouch, dueDaysFor, stageOf } from "
 const TABS = [
   { id: "today", label: "Today" },
   { id: "prospecting", label: "Prospects" },
-  { id: "week", label: "Week" },
-  { id: "ytd", label: "YTD" },
+  { id: "stats", label: "Stats" },
   { id: "followups", label: "Follow Ups" },
 ];
 
