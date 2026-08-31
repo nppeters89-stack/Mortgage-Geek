@@ -19,7 +19,7 @@ const TABS = [
   { id: "today", label: "Today" },
   { id: "prospecting", label: "Prospects" },
   { id: "stats", label: "Stats" },
-  { id: "followups", label: "Follow Ups" },
+  { id: "followups", label: "Pipeline" },
 ];
 
 function followUpsDue() {

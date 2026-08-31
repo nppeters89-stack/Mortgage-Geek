@@ -264,7 +264,7 @@ export function TabBar({ active, onChange }) {
     { id: "today", label: "Today" },
     { id: "prospecting", label: "Prospects" },
     { id: "stats", label: "Stats" },
-    { id: "followups", label: "Follow Ups" },
+    { id: "followups", label: "Pipeline" },
   ];
   const tint = withAlpha(T.greenBright, 0.15);
   const EASE = "180ms ease-out";
