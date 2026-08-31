@@ -114,8 +114,21 @@ export function TapTarget({ label, count, ceiling = 8, onInc, onDec, height = 64
       <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: on ? T.green : "transparent", transition: "background .2s ease" }} />
 
       <div style={{ position: "relative", height: "100%", display: "flex", alignItems: "center" }}>
-        <div style={{ flex: 1, paddingLeft: 18, fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, color: T.cream, letterSpacing: "-0.005em" }}>{label}</div>
-        <div key={pulse} style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 27, lineHeight: 1, color: on ? T.greenBright : T.dimmer, fontVariantNumeric: "tabular-nums", paddingRight: 14, minWidth: 46, textAlign: "right", animation: pulse ? "gl-pop .3s cubic-bezier(.2,.9,.3,1)" : "none" }}>{count}</div>
+        <div style={{ flex: 1, minWidth: 0, paddingLeft: 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <span style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, color: T.cream, letterSpacing: "-0.005em" }}>{label}</span>
+            {count >= ceiling && <span aria-hidden="true" style={{ color: T.greenBright, fontSize: 12, fontWeight: 700 }}>{"✓"}</span>}
+          </div>
+          {/* Tally track: one pip per ceiling slot; counts past the ceiling
+              append translucent extras (capped at six) so overflow stays
+              visible instead of silently maxing out. */}
+          <div style={{ display: "flex", gap: 3, marginTop: 7 }}>
+            {Array.from({ length: Math.min(Math.max(ceiling, count), ceiling + 6) }, (_, i) => (
+              <span key={i} style={{ width: 15, height: 6, borderRadius: 3, background: i < count ? (count >= ceiling ? T.greenBright : T.green) : "rgba(255,254,251,0.10)", opacity: i >= ceiling ? 0.6 : 1, transition: "background .25s ease" }} />
+            ))}
+          </div>
+        </div>
+        <div key={pulse} style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 27, lineHeight: 1, color: count >= ceiling ? T.greenBright : on ? T.cream : T.dimmer, fontVariantNumeric: "tabular-nums", paddingRight: 14, minWidth: 46, textAlign: "right", animation: pulse ? "gl-pop .3s cubic-bezier(.2,.9,.3,1)" : "none" }}>{count}</div>
         <div onClick={dec} style={{ width: 48, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", borderLeft: `1px solid ${T.lineSoft}`, cursor: count ? "pointer" : "default" }}>
           <div style={{ width: 15, height: 1.5, borderRadius: 1, background: cold ? T.cream : (count ? T.dim : T.faint), transition: "background .16s ease" }} />
         </div>
@@ -125,12 +138,14 @@ export function TapTarget({ label, count, ceiling = 8, onInc, onDec, height = 64
 }
 
 // ---------- Pillar section ----------
-export function Pillar({ title, total, note, children, gap = 8 }) {
+export function Pillar({ title, total, ceilingTotal = null, note, children, gap = 8 }) {
   return (
     <div>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: note ? 4 : 9 }}>
         <Eyebrow size={11}>{title}</Eyebrow>
-        <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 15, color: total > 0 ? T.green : T.dimmer, fontVariantNumeric: "tabular-nums" }}>{total}</div>
+        <div style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 15, color: total > 0 ? T.green : T.dimmer, fontVariantNumeric: "tabular-nums" }}>
+          {total}{ceilingTotal != null && <span style={{ fontWeight: 500, fontSize: 12, color: "rgba(255,254,251,0.28)" }}> of {ceilingTotal}</span>}
+        </div>
       </div>
       {note && (
         <div style={{ fontFamily: FF.body, fontWeight: 400, fontSize: 11.5, color: T.dimmer, marginBottom: 9, letterSpacing: "0.01em" }}>{note}</div>

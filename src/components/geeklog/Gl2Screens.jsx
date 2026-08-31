@@ -2,7 +2,7 @@ import { useState } from "react";
 import { T, FF, APP_MAX } from "./gl2Tokens";
 import { Wordmark, SettingsMark, Eyebrow, Card, TapTarget, Pillar, WeekBar, DayStrip } from "./Gl2Primitives";
 import { WeekRewards } from "./Gl2Rewards";
-import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, sumKeys } from "./gl2Model";
+import { CONV_SUBS, APPT_SUBS, CONTENT_SUBS, EVENTS_SUBS, CONV_DEF, DAY_GOAL, sumKeys } from "./gl2Model";
 
 // Geek Log 2.0 screen bodies. Each renders header + scrollable content only; the
 // page (GeekLogPage) supplies the viewport shell and the persistent TabBar, and
@@ -48,7 +48,38 @@ function SyncDot() {
 // ===========================================================================
 // Today
 // ===========================================================================
-export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, onOpenClosings, onOpenSoi, weekConv, target, syncing, pulse }) {
+// Today-first hero (CD 6B): the day's conversations as the scoreboard, the
+// week demoted to a context line. Two states pivot on DAY_GOAL; the deficit
+// framing ("93 to go") is gone on purpose.
+function TodayHero({ conv, weekConv, target, streak }) {
+  const cleared = conv >= DAY_GOAL;
+  const pct = Math.min(100, (conv / DAY_GOAL) * 100);
+  return (
+    <div style={{ flex: "0 0 auto", margin: "0 20px 14px", padding: "12px 14px 13px", borderRadius: 14, background: "rgba(255,254,251,0.035)", boxShadow: `inset 0 0 0 1px ${T.line}` }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+        <div style={{ fontFamily: FF.body, fontWeight: 800, fontSize: 52, lineHeight: 0.85, fontVariantNumeric: "tabular-nums", color: cleared ? T.greenLift : T.greenBright, filter: cleared ? "drop-shadow(0 0 18px rgba(99,230,160,0.45))" : "none", transition: "filter .4s ease, color .4s ease" }}>{conv}</div>
+        <div style={{ paddingBottom: 2, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 12.5, color: T.cream }}>conversations today</span>
+            {cleared && <span style={{ fontFamily: FF.body, fontSize: 10, fontWeight: 700, color: T.bg1, background: T.greenLift, borderRadius: 999, padding: "2px 7px", fontVariantNumeric: "tabular-nums" }}>+{conv - DAY_GOAL} over</span>}
+          </div>
+          <div style={{ fontFamily: FF.body, fontSize: 11.5, color: T.dimmer, marginTop: 2 }}>
+            {cleared ? "Goal cleared. Every extra one counts." : `${DAY_GOAL - conv} more fills today's board`}
+          </div>
+        </div>
+      </div>
+      <div style={{ marginTop: 10, height: 8, borderRadius: 4, background: cleared ? "rgba(47,191,113,0.22)" : T.bg0, overflow: "hidden" }}>
+        <div style={{ height: "100%", borderRadius: 4, width: `${pct}%`, background: cleared ? `linear-gradient(90deg, rgba(140,242,184,0.65), ${T.greenBright} 45%, ${T.greenLift})` : `linear-gradient(90deg, rgba(99,230,160,0.45), ${T.green} 55%, ${T.greenBright})`, transition: "width .4s ease, background .4s ease" }} />
+      </div>
+      <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", gap: 10, fontFamily: FF.body, fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>
+        <span>Today · goal {DAY_GOAL}</span>
+        <span>Week <strong style={{ color: T.dim, fontWeight: 700 }}>{weekConv}</strong>/{target}{streak > 0 ? ` · 🔥 ${streak} day streak` : ""}</span>
+      </div>
+    </div>
+  );
+}
+
+export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, backDisabled, onForward, canForward, onSettings, onOpenClosings, onOpenSoi, weekConv, target, streak = 0, syncing, pulse }) {
   const convTotal = sumKeys(state, CONV_SUBS);
   const apptTotal = sumKeys(state, APPT_SUBS);
   const contentTotal = sumKeys(state, CONTENT_SUBS);
@@ -85,31 +116,30 @@ export function TodayContent({ state, inc, dec, dateLabel, subtitle, onBack, bac
         </div>
       </div>
 
-      <div style={{ flex: "0 0 auto", margin: "0 20px 14px", padding: "12px 14px 13px", borderRadius: 14, background: "rgba(255,254,251,0.035)", boxShadow: `inset 0 0 0 1px ${T.line}` }}>
-        <WeekBar value={weekConv} target={target} thickness={7} pulse={pulse} />
-      </div>
+      <TodayHero conv={convTotal} weekConv={weekConv} target={target} streak={streak} />
 
       <div style={{ padding: "0 20px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
-        <Pillar title="Conversations" total={convTotal} note={CONV_DEF}>
+        <Pillar title="Conversations" total={convTotal} ceilingTotal={CONV_SUBS.reduce((n, x) => n + x.ceiling, 0)} note={CONV_DEF}>
           {CONV_SUBS.map((s) => (
             <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
           ))}
         </Pillar>
-        <Pillar title="Appointments" total={apptTotal}>
+        <Pillar title="Appointments" total={apptTotal} ceilingTotal={APPT_SUBS.reduce((n, x) => n + x.ceiling, 0)}>
           {APPT_SUBS.map((s) => (
             <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
           ))}
         </Pillar>
-        <Pillar title="Content" total={contentTotal}>
+        <Pillar title="Content" total={contentTotal} ceilingTotal={CONTENT_SUBS.reduce((n, x) => n + x.ceiling, 0)}>
           {CONTENT_SUBS.map((s) => (
             <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
           ))}
         </Pillar>
-        <Pillar title="Events" total={eventsTotal}>
+        <Pillar title="Events" total={eventsTotal} ceilingTotal={EVENTS_SUBS.reduce((n, x) => n + x.ceiling, 0)}>
           {EVENTS_SUBS.map((s) => (
             <TapTarget key={s.key} label={s.label} count={state[s.key]} ceiling={s.ceiling} onInc={() => inc(s.key)} onDec={() => dec(s.key)} />
           ))}
         </Pillar>
+        <div style={{ textAlign: "center", fontFamily: FF.body, fontSize: 10.5, color: T.dimmer }}>Tap a row to add · − to remove</div>
       </div>
     </>
   );

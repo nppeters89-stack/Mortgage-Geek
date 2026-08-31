@@ -18,6 +18,7 @@ export const T = {
   greenDeep: "#14563A",
   green: "#2FBF71", // status green, Geek Log's semantic success
   greenBright: "#63E6A0",
+  greenLift: "#8CF2B8", // brightest green: the Today hero once the daily goal clears
   greenWash: "rgba(47,191,113,0.10)", // green at 10%: card-level "this one is hot" fill
   greenWashLine: "rgba(47,191,113,0.28)", // its separator, so the wash reads as one block
   gold: "#B8860B", // closings only, internal

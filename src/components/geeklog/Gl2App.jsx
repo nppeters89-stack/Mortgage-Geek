@@ -449,7 +449,7 @@ export function Gl2App({ apiKey }) {
               onSettings={() => setSettingsOpen(true)}
               onOpenClosings={() => setTab("closings")}
               onOpenSoi={() => setTab("soi")}
-              weekConv={weekConv} target={target} syncing={syncing} pulse={pulse}
+              weekConv={weekConv} target={target} streak={streak} syncing={syncing} pulse={pulse}
             />
           )}
           {tab === "week" && (

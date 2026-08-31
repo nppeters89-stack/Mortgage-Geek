@@ -28,6 +28,10 @@ export const ALL_KEYS = [...CONV_SUBS, ...APPT_SUBS, ...CONTENT_SUBS, ...EVENTS_
 // api/geeklog/_activity.js so client and server agree.
 export const STREAK_FLOOR = 3;
 
+// The daily conversations goal: 20/day across 5 working days is the existing
+// 100/week, expressed in a unit that can be closed today.
+export const DAY_GOAL = 20;
+
 export const CONV_DEF = "A conversation is a two way exchange with a human about mortgage business.";
 
 export function sumKeys(obj, subs) {
