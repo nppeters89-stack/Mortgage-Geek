@@ -51,6 +51,44 @@ export const RAC_TARGET = 100; // everyone live should be in RAC
 export const MOT_TARGET = 80; // motivation on file
 export const CONVO_TARGET = 100; // weekly conversations goal
 
+// Shared weekly scoreboard math for the desktop HUD and the mobile header
+// strip, so the phone and the desktop can never disagree on the week.
+// week = rolling 7 days of non-referral touches (the shipped definition);
+// added/convos use Monday 00:00 local. Join date is stored addedat with a
+// fallback to the earliest touch or first-call log for members predating it.
+export function weekScoreboard({ prospects, logs, followUps, soi = EMPTY_OBJ, pinned = EMPTY_SET, cold = EMPTY_OBJ, dead = EMPTY_OBJ, addedat = EMPTY_OBJ }) {
+  const wkD = new Date(); wkD.setHours(0, 0, 0, 0);
+  const dayStart = wkD.getTime();
+  wkD.setDate(wkD.getDate() - ((wkD.getDay() + 6) % 7));
+  const weekStart = wkD.getTime();
+  const weekLabel = `week of ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][wkD.getDay()]} ${wkD.getDate()}`;
+  let week = 0, talkedWeek = 0;
+  const now = Date.now();
+  (prospects || []).forEach((p) => {
+    const id = idFromPhone(p.phone);
+    if (dead[id]) return;
+    (followUps[id] || []).forEach((t) => {
+      if (t.stage !== STAGE_REFERRAL && now - t.ts < 7 * DAY_MS) week++;
+      if (t.talked === true && t.ts >= weekStart) talkedWeek++;
+    });
+  });
+  const scoredCallsWeek = Object.values(logs || {}).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
+  const convosWeek = talkedWeek + scoredCallsWeek;
+  const livePool = (prospects || []).filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && (qualifiesForFollowUp(logs[id]) || pinned.has(id) || soi[id]); });
+  const joinTs = (id) => {
+    const stored = Number(addedat?.[id]);
+    if (Number.isFinite(stored) && stored > 0) return stored;
+    const first = (followUps[id] || []).reduce((m, t) => (t.ts && (!m || t.ts < m) ? t.ts : m), 0);
+    return first || logs?.[id]?.ts || 0;
+  };
+  const joins = livePool.map((p) => joinTs(idFromPhone(p.phone))).filter(Boolean);
+  return {
+    weekStart, dayStart, weekLabel, week, convosWeek,
+    addedToday: joins.filter((t) => t >= dayStart).length,
+    addedWeek: joins.filter((t) => t >= weekStart).length,
+  };
+}
+
 export function isToday(ts) {
   if (!ts) return false;
   return centralDateKey(new Date(ts)) === centralDateKey();

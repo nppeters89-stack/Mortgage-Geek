@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst, weekScoreboard } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -210,28 +210,9 @@ export function FollowUpCockpit({
     const racPct = livePool.length ? Math.round((livePool.length - racMissing) / livePool.length * 100) : 0;
     const whales = whaleMembers.length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
-    // Weekly scoreboard (4A). Week runs Monday 00:00 local to now. Join date is
-    // the stored addedat, falling back to the earliest touch or the first-call
-    // log for members who predate the field.
-    const wkD = new Date(); wkD.setHours(0, 0, 0, 0);
-    const dayStart = wkD.getTime();
-    wkD.setDate(wkD.getDate() - ((wkD.getDay() + 6) % 7));
-    const weekStart = wkD.getTime();
-    const weekLabel = `week of ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][wkD.getDay()]} ${wkD.getDate()}`;
-    const joinTs = (id) => {
-      const stored = Number(addedat?.[id]);
-      if (Number.isFinite(stored) && stored > 0) return stored;
-      const first = (followUps[id] || []).reduce((m, t) => (t.ts && (!m || t.ts < m) ? t.ts : m), 0);
-      return first || logs[id]?.ts || 0;
-    };
-    const joins = livePool.map((p) => joinTs(idFromPhone(p.phone))).filter(Boolean);
-    const addedToday = joins.filter((t) => t >= dayStart).length;
-    const addedWeek = joins.filter((t) => t >= weekStart).length;
-    // A conversation: a touch marked "We talked", or a scored first call. One
-    // definition, applied to both the power bar and the ratio.
-    const talkedWeek = all.filter((t) => t.talked === true && t.ts >= weekStart).length;
-    const scoredCallsWeek = Object.values(logs).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
-    const convosWeek = talkedWeek + scoredCallsWeek;
+    // Weekly scoreboard (4A): shared selector, so the phone strip and this
+    // panel always agree on the week.
+    const { weekLabel, addedToday, addedWeek, convosWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;

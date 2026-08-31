@@ -1,15 +1,19 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { T, FF } from "../gl2Tokens";
+import { T, FF, STAGE_RAMP } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, lastTouchTs, weekScoreboard, CONVO_TARGET, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
+import { MobileQueueRow } from "./MobileQueueRow";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { copyText } from "./clipboard";
 import { quietAction } from "./detailActionStyles";
 import { fireConfetti } from "./confetti";
+
+// Accent hex at an alpha, for the mobile filter tiles' active state.
+const tint = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},${a})`;
 
 // Follow Ups tab. On mobile (< 900px) this is the list experience: neglect-sorted
 // queue with the pipeline stage on every row, a stage selector in the composer
@@ -117,6 +121,35 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     const id = idFromPhone(p.phone);
     return isDueForTouch(followUps[id], dueDaysFor(stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)));
   }).length, [hotList, whaleList, followUps, goalIndex, stagemap, whaleSet]);
+  // Mobile 5B: filter tiles + staleness groups. Its own state, deliberately a
+  // different set from the desktop rail (data hygiene is desk work).
+  const [mobileFilter, setMobileFilter] = useState(null); // null | "due" | "fire" | "whale"
+  const dueDayOf = useCallback((id) => dueDaysFor(stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)), [followUps, goalIndex, stagemap, whaleSet]);
+  // Shared weekly scoreboard, same selector as the desktop HUD.
+  const wk = useMemo(() => weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat }), [prospects, logs, followUps, soi, pinnedSet, cold, dead, addedat]);
+  const mobileGroups = useMemo(() => {
+    const combined = [...hotList, ...whaleList];
+    let pool = combined;
+    if (mobileFilter === "whale") pool = whaleList;
+    else if (mobileFilter === "fire") pool = combined.filter((p) => fireSet.has(idFromPhone(p.phone)));
+    else if (mobileFilter === "due") pool = combined.filter((p) => { const id = idFromPhone(p.phone); return isDueForTouch(followUps[id], dueDayOf(id)); });
+    const overdue = [], soon = [], recent = [];
+    pool.forEach((p) => {
+      const id = idFromPhone(p.phone);
+      const dd = dueDayOf(id);
+      const ts = lastTouchTs(followUps[id]);
+      const days = ts ? Math.floor((Date.now() - ts) / 86400000) : null;
+      if (days == null || days >= dd) overdue.push(p);
+      else if (days >= dd - 4) soon.push(p);
+      else recent.push(p);
+    });
+    const groups = [
+      { key: "overdue", label: "Overdue · past their clock", color: T.redLiftHi, wash: T.redWash, rule: "rgba(226,87,91,0.30)", rows: fireFirst(overdue, fireSet) },
+      { key: "soon", label: "Due soon · within 4 days", color: T.amber, wash: "rgba(201,162,58,0.10)", rule: "rgba(201,162,58,0.30)", rows: fireFirst(soon, fireSet) },
+      { key: "recent", label: "Recently touched", color: T.dimmer, wash: "rgba(255,254,251,0.03)", rule: T.lineSoft, rows: fireFirst(recent, fireSet) },
+    ];
+    return { groups, total: pool.length, allCount: combined.length, fireCount: combined.filter((p) => fireSet.has(idFromPhone(p.phone))).length };
+  }, [hotList, whaleList, mobileFilter, followUps, fireSet, dueDayOf]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const closeDetail = useCallback(() => setOpenId(null), []);
@@ -442,20 +475,58 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
       <StatusBarCap />
-      <header style={{ position: "sticky", top: "calc(8px + env(safe-area-inset-top, 0px))", zIndex: 20, padding: "2px 20px 14px", background: T.bg1 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+      <header style={{ padding: "2px 20px 0", background: T.bg1 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Ups</h1>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
-              <strong style={{ color: T.redLift, fontWeight: 600 }}>{dueCount}</strong> due
-            </div>
-            <button type="button" onClick={() => setSheetOpen(true)} aria-label="Add to Follow Ups"
-              style={{ flex: "none", width: 34, height: 34, borderRadius: 10, background: "none", border: "none", boxShadow: `inset 0 0 0 1px ${T.line}`, color: T.dim, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-          </div>
+          <button type="button" onClick={() => setSheetOpen(true)} aria-label="Add to Follow Ups"
+            style={{ flex: "none", width: 32, height: 32, borderRadius: "50%", background: T.surfaceHi, border: `1px solid ${T.lineSoft}`, color: T.dim, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
+        {/* Week strip: the same numbers the desktop HUD shows, same selector. */}
+        <div style={{ marginTop: 11, padding: "9px 12px", background: T.surfaceHi, border: `1px solid ${T.line}`, borderRadius: 11, display: "flex", alignItems: "center", gap: 12, fontFamily: FF.body }}>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+            <span style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.greenBright }}>{wk.addedToday}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.dimmer }}>Added</span>
+          </span>
+          <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+            <span style={{ fontSize: 17, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: T.cream }}>{wk.week}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.dimmer }}>Wk</span>
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.dimmer }}>Convos</span>
+              <span style={{ fontSize: 11, fontVariantNumeric: "tabular-nums", color: T.dimmer }}><strong style={{ color: T.cream, fontWeight: 700 }}>{wk.convosWeek}</strong>/{CONVO_TARGET}</span>
+            </span>
+            <span style={{ position: "relative", display: "block", height: 7, marginTop: 4, background: T.bg0, borderRadius: 4, overflow: "hidden" }}>
+              <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 4, width: `${Math.min(100, (wk.convosWeek / CONVO_TARGET) * 100)}%`, background: `linear-gradient(90deg, ${T.redLift}, ${T.orange})` }} />
+              <span style={{ position: "absolute", top: 0, bottom: 0, left: "50%", width: 1, background: "rgba(255,254,251,0.14)" }} />
+            </span>
+          </span>
+        </div>
+        {/* Filter tiles. All is an explicit tile; single select. */}
+        <div style={{ display: "flex", gap: 6, padding: "11px 0" }}>
+          {[
+            { key: null, glyph: "◆", label: "All", accent: T.cream, count: mobileGroups.allCount },
+            { key: "due", glyph: "◗", label: "Due", accent: T.redLift, count: dueCount },
+            { key: "fire", glyph: "🔥", label: "Hot", accent: STAGE_RAMP[5], count: mobileGroups.fireCount },
+            { key: "whale", glyph: "🐳", label: "Whales", accent: T.whale, count: whaleList.length },
+          ].map((tile) => {
+            const active = mobileFilter === tile.key;
+            const a = tile.accent;
+            return (
+              <button key={tile.label} type="button" aria-pressed={active} onClick={() => setMobileFilter(tile.key)}
+                style={{ flex: 1, minWidth: 0, height: 52, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, borderRadius: 10, border: `1px solid ${active ? tint(a, 0.5) : T.line}`, background: active ? tint(a, 0.14) : "rgba(255,254,251,0.02)", cursor: "pointer", fontFamily: FF.body }}>
+                <span style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                  <span aria-hidden="true" style={{ fontSize: 11, color: active ? a : T.dimmer }}>{tile.glyph}</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: active ? a : T.dimmer }}>{tile.count}</span>
+                </span>
+                <span style={{ fontSize: 10, fontWeight: active ? 700 : 600, color: active ? a : T.dim }}>{tile.label}</span>
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -464,54 +535,36 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? (<>Nothing to follow up yet.<br />Any call you score 9 or 10 lands here automatically.</>) : "Loading…"}
           </div>
+        ) : mobileFilter && mobileGroups.total === 0 ? (
+          <div style={{ textAlign: "center", color: T.dim, padding: "40px 30px", fontSize: 12.5 }}>
+            Nothing matches this filter.{" "}
+            <button type="button" onClick={() => setMobileFilter(null)}
+              style={{ background: "none", border: "none", color: T.greenBright, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+              Show all
+            </button>
+          </div>
         ) : (
-          hotList.map((p) => {
-            const id = idFromPhone(p.phone);
-            return (
-              <ContactQueueRow key={id} prospect={p}
-                touches={followUps[id] || []}
-                highlight={isTopScore(logs[id])}
-                badge={p.manual ? "manual" : ""}
-                checked={racSet.has(id)}
-                whale={whaleSet.has(id)}
-                fire={fireSet.has(id)}
-                score={logs[id]?.score || null}
-                stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
-                stages={stages}
-                goalIndex={goalIndex}
-                onOpen={() => setOpenId(id)}
-              />
-            );
-          })
-        )}
-
-        {whaleList.length > 0 && (
-          <details style={{ margin: "14px 0 0", border: `1px solid ${T.whaleWashLine}`, borderRadius: 12, overflow: "hidden" }}>
-            <summary style={{ listStyle: "none", cursor: "pointer", padding: "13px 14px", background: T.whaleWash, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.whale }}>{"🐳"} Whale Pipeline · {whaleList.length}</span>
-              <span style={{ fontSize: 11, color: T.faint }}>top producers</span>
-            </summary>
-            <div style={{ padding: "2px 12px 6px" }}>
-              {whaleList.map((p) => {
+          mobileGroups.groups.map((g) => (
+            <div key={g.key}>
+              {/* Sticky tier header. Wash layered over bg1 so scrolling rows
+                  never show through; the count is always g.rows.length. */}
+              <div style={{ position: "sticky", top: "env(safe-area-inset-top, 0px)", zIndex: 5, display: "flex", alignItems: "baseline", justifyContent: "space-between", margin: "0 -12px", padding: "7px 16px", background: `linear-gradient(0deg, ${g.wash}, ${g.wash}), ${T.bg1}`, borderTop: `1px solid ${g.rule}`, borderBottom: `1px solid ${g.rule}` }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: g.color }}>{g.label}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: g.color }}>{g.rows.length}</span>
+              </div>
+              {g.rows.map((p) => {
                 const id = idFromPhone(p.phone);
+                const ts = lastTouchTs(followUps[id]);
                 return (
-                  <ContactQueueRow key={id} prospect={p}
-                    touches={followUps[id] || []}
-                    highlight={isTopScore(logs[id])}
-                    badge={p.manual ? "manual" : ""}
-                    checked={racSet.has(id)}
-                    whale
-                    fire={fireSet.has(id)}
-                    score={logs[id]?.score || null}
-                    stage={stageOf(followUps[id], { goalIndex, override: stagemap[id] })}
-                    stages={WHALE_COLUMNS}
-                    goalIndex={goalIndex}
-                    onOpen={() => setOpenId(id)}
-                  />
+                  <MobileQueueRow key={id} prospect={p} tier={g.key}
+                    days={ts ? Math.floor((Date.now() - ts) / 86400000) : null}
+                    dueDays={dueDayOf(id)}
+                    fire={fireSet.has(id)} whale={whaleSet.has(id)} checked={racSet.has(id)}
+                    onOpen={() => setOpenId(id)} />
                 );
               })}
             </div>
-          </details>
+          ))
         )}
 
         {coldList.length > 0 && (
