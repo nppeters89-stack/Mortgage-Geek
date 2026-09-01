@@ -222,6 +222,11 @@ function byNeglect(prospects, followUps) {
 // falls back to these labels when prospects:fu:stages is absent, so labels can
 // change server-side without a deploy without breaking the indices.
 export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In", "Motivation Identified / Maintenance", "SOI"];
+
+// Display shortening for stage names too long for a tight column header. The
+// full name still shows on wide (two-across) columns, in the composer dropdown,
+// toasts and history tags.
+export const shortStage = (label) => (label === "Motivation Identified / Maintenance" ? "Motivation / Maint." : label);
 export const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
 // The whale pipeline's seven value-add columns. Whales ride the same stage

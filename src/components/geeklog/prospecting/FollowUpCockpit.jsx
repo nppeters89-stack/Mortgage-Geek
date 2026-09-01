@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst, weekScoreboard } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -398,7 +398,7 @@ export function FollowUpCockpit({
                   style={{ ...colHead, flex: 1, minWidth: 0, background: "none", border: "none", cursor: "pointer", fontFamily: FF.body, alignItems: "center", borderBottom: "none" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
                     <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
-                    <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+                    <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{wide ? label : shortStage(label)}</span>
                   </span>
                   <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
                 </button>
