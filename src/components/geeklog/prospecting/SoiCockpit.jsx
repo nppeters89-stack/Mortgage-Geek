@@ -120,7 +120,7 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
         <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Sphere of Influence</h1>
         <button type="button" onClick={onOpenFollowUps}
           style={{ fontSize: 13, color: T.dim, background: "none", border: `1px solid ${T.line}`, borderRadius: 999, padding: "7px 14px", cursor: "pointer", fontFamily: FF.body }}>
-          ← Follow Up Cockpit
+          ← Pipeline Cockpit
         </button>
       </div>
 

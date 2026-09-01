@@ -221,7 +221,7 @@ function byNeglect(prospects, followUps) {
 // The seven pipeline stages, index 0 (New) through 6 (SOI, the goal). The app
 // falls back to these labels when prospects:fu:stages is absent, so labels can
 // change server-side without a deploy without breaking the indices.
-export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In / Meeting Ask", "Coffee / Face to Face", "SOI"];
+export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In", "Motivation Identified / Maintenance", "SOI"];
 export const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
 // The whale pipeline's seven value-add columns. Whales ride the same stage

@@ -477,7 +477,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
       <StatusBarCap />
       <header style={{ padding: "2px 20px 0", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Follow Ups</h1>
+          <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Pipeline</h1>
           <button type="button" onClick={() => setSheetOpen(true)} aria-label="Add to Follow Ups"
             style={{ flex: "none", width: 32, height: 32, borderRadius: "50%", background: T.surfaceHi, border: `1px solid ${T.lineSoft}`, color: T.dim, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
