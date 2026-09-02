@@ -139,13 +139,16 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
       const dd = dueDayOf(id);
       const ts = lastTouchTs(followUps[id]);
       const days = ts ? Math.floor((Date.now() - ts) / 86400000) : null;
+      // Due soon window scales with the clock: half the cadence, floor one
+      // day, and the 1-2 day clocks skip the tier entirely (due or not).
+      const win = dd <= 2 ? 0 : Math.max(1, Math.floor(dd / 2));
       if (days == null || days >= dd) overdue.push(p);
-      else if (days >= dd - 4) soon.push(p);
+      else if (win > 0 && days >= dd - win) soon.push(p);
       else recent.push(p);
     });
     const groups = [
       { key: "overdue", label: "Overdue · past their clock", color: T.redLiftHi, wash: T.redWash, rule: "rgba(226,87,91,0.30)", rows: fireFirst(overdue, fireSet) },
-      { key: "soon", label: "Due soon · within 4 days", color: T.amber, wash: "rgba(201,162,58,0.10)", rule: "rgba(201,162,58,0.30)", rows: fireFirst(soon, fireSet) },
+      { key: "soon", label: "Due soon · window closing", color: T.amber, wash: "rgba(201,162,58,0.10)", rule: "rgba(201,162,58,0.30)", rows: fireFirst(soon, fireSet) },
       { key: "recent", label: "Recently touched", color: T.dimmer, wash: "rgba(255,254,251,0.03)", rule: T.lineSoft, rows: fireFirst(recent, fireSet) },
     ];
     return { groups, total: pool.length, allCount: combined.length, fireCount: combined.filter((p) => fireSet.has(idFromPhone(p.phone))).length };
