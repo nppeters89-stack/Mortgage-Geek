@@ -108,6 +108,9 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
     { key: "rac", glyph: "✓", label: "Missing RAC", accent: T.amber, count: stats.racMissing },
     { key: "mot", glyph: "●", label: "Motivation", accent: T.orange, count: stats.motCount },
     { key: "fire", glyph: "🔥", label: "Hot", accent: STAGE_RAMP[5], count: stats.hotLeads },
+    // Maintenance Day: the whole Motivation / Maintenance column plus the
+    // entire cold pipeline, regardless of due state. A view, not a clock.
+    { key: "maint", glyph: "🛠", label: "Maintenance Day", accent: T.cold, count: stats.maintCount + coldTotal },
   ];
 
   const footBtn = (color) => ({ background: "none", border: "none", padding: 0, fontFamily: FF.body, fontSize: 11.5, color, cursor: "pointer" });

@@ -72,7 +72,7 @@ export function FollowUpCockpit({
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
   // Rail filter (2B): narrows the hot board. Whale, cold and dead sections
   // are unaffected; the goal column is a doorway and stays whole.
-  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire"
+  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire" | "maint"
   // Two-across only on screens that genuinely fit it. Below the gate every
   // column is a single stack and the board scrolls sideways - columns never
   // compress into a squeezed, overlapping middle state.
@@ -110,6 +110,7 @@ export function FollowUpCockpit({
     // counts follow the filter; the rail's segment counts do not.
     const match = (p, si) => {
       const id = idFromPhone(p.phone);
+      if (activeFilter === "maint") return si === goalIndex - 1;
       if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(si));
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
@@ -135,6 +136,7 @@ export function FollowUpCockpit({
     if (!activeFilter) return ranked;
     // Same rail filter as the hot board; due runs each column's whale clock.
     const match = (p, wi) => {
+      if (activeFilter === "maint") return false;
       const id = idFromPhone(p.phone);
       if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(wi, true));
       if (activeFilter === "rac") return !rac?.has(id);
@@ -214,13 +216,21 @@ export function FollowUpCockpit({
     const racPct = livePool.length ? Math.round((livePool.length - racMissing) / livePool.length * 100) : 0;
     const whales = whaleMembers.length;
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
+    // Maintenance Day pool: everyone sitting in the Motivation / Maintenance
+    // column (the rail adds the cold total on top for its badge).
+    const maintCount = prospects.filter((p) => {
+      const id = idFromPhone(p.phone);
+      if (cold[id] || dead[id] || whaleSet?.has(id)) return false;
+      if (!(isMember(id, logs, pinnedSet) || soi[id])) return false;
+      return stageOf(followUps[id] || [], { isSoi: !!soi[id], goalIndex, override: stagemap[id] }) === goalIndex - 1;
+    }).length;
     // Weekly scoreboard (4A): shared selector, so the phone strip and this
     // panel always agree on the week.
     const { weekLabel, addedToday, addedWeek, convosWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
@@ -446,7 +456,7 @@ export function FollowUpCockpit({
         })}
       </div>
 
-      {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && whaleCols.every((c) => !c.length) && (
+      {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && whaleCols.every((c) => !c.length) && !(activeFilter === "maint" && coldTotal > 0) && (
         <div style={{ textAlign: "center", padding: "2px 0 18px", fontSize: 12.5, color: T.dim, fontFamily: FF.body }}>
           Nothing matches this filter.{" "}
           <button type="button" onClick={() => setActiveFilter(null)}
@@ -495,8 +505,9 @@ export function FollowUpCockpit({
         </div>
       </details>
 
-      {/* Cold pipeline: leaves the view while a rail filter is on. */}
-      {!activeFilter && <>
+      {/* Cold pipeline: leaves the view while a rail filter is on, except
+          Maintenance Day, whose whole point is working the cold list too. */}
+      {(!activeFilter || activeFilter === "maint") && <>
       <details ref={coldRef} open style={{ margin: "6px 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tray" ? T.coldWash : "transparent" }}
         onDragOver={allow("tray")} onDragLeave={() => setOver(null)} onDrop={dropCold(null, false)}>
         <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.coldWash }}>
