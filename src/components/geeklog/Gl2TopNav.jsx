@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { T, FF } from "./gl2Tokens";
 import { TabGlyph } from "./Gl2Primitives";
 import { getCachedProspects } from "./prospecting/prospectStore";
-import { idFromPhone, followUpQueue, isDueForTouch, dueDaysFor, stageOf } from "./prospecting/prospectsModel";
+import { idFromPhone, followUpQueue, dueInfoFor, stageOf } from "./prospecting/prospectsModel";
 
 // Desktop top-bar navigation (design option 3c, translated into the Geek Log's
 // own system: Figtree and gl2Tokens in place of the sketch's Poppins and raw
@@ -32,7 +32,7 @@ function followUpsDue() {
     .filter((p) => {
       const id = idFromPhone(p.phone);
       const fu = c.followUps?.[id];
-      return isDueForTouch(fu, dueDaysFor(stageOf(fu || [], { override: stagemap[id] }), whale.has(id)));
+      return dueInfoFor(fu, stageOf(fu || [], { override: stagemap[id] }), whale.has(id)).due;
     }).length;
 }
 

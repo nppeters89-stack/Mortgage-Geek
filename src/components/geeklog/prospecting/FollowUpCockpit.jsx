@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -111,7 +111,7 @@ export function FollowUpCockpit({
     const match = (p, si) => {
       const id = idFromPhone(p.phone);
       if (activeFilter === "maint") return si === goalIndex - 1;
-      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(si));
+      if (activeFilter === "due") return dueInfoFor(followUps[id], si).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
       if (activeFilter === "fire") return fireSet?.has(id);
@@ -138,7 +138,7 @@ export function FollowUpCockpit({
     const match = (p, wi) => {
       if (activeFilter === "maint") return false;
       const id = idFromPhone(p.phone);
-      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(wi, true));
+      if (activeFilter === "due") return dueInfoFor(followUps[id], wi, true).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
       if (activeFilter === "fire") return fireSet?.has(id);
@@ -182,14 +182,14 @@ export function FollowUpCockpit({
     const dueMembers = hotMembers.filter((p) => {
       const id = idFromPhone(p.phone);
       const fu = followUps[id];
-      return isDueForTouch(fu, dueDaysFor(stageOf(fu || [], { goalIndex, override: stagemap[id] })));
+      return dueInfoFor(fu, stageOf(fu || [], { goalIndex, override: stagemap[id] })).due;
     });
     // Whales count toward due on their own 30-day nurture clock.
     const whaleMembers = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; });
     const dueWhales = whaleMembers.filter((p) => {
       const id = idFromPhone(p.phone);
       const fu = followUps[id];
-      return isDueForTouch(fu, dueDaysFor(stageOf(fu || [], { goalIndex, override: stagemap[id] }), true));
+      return dueInfoFor(fu, stageOf(fu || [], { goalIndex, override: stagemap[id] }), true).due;
     });
     const dueAll = [...dueMembers, ...dueWhales];
     const due = dueAll.length;
@@ -316,6 +316,9 @@ export function FollowUpCockpit({
   const hotCard = (p) => {
     const id = idFromPhone(p.phone);
     const ts = lastTouchTs(followUps[id]);
+    // Urgency (color) can run on the reply clock; the age label stays the
+    // outbound fact.
+    const info = dueInfoFor(followUps[id] || [], stageFor(id), whaleSet?.has(id));
     const count = (followUps[id] || []).length;
     // Same green wash the mobile queue rows use for a 10/10 interaction score:
     // the hottest leads stay visibly hot on the board.
@@ -342,7 +345,7 @@ export function FollowUpCockpit({
               </button>
             )}
             {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
-            <span style={{ color: staleColor(dSince(ts), T.faint, dueDaysFor(stageFor(id), whaleSet?.has(id))) }}>{rel(ts)}</span>
+            <span style={{ color: staleColor(dSince(info.sinceTs), T.faint, info.dueDays) }}>{rel(ts)}</span>
           </span>
         </div>
       </div>

@@ -262,6 +262,21 @@ export const STAGE_REFERRAL = -3;
 export const REPLY_STAGE = -4;
 export const repliesOf = (touches) => (touches || []).filter((t) => t && t.stage === REPLY_STAGE);
 export const lastReplyTs = (touches) => repliesOf(touches).reduce((m, t) => Math.max(m, t.ts || 0), 0);
+// A live conversation should speed up, not pause: a reply newer than the last
+// outbound touch makes the card due in 2 days, and the ramp runs from there.
+export const REPLY_DUE_DAYS = 2;
+// The one due/urgency oracle for a card. source is "reply" when the reply
+// clock governs, "stage" when the session 1 cadence applies unchanged.
+export function dueInfoFor(touches, stageIndex, isWhale = false) {
+  const touchTs = lastTouchTs(touches) || 0;
+  const replyTs = lastReplyTs(touches) || 0;
+  if (replyTs && replyTs > touchTs) {
+    const dueTs = replyTs + REPLY_DUE_DAYS * DAY_MS;
+    return { source: "reply", dueDays: REPLY_DUE_DAYS, sinceTs: replyTs, dueTs, due: Date.now() >= dueTs };
+  }
+  const dueDays = dueDaysFor(stageIndex, isWhale);
+  return { source: "stage", dueDays, sinceTs: touchTs || null, dueTs: touchTs ? touchTs + dueDays * DAY_MS : null, due: !touchTs || Date.now() >= touchTs + dueDays * DAY_MS };
+}
 
 // The goal (last) stage index for a stages array. Always the SOI column.
 export const goalIndexOf = (stages = DEFAULT_STAGES) => stages.length - 1;

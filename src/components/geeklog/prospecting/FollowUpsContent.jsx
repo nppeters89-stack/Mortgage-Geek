@@ -117,14 +117,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   const whaleList = useMemo(() => fireFirst(queue.filter((p) => whaleSet.has(idFromPhone(p.phone))), fireSet), [queue, whaleSet, fireSet]);
   // The header badge counts follow-ups actually DUE (7+ days or never touched),
   // matching the desktop top-nav badge.
-  const dueCount = useMemo(() => [...hotList, ...whaleList].filter((p) => {
-    const id = idFromPhone(p.phone);
-    return isDueForTouch(followUps[id], dueDaysFor(stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)));
-  }).length, [hotList, whaleList, followUps, goalIndex, stagemap, whaleSet]);
+  const infoOf = useCallback((id) => dueInfoFor(followUps[id], stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)), [followUps, goalIndex, stagemap, whaleSet]);
+  const dueCount = useMemo(() => [...hotList, ...whaleList].filter((p) => infoOf(idFromPhone(p.phone)).due).length, [hotList, whaleList, infoOf]);
   // Mobile 5B: filter tiles + staleness groups. Its own state, deliberately a
   // different set from the desktop rail (data hygiene is desk work).
   const [mobileFilter, setMobileFilter] = useState(null); // null | "due" | "fire" | "whale"
-  const dueDayOf = useCallback((id) => dueDaysFor(stageOf(followUps[id], { goalIndex, override: stagemap[id] }), whaleSet.has(id)), [followUps, goalIndex, stagemap, whaleSet]);
   // Shared weekly scoreboard, same selector as the desktop HUD.
   const wk = useMemo(() => weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat }), [prospects, logs, followUps, soi, pinnedSet, cold, dead, addedat]);
   const mobileGroups = useMemo(() => {
@@ -132,18 +129,17 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     let pool = combined;
     if (mobileFilter === "whale") pool = whaleList;
     else if (mobileFilter === "fire") pool = combined.filter((p) => fireSet.has(idFromPhone(p.phone)));
-    else if (mobileFilter === "due") pool = combined.filter((p) => { const id = idFromPhone(p.phone); return isDueForTouch(followUps[id], dueDayOf(id)); });
+    else if (mobileFilter === "due") pool = combined.filter((p) => infoOf(idFromPhone(p.phone)).due);
     const overdue = [], soon = [], recent = [];
     pool.forEach((p) => {
       const id = idFromPhone(p.phone);
-      const dd = dueDayOf(id);
-      const ts = lastTouchTs(followUps[id]);
-      const days = ts ? Math.floor((Date.now() - ts) / 86400000) : null;
+      const info = infoOf(id);
+      const rampDays = info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null;
       // Due soon window scales with the clock: half the cadence, floor one
-      // day, and the 1-2 day clocks skip the tier entirely (due or not).
-      const win = dd <= 2 ? 0 : Math.max(1, Math.floor(dd / 2));
-      if (days == null || days >= dd) overdue.push(p);
-      else if (win > 0 && days >= dd - win) soon.push(p);
+      // day, and the 1-2 day clocks (including the reply clock) skip the tier.
+      const win = info.dueDays <= 2 ? 0 : Math.max(1, Math.floor(info.dueDays / 2));
+      if (info.due) overdue.push(p);
+      else if (win > 0 && rampDays != null && rampDays >= info.dueDays - win) soon.push(p);
       else recent.push(p);
     });
     const groups = [
@@ -152,7 +148,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
       { key: "recent", label: "Recently touched", color: T.dimmer, wash: "rgba(255,254,251,0.03)", rule: T.lineSoft, rows: fireFirst(recent, fireSet) },
     ];
     return { groups, total: pool.length, allCount: combined.length, fireCount: combined.filter((p) => fireSet.has(idFromPhone(p.phone))).length };
-  }, [hotList, whaleList, mobileFilter, followUps, fireSet, dueDayOf]);
+  }, [hotList, whaleList, mobileFilter, followUps, fireSet, infoOf]);
   const openProspect = prospects.find((p) => idFromPhone(p.phone) === openId) || null;
 
   const closeDetail = useCallback(() => setOpenId(null), []);
@@ -570,10 +566,12 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
               {g.rows.map((p) => {
                 const id = idFromPhone(p.phone);
                 const ts = lastTouchTs(followUps[id]);
+                const info = infoOf(id);
                 return (
                   <MobileQueueRow key={id} prospect={p} tier={g.key}
                     days={ts ? Math.floor((Date.now() - ts) / 86400000) : null}
-                    dueDays={dueDayOf(id)}
+                    rampDays={info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null}
+                    dueDays={info.dueDays}
                     fire={fireSet.has(id)} whale={whaleSet.has(id)} checked={racSet.has(id)}
                     onReply={() => handleLogReply(id)}
                     onOpen={() => setOpenId(id)} />

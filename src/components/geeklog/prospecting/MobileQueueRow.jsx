@@ -5,7 +5,7 @@ import { T, FF, staleColor } from "../gl2Tokens";
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, dueDays, tier, fire = false, whale = false, checked = false, onOpen, onReply = null }) {
+export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, checked = false, onOpen, onReply = null }) {
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
@@ -25,7 +25,7 @@ export function MobileQueueRow({ prospect: p, days, dueDays, tier, fire = false,
         </div>
         <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
       </div>
-      <span style={{ flex: "none", fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: staleColor(days, T.dimmer, dueDays) }}>{days == null ? "never" : `${days}d`}</span>
+      <span style={{ flex: "none", fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: staleColor(rampDays == null ? days : rampDays, T.dimmer, dueDays) }}>{days == null ? "never" : `${days}d`}</span>
       {onReply && (
         <button type="button" aria-label={`They replied: ${p.name}`}
           onClick={(e) => { e.stopPropagation(); onReply(); }}
