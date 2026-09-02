@@ -73,7 +73,7 @@ export function FollowUpCockpit({
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
   // Rail filter (2B): narrows the hot board. Whale, cold and dead sections
   // are unaffected; the goal column is a doorway and stays whole.
-  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire" | "maint"
+  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire" | "maint" | "replied"
   // Two-across only on screens that genuinely fit it. Below the gate every
   // column is a single stack and the board scrolls sideways - columns never
   // compress into a squeezed, overlapping middle state.
@@ -112,13 +112,23 @@ export function FollowUpCockpit({
     const match = (p, si) => {
       const id = idFromPhone(p.phone);
       if (activeFilter === "maint") return si === goalIndex - 1;
+      if (activeFilter === "replied") return repliesOf(followUps[id]).length > 0;
       if (activeFilter === "due") return dueInfoFor(followUps[id], si).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
       if (activeFilter === "fire") return fireSet?.has(id);
       return true;
     };
-    return ranked.map((c, si) => (si === goalIndex ? c : c.filter((p) => match(p, si))));
+    const replySort = (cols) => {
+      if (activeFilter !== "replied") return cols;
+      const rank = (p) => {
+        const id = idFromPhone(p.phone);
+        const rTs = lastReplyTs(followUps[id]);
+        return [rTs > (lastTouchTs(followUps[id]) || 0) ? 0 : 1, -rTs];
+      };
+      return cols.map((c) => [...c].sort((a, b) => { const ra = rank(a), rb = rank(b); return ra[0] - rb[0] || ra[1] - rb[1]; }));
+    };
+    return replySort(ranked.map((c, si) => (si === goalIndex ? c : c.filter((p) => match(p, si)))));
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet, activeFilter, rac, motivation]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
@@ -139,13 +149,21 @@ export function FollowUpCockpit({
     const match = (p, wi) => {
       if (activeFilter === "maint") return false;
       const id = idFromPhone(p.phone);
+      if (activeFilter === "replied") return repliesOf(followUps[id]).length > 0;
       if (activeFilter === "due") return dueInfoFor(followUps[id], wi, true).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
       if (activeFilter === "fire") return fireSet?.has(id);
       return true;
     };
-    return ranked.map((c, wi) => c.filter((p) => match(p, wi)));
+    const sorted = ranked.map((c, wi) => c.filter((p) => match(p, wi)));
+    if (activeFilter !== "replied") return sorted;
+    const rank = (p) => {
+      const id = idFromPhone(p.phone);
+      const rTs = lastReplyTs(followUps[id]);
+      return [rTs > (lastTouchTs(followUps[id]) || 0) ? 0 : 1, -rTs];
+    };
+    return sorted.map((c) => [...c].sort((a, b) => { const ra = rank(a), rb = rank(b); return ra[0] - rb[0] || ra[1] - rb[1]; }));
   }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
@@ -219,6 +237,14 @@ export function FollowUpCockpit({
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
     // Maintenance Day pool: everyone sitting in the Motivation / Maintenance
     // column (the rail adds the cold total on top for its badge).
+    // Replied segment badge: cards where the newest event is an inbound reply.
+    const repliedOwed = prospects.filter((p) => {
+      const id = idFromPhone(p.phone);
+      if (cold[id] || dead[id]) return false;
+      if (!(isMember(id, logs, pinnedSet) || soi[id] || whaleSet?.has(id))) return false;
+      const rTs = lastReplyTs(followUps[id]);
+      return rTs > (lastTouchTs(followUps[id]) || 0);
+    }).length;
     const maintCount = prospects.filter((p) => {
       const id = idFromPhone(p.phone);
       if (cold[id] || dead[id] || whaleSet?.has(id)) return false;
@@ -231,7 +257,7 @@ export function FollowUpCockpit({
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
@@ -339,7 +365,10 @@ export function FollowUpCockpit({
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
-          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{count} touch{count === 1 ? "" : "es"}</span>
+          <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {count} touch{count === 1 ? "" : "es"}
+            {activeFilter === "replied" && !motivation?.[id] && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: T.orange }}>no motivation</span>}
+          </span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
             {onLogReply && (
               <button type="button" title="They replied" aria-label={`They replied: ${p.name}`}

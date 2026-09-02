@@ -111,6 +111,9 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
     // Maintenance Day: the whole Motivation / Maintenance column plus the
     // entire cold pipeline, regardless of due state. A view, not a clock.
     { key: "maint", glyph: "🛠", label: "Maintenance Day", accent: T.cold, count: stats.maintCount + coldTotal },
+    // Replied: qualify-next list. Badge counts only owed responses; the
+    // filter itself shows every card with a reply in history.
+    { key: "replied", glyph: "💬", label: "Replied", accent: T.greenBright, count: stats.repliedOwed },
   ];
 
   const footBtn = (color) => ({ background: "none", border: "none", padding: 0, fontFamily: FF.body, fontSize: 11.5, color, cursor: "pointer" });
