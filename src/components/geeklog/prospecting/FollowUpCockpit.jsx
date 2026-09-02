@@ -52,7 +52,7 @@ function FirePulse() {
 
 export function FollowUpCockpit({
   prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet, addedat,
-  onOpenDetail, onOpenSoi, onLogTouch, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
+  onOpenDetail, onOpenSoi, onLogTouch, onLogReply, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const boardRef = useRef(null);
@@ -334,6 +334,13 @@ export function FollowUpCockpit({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{count} touch{count === 1 ? "" : "es"}</span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
+            {onLogReply && (
+              <button type="button" title="They replied" aria-label={`They replied: ${p.name}`}
+                onClick={(e) => { e.stopPropagation(); onLogReply(id); }}
+                style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: "pointer", color: T.dim, display: "inline-flex" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+              </button>
+            )}
             {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
             <span style={{ color: staleColor(dSince(ts), T.faint, dueDaysFor(stageFor(id), whaleSet?.has(id))) }}>{rel(ts)}</span>
           </span>

@@ -52,7 +52,7 @@ function ScoreRow({ score, onSet }) {
 }
 
 export function FollowUpDetail({
-  prospect: p, log, touches, onBack, onLogFollowUp, onToast, onAddToSoi, onCopyForExcel,
+  prospect: p, log, touches, onBack, onLogFollowUp, onLogReply = null, onToast, onAddToSoi, onCopyForExcel,
   inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
@@ -105,7 +105,7 @@ export function FollowUpDetail({
     submitDone();
   };
 
-  const tagColor = (tone) => (tone === "cold" ? T.cold : tone === "dead" ? T.faint : tone === "ref" ? T.amber : T.redLift);
+  const tagColor = (tone) => (tone === "cold" ? T.cold : tone === "dead" ? T.faint : tone === "ref" ? T.amber : tone === "reply" ? T.greenBright : T.redLift);
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -239,6 +239,12 @@ export function FollowUpDetail({
             style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && !whaleMode && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
             {composerMode === "stage" && !whaleMode && stageSel === goal ? "Promote to SOI" : "Log follow up"}
           </button>
+          {onLogReply && (
+            <button type="button" onClick={() => { onLogReply(note.trim(), tsForLoggedDate(loggedOn)); submitDone(); }}
+              style={{ width: "100%", marginTop: 10, padding: 12, borderRadius: 12, border: `1px solid ${T.line}`, background: "none", color: T.dim, fontFamily: FF.body, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+              They replied
+            </button>
+          )}
         </div>
       )}
 

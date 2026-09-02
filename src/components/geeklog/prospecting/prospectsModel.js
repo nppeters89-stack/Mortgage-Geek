@@ -254,6 +254,13 @@ export const STAGE_DEAD = -2;
 // A referral event: the partner sent business. Lives in the same fu history as
 // every other touch, so it survives promotion, demotion, and re-seeds alike.
 export const STAGE_REFERRAL = -3;
+// A reply is a fact: the agent texted back. Inbound, in the same append-only
+// history, but not an outbound touch. It never resets the outbound clock,
+// never advances the ratchet, and never counts toward touch or conversation
+// stats; it marks the card and shortens its clock (see REPLY_DUE_DAYS).
+export const REPLY_STAGE = -4;
+export const repliesOf = (touches) => (touches || []).filter((t) => t && t.stage === REPLY_STAGE);
+export const lastReplyTs = (touches) => repliesOf(touches).reduce((m, t) => Math.max(m, t.ts || 0), 0);
 
 // The goal (last) stage index for a stages array. Always the SOI column.
 export const goalIndexOf = (stages = DEFAULT_STAGES) => stages.length - 1;
@@ -298,6 +305,7 @@ export function stageTag(touch, stages = DEFAULT_STAGES) {
   if (s === STAGE_COLD) return { label: "Cold check-in", tone: "cold" };
   if (s === STAGE_DEAD) return { label: "Marked dead", tone: "dead" };
   if (s === STAGE_REFERRAL) return { label: "Referral", tone: "ref" };
+  if (s === REPLY_STAGE) return { label: "They replied", tone: "reply" };
   return { label: stages[s] || stages[1], tone: "stage" };
 }
 

@@ -5,7 +5,7 @@ import { T, FF, staleColor } from "../gl2Tokens";
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, dueDays, tier, fire = false, whale = false, checked = false, onOpen }) {
+export function MobileQueueRow({ prospect: p, days, dueDays, tier, fire = false, whale = false, checked = false, onOpen, onReply = null }) {
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
@@ -26,6 +26,15 @@ export function MobileQueueRow({ prospect: p, days, dueDays, tier, fire = false,
         <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
       </div>
       <span style={{ flex: "none", fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: staleColor(days, T.dimmer, dueDays) }}>{days == null ? "never" : `${days}d`}</span>
+      {onReply && (
+        <button type="button" aria-label={`They replied: ${p.name}`}
+          onClick={(e) => { e.stopPropagation(); onReply(); }}
+          style={{ flex: "none", padding: 7, margin: -7, background: "none", border: "none", cursor: "pointer" }}>
+          <span style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,254,251,0.04)", border: `1px solid ${T.line}`, color: T.dimmer }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+          </span>
+        </button>
+      )}
       {/* 30px visual button padded out to a 44px hit target. */}
       <button type="button" aria-label={`Log a touch for ${p.name}`}
         onClick={(e) => { e.stopPropagation(); onOpen && onOpen(); }}
