@@ -1,11 +1,12 @@
 import { T, FF, staleColor } from "../gl2Tokens";
+import { ReplyBadge } from "./ReplyBadge";
 
 // Slim mobile Follow Ups row (CD 5B). Name + one status glyph, brokerage, a
 // bare age colored on the contact's own stage-aware clock, and a log button.
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, checked = false, onOpen, onReply = null }) {
+export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, checked = false, reply = null, onOpen, onReply = null }) {
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
@@ -22,6 +23,7 @@ export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, ti
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
               ) : null}
+          {reply && <ReplyBadge count={reply.count} days={reply.days} owed={reply.owed} />}
         </div>
         <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
       </div>

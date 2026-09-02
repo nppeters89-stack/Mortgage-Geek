@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, lastTouchTs, weekScoreboard, CONVO_TARGET, COLD_DUE_DAYS, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst, REPLY_STAGE } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, lastTouchTs, weekScoreboard, CONVO_TARGET, COLD_DUE_DAYS, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst, REPLY_STAGE, repliesOf, lastReplyTs } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
@@ -567,8 +567,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                 const id = idFromPhone(p.phone);
                 const ts = lastTouchTs(followUps[id]);
                 const info = infoOf(id);
+                const rCount = repliesOf(followUps[id]).length;
+                const rTs = lastReplyTs(followUps[id]);
                 return (
                   <MobileQueueRow key={id} prospect={p} tier={g.key}
+                    reply={rCount ? { count: rCount, days: rTs ? Math.floor((Date.now() - rTs) / 86400000) : null, owed: rTs > (ts || 0) } : null}
                     days={ts ? Math.floor((Date.now() - ts) / 86400000) : null}
                     rampDays={info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null}
                     dueDays={info.dueDays}

@@ -1,9 +1,10 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
+import { ReplyBadge } from "./ReplyBadge";
 import { fireConfetti } from "./confetti";
 
 // The desktop Follow Up cockpit (viewport >= 900px), matching followup_cockpit
@@ -319,6 +320,8 @@ export function FollowUpCockpit({
     // Urgency (color) can run on the reply clock; the age label stays the
     // outbound fact.
     const info = dueInfoFor(followUps[id] || [], stageFor(id), whaleSet?.has(id));
+    const replies = repliesOf(followUps[id]);
+    const replyTs = lastReplyTs(followUps[id]);
     const count = (followUps[id] || []).length;
     // Same green wash the mobile queue rows use for a 10/10 interaction score:
     // the hottest leads stay visibly hot on the board.
@@ -332,6 +335,7 @@ export function FollowUpCockpit({
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
           {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
+          <ReplyBadge count={replies.length} days={replyTs ? dSince(replyTs) : null} owed={replyTs > (ts || 0)} />
         </div>
         <div style={{ fontSize: 11.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
