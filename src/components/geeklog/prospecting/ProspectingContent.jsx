@@ -5,7 +5,7 @@ import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCa
 import { startText } from "./textIntent";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
-  outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
+  outcomeMeta, PILL_TONES, logTsvRow, logTsvAll, e164Phone,
 } from "./prospectsModel";
 import { copyText } from "./clipboard";
 
