@@ -231,7 +231,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
                   aria-label={`Text ${p.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    const r = startText({ prospect: p, prospectingTab: true });
+                    const r = startText({ prospect: p, prospectingTab: true, hook: profile[id]?.hook || "" });
                     if (!r.ok) return;
                     if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
                   }}
