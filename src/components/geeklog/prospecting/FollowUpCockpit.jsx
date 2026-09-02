@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -32,7 +32,7 @@ const RacCheck = () => (
 
 const DAY = 86400000;
 const rel = (ts) => { if (!ts) return "No touches"; const d = Math.round((Date.now() - ts) / DAY); return d <= 0 ? "Today" : d === 1 ? "1d ago" : `${d}d ago`; };
-const isStale = (ts) => !!ts && Date.now() - ts > 14 * DAY;
+const isStale = (ts) => !!ts && Date.now() - ts > STALE_DAYS * DAY;
 // Days since a timestamp, for the urgency ramp (null = never).
 const dSince = (ts) => (ts ? Math.floor((Date.now() - ts) / DAY) : null);
 const isMember = (id, logs, pinnedSet) => qualifiesForFollowUp(logs[id]) || pinnedSet.has(id);
