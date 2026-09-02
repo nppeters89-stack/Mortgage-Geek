@@ -11,6 +11,27 @@ export const idFromPhone = (phone) => String(phone || "").replace(/\D/g, "");
 // tel: href keeps a leading + for international, digits otherwise.
 export const dialHref = (phone) => `tel:${String(phone || "").replace(/[^0-9+]/g, "")}`;
 
+// E.164 for US numbers, from the same raw phone strings tap-to-dial uses:
+// 10 digits, or 11 with a leading 1. Anything else returns null so callers
+// can disable rather than send a text into the void.
+export function e164Phone(phone) {
+  const d = idFromPhone(phone);
+  if (d.length === 10) return `+1${d}`;
+  if (d.length === 11 && d.startsWith("1")) return `+${d}`;
+  return null;
+}
+
+// sms: URL with a prefilled body. iOS and iPadOS join the body with & while
+// everything else takes ?. iPadOS masquerades as a Mac, so touch points break
+// the tie. Returns null when the number cannot normalize.
+export function buildSmsUrl(rawPhone, body) {
+  const e164 = e164Phone(rawPhone);
+  if (!e164) return null;
+  const ua = typeof navigator !== "undefined" ? navigator.userAgent || "" : "";
+  const ios = /iPad|iPhone|iPod/.test(ua) || (ua.includes("Mac") && typeof navigator !== "undefined" && navigator.maxTouchPoints > 1);
+  return `sms:${e164}${ios ? "&" : "?"}body=${encodeURIComponent(body || "")}`;
+}
+
 // The six call outcomes, in the order the preview lays them out. `short` is the
 // queue status pill label; `tone` picks the pill palette.
 export const OUTCOMES = [
