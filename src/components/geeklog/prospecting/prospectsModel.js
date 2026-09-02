@@ -243,6 +243,9 @@ export const WHALE_COLUMNS = ["Value Add 1", "Value Add 2", "Value Add 3", "Valu
 // The five cold columns, keyed by check-in count (min(count, 4)).
 export const COLD_COLUMNS = ["Fresh Cold", "1 Check-in", "2 Check-ins", "3 Check-ins", "4-5 Check-ins"];
 export const COLD_CHECKIN_CAP = 5;
+// Cold color clock: cold ages are colored on a 30-day rhythm (yellow at 30,
+// orange 33, red 37). Color only; cold never joins any due count.
+export const COLD_DUE_DAYS = 30;
 
 // Sentinel stages that a touch can carry: a cold check-in and a dead marker. Any
 // stage > 0 is a pipeline stage (index into the stages array).

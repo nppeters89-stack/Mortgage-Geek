@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -349,7 +349,7 @@ export function FollowUpCockpit({
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
           <ColdPips count={n} />
           {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontSize: 10, fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
-          <span style={{ fontSize: 10, color: T.faint }}>{rel(ts)}</span>
+          <span style={{ fontSize: 10, color: staleColor(dSince(ts), T.faint, COLD_DUE_DAYS) }}>{rel(ts)}</span>
         </div>
         {n >= COLD_CHECKIN_CAP && <div style={{ marginTop: 7, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.amber, textTransform: "uppercase" }}>Consider the dead box</div>}
       </div>

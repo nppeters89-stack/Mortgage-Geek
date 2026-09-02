@@ -16,7 +16,7 @@ export const mutedBadge = {
 // Extracted from the Follow Ups queue so the SOI queue reads identically; the
 // only difference between the two is the optional `meta` line (SOI shows the
 // promotion date there) and what the caller passes for `highlight`.
-export function ContactQueueRow({ prospect: p, touches = [], highlight = false, meta = "", badge = "", checked = false, whale = false, fire = false, onOpen, stage = null, stages = null, goalIndex, coldCount = null, score = null }) {
+export function ContactQueueRow({ prospect: p, touches = [], highlight = false, meta = "", badge = "", checked = false, whale = false, fire = false, onOpen, stage = null, stages = null, goalIndex, coldCount = null, score = null, dueDay = null }) {
   const count = touches.length;
   const { label, days } = lastTouchLabel(touches);
   const showStage = stage != null && Array.isArray(stages);
@@ -61,7 +61,7 @@ export function ContactQueueRow({ prospect: p, touches = [], highlight = false, 
         <span style={{ flex: "none", fontSize: 11, fontWeight: 600, padding: "4px 9px", borderRadius: 6, color: T.dim, background: "rgba(255,254,251,0.08)" }}>{count} touch{count === 1 ? "" : "es"}</span>
       )}
       <div style={{ flex: "none", textAlign: "right" }}>
-        <div style={{ fontSize: 12.5, fontWeight: 600, color: staleColor(days, T.dim, dueDaysFor(stage, whale)), fontVariantNumeric: "tabular-nums" }}>{label}</div>
+        <div style={{ fontSize: 12.5, fontWeight: 600, color: staleColor(days, T.dim, dueDay ?? dueDaysFor(stage, whale)), fontVariantNumeric: "tabular-nums" }}>{label}</div>
         <div style={{ fontSize: 10, color: T.faint, letterSpacing: "0.06em", textTransform: "uppercase" }}>last touch</div>
       </div>
     </div>
