@@ -143,6 +143,7 @@ export function filterQueue(prospects, { filter, query, logs }) {
     const log = logs[idFromPhone(p.phone)];
     if (filter === "vip" && !hasIntelDot(p)) return false;
     if (filter === "cb" && !(log && log.outcome === "Callback")) return false;
+    if (filter === "na" && !(log && log.outcome === "No answer")) return false;
     if (filter === "today" && !(log && log.outcome && isToday(log.ts))) return false;
     if (q && !(p.name.toLowerCase().includes(q) || (p.brokerage || "").toLowerCase().includes(q))) return false;
     return true;

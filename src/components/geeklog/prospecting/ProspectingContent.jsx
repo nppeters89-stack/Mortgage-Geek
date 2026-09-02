@@ -19,6 +19,7 @@ const CHIPS = [
   { id: "vip", label: "Has intel" },
   { id: "cb", label: "Callbacks" },
   { id: "today", label: "Logged today" },
+  { id: "na", label: "No answer" },
 ];
 
 export function ProspectingContent({ apiKey, onTalkedLogged }) {
@@ -195,7 +196,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           {CHIPS.map((c) => {
             const on = filter === c.id;
             return (
-              <button key={c.id} type="button" onClick={() => setFilter(c.id)}
+              <button key={c.id} type="button" onClick={() => { setFilter(c.id); if (c.id === "na") window.scrollTo({ top: 0, behavior: "smooth" }); }}
                 style={{ flex: "none", fontSize: 13, fontWeight: on ? 600 : 500, color: on ? T.bg1 : T.dim, border: `1px solid ${on ? T.cream : T.line}`, borderRadius: 999, padding: "7px 14px", background: on ? T.cream : "none", fontFamily: FF.body, cursor: "pointer" }}>
                 {c.label}
               </button>
