@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { T, FF } from "../gl2Tokens";
 import { OUTCOMES, heatColor } from "./prospectsModel";
+import { ChipFields } from "./ChipFields";
 import { ContactHeader } from "./ContactHeader";
 import { AddToContactsButton } from "./AddToContactsButton";
 import { MotivationBox } from "./MotivationBox";
@@ -17,25 +18,47 @@ const tomorrowISO = () => {
   return d.toISOString().slice(0, 10);
 };
 
-export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToast = null, motivation = "", onSaveMotivation = null }) {
+export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToast = null, motivation = "", onSaveMotivation = null, profile = null, onSaveProfile = null }) {
   const [outcome, setOutcome] = useState(log?.outcome || "");
   const [score, setScore] = useState(log?.score || 0);
   const [note, setNote] = useState(log?.note || "");
   const [callback, setCallback] = useState(log?.callback || "");
+  // Contact understanding, prefilled; objections belong to this call only.
+  const [lender, setLender] = useState(profile?.lenderSituation || "");
+  const [needs, setNeeds] = useState(profile?.needs || []);
+  const [hook, setHook] = useState(profile?.hook || "");
+  const [objections, setObjections] = useState([]);
 
   const pickOutcome = (value) => {
     setOutcome(value);
     if (value === "Callback" && !callback) setCallback(tomorrowISO());
   };
 
-  const buildLog = () => ({
-    outcome,
-    score: score || null,
-    note: note.trim(),
-    callback: callback || "",
-    dateCalled: new Date().toISOString().slice(0, 10),
-    ts: Date.now(),
-  });
+  const buildLog = () => {
+    const l = {
+      outcome,
+      score: score || null,
+      note: note.trim(),
+      callback: callback || "",
+      dateCalled: new Date().toISOString().slice(0, 10),
+      ts: Date.now(),
+    };
+    if (objections.length) l.objections = objections;
+    return l;
+  };
+  // Contact fields write only when they changed from the prefill.
+  const saveProfileIfChanged = () => {
+    if (!onSaveProfile) return;
+    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [], h: profile?.hook || "" });
+    const after = JSON.stringify({ l: lender, n: needs, h: hook.trim() });
+    if (before !== after) {
+      const next = {};
+      if (lender) next.lenderSituation = lender;
+      if (needs.length) next.needs = needs;
+      if (hook.trim()) next.hook = hook.trim();
+      onSaveProfile(next);
+    }
+  };
 
   return (
     <div style={{ padding: "0 20px 40px" }}>
@@ -78,6 +101,8 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
           ))}
         </div>
 
+        <ChipFields lender={lender} setLender={setLender} needs={needs} setNeeds={setNeeds}
+          hook={hook} setHook={setHook} objections={objections} setObjections={setObjections} />
         <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notes from the call..."
           style={{ width: "100%", marginTop: 20, minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
 
@@ -87,7 +112,7 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
             style={{ flex: 1, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 10, color: T.cream, padding: "10px 12px", fontFamily: FF.body, fontSize: 15, colorScheme: "dark" }} />
         </div>
 
-        <button type="button" onClick={() => onSave(buildLog())}
+        <button type="button" onClick={() => { saveProfileIfChanged(); onSave(buildLog()); }}
           style={{ width: "100%", marginTop: 18, padding: 16, borderRadius: 12, border: "none", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: "pointer" }}>
           Save log
         </button>

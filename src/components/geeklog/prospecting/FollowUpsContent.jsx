@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire, persistProfile } from "./prospectStore";
 import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, dueInfoFor, lastTouchTs, weekScoreboard, CONVO_TARGET, COLD_DUE_DAYS, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst, REPLY_STAGE, repliesOf, lastReplyTs, e164Phone } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
@@ -37,6 +37,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   const [whale, setWhale] = useState(() => seed?.whale || []);
   const [fire, setFire] = useState(() => seed?.fire || []);
   const [addedat, setAddedat] = useState(() => seed?.addedat || {});
+  const [profile, setProfile] = useState(() => seed?.profile || {});
   const [cold, setCold] = useState(() => seed?.cold || {});
   const [stagemap, setStagemap] = useState(() => seed?.stagemap || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
@@ -94,7 +95,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
         setPinned(c.pinned || []);
         setRac(c.rac || []);
         setWhale(c.whale || []);
-        setFire(c.fire || []); setAddedat(c.addedat || {});
+        setFire(c.fire || []); setAddedat(c.addedat || {}); setProfile(c.profile || {});
         setCold(c.cold || {});
         setDead(c.dead || {});
         setStages(c.stages || DEFAULT_STAGES);
@@ -172,10 +173,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   // Log a touch at a chosen stage. The goal stage promotes to SOI in the same
   // gesture (writes the stage touch AND adds SOI membership). Non-goal touches
   // leave the detail open so the stage advances in place.
-  const handleLogFollowUp = useCallback((id, note, stage, ts, talked) => {
+  const handleLogFollowUp = useCallback((id, note, stage, ts, talked, objections) => {
     const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note };
     if (Number.isInteger(stage)) touch.stage = stage;
     if (talked === true) touch.talked = true;
+    if (Array.isArray(objections) && objections.length) touch.objections = objections;
     const next = [...(fuRef.current[id] || []), touch];
     setFollowUps((prev) => ({ ...prev, [id]: next }));
     persistFollowUps(apiKey, id, next);
@@ -249,6 +251,15 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   }, [apiKey, showToast]);
 
   // Save (or clear) a contact's motivation note.
+  const handleSaveProfile = useCallback((id, prof) => {
+    setProfile((prev) => {
+      const next = { ...prev };
+      if (prof && Object.keys(prof).length) next[id] = prof; else delete next[id];
+      return next;
+    });
+    persistProfile(apiKey, id, prof).catch(() => showToast("Profile save failed"));
+  }, [apiKey, showToast]);
+
   const handleSaveMotivation = useCallback((id, text) => {
     const prev = motivationRef.current;
     const next = { ...prev };
@@ -426,12 +437,14 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
         />
       );
     }
-    const logTouch = (note, stage, ts, talked) => { handleLogFollowUp(id, note, stage, ts, talked); if (modal && stage === goalIndex) fireConfetti(); };
+    const logTouch = (note, stage, ts, talked, objections) => { handleLogFollowUp(id, note, stage, ts, talked, objections); if (modal && stage === goalIndex) fireConfetti(); };
     return (
       <FollowUpDetail
         prospect={p} log={logs[id]} touches={followUps[id] || []}
         onBack={closeDetail}
         onLogFollowUp={logTouch}
+        profile={profile[id] || null}
+        onSaveProfile={(prof) => handleSaveProfile(id, prof)}
         onLogReply={(note, ts) => handleLogReply(id, note, ts)}
         onToast={showToast}
         onAddToSoi={() => { handleAddToSoi(id); if (modal) fireConfetti(); }}
@@ -451,7 +464,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
         ) : null}
       />
     );
-  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, racSet, pinnedSet, whaleSet, fireSet, closeDetail, showToast, toggleRac, toggleWhale, toggleFire, handleColdCheckIn, handleRevive, handleLogFollowUp, handleLogReply, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
+  }, [prospects, logs, followUps, cold, dead, soi, stages, goalIndex, stagemap, motivation, profile, racSet, pinnedSet, whaleSet, fireSet, closeDetail, showToast, toggleRac, toggleWhale, toggleFire, handleColdCheckIn, handleRevive, handleLogFollowUp, handleLogReply, handleSaveProfile, handleAddToSoi, handleCopyForExcel, handleSaveMotivation, handleSetScore, setPin]);
 
   // ----- Desktop: the cockpit, with the detail in a modal -----
   if (isDesktop) {

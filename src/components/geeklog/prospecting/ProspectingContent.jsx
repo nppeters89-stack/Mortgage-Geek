@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactCard } from "./ContactCard";
-import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation, persistProfile } from "./prospectStore";
 import { startText } from "./textIntent";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
@@ -30,6 +30,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   // the call queue is never mistaken for a live lead. Derived from the dead
   // hash, so it covers everyone already buried.
   const [dead, setDead] = useState(() => seed?.dead || {});
+  const [profile, setProfile] = useState(() => seed?.profile || {});
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -58,6 +59,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
         setLogs(c.logs);
         setMotivation(c.motivation || {});
         setDead(c.dead || {});
+        setProfile(c.profile || {});
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -81,6 +83,15 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
 
   // Same motivation note as Follow Ups, on the same shared key - entered here
   // during the call, waiting in Follow Ups when the contact graduates.
+  const handleSaveProfile = useCallback((id, prof) => {
+    setProfile((prev) => {
+      const next = { ...prev };
+      if (prof && Object.keys(prof).length) next[id] = prof; else delete next[id];
+      return next;
+    });
+    persistProfile(apiKey, id, prof).catch(() => showToast("Profile save failed"));
+  }, [apiKey, showToast]);
+
   const handleSaveMotivation = useCallback((id, text) => {
     const prev = motivationRef.current;
     const next = { ...prev };
@@ -142,6 +153,8 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
           onToast={showToast}
           motivation={motivation[id] || ""}
           onSaveMotivation={(text) => handleSaveMotivation(id, text)}
+          profile={profile[idFromPhone(openProspect?.phone || "")] || null}
+          onSaveProfile={(prof) => handleSaveProfile(idFromPhone(openProspect.phone), prof)}
         />
         <Toast msg={toast} />
       </>

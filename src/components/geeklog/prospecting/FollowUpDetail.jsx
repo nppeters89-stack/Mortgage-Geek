@@ -9,6 +9,7 @@ import { ghostAction } from "./detailActionStyles";
 import { copyText } from "./clipboard";
 import { MotivationBox } from "./MotivationBox";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
+import { ChipFields } from "./ChipFields";
 
 // Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
 // read-only "First contact" block from the original call log, a composer, and the
@@ -52,7 +53,7 @@ function ScoreRow({ score, onSet }) {
 }
 
 export function FollowUpDetail({
-  prospect: p, log, touches, onBack, onLogFollowUp, onLogReply = null, onToast, onAddToSoi, onCopyForExcel,
+  prospect: p, log, touches, onBack, onLogFollowUp, onLogReply = null, profile = null, onSaveProfile = null, onToast, onAddToSoi, onCopyForExcel,
   inRac = false, onToggleRac, footerAction = null, backLabel = "Follow Ups",
   composerMode = "plain", stages = null, stageIndex = 0, goalIndex, coldCount = 0,
   statusLine = "", onColdCheckIn, onRevive, showStageTags = false,
@@ -74,22 +75,39 @@ export function FollowUpDetail({
   const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
   // A live conversation happened on this touch (feeds the weekly scoreboard).
   const [talked, setTalked] = useState(false);
+  const [lender, setLender] = useState(profile?.lenderSituation || "");
+  const [needs, setNeeds] = useState(profile?.needs || []);
+  const [hook, setHook] = useState(profile?.hook || "");
+  const [objections, setObjections] = useState([]);
+  const saveProfileIfChanged = () => {
+    if (!onSaveProfile) return;
+    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [], h: profile?.hook || "" });
+    const after = JSON.stringify({ l: lender, n: needs, h: hook.trim() });
+    if (before === after) return;
+    const next = {};
+    if (lender) next.lenderSituation = lender;
+    if (needs.length) next.needs = needs;
+    if (hook.trim()) next.hook = hook.trim();
+    onSaveProfile(next);
+  };
   useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
 
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
   const atCap = coldCount >= COLD_CHECKIN_CAP;
 
-  const submitDone = () => { setNote(""); setLoggedOn(todayLocalISO()); setTalked(false); };
+  const submitDone = () => { setNote(""); setLoggedOn(todayLocalISO()); setTalked(false); setObjections([]); };
   const submitPlain = () => {
     const text = note.trim();
     if (!text) return;
-    onLogFollowUp(text, null, tsForLoggedDate(loggedOn), talked);
+    saveProfileIfChanged();
+    onLogFollowUp(text, null, tsForLoggedDate(loggedOn), talked, objections);
     submitDone();
   };
   const submitStage = () => {
     const text = note.trim();
     if (!text) return;
-    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn), talked);
+    saveProfileIfChanged();
+    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn), talked, objections);
     submitDone();
   };
   const submitSoi = () => {
@@ -226,6 +244,9 @@ export function FollowUpDetail({
               {stages.map((label, i) => (!whaleMode && i === 0 ? null : <option key={i} value={i}>{label}</option>))}
             </select>
           )}
+          <ChipFields lender={lender} setLender={setLender} needs={needs} setNeeds={setNeeds}
+            hook={hook} setHook={setHook} objections={objections} setObjections={setObjections} />
+          <div style={{ marginTop: 12 }} />
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
             style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
           <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
