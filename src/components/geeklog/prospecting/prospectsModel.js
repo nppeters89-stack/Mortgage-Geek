@@ -68,8 +68,8 @@ export function weekScoreboard({ prospects, logs, followUps, soi = EMPTY_OBJ, pi
     const id = idFromPhone(p.phone);
     if (dead[id]) return;
     (followUps[id] || []).forEach((t) => {
-      if (t.stage !== STAGE_REFERRAL && now - t.ts < 7 * DAY_MS) week++;
-      if (t.talked === true && t.ts >= weekStart) talkedWeek++;
+      if (t.stage !== STAGE_REFERRAL && t.stage !== REPLY_STAGE && now - t.ts < 7 * DAY_MS) week++;
+      if (t.talked === true && t.stage !== REPLY_STAGE && t.ts >= weekStart) talkedWeek++;
     });
   });
   const scoredCallsWeek = Object.values(logs || {}).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
@@ -190,7 +190,8 @@ export const isTopScore = (log) => !!(log && log.score === TOP_SCORE);
 // Newest touch timestamp for a contact (0 if none).
 export function lastTouchTs(touches) {
   if (!Array.isArray(touches) || !touches.length) return 0;
-  return touches.reduce((m, t) => Math.max(m, t.ts || 0), 0);
+  // Inbound replies never reset the outbound clock.
+  return touches.reduce((m, t) => Math.max(m, t && t.stage === REPLY_STAGE ? 0 : t.ts || 0), 0);
 }
 
 // { label, stale } for the queue's last-touch line. Stale (amber) at zero touches
@@ -368,7 +369,7 @@ export function formatSoiSince(ts) {
 // preview: 0 Producing & Connected, 1 Producing & Overdue, 2 Quiet & Connected,
 // 3 Quiet & Drifting.
 
-export const touchesBy = (touches) => (touches || []).filter((t) => t && t.stage !== STAGE_REFERRAL);
+export const touchesBy = (touches) => (touches || []).filter((t) => t && t.stage !== STAGE_REFERRAL && t.stage !== REPLY_STAGE);
 export const referralsOf = (touches) => (touches || []).filter((t) => t && t.stage === STAGE_REFERRAL);
 
 // Null (not lastTouchTs's 0) when there is nothing: the timer chips render

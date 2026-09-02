@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { fireConfetti } from "./confetti";
@@ -170,9 +170,9 @@ export function FollowUpCockpit({
     let streak = 0; const d = new Date();
     if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
     while (days.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
-    const week = all.filter((t) => t.stage !== -3 && Date.now() - t.ts < 7 * DAY).length;
+    const week = all.filter((t) => t.stage !== -3 && t.stage !== REPLY_STAGE && Date.now() - t.ts < 7 * DAY).length;
     const todayKey = dayKey(Date.now());
-    const today = all.filter((t) => t.stage !== -3 && dayKey(t.ts) === todayKey).length;
+    const today = all.filter((t) => t.stage !== -3 && t.stage !== REPLY_STAGE && dayKey(t.ts) === todayKey).length;
     const activeMembers = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && !soi[id] && isMember(id, logs, pinnedSet); });
     const cov = activeMembers.length ? Math.round(activeMembers.filter((p) => { const ts = lastTouchTs(followUps[idFromPhone(p.phone)]); return ts && !isStale(ts); }).length / activeMembers.length * 100) : 100;
     const soiCount = prospects.filter((p) => { const id = idFromPhone(p.phone); return soi[id] && !dead[id]; }).length;
@@ -205,7 +205,7 @@ export function FollowUpCockpit({
     const dayCounts = Array.from({ length: 14 }, (_, i) => {
       const dd = new Date(); dd.setDate(dd.getDate() - (13 - i));
       const k = dd.toDateString();
-      return all.filter((t) => t.stage !== -3 && dayKey(t.ts) === k).length;
+      return all.filter((t) => t.stage !== -3 && t.stage !== REPLY_STAGE && dayKey(t.ts) === k).length;
     });
     // Data-capture coverage across the whole live pipeline (hot + whales + SOI):
     // motivation on file, and entered into RAC.
