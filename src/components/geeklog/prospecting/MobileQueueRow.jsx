@@ -1,4 +1,4 @@
-import { T, FF, staleColor } from "../gl2Tokens";
+import { T, FF, staleColor, staleWash } from "../gl2Tokens";
 import { ReplyBadge } from "./ReplyBadge";
 
 // Slim mobile Follow Ups row (CD 5B). Name + one status glyph, brokerage, a
@@ -6,16 +6,17 @@ import { ReplyBadge } from "./ReplyBadge";
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, reply = null, onOpen, onReply = null, onText = null }) {
+export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, top = false, fire = false, whale = false, reply = null, onOpen, onReply = null, onText = null }) {
+  const wash = staleWash(rampDays == null ? days : rampDays, dueDays, 0.05);
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen && onOpen(); } }}
-      style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", borderBottom: `1px solid ${T.lineSoft}`, cursor: "pointer", opacity: tier === "recent" ? 0.72 : 1 }}>
+      style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 16px", borderBottom: `1px solid ${T.lineSoft}`, cursor: "pointer", opacity: tier === "recent" ? 0.72 : 1, background: wash || "transparent" }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-          <span style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 15, lineHeight: 1.25, color: T.cream, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</span>
+          <span style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 15, lineHeight: 1.25, color: top ? T.greenBright : T.cream, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</span>
           {fire ? <span aria-hidden="true" style={{ flex: "none", fontSize: 12 }}>{"🔥"}</span>
             : whale ? <span aria-hidden="true" style={{ flex: "none", fontSize: 12 }}>{"🐳"}</span>
               : null}

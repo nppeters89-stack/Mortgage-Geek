@@ -97,7 +97,7 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
   // Worst first: ascending by percentage, so the gap to close sits on top.
   const gauges = [
     { label: "Motivation on file", pct: stats.motPct, color: T.orange, target: MOT_TARGET },
-    { label: "In RAC", pct: stats.racPct, color: T.amber, target: RAC_TARGET },
+    { label: "In RAC", pct: stats.racPct, color: stats.racPct >= 100 ? T.green : T.amber, target: RAC_TARGET },
     { label: "Touched in 14d", pct: stats.cov, color: stats.cov < COV_TARGET ? T.amber : T.green, target: COV_TARGET },
   ].sort((a, b) => a.pct - b.pct);
 

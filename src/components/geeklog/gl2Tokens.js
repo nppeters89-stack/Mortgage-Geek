@@ -91,6 +91,14 @@ export function staleColor(days, freshColor, dueDay = 7) {
   return "#FF3131";
 }
 
+// A faint background tint matching the urgency ramp: null while the card is
+// fresh, then the ramp color at low alpha once the clock starts showing.
+export function staleWash(days, dueDay = 7, alpha = 0.07) {
+  const c = staleColor(days, null, dueDay);
+  if (!c) return null;
+  return `rgba(${parseInt(c.slice(1, 3), 16)},${parseInt(c.slice(3, 5), 16)},${parseInt(c.slice(5, 7), 16)},${alpha})`;
+}
+
 // Interaction-score heat scale for prospecting call scoring: 1-10, red→green,
 // the same red-to-green convention as an interaction heatmap. Index 0 = score 1.
 export const SCORE_HEAT = [

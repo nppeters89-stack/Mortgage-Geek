@@ -587,6 +587,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
                 const rTs = lastReplyTs(followUps[id]);
                 return (
                   <MobileQueueRow key={id} prospect={p} tier={g.key}
+                    top={isTopScore(logs[id])}
                     reply={rCount ? { count: rCount, days: rTs ? Math.floor((Date.now() - rTs) / 86400000) : null, owed: rTs > (ts || 0) } : null}
                     days={ts ? Math.floor((Date.now() - ts) / 86400000) : null}
                     rampDays={info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null}

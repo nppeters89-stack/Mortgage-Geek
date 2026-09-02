@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect } from "react";
-import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
+import { T, FF, stageRampColor, whaleRampColor, staleColor, staleWash, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage, e164Phone } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
@@ -349,6 +349,7 @@ export function FollowUpCockpit({
     // Urgency (color) can run on the reply clock; the age label stays the
     // outbound fact.
     const info = dueInfoFor(followUps[id] || [], stageFor(id), whaleSet?.has(id));
+    const dueWash = staleWash(dSince(info.sinceTs), info.dueDays);
     const replies = repliesOf(followUps[id]);
     const replyTs = lastReplyTs(followUps[id]);
     const count = (followUps[id] || []).length;
@@ -358,7 +359,7 @@ export function FollowUpCockpit({
     const hot = fireSet?.has(id);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${hot ? T.orangeWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", backgroundColor: T.surface, backgroundImage: dueWash ? `linear-gradient(0deg, ${dueWash}, ${dueWash})` : "none", border: `1px solid ${hot ? T.orangeWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         {hot && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: top ? T.greenBright : T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
@@ -398,9 +399,10 @@ export function FollowUpCockpit({
     const id = idFromPhone(p.phone);
     const n = coldCount(followUps[id]);
     const ts = lastTouchTs(followUps[id]);
+    const dueWash = staleWash(dSince(ts), COLD_DUE_DAYS);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "cold")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
+        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", backgroundColor: T.surface, backgroundImage: dueWash ? `linear-gradient(0deg, ${dueWash}, ${dueWash})` : "none", border: `1px solid ${T.coldWashLine}`, borderRadius: 11, padding: "11px 12px", cursor: "grab", userSelect: "none" }}>
         {fireSet?.has(id) && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{fireSet?.has(id) ? " 🔥" : ""}</div>
