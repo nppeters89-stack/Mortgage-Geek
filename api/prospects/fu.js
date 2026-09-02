@@ -12,6 +12,7 @@
 // stored here.
 
 import { redis, requireKey, jsonResponse } from "../geeklog/_redis.js";
+import { OBJECTION_IDS } from "./_chips.js";
 
 const FU_SET = "prospects:fu:ids";
 const fuKey = (id) => `prospects:fu:${id}`;
@@ -29,6 +30,7 @@ function validate(body) {
     if (t.stage != null && !(Number.isInteger(t.stage) && t.stage >= -4 && t.stage <= 20)) return "touch.stage must be an integer"; // -3 = referral event, -4 = inbound reply
     if (t.talked != null && typeof t.talked !== "boolean") return "touch.talked must be a boolean";
     if (t.type != null && (typeof t.type !== "string" || t.type.length > 20)) return "touch.type must be a short string";
+    if (t.objections != null && (!Array.isArray(t.objections) || t.objections.length > 10 || t.objections.some((x) => !OBJECTION_IDS.has(x)))) return "touch.objections must be known objection ids";
   }
   return null;
 }
@@ -52,6 +54,7 @@ export default async function handler(req, res) {
       if (Number.isInteger(t.stage)) o.stage = t.stage;
       if (t.talked === true) o.talked = true; // a live conversation happened on this touch
       if (typeof t.type === "string" && t.type && t.type.length <= 20) o.type = t.type; // e.g. "text"
+      if (Array.isArray(t.objections) && t.objections.length) o.objections = t.objections.filter((x) => OBJECTION_IDS.has(x));
       return o;
     });
 

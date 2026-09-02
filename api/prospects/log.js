@@ -6,6 +6,7 @@
 // write wins. Payload is tiny so it works with keepalive:true on the client
 // (the write survives the phone locking right after Save).
 
+import { OBJECTION_IDS } from "./_chips.js";
 import { redis, requireKey, jsonResponse, isValidISODate } from "../geeklog/_redis.js";
 
 const LOGGED_SET = "prospects:logged";
@@ -25,6 +26,7 @@ function validate(body) {
   if (log.callback && !isValidISODate(log.callback)) return "callback must be an ISO date";
   if (log.dateCalled && !isValidISODate(log.dateCalled)) return "dateCalled must be an ISO date";
   if (log.ts != null && !Number.isFinite(log.ts)) return "ts must be a number";
+  if (log.objections != null && (!Array.isArray(log.objections) || log.objections.length > 10 || log.objections.some((x) => !OBJECTION_IDS.has(x)))) return "objections must be known objection ids";
   return null;
 }
 
@@ -51,6 +53,7 @@ export default async function handler(req, res) {
       // the fact - and must not read as activity on the day it was typed in.
       ts: Number.isFinite(log.ts) ? log.ts : null,
     };
+    if (Array.isArray(log.objections) && log.objections.length) record.objections = log.objections.filter((x) => OBJECTION_IDS.has(x));
 
     await redis.set(logKey(id), JSON.stringify(record));
     await redis.sadd(LOGGED_SET, id);

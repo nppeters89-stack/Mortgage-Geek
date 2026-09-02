@@ -25,6 +25,7 @@
 // replaced wholesale on every re-seed from Excel and would destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
+import { LENDER_SITUATION_IDS, NEED_IDS } from "./_chips.js";
 
 const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
@@ -33,6 +34,7 @@ const RAC_SET = "prospects:rac";
 const WHALE_SET = "prospects:whale";
 const FIRE_SET = "prospects:fire";
 const ADDED_KEY = "prospects:addedat";
+const PROFILE_KEY = "prospects:profile";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
@@ -126,6 +128,32 @@ async function handleAdded(res, { id, ts }) {
   return jsonResponse(res, 200, { id, ts: existing != null ? Number(existing) : t });
 }
 
+// Contact profile: Nick's current understanding, overwritten as it improves.
+// { lenderSituation?, needs?, hook? }; unknown chip ids are rejected. A save
+// that empties every field deletes the hash entry.
+async function handleProfile(res, { id, profile }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!profile || typeof profile !== "object") return jsonResponse(res, 400, { error: "profile must be an object" });
+  const clean = {};
+  if (profile.lenderSituation != null && profile.lenderSituation !== "") {
+    if (!LENDER_SITUATION_IDS.has(profile.lenderSituation)) return jsonResponse(res, 400, { error: "unknown lenderSituation id" });
+    clean.lenderSituation = profile.lenderSituation;
+  }
+  if (profile.needs != null) {
+    if (!Array.isArray(profile.needs) || profile.needs.length > 10 || profile.needs.some((n) => !NEED_IDS.has(n))) {
+      return jsonResponse(res, 400, { error: "unknown need id" });
+    }
+    if (profile.needs.length) clean.needs = profile.needs;
+  }
+  if (profile.hook != null && profile.hook !== "") {
+    if (typeof profile.hook !== "string" || profile.hook.length > 300) return jsonResponse(res, 400, { error: "hook must be a short string" });
+    clean.hook = profile.hook.trim();
+  }
+  if (Object.keys(clean).length) await redis.hset(PROFILE_KEY, { [id]: JSON.stringify(clean) });
+  else await redis.hdel(PROFILE_KEY, id);
+  return jsonResponse(res, 200, { id, profile: clean });
+}
+
 async function handleManual(res, contact) {
   const err = validateContact(contact);
   if (err) return jsonResponse(res, 400, { error: err });
@@ -212,6 +240,7 @@ export default async function handler(req, res) {
       case "cold": return await handleCold(res, body);
       case "dead": return await handleDead(res, body);
       case "added": return await handleAdded(res, body);
+      case "profile": return await handleProfile(res, body);
       case "manual": return await handleManual(res, body.contact);
       default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
     }

@@ -37,6 +37,7 @@ const RAC_SET = "prospects:rac";
 const WHALE_SET = "prospects:whale";
 const FIRE_SET = "prospects:fire";
 const ADDED_KEY = "prospects:addedat";
+const PROFILE_KEY = "prospects:profile";
 const STAGES_KEY = "prospects:fu:stages";
 const CONFIG_KEY = "prospects:fu:config";
 const COLD_KEY = "prospects:cold";
@@ -63,7 +64,7 @@ export default async function handler(req, res) {
     // read at once; wave 2 holds the two MGETs that need their SMEMBERS first.
     const [
       listRaw, loggedIdsRaw, fuIdsRaw, soiRaw, pinnedRaw, racRaw, whaleRaw, fireRaw,
-      manualHash, storedStagesRaw, storedConfigRaw, coldRaw, deadRaw, stagemapHash, motivationHash, addedatHash,
+      manualHash, storedStagesRaw, storedConfigRaw, coldRaw, deadRaw, stagemapHash, motivationHash, addedatHash, profileHash,
     ] = await Promise.all([
       redis.get(LIST_KEY),
       redis.smembers(LOGGED_SET),
@@ -81,6 +82,7 @@ export default async function handler(req, res) {
       redis.hgetall(STAGEMAP_KEY),
       redis.hgetall(MOTIVATION_KEY),
       redis.hgetall(ADDED_KEY),
+      redis.hgetall(PROFILE_KEY),
     ]);
 
     const list = parseStored(listRaw) || { version: 1, generated: null, source: null, prospects: [] };
@@ -153,7 +155,15 @@ export default async function handler(req, res) {
       if (value != null) motivation[id] = String(value);
     }
 
-    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale, fire, addedat: addedatHash || {} });
+    // Contact profiles: id -> { lenderSituation?, needs?, hook? }. Entries that
+    // fail to parse are skipped rather than breaking the payload.
+    const profile = {};
+    for (const [id, value] of Object.entries(profileHash || {})) {
+      const v = parseStored(value);
+      if (v && typeof v === "object") profile[id] = v;
+    }
+
+    return jsonResponse(res, 200, { list, logs, followUps, soi, pinned, manual, rac, stages, config, cold, dead, stagemap, motivation, whale, fire, addedat: addedatHash || {}, profile });
   } catch (err) {
     console.error("[prospects] error:", err);
     return jsonResponse(res, 500, { error: "Internal Server Error" });

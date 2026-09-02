@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt, saveProfile, saveProfileKeepalive } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, qualifiesForFollowUp, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -81,10 +81,29 @@ export async function loadProspects(apiKey) {
   const config = data.config && typeof data.config === "object" ? { ...DEFAULT_CONFIG, ...data.config } : DEFAULT_CONFIG;
   cache = {
     prospects, logs, followUps, soi: data.soi || {}, pinned: toIds(data.pinned), manual, rac: toIds(data.rac),
-    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire), addedat: data.addedat || {},
+    stages, config, cold: data.cold || {}, dead: data.dead || {}, stagemap: data.stagemap || {}, motivation: data.motivation || {}, whale: toIds(data.whale), fire: toIds(data.fire), addedat: data.addedat || {}, profile: data.profile || {},
   };
   saveLS(cache);
   return cache;
+}
+
+// Contact profile map and its optimistic write: same shape as motivation.
+export function getCachedProfile() {
+  return getCachedProspects()?.profile || {};
+}
+export function setCachedProfile(map) {
+  const c = getCachedProspects();
+  if (!c) return;
+  cache = { ...c, profile: map };
+  saveLS(cache);
+}
+export function persistProfile(apiKey, id, profileObj) {
+  const prev = getCachedProfile();
+  const next = { ...prev };
+  if (profileObj && Object.keys(profileObj).length) next[id] = profileObj; else delete next[id];
+  setCachedProfile(next);
+  saveProfileKeepalive(apiKey, id, profileObj || {});
+  return saveProfile(apiKey, id, profileObj || {});
 }
 
 // Queue join date: written once, the first time a contact qualifies for Follow
