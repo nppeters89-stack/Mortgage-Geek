@@ -10,6 +10,7 @@ import { copyText } from "./clipboard";
 import { MotivationBox } from "./MotivationBox";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { ChipFields } from "./ChipFields";
+import { lenderLabel, needLabel } from "./chips";
 
 // Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
 // read-only "First contact" block from the original call log, a composer, and the
@@ -157,6 +158,16 @@ export function FollowUpDetail({
 
       {statusLine && (
         <div style={{ marginTop: 12, fontSize: 11.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: composerMode === "cold" ? T.cold : composerMode === "soi" ? T.amber : T.redLift }}>{statusLine}</div>
+      )}
+
+      {/* Read-only understanding for composers without the editable chips
+          (SOI and cold); the plain and stage composers edit these inline. */}
+      {(composerMode === "soi" || composerMode === "cold") && profile && (profile.lenderSituation || profile.needs?.length || profile.hook) && (
+        <div style={{ marginTop: 14, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "11px 14px", fontSize: 12.5, lineHeight: 1.7, color: T.dim }}>
+          {profile.lenderSituation && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Lender</span>{lenderLabel(profile.lenderSituation)}</div>}
+          {profile.needs?.length > 0 && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Needs</span>{profile.needs.map(needLabel).join(", ")}</div>}
+          {profile.hook && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Hook</span>{profile.hook}</div>}
+        </div>
       )}
 
       {log && (

@@ -21,6 +21,7 @@ import { quietAction } from "./detailActionStyles";
 // them back into Follow Ups with every touch - and every referral - intact.
 export function SoiContent({ apiKey, onOpenFollowUps }) {
   const seed = getCachedProspects();
+  const [profile, setProfile] = useState(() => seed?.profile || {});
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
   const [logs, setLogs] = useState(() => seed?.logs || {});
   const [followUps, setFollowUps] = useState(() => seed?.followUps || {});
@@ -64,6 +65,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
     let cancelled = false;
     loadProspects(apiKey)
       .then((c) => {
+        setProfile(c.profile || {});
         if (cancelled) return;
         setProspects(c.prospects);
         setLogs(c.logs);
@@ -159,6 +161,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
     const since = formatSoiSince(soi[id]);
     return (
       <FollowUpDetail
+        profile={profile[id] || null}
         prospect={p}
         log={logs[id]}
         touches={followUps[id] || []}
