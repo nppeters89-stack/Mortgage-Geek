@@ -25,6 +25,10 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
   const [prospects, setProspects] = useState(() => (seed?.prospects ? sortedQueue(seed.prospects) : []));
   const [logs, setLogs] = useState(() => seed?.logs || {});
   const [motivation, setMotivation] = useState(() => seed?.motivation || {});
+  // Buried contacts (the pipeline dead box) wear a skull here so a name from
+  // the call queue is never mistaken for a live lead. Derived from the dead
+  // hash, so it covers everyone already buried.
+  const [dead, setDead] = useState(() => seed?.dead || {});
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
@@ -52,6 +56,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
         setProspects(c.prospects);
         setLogs(c.logs);
         setMotivation(c.motivation || {});
+        setDead(c.dead || {});
         setReady(true);
       })
       .catch(() => setReady(true));
@@ -204,7 +209,7 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "15px 10px", borderBottom: `1px solid ${T.line}`, cursor: "pointer", borderRadius: 8 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: hasIntelDot(p) ? T.redLift : "transparent", flex: "none" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}</div>
+                  <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}{dead[id] ? " 💀" : ""}</div>
                   <div style={{ fontSize: 12.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
                 </div>
                 {meta && (
