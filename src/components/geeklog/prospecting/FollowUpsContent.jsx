@@ -6,6 +6,7 @@ import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { MobileQueueRow } from "./MobileQueueRow";
+import { ReplyDateDialog } from "./LoggedDatePicker";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { copyText } from "./clipboard";
@@ -122,6 +123,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // Mobile 5B: filter tiles + staleness groups. Its own state, deliberately a
   // different set from the desktop rail (data hygiene is desk work).
   const [mobileFilter, setMobileFilter] = useState(null); // null | "due" | "fire" | "whale"
+  const [replyFor, setReplyFor] = useState(null); // { id, name } for the reply date dialog
   // Shared weekly scoreboard, same selector as the desktop HUD.
   const wk = useMemo(() => weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat }), [prospects, logs, followUps, soi, pinnedSet, cold, dead, addedat]);
   const mobileGroups = useMemo(() => {
@@ -576,7 +578,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                     rampDays={info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null}
                     dueDays={info.dueDays}
                     fire={fireSet.has(id)} whale={whaleSet.has(id)}
-                    onReply={() => handleLogReply(id)}
+                    onReply={() => setReplyFor({ id, name: p.name })}
                     onOpen={() => setOpenId(id)} />
                 );
               })}
@@ -606,6 +608,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           </details>
         )}
       </div>
+
+      {replyFor && (
+        <ReplyDateDialog name={replyFor.name} onClose={() => setReplyFor(null)}
+          onSave={(ts) => handleLogReply(replyFor.id, "", ts)} />
+      )}
 
       {sheetOpen && (
         <AddToFollowUpsSheet

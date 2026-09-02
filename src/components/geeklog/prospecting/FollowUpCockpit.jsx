@@ -3,7 +3,7 @@ import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from ".
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
 import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
-import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
+import { LoggedDatePicker, ReplyDateDialog, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { ReplyBadge } from "./ReplyBadge";
 import { fireConfetti } from "./confetti";
 
@@ -60,6 +60,7 @@ export function FollowUpCockpit({
   };
   const [over, setOver] = useState(null); // highlight key, e.g. "hot:3" | "cold:2" | "tray" | "dead"
   const [pop, setPop] = useState(null); // { type, id, targetStage }
+  const [replyPop, setReplyPop] = useState(null); // { id, name } for the reply date dialog
   // Collapsed stage columns (indices). Collapsing hides the card list; the
   // header stays a drop target, so a card can still be dragged onto it.
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
@@ -364,7 +365,7 @@ export function FollowUpCockpit({
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
             {onLogReply && (
               <button type="button" title="They replied" aria-label={`They replied: ${p.name}`}
-                onClick={(e) => { e.stopPropagation(); onLogReply(id); }}
+                onClick={(e) => { e.stopPropagation(); setReplyPop({ id, name: p.name }); }}
                 style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: "pointer", color: T.dim, display: "inline-flex" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               </button>
@@ -492,6 +493,11 @@ export function FollowUpCockpit({
           );
         })}
       </div>
+
+      {replyPop && (
+        <ReplyDateDialog name={replyPop.name} onClose={() => setReplyPop(null)}
+          onSave={(ts) => onLogReply(replyPop.id, "", ts)} />
+      )}
 
       {activeFilter && board.every((c, si) => si === goalIndex || !c.length) && whaleCols.every((c) => !c.length) && !(activeFilter === "maint" && coldTotal > 0) && (
         <div style={{ textAlign: "center", padding: "2px 0 18px", fontSize: 12.5, color: T.dim, fontFamily: FF.body }}>
