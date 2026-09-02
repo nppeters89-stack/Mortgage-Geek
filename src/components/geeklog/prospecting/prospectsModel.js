@@ -162,10 +162,13 @@ export const STALE_DAYS = 14;
 // the same threshold where the urgency ramp starts kindling, so every due
 // count agrees with the yellow-through-red labels.
 export const DUE_DAYS = 7;
-// Stage-aware cadence: the two value-add stages breathe slower than the 7-day
-// default, and whales run a 30-day nurture clock (due the day after it laps).
-// Indexes match DEFAULT_STAGES: 2 = Value Add & Social, 3 = Value Add.
-export const STAGE_DUE_DAYS = { 2: 10, 3: 14 };
+// Stage-aware cadence: one clock per standard stage, indexed to match
+// DEFAULT_STAGES 0..5 (New, Intro Follow Up, Value Add & Social, Value Add,
+// Check In, Motivation Identified / Maintenance). SOI (index 6) is not listed
+// on purpose: the SOI cockpit owns its own clocks, so it falls through to the
+// DUE_DAYS fallback for the badge counts. New cards are never-touched and read
+// red by rule already; the 1-day value is for consistency and hand placements.
+export const STAGE_DUE_DAYS = [1, 3, 7, 14, 21, 30];
 export const WHALE_DUE_DAYS = 31;
 export const dueDaysFor = (stageIndex, isWhale = false) => (isWhale ? WHALE_DUE_DAYS : STAGE_DUE_DAYS[stageIndex] ?? DUE_DAYS);
 export const isDueForTouch = (touches, dueDays = DUE_DAYS) => {
