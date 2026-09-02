@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
 import { COV_TARGET, RAC_TARGET, MOT_TARGET, CONVO_TARGET } from "./prospectsModel";
+import { objectionLabel } from "./chips";
 
 // Triage HUD (CD handoff 1A + the 2B filter rail): the cockpit's diagnostics as
 // one instrument. Zone 1 is the work owed (the only red on the strip), zone 2
@@ -170,6 +171,11 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
                 <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Conversion ratio · wk</div>
               </div>
             </div>
+            {Object.keys(stats.objectionsWeek || {}).length > 0 && (
+              <div style={{ fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>
+                Objections wk: {Object.entries(stats.objectionsWeek).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${objectionLabel(id).toLowerCase()} ${n}`).join(", ")}
+              </div>
+            )}
             <div style={{ marginTop: "auto", paddingTop: 11, borderTop: `1px solid ${T.line}`, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", fontSize: 11.5, color: T.faint }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Pipeline</span>
               <span style={{ color: T.dim }}>{stats.activeCount} active</span>

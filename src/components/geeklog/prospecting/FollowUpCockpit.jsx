@@ -256,11 +256,11 @@ export function FollowUpCockpit({
     }).length;
     // Weekly scoreboard (4A): shared selector, so the phone strip and this
     // panel always agree on the week.
-    const { weekLabel, addedToday, addedWeek, convosWeek, repliesWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
+    const { weekLabel, addedToday, addedWeek, convosWeek, repliesWeek, objectionsWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, tensCount, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, tensCount, objectionsWeek, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, profile, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----

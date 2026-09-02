@@ -8,6 +8,7 @@ import { ContactQueueRow } from "./ContactQueueRow";
 import { MobileQueueRow } from "./MobileQueueRow";
 import { ReplyDateDialog } from "./LoggedDatePicker";
 import { startText } from "./textIntent";
+import { objectionLabel } from "./chips";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { copyText } from "./clipboard";
@@ -546,6 +547,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
             </span>
           </span>
         </div>
+        {Object.keys(wk.objectionsWeek || {}).length > 0 && (
+          <div style={{ marginTop: 8, fontFamily: FF.body, fontSize: 10.5, color: T.dimmer, fontVariantNumeric: "tabular-nums" }}>
+            Objections wk: {Object.entries(wk.objectionsWeek).sort((a, b) => b[1] - a[1]).map(([id, n]) => `${objectionLabel(id).toLowerCase()} ${n}`).join(", ")}
+          </div>
+        )}
         {/* Filter tiles. All is an explicit tile; single select. */}
         <div style={{ display: "flex", gap: 6, padding: "11px 0" }}>
           {[
