@@ -169,8 +169,11 @@ export const DUE_DAYS = 7;
 // DUE_DAYS fallback for the badge counts. New cards are never-touched and read
 // red by rule already; the 1-day value is for consistency and hand placements.
 export const STAGE_DUE_DAYS = [1, 3, 7, 14, 21, 30];
-export const WHALE_DUE_DAYS = 31;
-export const dueDaysFor = (stageIndex, isWhale = false) => (isWhale ? WHALE_DUE_DAYS : STAGE_DUE_DAYS[stageIndex] ?? DUE_DAYS);
+// Whale cadence per value-add column (0..6). Early columns move fast while the
+// relationship is forming, then settle into the 30-day nurture rhythm.
+export const WHALE_DUE_DAYS = [3, 7, 14, 30, 30, 30, 30];
+export const dueDaysFor = (stageIndex, isWhale = false) =>
+  (isWhale ? WHALE_DUE_DAYS[stageIndex] ?? WHALE_DUE_DAYS[WHALE_DUE_DAYS.length - 1] : STAGE_DUE_DAYS[stageIndex] ?? DUE_DAYS);
 export const isDueForTouch = (touches, dueDays = DUE_DAYS) => {
   const ts = lastTouchTs(touches);
   return !ts || Date.now() - ts >= dueDays * DAY_MS;

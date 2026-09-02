@@ -133,16 +133,16 @@ export function FollowUpCockpit({
     cols.forEach((c) => c.sort((a, b) => (lastTouchTs(followUps[idFromPhone(a.phone)]) || 0) - (lastTouchTs(followUps[idFromPhone(b.phone)]) || 0)));
     const ranked = cols.map((c) => fireFirst(c, fireSet));
     if (!activeFilter) return ranked;
-    // Same rail filter as the hot board; due runs on the whale 30-day clock.
-    const match = (p) => {
+    // Same rail filter as the hot board; due runs each column's whale clock.
+    const match = (p, wi) => {
       const id = idFromPhone(p.phone);
-      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(0, true));
+      if (activeFilter === "due") return isDueForTouch(followUps[id], dueDaysFor(wi, true));
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
       if (activeFilter === "fire") return fireSet?.has(id);
       return true;
     };
-    return ranked.map((c) => c.filter(match));
+    return ranked.map((c, wi) => c.filter((p) => match(p, wi)));
   }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
@@ -184,7 +184,11 @@ export function FollowUpCockpit({
     });
     // Whales count toward due on their own 30-day nurture clock.
     const whaleMembers = prospects.filter((p) => { const id = idFromPhone(p.phone); return whaleSet?.has(id) && !cold[id] && !dead[id]; });
-    const dueWhales = whaleMembers.filter((p) => isDueForTouch(followUps[idFromPhone(p.phone)], dueDaysFor(0, true)));
+    const dueWhales = whaleMembers.filter((p) => {
+      const id = idFromPhone(p.phone);
+      const fu = followUps[id];
+      return isDueForTouch(fu, dueDaysFor(stageOf(fu || [], { goalIndex, override: stagemap[id] }), true));
+    });
     const dueAll = [...dueMembers, ...dueWhales];
     const due = dueAll.length;
     // Days since last touch for the most neglected due card. A never-touched
