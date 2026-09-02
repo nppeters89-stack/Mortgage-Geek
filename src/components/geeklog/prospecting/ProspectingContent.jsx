@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
 import { ContactCard } from "./ContactCard";
 import { getCachedProspects, loadProspects, persistLog, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { startText } from "./textIntent";
 import {
   idFromPhone, sortedQueue, filterQueue, hasIntelDot, isToday,
   outcomeMeta, PILL_TONES, logTsvRow, logTsvAll,
@@ -212,6 +213,20 @@ export function ProspectingContent({ apiKey, onTalkedLogged }) {
                   <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 20, lineHeight: 1.15, color: T.cream }}>{p.name}{dead[id] ? " 💀" : ""}</div>
                   <div style={{ fontSize: 12.5, color: T.dim, marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
                 </div>
+                <button type="button" disabled={!e164Phone(p.phone)}
+                  title={e164Phone(p.phone) ? "Text a first-contact message" : "no valid mobile number"}
+                  aria-label={`Text ${p.name}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const r = startText({ prospect: p, prospectingTab: true });
+                    if (!r.ok) return;
+                    if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
+                  }}
+                  style={{ flex: "none", padding: 7, margin: -7, background: "none", border: "none", cursor: e164Phone(p.phone) ? "pointer" : "default", opacity: e164Phone(p.phone) ? 1 : 0.35 }}>
+                  <span style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,254,251,0.04)", border: `1px solid ${T.line}`, color: T.dim }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
+                  </span>
+                </button>
                 {meta && (
                   <span style={{ flex: "none", fontSize: 11, fontWeight: 600, padding: "4px 9px", borderRadius: 6, color: tone.color, background: tone.bg }}>{meta.short}</span>
                 )}

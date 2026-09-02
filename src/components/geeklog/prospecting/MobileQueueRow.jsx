@@ -6,7 +6,7 @@ import { ReplyBadge } from "./ReplyBadge";
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, reply = null, onOpen, onReply = null }) {
+export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, reply = null, onOpen, onReply = null, onText = null }) {
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
@@ -24,6 +24,15 @@ export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, ti
         <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
       </div>
       <span style={{ flex: "none", fontSize: 11.5, fontVariantNumeric: "tabular-nums", color: staleColor(rampDays == null ? days : rampDays, T.dimmer, dueDays) }}>{days == null ? "never" : `${days}d`}</span>
+      {onText && (
+        <button type="button" aria-label={`Text ${p.name}`}
+          onClick={(e) => { e.stopPropagation(); onText(); }}
+          style={{ flex: "none", padding: 7, margin: -7, background: "none", border: "none", cursor: "pointer" }}>
+          <span style={{ width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,254,251,0.04)", border: `1px solid ${T.line}`, color: T.dimmer }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
+          </span>
+        </button>
+      )}
       {onReply && (
         <button type="button" aria-label={`They replied: ${p.name}`}
           onClick={(e) => { e.stopPropagation(); onReply(); }}

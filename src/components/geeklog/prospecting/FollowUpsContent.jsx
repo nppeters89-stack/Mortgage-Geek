@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF, STAGE_RAMP } from "../gl2Tokens";
 import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistPin, setCachedPinned, persistManualContact, persistRac, setCachedRac, persistCold, persistDead, setCachedColdDead, persistStageMove, setCachedStagemap, persistMotivation, setCachedMotivation, persistLog, persistWhale, setCachedWhale, persistFire, setCachedFire } from "./prospectStore";
-import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, dueInfoFor, lastTouchTs, weekScoreboard, CONVO_TARGET, COLD_DUE_DAYS, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst, REPLY_STAGE, repliesOf, lastReplyTs } from "./prospectsModel";
+import { idFromPhone, followUpQueue, coldQueue, isTopScore, isPinnedMember, qualifiesForFollowUp, manualContactTsvRow, stageOf, coldCount, isDueForTouch, dueDaysFor, dueInfoFor, lastTouchTs, weekScoreboard, CONVO_TARGET, COLD_DUE_DAYS, DEFAULT_STAGES, DEFAULT_CONFIG, WHALE_COLUMNS, fireFirst, REPLY_STAGE, repliesOf, lastReplyTs, e164Phone } from "./prospectsModel";
 import { FollowUpDetail } from "./FollowUpDetail";
 import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { MobileQueueRow } from "./MobileQueueRow";
 import { ReplyDateDialog } from "./LoggedDatePicker";
+import { startText } from "./textIntent";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { copyText } from "./clipboard";
@@ -272,6 +273,14 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
     });
   }, [apiKey, showToast, stages]);
 
+  // Text button: template by stage, intent written, sms: on touch devices,
+  // clipboard on desktop. Never logs anything by itself.
+  const handleText = useCallback((p, { stage = 0, cold = false } = {}) => {
+    const r = startText({ prospect: p, stage, cold });
+    if (!r.ok) { showToast("No valid mobile number"); return; }
+    if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
+  }, [showToast]);
+
   // Inbound reply: appended to the same history as stage -4. Not an outbound
   // touch; the model excludes it from clocks, ratchet and stats.
   const handleLogReply = useCallback((id, note, ts) => {
@@ -450,6 +459,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
           stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet} fireSet={fireSet} addedat={addedat}
           onLogReply={handleLogReply}
+          onText={handleText}
           onOpenDetail={setOpenId}
           onOpenSoi={onOpenSoi}
           onLogTouch={handleLogFollowUp}
@@ -579,6 +589,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                     dueDays={info.dueDays}
                     fire={fireSet.has(id)} whale={whaleSet.has(id)}
                     onReply={() => setReplyFor({ id, name: p.name })}
+                    onText={e164Phone(p.phone) ? () => handleText(p, { stage: stageOf(followUps[id], { goalIndex, override: stagemap[id] }) }) : null}
                     onOpen={() => setOpenId(id)} />
                 );
               })}

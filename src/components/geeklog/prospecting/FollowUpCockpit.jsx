@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage, e164Phone } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, ReplyDateDialog, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { ReplyBadge } from "./ReplyBadge";
@@ -45,7 +45,7 @@ function FirePulse() {
 
 export function FollowUpCockpit({
   prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet, addedat,
-  onOpenDetail, onOpenSoi, onLogTouch, onLogReply, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
+  onOpenDetail, onOpenSoi, onLogTouch, onLogReply, onText, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
   const boardRef = useRef(null);
@@ -363,6 +363,14 @@ export function FollowUpCockpit({
             {activeFilter === "replied" && !motivation?.[id] && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: T.orange }}>no motivation</span>}
           </span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
+            {onText && (
+              <button type="button" disabled={!e164Phone(p.phone)}
+                title={e164Phone(p.phone) ? "Text them" : "no valid mobile number"} aria-label={`Text ${p.name}`}
+                onClick={(e) => { e.stopPropagation(); onText(p, { stage: stageFor(id), cold: false }); }}
+                style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: e164Phone(p.phone) ? "pointer" : "default", color: T.dim, display: "inline-flex", opacity: e164Phone(p.phone) ? 1 : 0.35 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
+              </button>
+            )}
             {onLogReply && (
               <button type="button" title="They replied" aria-label={`They replied: ${p.name}`}
                 onClick={(e) => { e.stopPropagation(); setReplyPop({ id, name: p.name }); }}
@@ -393,6 +401,14 @@ export function FollowUpCockpit({
         <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
           <ColdPips count={n} />
+            {onText && (
+              <button type="button" disabled={!e164Phone(p.phone)}
+                title={e164Phone(p.phone) ? "Text them" : "no valid mobile number"} aria-label={`Text ${p.name}`}
+                onClick={(e) => { e.stopPropagation(); onText(p, { stage: stageFor(id), cold: true }); }}
+                style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: e164Phone(p.phone) ? "pointer" : "default", color: T.dim, display: "inline-flex", opacity: e164Phone(p.phone) ? 1 : 0.35 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
+              </button>
+            )}
           {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontSize: 10, fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
           <span style={{ fontSize: 10, color: staleColor(dSince(ts), T.faint, COLD_DUE_DAYS) }}>{rel(ts)}</span>
         </div>
