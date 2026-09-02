@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { T, FF, stageRampColor, whaleRampColor, staleColor, staleWash, STAGE_RAMP } from "../gl2Tokens";
 import { TriageHud, HudHelp, ConvoBar } from "./TriageHud";
-import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage, e164Phone } from "./prospectsModel";
+import { idFromPhone, stageOf, coldCount, coldColIndex, lastTouchTs, qualifiesForFollowUp, isTopScore, isDueForTouch, dueDaysFor, heatColor, COLD_COLUMNS, WHALE_COLUMNS, COLD_CHECKIN_CAP, COLD_DUE_DAYS, STALE_DAYS, REPLY_STAGE, dueInfoFor, repliesOf, lastReplyTs, fireFirst, weekScoreboard, shortStage, e164Phone, hasMotivation } from "./prospectsModel";
 import { ColdPips } from "./StageDots";
 import { LoggedDatePicker, ReplyDateDialog, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { ReplyBadge } from "./ReplyBadge";
@@ -44,7 +44,7 @@ function FirePulse() {
 }
 
 export function FollowUpCockpit({
-  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, rac, whaleSet, fireSet, addedat,
+  prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, weekTarget, stagemap, motivation, profile, rac, whaleSet, fireSet, addedat,
   onOpenDetail, onOpenSoi, onLogTouch, onLogReply, onText, onMoveStage, onColdCheckIn, onMoveToCold, onMarkDead, onRestore, onRevive, onReviveSilent,
 }) {
   const drag = useRef(null); // { id, from: "hot" | "cold" }
@@ -110,7 +110,7 @@ export function FollowUpCockpit({
       if (activeFilter === "tens") return isTopScore(logs[id]);
       if (activeFilter === "due") return dueInfoFor(followUps[id], si).due;
       if (activeFilter === "rac") return !rac?.has(id);
-      if (activeFilter === "mot") return !!motivation?.[id];
+      if (activeFilter === "mot") return hasMotivation(id, motivation, profile);
       if (activeFilter === "fire") return fireSet?.has(id);
       return true;
     };
@@ -124,7 +124,7 @@ export function FollowUpCockpit({
       return cols.map((c) => [...c].sort((a, b) => { const ra = rank(a), rb = rank(b); return ra[0] - rb[0] || ra[1] - rb[1]; }));
     };
     return replySort(ranked.map((c, si) => (si === goalIndex ? c : c.filter((p) => match(p, si)))));
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet, activeFilter, rac, motivation]);
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, stages, goalIndex, stagemap, whaleSet, fireSet, activeFilter, rac, motivation, profile]);
 
   // Whale board: whales not cold and not dead, placed by the same stage ratchet
   // as the hot board (same stagemap drags), mapped onto the seven value-add
@@ -148,7 +148,7 @@ export function FollowUpCockpit({
       if (activeFilter === "tens") return isTopScore(logs[id]);
       if (activeFilter === "due") return dueInfoFor(followUps[id], wi, true).due;
       if (activeFilter === "rac") return !rac?.has(id);
-      if (activeFilter === "mot") return !!motivation?.[id];
+      if (activeFilter === "mot") return hasMotivation(id, motivation, profile);
       if (activeFilter === "fire") return fireSet?.has(id);
       return true;
     };
@@ -160,7 +160,7 @@ export function FollowUpCockpit({
       return [rTs > (lastTouchTs(followUps[id]) || 0) ? 0 : 1, -rTs];
     };
     return sorted.map((c) => [...c].sort((a, b) => { const ra = rank(a), rb = rank(b); return ra[0] - rb[0] || ra[1] - rb[1]; }));
-  }, [prospects, logs, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
+  }, [prospects, logs, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation, profile]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
   const coldCols = useMemo(() => {
@@ -225,7 +225,7 @@ export function FollowUpCockpit({
     // Data-capture coverage across the whole live pipeline (hot + whales + SOI):
     // motivation on file, and entered into RAC.
     const livePool = prospects.filter((p) => { const id = idFromPhone(p.phone); return !cold[id] && !dead[id] && (isMember(id, logs, pinnedSet) || soi[id]); });
-    const motCount = livePool.filter((p) => !!motivation?.[idFromPhone(p.phone)]).length;
+    const motCount = livePool.filter((p) => hasMotivation(idFromPhone(p.phone), motivation, profile)).length;
     const racMissing = livePool.filter((p) => !rac?.has(idFromPhone(p.phone))).length;
     const motPct = livePool.length ? Math.round(motCount / livePool.length * 100) : 0;
     const racPct = livePool.length ? Math.round((livePool.length - racMissing) / livePool.length * 100) : 0;
@@ -261,7 +261,7 @@ export function FollowUpCockpit({
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
     return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, tensCount, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
-  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
+  }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, profile, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
   const startDrag = (id, from) => (e) => {
@@ -370,7 +370,7 @@ export function FollowUpCockpit({
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 9, fontSize: 11, color: T.faint }}>
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {count} touch{count === 1 ? "" : "es"}
-            {activeFilter === "replied" && !motivation?.[id] && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: T.orange }}>no motivation</span>}
+            {activeFilter === "replied" && !hasMotivation(id, motivation, profile) && <span style={{ marginLeft: 6, fontSize: 9, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: T.orange }}>no motivation</span>}
           </span>
           <span style={{ flex: "none", display: "flex", alignItems: "center", gap: 6 }}>
             {onText && (

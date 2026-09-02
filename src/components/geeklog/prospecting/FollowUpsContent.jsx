@@ -474,7 +474,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
         <FollowUpCockpit
           prospects={prospects} logs={logs} followUps={followUps} soi={soi} pinnedSet={pinnedSet}
           cold={cold} dead={dead} stages={stages} goalIndex={goalIndex} weekTarget={config.weekTarget}
-          stagemap={stagemap} motivation={motivation} rac={racSet} whaleSet={whaleSet} fireSet={fireSet} addedat={addedat}
+          stagemap={stagemap} motivation={motivation} profile={profile} rac={racSet} whaleSet={whaleSet} fireSet={fireSet} addedat={addedat}
           onLogReply={handleLogReply}
           onText={handleText}
           onOpenDetail={setOpenId}

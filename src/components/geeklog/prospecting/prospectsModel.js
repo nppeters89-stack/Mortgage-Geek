@@ -347,6 +347,15 @@ export function stageTag(touch, stages = DEFAULT_STAGES) {
   return { label: stages[s] || stages[1], tone: "stage" };
 }
 
+// Motivation on file, the single formula: structured understanding (a lender
+// situation or at least one need) or the legacy free-text motivation. Legacy
+// contacts with only free text count exactly as before.
+export function hasMotivation(id, motivation, profile) {
+  if (motivation && motivation[id]) return true;
+  const prof = profile && profile[id];
+  return !!(prof && (prof.lenderSituation || (Array.isArray(prof.needs) && prof.needs.length)));
+}
+
 // Follow Ups membership, the single formula: earned by a 9+ call score OR placed
 // by hand, and not already promoted to SOI. A promoted contact graduates into the
 // SOI view; the call log and the pin are both untouched, so removing them from
