@@ -575,7 +575,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
                     days={ts ? Math.floor((Date.now() - ts) / 86400000) : null}
                     rampDays={info.sinceTs ? Math.floor((Date.now() - info.sinceTs) / 86400000) : null}
                     dueDays={info.dueDays}
-                    fire={fireSet.has(id)} whale={whaleSet.has(id)} checked={racSet.has(id)}
+                    fire={fireSet.has(id)} whale={whaleSet.has(id)}
                     onReply={() => handleLogReply(id)}
                     onOpen={() => setOpenId(id)} />
                 );

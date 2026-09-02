@@ -22,14 +22,6 @@ import { fireConfetti } from "./confetti";
 // mobile list and this board write through exactly one path. Colors from
 // gl2Tokens; no hardcoded hex.
 
-// The RAC check, same visual language as the mobile queue rows: green check
-// beside the name once the contact has been entered into the CRM.
-const RacCheck = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
-    role="img" aria-label="In RAC" style={{ flex: "none" }}>
-    <path d="M20 6L9 17l-5-5" />
-  </svg>
-);
 
 const DAY = 86400000;
 const rel = (ts) => { if (!ts) return "No touches"; const d = Math.round((Date.now() - ts) / DAY); return d <= 0 ? "Today" : d === 1 ? "1d ago" : `${d}d ago`; };
@@ -360,7 +352,6 @@ export function FollowUpCockpit({
         {hot && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
-          {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
           <ReplyBadge count={replies.length} days={replyTs ? dSince(replyTs) : null} owed={replyTs > (ts || 0)} />
         </div>
@@ -396,7 +387,6 @@ export function FollowUpCockpit({
         {fireSet?.has(id) && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 15.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{fireSet?.has(id) ? " 🔥" : ""}</div>
-          {rac?.has(id) && <RacCheck />}
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
         </div>
         <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>

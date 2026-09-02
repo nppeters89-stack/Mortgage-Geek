@@ -6,7 +6,7 @@ import { ReplyBadge } from "./ReplyBadge";
 // The touch-count pill, score, LAST TOUCH caption and stage notches stay in
 // the detail view one tap away; the group header above says what the age
 // means. ContactQueueRow is untouched and still serves the SOI queue.
-export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, checked = false, reply = null, onOpen, onReply = null }) {
+export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, tier, fire = false, whale = false, reply = null, onOpen, onReply = null }) {
   const overdue = tier === "overdue";
   return (
     <div role="button" tabIndex={0}
@@ -18,11 +18,7 @@ export function MobileQueueRow({ prospect: p, days, rampDays = null, dueDays, ti
           <span style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 15, lineHeight: 1.25, color: T.cream, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.name}</span>
           {fire ? <span aria-hidden="true" style={{ flex: "none", fontSize: 12 }}>{"🔥"}</span>
             : whale ? <span aria-hidden="true" style={{ flex: "none", fontSize: 12 }}>{"🐳"}</span>
-              : checked ? (
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" role="img" aria-label="In RAC" style={{ flex: "none" }}>
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              ) : null}
+              : null}
           {reply && <ReplyBadge count={reply.count} days={reply.days} owed={reply.owed} />}
         </div>
         <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.brokerage || p.lineType || " "}</div>
