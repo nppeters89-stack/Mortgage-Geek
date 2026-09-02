@@ -4,6 +4,7 @@ import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar, StatsToggle } from "./Gl2Primitives";
 import { Gl2TabDock } from "./Gl2TabDock";
+import { TextIntentChip } from "./prospecting/TextIntentChip";
 import { Gl2TopNav } from "./Gl2TopNav";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
@@ -74,6 +75,10 @@ export function Gl2App({ apiKey }) {
   const [tab, setTab] = useState("today");
   // Stats folds the old Week and YTD tabs into one; this picks the view.
   const [statsView, setStatsView] = useState("week");
+  // Sent it chip plumbing: a log through the chip bumps the tick so the
+  // mounted tab remounts and rereads the store; Edit deep-links a contact.
+  const [textTick, setTextTick] = useState(0);
+  const [textEditId, setTextEditId] = useState(null);
   // The desktop Follow Up cockpit (>= 900px) runs full-bleed: no width cap, the
   // board owns the whole screen. Every other tab and all of mobile stay at
   // APP_MAX.
@@ -464,13 +469,17 @@ export function Gl2App({ apiKey }) {
               )}
             </>
           )}
-          {tab === "prospecting" && <ProspectingContent apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
-          {tab === "followups" && <FollowUpsContent apiKey={apiKey} onOpenSoi={() => setTab("soi")} />}
+          {tab === "prospecting" && <ProspectingContent key={`pr${textTick}`} apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
+          {tab === "followups" && <FollowUpsContent key={`fu${textTick}`} apiKey={apiKey} onOpenSoi={() => setTab("soi")} openContactId={textEditId} onOpenConsumed={() => setTextEditId(null)} />}
           {/* Closings and SOI are not bottom tabs; they open from the dollar and
               SOI buttons in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
           {tab === "soi" && <SoiContent apiKey={apiKey} onOpenFollowUps={() => setTab("followups")} />}
         </div>
+
+        <TextIntentChip apiKey={apiKey}
+          onLogged={() => setTextTick((t) => t + 1)}
+          onEdit={(id) => { setTextEditId(id); setTab("followups"); setTextTick((t) => t + 1); }} />
 
         {isNarrow && (
           <Gl2TabDock resetKey={tab} maxWidth={columnMax}>

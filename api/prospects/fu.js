@@ -28,6 +28,7 @@ function validate(body) {
     if (t.note && t.note.length > 2000) return "touch note too long";
     if (t.stage != null && !(Number.isInteger(t.stage) && t.stage >= -4 && t.stage <= 20)) return "touch.stage must be an integer"; // -3 = referral event, -4 = inbound reply
     if (t.talked != null && typeof t.talked !== "boolean") return "touch.talked must be a boolean";
+    if (t.type != null && (typeof t.type !== "string" || t.type.length > 20)) return "touch.type must be a short string";
   }
   return null;
 }
@@ -50,6 +51,7 @@ export default async function handler(req, res) {
       const o = { ts: t.ts, note: typeof t.note === "string" ? t.note : "" };
       if (Number.isInteger(t.stage)) o.stage = t.stage;
       if (t.talked === true) o.talked = true; // a live conversation happened on this touch
+      if (typeof t.type === "string" && t.type && t.type.length <= 20) o.type = t.type; // e.g. "text"
       return o;
     });
 

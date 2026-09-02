@@ -26,7 +26,7 @@ const tint = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.s
 // there is one source of truth for stage, cold, and dead. Moving TO cold or dead
 // is a desktop drag gesture; mobile can check in and revive. Dead contacts are
 // excluded from every list.
-export function FollowUpsContent({ apiKey, onOpenSoi }) {
+export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOpenConsumed = null }) {
   const seed = getCachedProspects();
   const [prospects, setProspects] = useState(() => seed?.prospects || []);
   const [logs, setLogs] = useState(() => seed?.logs || {});
@@ -125,6 +125,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi }) {
   // different set from the desktop rail (data hygiene is desk work).
   const [mobileFilter, setMobileFilter] = useState(null); // null | "due" | "fire" | "whale"
   const [replyFor, setReplyFor] = useState(null); // { id, name } for the reply date dialog
+  // Sent it chip Edit: open this contact's detail once, then hand back.
+  useEffect(() => {
+    if (openContactId) { setOpenId(openContactId); onOpenConsumed?.(); }
+  }, [openContactId, onOpenConsumed]);
   // Shared weekly scoreboard, same selector as the desktop HUD.
   const wk = useMemo(() => weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat }), [prospects, logs, followUps, soi, pinnedSet, cold, dead, addedat]);
   const mobileGroups = useMemo(() => {
