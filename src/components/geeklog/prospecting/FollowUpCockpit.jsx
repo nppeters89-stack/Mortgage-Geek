@@ -91,6 +91,7 @@ export function FollowUpCockpit({
   });
 
   const touchesOf = (id) => followUps[id] || [];
+  const repliedIn = (col) => col.filter((p) => repliesOf(followUps[idFromPhone(p.phone)]).length > 0).length;
   const stageFor = (id) => stageOf(touchesOf(id), { isSoi: !!soi[id], goalIndex, override: stagemap[id] });
 
   // Board columns: active pipeline members plus SOI members (SOI sits in the goal
@@ -253,11 +254,11 @@ export function FollowUpCockpit({
     }).length;
     // Weekly scoreboard (4A): shared selector, so the phone strip and this
     // panel always agree on the week.
-    const { weekLabel, addedToday, addedWeek, convosWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
+    const { weekLabel, addedToday, addedWeek, convosWeek, repliesWeek } = weekScoreboard({ prospects, logs, followUps, soi, pinned: pinnedSet, cold, dead, addedat });
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
@@ -457,7 +458,10 @@ export function FollowUpCockpit({
                     <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
                     <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{wide ? label : shortStage(label)}</span>
                   </span>
-                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>{board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span></span>
+                  <span style={{ flex: "none", fontSize: 12, color: T.faint }}>
+                    {repliedIn(board[si]) > 0 && <span style={{ marginRight: 7, fontSize: 10.5, fontWeight: 700, color: T.greenBright }}>{repliedIn(board[si])} replied</span>}
+                    {board[si].length} <span style={{ fontSize: 10 }}>{shut ? "▸" : "▾"}</span>
+                  </span>
                 </button>
                 {/* The goal column doubles as the door to the SOI cockpit. A
                     sibling, not a child: buttons cannot nest. Drop behavior is
@@ -530,7 +534,10 @@ export function FollowUpCockpit({
                     <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
                     <span style={{ ...colTitle(ramp), whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
                   </span>
-                  <span style={{ fontSize: 12, color: T.faint }}>{whaleCols[wi].length}</span>
+                  <span style={{ fontSize: 12, color: T.faint }}>
+                    {repliedIn(whaleCols[wi]) > 0 && <span style={{ marginRight: 7, fontSize: 10.5, fontWeight: 700, color: T.greenBright }}>{repliedIn(whaleCols[wi])} replied</span>}
+                    {whaleCols[wi].length}
+                  </span>
                 </div>
                 <div style={{ ...(wide ? wideBody : colBody), background: over === key ? T.whaleWash : "transparent" }}>
                   {wide ? (

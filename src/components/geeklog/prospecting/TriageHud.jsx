@@ -157,6 +157,10 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
                 <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.week}</div>
                 <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Follow ups · Week</div>
               </div>
+              <div style={{ flex: 1, padding: "0 16px", borderRight: `1px solid ${T.line}` }}>
+                <div style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.cream }}>{stats.repliesWeek}</div>
+                <div style={{ marginTop: 5, fontSize: 9.5, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer }}>Replies · Week</div>
+              </div>
               <div style={{ flex: 1.25, paddingLeft: 16 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                   <span style={{ fontSize: 26, fontWeight: 700, lineHeight: 1, fontVariantNumeric: "tabular-nums", color: T.amber }}>{stats.ratioPct}%</span>

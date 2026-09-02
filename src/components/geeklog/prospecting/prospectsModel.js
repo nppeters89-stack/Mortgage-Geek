@@ -62,7 +62,7 @@ export function weekScoreboard({ prospects, logs, followUps, soi = EMPTY_OBJ, pi
   wkD.setDate(wkD.getDate() - ((wkD.getDay() + 6) % 7));
   const weekStart = wkD.getTime();
   const weekLabel = `week of ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][wkD.getDay()]} ${wkD.getDate()}`;
-  let week = 0, talkedWeek = 0;
+  let week = 0, talkedWeek = 0, repliesWeek = 0;
   const now = Date.now();
   (prospects || []).forEach((p) => {
     const id = idFromPhone(p.phone);
@@ -70,6 +70,7 @@ export function weekScoreboard({ prospects, logs, followUps, soi = EMPTY_OBJ, pi
     (followUps[id] || []).forEach((t) => {
       if (t.stage !== STAGE_REFERRAL && t.stage !== REPLY_STAGE && now - t.ts < 7 * DAY_MS) week++;
       if (t.talked === true && t.stage !== REPLY_STAGE && t.ts >= weekStart) talkedWeek++;
+      if (t.stage === REPLY_STAGE && t.ts >= weekStart) repliesWeek++;
     });
   });
   const scoredCallsWeek = Object.values(logs || {}).filter((l) => l && l.score >= 1 && l.ts && l.ts >= weekStart).length;
@@ -83,7 +84,7 @@ export function weekScoreboard({ prospects, logs, followUps, soi = EMPTY_OBJ, pi
   };
   const joins = livePool.map((p) => joinTs(idFromPhone(p.phone))).filter(Boolean);
   return {
-    weekStart, dayStart, weekLabel, week, convosWeek,
+    weekStart, dayStart, weekLabel, week, convosWeek, repliesWeek,
     addedToday: joins.filter((t) => t >= dayStart).length,
     addedWeek: joins.filter((t) => t >= weekStart).length,
   };
