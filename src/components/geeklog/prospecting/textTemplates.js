@@ -6,14 +6,12 @@
 
 export const SITE_URL = "https://mortgagegeek.ai";
 
-// Prospecting tab and pipeline cards still in New.
-export const firstContact = "Hi {first}, Nick Peters with Rate here. {hook} Great connecting with you. My site is {link} if you want a feel for how I work with agents and their buyers.\nNMLS #1119524";
-
-// Intro Follow Up through Check In.
-export const pipeline = "Hey {first}, Nick here. {hook} Wanted to check in and see how your buyers are doing this week. Anything I can help move along?";
-
-// Motivation Identified / Maintenance and the cold pipeline.
-export const maintenance = "Hi {first}, Nick here. {hook} Been a minute. No agenda, just checking in. Hope business is treating you well.";
+// All three are just the greeting: Nick's templates change all the time, so
+// he pastes the body in Messages after the prefill. The three exports stay
+// separate so stage-specific copy can return later without rewiring.
+export const firstContact = "Hey {first}, ";
+export const pipeline = "Hey {first}, ";
+export const maintenance = "Hey {first}, ";
 
 // Which template a card gets, from its stage. The Prospecting tab always
 // takes firstContact; cold always takes maintenance. Whale value-add columns

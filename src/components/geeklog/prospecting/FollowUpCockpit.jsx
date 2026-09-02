@@ -66,7 +66,7 @@ export function FollowUpCockpit({
   const [collapsedCols, setCollapsedCols] = useState(() => new Set());
   // Rail filter (2B): narrows the hot board. Whale, cold and dead sections
   // are unaffected; the goal column is a doorway and stays whole.
-  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire" | "maint" | "replied"
+  const [activeFilter, setActiveFilter] = useState(null); // null | "due" | "rac" | "mot" | "fire" | "maint" | "replied" | "tens"
   // Two-across only on screens that genuinely fit it. Below the gate every
   // column is a single stack and the board scrolls sideways - columns never
   // compress into a squeezed, overlapping middle state.
@@ -107,6 +107,7 @@ export function FollowUpCockpit({
       const id = idFromPhone(p.phone);
       if (activeFilter === "maint") return si === goalIndex - 1;
       if (activeFilter === "replied") return repliesOf(followUps[id]).length > 0;
+      if (activeFilter === "tens") return isTopScore(logs[id]);
       if (activeFilter === "due") return dueInfoFor(followUps[id], si).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
@@ -144,6 +145,7 @@ export function FollowUpCockpit({
       if (activeFilter === "maint") return false;
       const id = idFromPhone(p.phone);
       if (activeFilter === "replied") return repliesOf(followUps[id]).length > 0;
+      if (activeFilter === "tens") return isTopScore(logs[id]);
       if (activeFilter === "due") return dueInfoFor(followUps[id], wi, true).due;
       if (activeFilter === "rac") return !rac?.has(id);
       if (activeFilter === "mot") return !!motivation?.[id];
@@ -158,7 +160,7 @@ export function FollowUpCockpit({
       return [rTs > (lastTouchTs(followUps[id]) || 0) ? 0 : 1, -rTs];
     };
     return sorted.map((c) => [...c].sort((a, b) => { const ra = rank(a), rb = rank(b); return ra[0] - rb[0] || ra[1] - rb[1]; }));
-  }, [prospects, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
+  }, [prospects, logs, followUps, cold, dead, stagemap, goalIndex, whaleSet, fireSet, activeFilter, rac, motivation]);
   const whaleTotal = whaleCols.reduce((n, c) => n + c.length, 0);
 
   const coldCols = useMemo(() => {
@@ -231,6 +233,13 @@ export function FollowUpCockpit({
     const hotLeads = prospects.filter((p) => { const id = idFromPhone(p.phone); return fireSet?.has(id) && !cold[id] && !dead[id]; }).length;
     // Maintenance Day pool: everyone sitting in the Motivation / Maintenance
     // column (the rail adds the cold total on top for its badge).
+    // Perfect 10s across the live pool (hot board and whales).
+    const tensCount = prospects.filter((p) => {
+      const id = idFromPhone(p.phone);
+      if (cold[id] || dead[id]) return false;
+      if (!(isMember(id, logs, pinnedSet) || soi[id] || whaleSet?.has(id))) return false;
+      return isTopScore(logs[id]);
+    }).length;
     // Replied segment badge: cards where the newest event is an inbound reply.
     const repliedOwed = prospects.filter((p) => {
       const id = idFromPhone(p.phone);
@@ -251,7 +260,7 @@ export function FollowUpCockpit({
     // Of this week's conversations, how many turned into queue adds. Always a
     // share of the conversations, so it cannot exceed 100.
     const ratioPct = convosWeek ? Math.min(100, Math.round((addedWeek / convosWeek) * 100)) : 0;
-    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
+    return { streak, week, today, cov, soiCount, due, motPct, racPct, motCount, racMissing, whales, hotLeads, dayCounts, oldestDue, liveCount: livePool.length, activeCount: activeMembers.length, maintCount, repliedOwed, repliesWeek, tensCount, weekLabel, addedToday, addedWeek, convosWeek, ratioPct };
   }, [prospects, logs, followUps, soi, pinnedSet, cold, dead, whaleSet, fireSet, motivation, rac, stagemap, goalIndex, addedat]);
 
   // ----- drag plumbing -----
@@ -349,10 +358,10 @@ export function FollowUpCockpit({
     const hot = fireSet?.has(id);
     return (
       <div key={id} draggable onDragStart={startDrag(id, "hot")} onDragEnd={endDrag} onClick={() => onOpenDetail(id)}
-        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: top ? T.greenWash : T.surface, border: `1px solid ${hot ? T.orangeWashLine : top ? T.greenWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
+        style={{ position: "relative", boxSizing: "border-box", flex: "none", width: "100%", maxWidth: 200, minWidth: 0, overflow: "hidden", background: T.surface, border: `1px solid ${hot ? T.orangeWashLine : T.line}`, borderRadius: 11, padding: "12px 13px", cursor: "grab", userSelect: "none" }}>
         {hot && <FirePulse />}
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
+          <div style={{ fontFamily: FF.body, fontWeight: 600, fontSize: 16.5, lineHeight: 1.2, color: top ? T.greenBright : T.cream, minWidth: 0, overflowWrap: "break-word" }}>{p.name}{hot ? " 🔥" : ""}{whaleSet?.has(id) ? " 🐳" : ""}{soi[id] ? " 🤝" : ""}</div>
           {!!motivation?.[id] && <span title="Motivation noted" style={{ flex: "none", width: 7, height: 7, borderRadius: "50%", background: T.orange }} />}
           <ReplyBadge count={replies.length} days={replyTs ? dSince(replyTs) : null} owed={replyTs > (ts || 0)} />
         </div>
@@ -378,7 +387,6 @@ export function FollowUpCockpit({
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
               </button>
             )}
-            {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
             <span style={{ color: staleColor(dSince(info.sinceTs), T.faint, info.dueDays) }}>{rel(ts)}</span>
           </span>
         </div>
@@ -409,7 +417,6 @@ export function FollowUpCockpit({
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
               </button>
             )}
-          {!!logs[id]?.score && <span title="Interaction score from the first call" style={{ fontSize: 10, fontWeight: 700, color: heatColor(logs[id].score), fontVariantNumeric: "tabular-nums" }}>{logs[id].score}/10</span>}
           <span style={{ fontSize: 10, color: staleColor(dSince(ts), T.faint, COLD_DUE_DAYS) }}>{rel(ts)}</span>
         </div>
         {n >= COLD_CHECKIN_CAP && <div style={{ marginTop: 7, fontSize: 10, fontWeight: 700, letterSpacing: "0.05em", color: T.amber, textTransform: "uppercase" }}>Consider the dead box</div>}

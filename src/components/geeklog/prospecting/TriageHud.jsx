@@ -114,6 +114,7 @@ export function TriageHud({ stats, weekTarget, activeFilter, onSetFilter, coldTo
     // Replied: qualify-next list. Badge counts only owed responses; the
     // filter itself shows every card with a reply in history.
     { key: "replied", glyph: "💬", label: "Replied", accent: T.greenBright, count: stats.repliedOwed },
+    { key: "tens", glyph: "★", label: "10s", accent: T.green, count: stats.tensCount },
   ];
 
   const footBtn = (color) => ({ background: "none", border: "none", padding: 0, fontFamily: FF.body, fontSize: 11.5, color, cursor: "pointer" });
