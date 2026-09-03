@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
-import { T, APP_MAX } from "./gl2Tokens";
+import { T, FF, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar, StatsToggle } from "./Gl2Primitives";
 import { withAlpha } from "../../utils/format";
