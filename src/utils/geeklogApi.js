@@ -1,24 +1,46 @@
-// Thin fetch wrapper around the /api/geeklog/* endpoints (G1). Every
-// exported function takes the URL key as the first argument and sends
-// it as the X-Geeklog-Key header. This module never reads, stores, or
-// caches the key — callers own it.
+// Thin fetch wrapper around the Geek Log api. Auth is the HttpOnly
+// gl_session cookie, sent automatically with credentials: "same-origin";
+// this module never holds a secret. Exported functions keep their legacy
+// (key, ...) signatures so call sites did not have to change when the
+// URL key was retired; the first argument is ignored.
+//
+// A 401 from any gated endpoint calls the registered unauthorized handler
+// so the app can drop to the login screen from anywhere.
 
 const BASE = "/api/geeklog";
+
+let unauthorizedHandler = null;
+export function setUnauthorizedHandler(fn) { unauthorizedHandler = fn; }
+const notify401 = () => { try { unauthorizedHandler && unauthorizedHandler(); } catch { /* no-op */ } };
+
+// The three auth kinds ride the membership kind router. Raw fetches on
+// purpose: their 401s are expected states, not session losses, so they must
+// not trip the unauthorized handler. Each returns the HTTP status.
+async function authKind(body) {
+  const res = await fetch("/api/prospects/membership", {
+    method: "PUT",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return res.status;
+}
+export const authCheck = () => authKind({ kind: "auth.check" });
+export const authLogin = (passphrase) => authKind({ kind: "auth.login", passphrase });
+export const authLogout = () => authKind({ kind: "auth.logout" });
 
 async function request(key, path, init = {}) {
   let res;
   try {
     res = await fetch(`${BASE}${path}`, {
       ...init,
-      headers: {
-        ...(init.headers || {}),
-        "X-Geeklog-Key": key,
-      },
+      credentials: "same-origin",
+      headers: { ...(init.headers || {}) },
     });
   } catch {
     throw new Error("Network error");
   }
-  if (res.status === 401) throw new Error("Unauthorized");
+  if (res.status === 401) { notify401(); throw new Error("Unauthorized"); }
   // 204 No Content responses have no body — short-circuit before parse.
   if (res.status === 204) return null;
   let body = null;
@@ -118,8 +140,8 @@ export async function saveDay(key, dayDoc) {
 
 // Fire-and-forget upsert of one day with keepalive: true, so the write survives
 // the page being backgrounded or unloaded (the phone locked right after a tap).
-// sendBeacon cannot set custom headers, but a keepalive fetch can, so the
-// X-Geeklog-Key auth header rides along. Same endpoint and body as saveDay; the
+// sendBeacon cannot set fetch options, but a keepalive fetch can, so the
+// session cookie rides along via credentials. Same endpoint and body as saveDay; the
 // server upsert makes a duplicate write harmless. The caller cannot await during
 // unload, and the load-time reconcile is the backstop if this never lands.
 export function saveDayKeepalive(key, dayDoc) {
@@ -127,10 +149,8 @@ export function saveDayKeepalive(key, dayDoc) {
     fetch(`${BASE}/activity`, {
       method: "POST",
       keepalive: true,
-      headers: {
-        "Content-Type": "application/json",
-        "X-Geeklog-Key": key,
-      },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dayDoc),
     });
   } catch {
@@ -179,7 +199,7 @@ export async function saveSettings(key, weeklyTarget) {
 
 // ---- Prospecting (Geek Log tab) ----
 // These endpoints live under /api/prospects (not /api/geeklog), so they use
-// their own fetches rather than request(). Same X-Geeklog-Key auth. Contact data
+// their own fetches rather than request(). Same cookie auth. Contact data
 // is returned only to an authorized client and is never cached in this module.
 
 async function prospectsFetch(key, path, init = {}) {
@@ -187,12 +207,13 @@ async function prospectsFetch(key, path, init = {}) {
   try {
     res = await fetch(`/api/prospects${path}`, {
       ...init,
-      headers: { ...(init.headers || {}), "X-Geeklog-Key": key },
+      credentials: "same-origin",
+      headers: { ...(init.headers || {}) },
     });
   } catch {
     throw new Error("Network error");
   }
-  if (res.status === 401) throw new Error("Unauthorized");
+  if (res.status === 401) { notify401(); throw new Error("Unauthorized"); }
   let body = null;
   try { body = await res.json(); } catch { body = null; }
   if (res.status >= 400) throw new Error(body?.error || `Request failed: ${res.status}`);
@@ -224,7 +245,8 @@ export function saveProspectLogKeepalive(key, id, log) {
     fetch(`/api/prospects/log`, {
       method: "PUT",
       keepalive: true,
-      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, log }),
     });
   } catch {
@@ -248,7 +270,8 @@ export function saveFollowUpsKeepalive(key, id, touches) {
     fetch(`/api/prospects/fu`, {
       method: "PUT",
       keepalive: true,
-      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, touches }),
     });
   } catch {
@@ -279,7 +302,8 @@ function membershipKeepalive(key, body) {
     fetch(`/api/prospects/membership`, {
       method: "PUT",
       keepalive: true,
-      headers: { "Content-Type": "application/json", "X-Geeklog-Key": key },
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
   } catch {

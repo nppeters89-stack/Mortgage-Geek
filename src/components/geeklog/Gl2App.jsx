@@ -50,7 +50,7 @@ function flagSet(key) { try { localStorage.setItem(key, "1"); } catch { /* best-
 function lsGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
 function lsSet(key, v) { try { localStorage.setItem(key, v); } catch { /* best-effort */ } }
 
-export function Gl2App({ apiKey }) {
+export function Gl2App({ apiKey, onSignOut = null }) {
   const todayKey = centralDateKey();
   const weekStart = weekStartFor(todayKey);
   const dayKeys = weekDayKeys(weekStart);
@@ -487,7 +487,7 @@ export function Gl2App({ apiKey }) {
           </Gl2TabDock>
         )}
 
-        {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} onOpenCorrection={() => setCorrectionOpen(true)} />}
+        {settingsOpen && <SettingsPanel target={target} setTarget={changeTarget} onClose={() => setSettingsOpen(false)} soundOn={soundOn} setSoundOn={setSoundOn} onOpenCorrection={() => setCorrectionOpen(true)} onSignOut={onSignOut} />}
 
         {/* Correction form layers above Settings; closing it returns there. */}
         {correctionOpen && <CorrectionPanel apiKey={apiKey} onClose={() => setCorrectionOpen(false)} onSaved={handleCorrectionSaved} />}

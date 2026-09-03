@@ -293,7 +293,7 @@ export function ClosingsContent({ closings, year }) {
 // ===========================================================================
 // Settings overlay (opened from the Today gear; not a tab)
 // ===========================================================================
-export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn, onOpenCorrection }) {
+export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn, onOpenCorrection, onSignOut = null }) {
   return (
     // Fixed and column-centered, not absolute-in-column: the column flows with
     // the document now and can be taller than the screen, so inset:0 against it
@@ -355,6 +355,13 @@ export function SettingsPanel({ target, setTarget, onClose, soundOn, setSoundOn,
               <div style={{ width: 8, height: 8, borderRight: `1.6px solid ${T.dim}`, borderBottom: `1.6px solid ${T.dim}`, transform: "rotate(-45deg)", flexShrink: 0 }} />
             </div>
           </div>
+        )}
+
+        {onSignOut && (
+          <button type="button" onClick={onSignOut}
+            style={{ width: "100%", marginTop: 14, padding: "13px 0", borderRadius: 12, border: `1px solid ${T.redWashLine}`, background: "none", color: T.redLift, fontFamily: FF.body, fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
+            Sign out
+          </button>
         )}
       </div>
     </div>
