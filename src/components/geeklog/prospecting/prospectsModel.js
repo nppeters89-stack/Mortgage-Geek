@@ -4,6 +4,8 @@
 import { T, SCORE_HEAT } from "../gl2Tokens";
 import { centralDateKey } from "../gl2Week";
 
+import { AGENT_PIPELINE } from "./pipelines";
+
 // Contact id = phone digits only (matches the Redis prospects:log:{id} key and
 // the server's validation).
 export const idFromPhone = (phone) => String(phone || "").replace(/\D/g, "");
@@ -191,18 +193,16 @@ export const STALE_DAYS = 14;
 // the same threshold where the urgency ramp starts kindling, so every due
 // count agrees with the yellow-through-red labels.
 export const DUE_DAYS = 7;
-// Stage-aware cadence: one clock per standard stage, indexed to match
-// DEFAULT_STAGES 0..5 (New, Intro Follow Up, Value Add & Social, Value Add,
-// Check In, Motivation Identified / Maintenance). SOI (index 6) is not listed
-// on purpose: the SOI cockpit owns its own clocks, so it falls through to the
-// DUE_DAYS fallback for the badge counts. New cards are never-touched and read
-// red by rule already; the 1-day value is for consistency and hand placements.
-export const STAGE_DUE_DAYS = [1, 8, 7, 14, 21, 30]; // Intro reads due on day 8, after 7 full days
-// Whale cadence per value-add column (0..6). Early columns move fast while the
-// relationship is forming, then settle into the 30-day nurture rhythm.
-export const WHALE_DUE_DAYS = [3, 7, 14, 30, 30, 30, 30];
-export const dueDaysFor = (stageIndex, isWhale = false) =>
-  (isWhale ? WHALE_DUE_DAYS[stageIndex] ?? WHALE_DUE_DAYS[WHALE_DUE_DAYS.length - 1] : STAGE_DUE_DAYS[stageIndex] ?? DUE_DAYS);
+// Stage clocks now live on the pipeline configs (pipelines.js); the legacy
+// constant names re-export the agent values unchanged. Engine functions take
+// the pipeline config with the agent default, so agent call sites behave
+// byte for byte as before.
+export const STAGE_DUE_DAYS = AGENT_PIPELINE.dueDays;
+export const WHALE_DUE_DAYS = AGENT_PIPELINE.whaleDueDays;
+export const dueDaysFor = (stageIndex, isWhale = false, pipeline = AGENT_PIPELINE) =>
+  (isWhale
+    ? (pipeline.whaleDueDays || AGENT_PIPELINE.whaleDueDays)[stageIndex] ?? (pipeline.whaleDueDays || AGENT_PIPELINE.whaleDueDays).at(-1)
+    : pipeline.dueDays[stageIndex] ?? pipeline.fallbackDueDays);
 export const isDueForTouch = (touches, dueDays = DUE_DAYS) => {
   const ts = lastTouchTs(touches);
   return !ts || Date.now() - ts >= dueDays * DAY_MS;
@@ -257,7 +257,7 @@ function byNeglect(prospects, followUps) {
 // The seven pipeline stages, index 0 (New) through 6 (SOI, the goal). The app
 // falls back to these labels when prospects:fu:stages is absent, so labels can
 // change server-side without a deploy without breaking the indices.
-export const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value Add", "Check In", "Motivation Identified / Maintenance", "SOI"];
+export const DEFAULT_STAGES = AGENT_PIPELINE.stages.map((s) => s.label);
 
 // Display shortening for stage names too long for a tight column header. The
 // full name still shows on wide (two-across) columns, in the composer dropdown,
@@ -296,14 +296,14 @@ export const lastReplyTs = (touches) => repliesOf(touches).reduce((m, t) => Math
 export const REPLY_DUE_DAYS = 2;
 // The one due/urgency oracle for a card. source is "reply" when the reply
 // clock governs, "stage" when the session 1 cadence applies unchanged.
-export function dueInfoFor(touches, stageIndex, isWhale = false) {
+export function dueInfoFor(touches, stageIndex, isWhale = false, pipeline = AGENT_PIPELINE) {
   const touchTs = lastTouchTs(touches) || 0;
   const replyTs = lastReplyTs(touches) || 0;
   if (replyTs && replyTs > touchTs) {
     const dueTs = replyTs + REPLY_DUE_DAYS * DAY_MS;
     return { source: "reply", dueDays: REPLY_DUE_DAYS, sinceTs: replyTs, dueTs, due: Date.now() >= dueTs };
   }
-  const dueDays = dueDaysFor(stageIndex, isWhale);
+  const dueDays = dueDaysFor(stageIndex, isWhale, pipeline);
   return { source: "stage", dueDays, sinceTs: touchTs || null, dueTs: touchTs ? touchTs + dueDays * DAY_MS : null, due: !touchTs || Date.now() >= touchTs + dueDays * DAY_MS };
 }
 
