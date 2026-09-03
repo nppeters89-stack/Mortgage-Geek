@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T, FF, staleColor, staleWash } from "../gl2Tokens";
 import { LEAD_PIPELINE, trackOf } from "./pipelines";
 import { leadInfo, leadPlaceLabel, expiryDaysLeft, attemptsOf, ATTEMPTING } from "./leadsModel";
@@ -12,6 +13,8 @@ import { copyText } from "./clipboard";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { ChipRow } from "./ChipFields";
 import { LEAD_OBJECTIONS, LEAD_TIMELINE } from "./chips";
+import { assembleAccountReport } from "./leadReport";
+import { LeadReportCard } from "./LeadReportCard";
 import { useIsMobile } from "../../../utils/hooks";
 
 // Leads tab: the consumer lead pipeline, running the same engine as the agent
@@ -46,6 +49,8 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const [formOpen, setFormOpen] = useState(false);
   const [acctOpen, setAcctOpen] = useState(false);
   const [replyFor, setReplyFor] = useState(null);
+  const [reportFor, setReportFor] = useState(null); // assembled report being exported
+  const reportRef = useRef(null);
   const [toast, setToast] = useState("");
   const isNarrow = useIsMobile(899);
 
@@ -135,6 +140,31 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     if (!r.ok) { showToast("No valid mobile number"); return; }
     if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
   }, [infoOf, showToast]);
+
+  // Off-screen report card to PNG, the same path the week story uses. The
+  // payload is assembled note-free before anything renders.
+  const exportReport = useCallback(async (account) => {
+    const report = assembleAccountReport({ account, contacts, fu, status });
+    setReportFor(report);
+    try {
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      if (document.fonts?.ready) await document.fonts.ready;
+      const node = reportRef.current;
+      if (!node) throw new Error("no report node");
+      const fontEmbedCSS = await getFontEmbedCSS(node);
+      const height = Math.max(1350, node.scrollHeight);
+      const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: T.bg1, fontEmbedCSS, width: 1080, height, canvasWidth: 1080, canvasHeight: height });
+      const link = document.createElement("a");
+      link.download = `lead-report-${account.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${todayLocalISO()}.png`;
+      link.href = dataUrl;
+      link.click();
+      showToast("Report exported");
+    } catch {
+      showToast("Export failed");
+    } finally {
+      setReportFor(null);
+    }
+  }, [contacts, fu, status, showToast]);
 
   // ----- pieces -----
   const accountName = (id) => accounts[id]?.name || "";
@@ -284,7 +314,13 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       )}
       {acctOpen && (
         <AccountManager accounts={accounts} apiKey={apiKey} onClose={() => setAcctOpen(false)}
-          onSaved={(a) => setAccounts((p) => ({ ...p, [a.id]: a }))} onToast={showToast} />
+          onSaved={(a) => setAccounts((p) => ({ ...p, [a.id]: a }))} onToast={showToast}
+          onReport={(a) => exportReport(a)} />
+      )}
+      {reportFor && (
+        <div aria-hidden="true" style={{ position: "fixed", left: -12000, top: 0 }}>
+          <div ref={reportRef}><LeadReportCard report={reportFor} /></div>
+        </div>
       )}
       {replyFor && (
         <ReplyDateDialog name={replyFor.name} onClose={() => setReplyFor(null)} onSave={(ts) => logReply(replyFor.id, ts)} />
@@ -530,7 +566,7 @@ function NewLeadForm({ accounts, apiKey, onClose, onSaved, onAccountAdded, onToa
 }
 
 // ---------- account management ----------
-function AccountManager({ accounts, apiKey, onClose, onSaved, onToast }) {
+function AccountManager({ accounts, apiKey, onClose, onSaved, onToast, onReport = null }) {
   const [name, setName] = useState("");
   const [type, setType] = useState("team");
   const [reportDay, setReportDay] = useState(5);
@@ -555,7 +591,7 @@ function AccountManager({ accounts, apiKey, onClose, onSaved, onToast }) {
       <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 460, padding: "18px 20px 22px", fontFamily: FF.body }}>
         <div style={{ fontWeight: 700, fontSize: 19, color: T.cream, marginBottom: 12 }}>Accounts</div>
         {Object.values(accounts).map((a) => (
-          <AccountRow key={a.id} account={a} days={DAYS} inp={inp} onSave={(next) => save(next)} />
+          <AccountRow key={a.id} account={a} days={DAYS} inp={inp} onSave={(next) => save(next)} onReport={onReport} />
         ))}
         <div style={{ display: "flex", gap: 6, marginTop: 14, flexWrap: "wrap" }}>
           <input style={{ ...inp, flex: 1, minWidth: 130 }} placeholder="New account name" value={name} onChange={(e) => setName(e.target.value.slice(0, 120))} />
@@ -574,7 +610,7 @@ function AccountManager({ accounts, apiKey, onClose, onSaved, onToast }) {
   );
 }
 
-function AccountRow({ account, days, inp, onSave }) {
+function AccountRow({ account, days, inp, onSave, onReport = null }) {
   const [name, setName] = useState(account.name);
   const [reportDay, setReportDay] = useState(account.reportDay);
   const dirty = name !== account.name || reportDay !== account.reportDay;
@@ -589,6 +625,12 @@ function AccountRow({ account, days, inp, onSave }) {
         <button type="button" onClick={() => onSave({ ...account, name: name.trim(), reportDay })}
           style={{ border: "none", borderRadius: 10, padding: "8px 12px", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
           Save
+        </button>
+      )}
+      {onReport && (
+        <button type="button" onClick={() => onReport(account)}
+          style={{ border: `1px solid ${T.line}`, borderRadius: 10, padding: "8px 12px", background: "none", color: T.dim, fontFamily: FF.body, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+          Report
         </button>
       )}
     </div>
