@@ -7,7 +7,7 @@
 // Contact data never leaves Redis + these session caches; nothing is bundled or
 // prerendered.
 
-import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt, saveProfile, saveProfileKeepalive } from "../../../utils/geeklogApi";
+import { fetchProspects, saveProspectLog, saveProspectLogKeepalive, saveFollowUps, saveFollowUpsKeepalive, saveSoi, saveSoiKeepalive, savePin, savePinKeepalive, saveManualContact, saveRac, saveRacKeepalive, saveCold, saveColdKeepalive, saveDead, saveDeadKeepalive, saveStageMove, saveStageMoveKeepalive, saveMotivation, saveMotivationKeepalive, saveWhale, saveWhaleKeepalive, saveFire, saveFireKeepalive, saveAddedAt, saveProfile, saveProfileKeepalive, saveSoiCategory } from "../../../utils/geeklogApi";
 import { sortedQueue, mergeManualContacts, qualifiesForFollowUp, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 
 const LS_KEY = "gl2:prospects:v1";
@@ -163,14 +163,23 @@ export function setCachedSoi(soi) {
 // caller can revert its own state on failure. A revert can briefly disagree with
 // the server if the keepalive landed and the awaited call did not; the next load
 // reads server truth and settles it.
-export function persistSoi(apiKey, id, action) {
+export function persistSoi(apiKey, id, action, category) {
   const soi = { ...getCachedSoi() };
-  if (action === "add") soi[id] = String(Date.now());
+  if (action === "add") soi[id] = { ts: Date.now(), category: category || "" };
   else delete soi[id];
   setCachedSoi(soi);
 
-  saveSoiKeepalive(apiKey, id, action);
-  return saveSoi(apiKey, id, action);
+  saveSoiKeepalive(apiKey, id, action, category);
+  return saveSoi(apiKey, id, action, category);
+}
+
+export function persistSoiCategory(apiKey, id, category, reportDay) {
+  const soi = { ...getCachedSoi() };
+  const prev = soi[id];
+  const ts = prev && typeof prev === "object" ? prev.ts : Number(prev) || Date.now();
+  soi[id] = { ...(typeof prev === "object" ? prev : {}), ts, category, ...(reportDay != null ? { reportDay } : {}) };
+  setCachedSoi(soi);
+  return saveSoiCategory(apiKey, id, category, reportDay);
 }
 
 // ----- Manual Follow Ups membership -----

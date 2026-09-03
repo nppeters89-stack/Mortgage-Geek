@@ -313,12 +313,12 @@ function membershipKeepalive(key, body) {
 
 // Promote one contact into the sphere of influence ("add") or take them back out
 // ("remove"). Awaited so the caller can revert its optimistic update.
-export async function saveSoi(key, id, action) {
-  return prospectsFetch(key, "/membership", membershipBody({ kind: "soi", id, action }));
+export async function saveSoi(key, id, action, category) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "soi", id, action, category }));
 }
 
-export function saveSoiKeepalive(key, id, action) {
-  membershipKeepalive(key, { kind: "soi", id, action });
+export function saveSoiKeepalive(key, id, action, category) {
+  membershipKeepalive(key, { kind: "soi", id, action, category });
 }
 
 // Manually place a contact in Follow Ups ("add") or take them out ("remove").
@@ -369,6 +369,11 @@ export async function saveLeadKind(key, body) {
 }
 export function saveLeadKindKeepalive(key, body) {
   membershipKeepalive(key, body);
+}
+
+// Categorize an SOI member (and optionally set the weekly report day).
+export async function saveSoiCategory(key, id, category, reportDay) {
+  return prospectsFetch(key, "/membership", membershipBody({ kind: "soi.category", id, category, ...(reportDay != null ? { reportDay } : {}) }));
 }
 
 // Join-date write for the Follow Ups queue (first write wins server-side).

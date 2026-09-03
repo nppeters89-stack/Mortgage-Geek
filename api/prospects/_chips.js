@@ -11,3 +11,4 @@ export const LEAD_OBJECTION_IDS = new Set(["working_with_lender", "just_looking"
 export const LEAD_TIMELINE_IDS = new Set(["now", "soon", "later"]);
 export const LEAD_TRACK_IDS = new Set(["preapproved", "not_yet", "nurture", "under_contract", "closed", "dead"]);
 export const LEAD_ACCOUNT_TYPES = new Set(["team", "builder", "agent"]);
+export const SOI_CATEGORY_IDS = new Set(["builder_agent", "retail_agent", "current_client", "past_client", "business_person"]);

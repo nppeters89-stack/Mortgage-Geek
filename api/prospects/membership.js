@@ -25,7 +25,7 @@
 // replaced wholesale on every re-seed from Excel and would destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
-import { LENDER_SITUATION_IDS, NEED_IDS, LEAD_OBJECTION_IDS, LEAD_TIMELINE_IDS, LEAD_TRACK_IDS, LEAD_ACCOUNT_TYPES } from "./_chips.js";
+import { LENDER_SITUATION_IDS, NEED_IDS, LEAD_OBJECTION_IDS, LEAD_TIMELINE_IDS, LEAD_TRACK_IDS, SOI_CATEGORY_IDS } from "./_chips.js";
 import { issueSession, verifySession, safeEqual, readCookie, sessionCookie, clearSessionCookie } from "../geeklog/_auth.js";
 
 const SOI_KEY = "prospects:soi";
@@ -45,7 +45,6 @@ const leadKey = (id) => `leads:contact:${id}`;
 const leadFuKey = (id) => `leads:fu:${id}`;
 const LEADS_FU_IDS = "leads:fu:ids";
 const LEADS_STATUS = "leads:status";
-const LEADS_ACCOUNTS = "leads:accounts";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
@@ -68,17 +67,38 @@ function validateContact(contact) {
 }
 
 // Sphere of influence: a stored membership flag plus the promotion date.
-async function handleSoi(res, { id, action }) {
+async function handleSoi(res, { id, action, category }) {
   if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
   if (!ACTIONS.has(action)) return jsonResponse(res, 400, { error: "action must be add or remove" });
 
   if (action === "add") {
+    // New members carry a category from every entry point; legacy members
+    // keep their bare-timestamp records until categorized.
+    if (!SOI_CATEGORY_IDS.has(category)) return jsonResponse(res, 400, { error: "category required" });
     const ts = Date.now();
-    await redis.hset(SOI_KEY, { [id]: String(ts) });
-    return jsonResponse(res, 200, { id, action, ts });
+    await redis.hset(SOI_KEY, { [id]: JSON.stringify({ ts, category }) });
+    return jsonResponse(res, 200, { id, action, ts, category });
   }
   await redis.hdel(SOI_KEY, id);
   return jsonResponse(res, 200, { id, action });
+}
+
+// Categorize (or re-categorize) an existing member and optionally set the
+// weekly reportDay. Preserves the original membership timestamp.
+async function handleSoiCategory(res, { id, category, reportDay }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  const raw = await redis.hget(SOI_KEY, id);
+  if (raw == null) return jsonResponse(res, 400, { error: "not an SOI member" });
+  if (!SOI_CATEGORY_IDS.has(category)) return jsonResponse(res, 400, { error: "unknown category" });
+  const prev = parseStored(raw);
+  const entry = { ts: prev && typeof prev === "object" ? Number(prev.ts) || Date.now() : Number(prev) || Date.now(), category };
+  if (prev && typeof prev === "object" && Number.isInteger(prev.reportDay)) entry.reportDay = prev.reportDay;
+  if (reportDay != null) {
+    if (!(Number.isInteger(reportDay) && reportDay >= 0 && reportDay <= 6)) return jsonResponse(res, 400, { error: "reportDay must be 0-6" });
+    entry.reportDay = reportDay;
+  }
+  await redis.hset(SOI_KEY, { [id]: JSON.stringify(entry) });
+  return jsonResponse(res, 200, { id, ...entry });
 }
 
 // A plain membership SET keyed by contact id. Two of these: prospects:pinned
@@ -203,12 +223,6 @@ async function handleProfile(res, { id, profile }) {
 
 // ---- Lead kinds ----
 
-async function accountExists(accountId) {
-  if (typeof accountId !== "string" || !accountId) return false;
-  const v = await redis.hget(LEADS_ACCOUNTS, accountId);
-  return v != null;
-}
-
 // Create or update a lead contact. Field whitelist IS the data rule: no
 // income, no credit, no loan numbers, no documents, ever.
 async function handleLeadSave(res, { contact }) {
@@ -216,7 +230,11 @@ async function handleLeadSave(res, { contact }) {
   const id = String(contact.phone || "").replace(/\D/g, "");
   if (!/^\d{7,}$/.test(id)) return jsonResponse(res, 400, { error: "phone must have at least 7 digits" });
   if (typeof contact.name !== "string" || !contact.name.trim()) return jsonResponse(res, 400, { error: "name required" });
-  if (!(await accountExists(contact.accountId))) return jsonResponse(res, 400, { error: "unknown accountId" });
+  // Referral source must be an SOI member; the membership hash is the single
+  // source of truth for who can refer.
+  if (typeof contact.referredBy !== "string" || !/^\d{7,}$/.test(contact.referredBy) || (await redis.hget(SOI_KEY, contact.referredBy)) == null) {
+    return jsonResponse(res, 400, { error: "referredBy must be an SOI member id" });
+  }
   for (const [k, max] of [["name", 120], ["email", 200], ["sourceNote", 300], ["note", 500]]) {
     if (contact[k] != null && (typeof contact[k] !== "string" || contact[k].length > max)) return jsonResponse(res, 400, { error: `${k} must be a short string` });
   }
@@ -226,7 +244,7 @@ async function handleLeadSave(res, { contact }) {
     name: contact.name.trim(),
     phone: String(contact.phone),
     email: typeof contact.email === "string" ? contact.email.trim() : "",
-    accountId: contact.accountId,
+    referredBy: contact.referredBy,
     sourceNote: typeof contact.sourceNote === "string" ? contact.sourceNote.trim() : "",
     note: typeof contact.note === "string" ? contact.note.trim() : "",
     timeline: LEAD_TIMELINE_IDS.has(contact.timeline) ? contact.timeline : "",
@@ -280,17 +298,6 @@ async function handleLeadStatus(res, { id, track, expiryTs }) {
   return jsonResponse(res, 200, { id, ...entry });
 }
 
-// Partner account registry: id, name, type, reportDay (0 Sunday .. 6).
-async function handleLeadAccount(res, { account }) {
-  if (!account || typeof account !== "object") return jsonResponse(res, 400, { error: "account must be an object" });
-  if (typeof account.name !== "string" || !account.name.trim() || account.name.length > 120) return jsonResponse(res, 400, { error: "account name required" });
-  if (!LEAD_ACCOUNT_TYPES.has(account.type)) return jsonResponse(res, 400, { error: "type must be team, builder or agent" });
-  const reportDay = Number.isInteger(account.reportDay) && account.reportDay >= 0 && account.reportDay <= 6 ? account.reportDay : 5;
-  const id = typeof account.id === "string" && /^acc_[a-z0-9]+$/.test(account.id) ? account.id : `acc_${Date.now().toString(36)}`;
-  const clean = { id, name: account.name.trim(), type: account.type, reportDay };
-  await redis.hset(LEADS_ACCOUNTS, { [id]: JSON.stringify(clean) });
-  return jsonResponse(res, 200, { account: clean });
-}
 
 async function handleLeadDelete(res, { id }) {
   if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
@@ -302,11 +309,6 @@ async function handleLeadDelete(res, { id }) {
   return jsonResponse(res, 200, { id, deleted: true });
 }
 
-async function handleLeadAccountDelete(res, { id }) {
-  if (typeof id !== "string" || !id) return jsonResponse(res, 400, { error: "id required" });
-  await redis.hdel(LEADS_ACCOUNTS, id);
-  return jsonResponse(res, 200, { id, deleted: true });
-}
 
 async function handleManual(res, contact) {
   const err = validateContact(contact);
@@ -392,6 +394,7 @@ export default async function handler(req, res) {
 
     switch (body.kind) {
       case "soi": return await handleSoi(res, body);
+      case "soi.category": return await handleSoiCategory(res, body);
       case "pin": return await handleSetFlag(res, body, PINNED_SET);
       case "rac": return await handleSetFlag(res, body, RAC_SET);
       case "whale": return await handleSetFlag(res, body, WHALE_SET);
@@ -405,9 +408,7 @@ export default async function handler(req, res) {
       case "lead.save": return await handleLeadSave(res, body);
       case "lead.touch": return await handleLeadTouch(res, body);
       case "lead.status": return await handleLeadStatus(res, body);
-      case "lead.account": return await handleLeadAccount(res, body);
       case "lead.delete": return await handleLeadDelete(res, body);
-      case "lead.account.delete": return await handleLeadAccountDelete(res, body);
       case "manual": return await handleManual(res, body.contact);
       default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
     }

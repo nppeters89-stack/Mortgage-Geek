@@ -404,8 +404,21 @@ export function soiQueue(prospects, soi, followUps) {
 
 // Promotion date for the SOI row, e.g. "Aug 2026". Values arrive from Redis as
 // strings, so coerce before formatting.
+export const SOI_CATEGORIES = [
+  { id: "builder_agent", label: "Builder Agent" },
+  { id: "retail_agent", label: "Retail Agent" },
+  { id: "current_client", label: "Current Client" },
+  { id: "past_client", label: "Past Client" },
+  { id: "business_person", label: "Business Person" },
+];
+export const soiCategoryLabel = (id) => (SOI_CATEGORIES.find((c) => c.id === id) || {}).label || "";
+// The SOI hash value is a legacy bare timestamp or { ts, category, reportDay }.
+export const soiTsOf = (v) => (v && typeof v === "object" ? Number(v.ts) || 0 : Number(v) || 0);
+export const soiCategoryOf = (v) => (v && typeof v === "object" ? v.category || "" : "");
+export const soiReportDayOf = (v) => (v && typeof v === "object" && Number.isInteger(v.reportDay) ? v.reportDay : null);
+
 export function formatSoiSince(ts) {
-  const n = Number(ts);
+  const n = soiTsOf(ts) || Number(ts);
   if (!Number.isFinite(n) || n <= 0) return "";
   try {
     return new Date(n).toLocaleDateString(undefined, { month: "short", year: "numeric" });
