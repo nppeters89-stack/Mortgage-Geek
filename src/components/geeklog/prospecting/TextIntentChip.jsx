@@ -3,6 +3,8 @@ import { T, FF } from "../gl2Tokens";
 import { useIsMobile } from "../../../utils/hooks";
 import { readTextIntent, clearTextIntent } from "./textIntent";
 import { getCachedProspects, persistFollowUps, persistPin } from "./prospectStore";
+import { getCachedLeads, persistLeadTouch } from "./leadStore";
+import { leadStageOf, ATTEMPTING } from "./leadsModel";
 import { idFromPhone, stageOf, qualifiesForFollowUp, WHALE_COLUMNS, DEFAULT_STAGES } from "./prospectsModel";
 
 // The Sent it chip. The app cannot know whether a text actually went out, so
@@ -25,9 +27,13 @@ export function TextIntentChip({ apiKey, onEdit, onLogged }) {
     };
   }, []);
   if (!intent) return null;
+  const isLead = intent.ns === "lead";
   const cache = getCachedProspects();
+  const leadCache = isLead ? getCachedLeads() : null;
   const id = String(intent.contactId);
-  const prospect = (cache?.prospects || []).find((x) => idFromPhone(x.phone) === id);
+  const prospect = isLead
+    ? (leadCache?.contacts?.[id] ? { ...leadCache.contacts[id], phone: leadCache.contacts[id].phone } : null)
+    : (cache?.prospects || []).find((x) => idFromPhone(x.phone) === id);
   if (!prospect) return null;
   const first = String(prospect.name || "").trim().split(/\s+/)[0] || "them";
 
@@ -37,6 +43,16 @@ export function TextIntentChip({ apiKey, onEdit, onLogged }) {
   };
   const dismiss = () => { clearTextIntent(); setIntent(null); };
   const logIt = () => {
+    if (isLead) {
+      // A texted lead logs an attempt (or a touch at its current stage past
+      // attempting) into leads:fu and nowhere else.
+      const touches = leadCache?.fu?.[id] || [];
+      const stage = Math.max(ATTEMPTING, leadStageOf(touches));
+      persistLeadTouch(apiKey, id, [...touches, { ts: Date.now(), note: "", stage, type: "text" }]);
+      dismiss();
+      onLogged?.();
+      return;
+    }
     const fu = cache.followUps?.[id] || [];
     const stagesArr = Array.isArray(cache.stages) && cache.stages.length ? cache.stages : DEFAULT_STAGES;
     const goalIndex = stagesArr.length - 1;
@@ -54,9 +70,10 @@ export function TextIntentChip({ apiKey, onEdit, onLogged }) {
     onLogged?.();
   };
   const edit = () => {
+    if (isLead) { dismiss(); onEdit?.(id, "lead"); return; }
     if (!membership().member) persistPin(apiKey, id, "add");
     dismiss();
-    onEdit?.(id);
+    onEdit?.(id, "agent");
   };
 
   const btn = (bg, color, border) => ({ border: border || "none", background: bg, color, borderRadius: 999, padding: "8px 14px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer" });

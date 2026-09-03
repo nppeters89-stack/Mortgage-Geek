@@ -360,6 +360,17 @@ export function saveProfileKeepalive(key, id, profile) {
   membershipKeepalive(key, { kind: "profile", id, profile });
 }
 
+// ----- Leads namespace: one GET plus kinds on the membership router. -----
+export async function fetchLeads(key) {
+  return prospectsFetch(key, "?ns=leads");
+}
+export async function saveLeadKind(key, body) {
+  return prospectsFetch(key, "/membership", membershipBody(body));
+}
+export function saveLeadKindKeepalive(key, body) {
+  membershipKeepalive(key, body);
+}
+
 // Join-date write for the Follow Ups queue (first write wins server-side).
 export async function saveAddedAt(key, id, ts) {
   return prospectsFetch(key, "/membership", membershipBody({ kind: "added", id, ts }));

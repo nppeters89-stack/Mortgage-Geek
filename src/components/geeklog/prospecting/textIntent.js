@@ -27,12 +27,12 @@ export function clearTextIntent() {
 // tap overwrites any older one), then either navigate to sms: (touch devices)
 // or hand back the body for a clipboard copy (desktop). Returns { ok: false }
 // when the number cannot normalize, so callers can disable the button.
-export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "" }) {
+export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "", ns = "agent" }) {
   const body = fill(templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
   const url = buildSmsUrl(prospect.phone, body);
   if (!url) return { ok: false };
   try {
-    localStorage.setItem(KEY, JSON.stringify({ contactId: idFromPhone(prospect.phone), stage, ts: Date.now() }));
+    localStorage.setItem(KEY, JSON.stringify({ contactId: idFromPhone(prospect.phone), stage, ts: Date.now(), ns }));
   } catch { /* best-effort */ }
   const touchDevice = typeof navigator !== "undefined" && (navigator.maxTouchPoints > 0 || "ontouchstart" in window);
   if (touchDevice) {

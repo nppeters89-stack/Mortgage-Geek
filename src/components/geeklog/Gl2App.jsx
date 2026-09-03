@@ -3,8 +3,10 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T, APP_MAX } from "./gl2Tokens";
 import { useIsMobile } from "../../utils/hooks";
 import { TabBar, StatsToggle } from "./Gl2Primitives";
+import { withAlpha } from "../../utils/format";
 import { Gl2TabDock } from "./Gl2TabDock";
 import { TextIntentChip } from "./prospecting/TextIntentChip";
+import { LeadsContent } from "./prospecting/LeadsContent";
 import { Gl2TopNav } from "./Gl2TopNav";
 import { TodayContent, WeekContent, ClosingsContent, SettingsPanel } from "./Gl2Screens";
 import { CorrectionPanel } from "./Gl2Correction";
@@ -79,11 +81,15 @@ export function Gl2App({ apiKey, onSignOut = null }) {
   // mounted tab remounts and rereads the store; Edit deep-links a contact.
   const [textTick, setTextTick] = useState(0);
   const [textEditId, setTextEditId] = useState(null);
+  const [leadEditId, setLeadEditId] = useState(null);
+  // Desktop cockpit switcher: the Pipeline tab flips between the agent board
+  // and the lead board; mobile reaches leads through its own tab.
+  const [pipelineView, setPipelineView] = useState("agents");
   // The desktop Follow Up cockpit (>= 900px) runs full-bleed: no width cap, the
   // board owns the whole screen. Every other tab and all of mobile stay at
   // APP_MAX.
   const isNarrow = useIsMobile(899);
-  const columnMax = (tab === "followups" || tab === "soi") && !isNarrow ? "100%" : APP_MAX;
+  const columnMax = (tab === "followups" || tab === "soi" || tab === "leads") && !isNarrow ? "100%" : APP_MAX;
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayKey);
@@ -470,7 +476,26 @@ export function Gl2App({ apiKey, onSignOut = null }) {
             </>
           )}
           {tab === "prospecting" && <ProspectingContent key={`pr${textTick}`} apiKey={apiKey} onTalkedLogged={addProspectingConversation} />}
-          {tab === "followups" && <FollowUpsContent key={`fu${textTick}`} apiKey={apiKey} onOpenSoi={() => setTab("soi")} openContactId={textEditId} onOpenConsumed={() => setTextEditId(null)} />}
+          {tab === "followups" && (
+            <>
+              {!isNarrow && (
+                <div style={{ display: "flex", justifyContent: "center", paddingBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 4, padding: 4, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 999 }}>
+                    {[{ id: "agents", label: "Agents" }, { id: "leads", label: "Leads" }].map((o) => (
+                      <button key={o.id} type="button" aria-pressed={pipelineView === o.id} onClick={() => setPipelineView(o.id)}
+                        style={{ border: "none", borderRadius: 999, padding: "7px 16px", fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer", background: pipelineView === o.id ? withAlpha(T.greenBright, 0.15) : "none", color: pipelineView === o.id ? T.greenBright : T.dim }}>
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {isNarrow || pipelineView === "agents"
+                ? <FollowUpsContent key={`fu${textTick}`} apiKey={apiKey} onOpenSoi={() => setTab("soi")} openContactId={textEditId} onOpenConsumed={() => setTextEditId(null)} />
+                : <LeadsContent key={`ld${textTick}`} apiKey={apiKey} openLeadId={leadEditId} onOpenConsumed={() => setLeadEditId(null)} />}
+            </>
+          )}
+          {tab === "leads" && <LeadsContent key={`ldm${textTick}`} apiKey={apiKey} openLeadId={leadEditId} onOpenConsumed={() => setLeadEditId(null)} />}
           {/* Closings and SOI are not bottom tabs; they open from the dollar and
               SOI buttons in the Today header. */}
           {tab === "closings" && <ClosingsContent closings={closings} year={year} />}
@@ -479,7 +504,11 @@ export function Gl2App({ apiKey, onSignOut = null }) {
 
         <TextIntentChip apiKey={apiKey}
           onLogged={() => setTextTick((t) => t + 1)}
-          onEdit={(id) => { setTextEditId(id); setTab("followups"); setTextTick((t) => t + 1); }} />
+          onEdit={(id, ns) => {
+            if (ns === "lead") { setLeadEditId(id); if (isNarrow) setTab("leads"); else { setTab("followups"); setPipelineView("leads"); } }
+            else { setTextEditId(id); setTab("followups"); setPipelineView("agents"); }
+            setTextTick((t) => t + 1);
+          }} />
 
         {isNarrow && (
           <Gl2TabDock resetKey={tab} maxWidth={columnMax}>

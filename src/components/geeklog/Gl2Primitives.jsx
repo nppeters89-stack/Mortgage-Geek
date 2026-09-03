@@ -249,6 +249,8 @@ export function TabGlyph({ id, size = 22 }) {
       return (<svg {...common}><rect x="3.25" y="4.75" width="17.5" height="16" rx="3.2" /><path d="M3.25 9.6h17.5M8.2 3.1v3.4M15.8 3.1v3.4" /><circle cx="12" cy="15.1" r="1.85" fill="currentColor" stroke="none" /></svg>);
     case "prospecting":
       return (<svg {...common}><circle cx="9.4" cy="8.6" r="3.3" /><path d="M3.6 19.9c0-3.25 2.6-5.4 5.8-5.4s5.8 2.15 5.8 5.4" /><path d="M18.6 7.1v5M16.1 9.6h5" /></svg>);
+    case "leads":
+      return (<svg {...common}><path d="M3.4 4.4h17.2l-6.7 7.7v6.1l-3.8 2v-8.1L3.4 4.4Z" /></svg>);
     case "stats":
     case "ytd":
       return (<svg {...common}><path d="M3.6 16.9 9.2 11.3l3.4 3.4 7.8-7.8" /><path d="M15.4 6.9h5v5" /><path d="M3.6 20.6h17" /></svg>);
@@ -263,6 +265,7 @@ export function TabBar({ active, onChange }) {
   const tabs = [
     { id: "today", label: "Today" },
     { id: "prospecting", label: "Prospects" },
+    { id: "leads", label: "Leads" },
     { id: "stats", label: "Stats" },
     { id: "followups", label: "Pipeline" },
   ];
