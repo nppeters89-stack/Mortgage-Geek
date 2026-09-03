@@ -4,8 +4,9 @@ import { T, FF, staleColor, staleWash } from "../gl2Tokens";
 import { LEAD_PIPELINE, trackOf } from "./pipelines";
 import { leadInfo, leadPlaceLabel, expiryDaysLeft, attemptsOf, ATTEMPTING } from "./leadsModel";
 import { idFromPhone, repliesOf, lastReplyTs, lastTouchTs, e164Phone, REPLY_STAGE } from "./prospectsModel";
-import { getCachedLeads, loadLeads, persistLeadTouch, persistLead, persistLeadStatus, persistLeadAccount, deleteLead } from "./leadStore";
-import { getCachedProspects, persistFire, setCachedFire } from "./prospectStore";
+import { getCachedLeads, loadLeads, persistLeadTouch, persistLead, persistLeadStatus, deleteLead } from "./leadStore";
+import { getCachedProspects, loadProspects, persistFire, setCachedFire, persistFollowUps, persistManualContact, persistSoi, persistSoiCategory } from "./prospectStore";
+import { SOI_CATEGORIES, soiCategoryOf, soiReportDayOf } from "./prospectsModel";
 import { ReplyBadge } from "./ReplyBadge";
 import { ReplyDateDialog, LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { startText } from "./textIntent";
@@ -13,7 +14,7 @@ import { copyText } from "./clipboard";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { ChipRow } from "./ChipFields";
 import { LEAD_OBJECTIONS, LEAD_TIMELINE } from "./chips";
-import { assembleAccountReport } from "./leadReport";
+import { assembleReferrerReport } from "./leadReport";
 import { LeadReportCard } from "./LeadReportCard";
 import { useIsMobile } from "../../../utils/hooks";
 
@@ -41,7 +42,8 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const [contacts, setContacts] = useState(() => seed?.contacts || {});
   const [fu, setFu] = useState(() => seed?.fu || {});
   const [status, setStatus] = useState(() => seed?.status || {});
-  const [accounts, setAccounts] = useState(() => seed?.accounts || {});
+  // Referral sources are SOI members; the agent cache is the registry.
+  const [agent, setAgent] = useState(() => getCachedProspects());
   const [fire, setFire] = useState(() => getCachedProspects()?.fire || []);
   const [ready, setReady] = useState(!!seed);
   const [filter, setFilter] = useState(null); // null | "due" | "attempting" | "owed" | accountId
@@ -63,8 +65,10 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     let cancelled = false;
     loadLeads(apiKey).then((c) => {
       if (cancelled) return;
-      setContacts(c.contacts); setFu(c.fu); setStatus(c.status); setAccounts(c.accounts); setReady(true);
+      setContacts(c.contacts); setFu(c.fu); setStatus(c.status); setReady(true);
     }).catch(() => setReady(true));
+    if (!getCachedProspects()) loadProspects(apiKey).then((c) => { if (!cancelled) setAgent(c); }).catch(() => {});
+    else setAgent(getCachedProspects());
     return () => { cancelled = true; };
   }, [apiKey]);
 
@@ -89,7 +93,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     if (filter === "due") pool = pool.filter((l) => infoOf(l.id).due);
     else if (filter === "attempting") pool = pool.filter((l) => { const i = infoOf(l.id); return i.place.type === "stage" && i.place.index === ATTEMPTING; });
     else if (filter === "owed") pool = pool.filter((l) => owedOf(l.id));
-    else if (filter) pool = pool.filter((l) => l.accountId === filter);
+    else if (filter) pool = pool.filter((l) => l.referredBy === filter);
     return [...pool].sort((a, b) => {
       const ia = infoOf(a.id), ib = infoOf(b.id);
       if (ia.due !== ib.due) return ia.due ? -1 : 1;
@@ -143,8 +147,8 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
 
   // Off-screen report card to PNG, the same path the week story uses. The
   // payload is assembled note-free before anything renders.
-  const exportReport = useCallback(async (account) => {
-    const report = assembleAccountReport({ account, contacts, fu, status });
+  const exportReport = useCallback(async (member) => {
+    const report = assembleReferrerReport({ member, contacts, fu, status });
     setReportFor(report);
     try {
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
@@ -155,7 +159,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       const height = Math.max(1350, node.scrollHeight);
       const dataUrl = await toPng(node, { pixelRatio: 2, backgroundColor: T.bg1, fontEmbedCSS, width: 1080, height, canvasWidth: 1080, canvasHeight: height });
       const link = document.createElement("a");
-      link.download = `lead-report-${account.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${todayLocalISO()}.png`;
+      link.download = `lead-report-${member.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${todayLocalISO()}.png`;
       link.href = dataUrl;
       link.click();
       showToast("Report exported");
@@ -166,14 +170,24 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     }
   }, [contacts, fu, status, showToast]);
 
-  // ----- pieces -----
-  const accountName = (id) => accounts[id]?.name || "";
+  // ----- referral sources: SOI members, from the agent cache -----
+  const referrers = useMemo(() => {
+    const soi = agent?.soi || {};
+    const byId = new Map((agent?.prospects || []).map((p) => [idFromPhone(p.phone), p]));
+    const list = Object.keys(soi).map((id) => {
+      const p = byId.get(id);
+      return { id, name: p?.name || id, brokerage: p?.brokerage || "", category: soiCategoryOf(soi[id]), reportDay: soiReportDayOf(soi[id]) };
+    });
+    const rank = (c) => (c === "builder_agent" || c === "retail_agent" ? 0 : 1);
+    return list.sort((a, b) => rank(a.category) - rank(b.category) || a.name.localeCompare(b.name));
+  }, [agent]);
+  const referrerName = useCallback((id) => referrers.find((r) => r.id === id)?.name || "", [referrers]);
 
   const railChips = [
     { key: "due", label: `Due today ${counts.due}` },
     { key: "attempting", label: `Attempting ${counts.attempting}` },
     { key: "owed", label: `Owed a response ${counts.owed}` },
-    ...Object.values(accounts).map((a) => ({ key: a.id, label: a.name })),
+    ...[...new Set(leads.map((l) => l.referredBy).filter(Boolean))].map((id) => ({ key: id, label: referrerName(id) || "Unknown" })),
   ];
 
   const rail = (
@@ -190,7 +204,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       <span style={{ flex: 1 }} />
       <button type="button" onClick={() => setAcctOpen(true)}
         style={{ flex: "none", fontSize: 12.5, color: T.dim, border: `1px solid ${T.line}`, borderRadius: 999, padding: "7px 13px", background: "none", fontFamily: FF.body, cursor: "pointer" }}>
-        Accounts
+        Reports
       </button>
       <button type="button" onClick={() => setFormOpen(true)}
         style={{ flex: "none", fontSize: 12.5, fontWeight: 700, color: T.cream, border: "none", borderRadius: 999, padding: "7px 15px", background: T.green, fontFamily: FF.body, cursor: "pointer" }}>
@@ -218,7 +232,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           </span>
           <ReplyBadge count={replies.length} days={rTs ? dSince(rTs) : null} owed={rTs > (lastTouchTs(fu[id]) || 0)} />
         </div>
-        <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{accountName(lead.accountId)}</div>
+        <div style={{ fontSize: 11, color: T.dim, marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{referrerName(lead.referredBy)}</div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 8, fontSize: 10.5, color: T.faint }}>
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {leadPlaceLabel(info)}{info.place.type === "stage" && info.place.index === ATTEMPTING ? ` · ${attemptsOf(fu[id])} of ${LEAD_PIPELINE.attemptCap}` : ""}{exp != null ? ` · expires ${exp}d` : ""}
@@ -292,7 +306,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       )}
 
       {openLead && openLead.name && (
-        <LeadDetail lead={openLead} touches={fu[openId] || []} info={infoOf(openId)} accountLabel={accountName(openLead.accountId)}
+        <LeadDetail lead={openLead} touches={fu[openId] || []} info={infoOf(openId)} accountLabel={referrerName(openLead.referredBy)}
           isFire={fireSet.has(openId)} onToggleFire={() => toggleFire(openId)}
           onClose={() => setOpenId(null)}
           onLogTouch={(touch) => logTouch(openId, touch)}
@@ -306,16 +320,29 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       )}
 
       {formOpen && (
-        <NewLeadForm accounts={accounts} apiKey={apiKey}
+        <NewLeadForm referrers={referrers} apiKey={apiKey}
           onClose={() => setFormOpen(false)}
-          onSaved={(contact) => { const id = idFromPhone(contact.phone); setContacts((p) => ({ ...p, [id]: contact })); setFormOpen(false); showToast("Lead added"); }}
-          onAccountAdded={(a) => setAccounts((p) => ({ ...p, [a.id]: a }))}
+          onSaved={(contact) => {
+            const id = idFromPhone(contact.phone);
+            setContacts((p) => ({ ...p, [id]: contact }));
+            setFormOpen(false);
+            showToast("Lead added");
+            // Referral side effect: a stage -3 touch on the referring SOI
+            // member's existing history, so the producing clock and Owe a
+            // Thank You update with zero new logic.
+            const parts = String(contact.name || "").trim().split(/\s+/);
+            const label = `lead: ${parts[0] || ""} ${parts.length > 1 ? parts[parts.length - 1][0] + "." : ""}`.trim();
+            const agentFu = getCachedProspects()?.followUps?.[contact.referredBy] || [];
+            persistFollowUps(apiKey, contact.referredBy, [...agentFu, { ts: Date.now(), note: label, stage: -3 }]).catch(() => {});
+            setAgent(getCachedProspects());
+          }}
+          onSoiAdded={() => setAgent({ ...getCachedProspects() })}
           onToast={showToast} />
       )}
       {acctOpen && (
-        <AccountManager accounts={accounts} apiKey={apiKey} onClose={() => setAcctOpen(false)}
-          onSaved={(a) => setAccounts((p) => ({ ...p, [a.id]: a }))} onToast={showToast}
-          onReport={(a) => exportReport(a)} />
+        <ReferrerReports referrers={referrers} leads={leads} apiKey={apiKey}
+          onClose={() => setAcctOpen(false)} onReport={(m) => exportReport(m)} onToast={showToast}
+          onDaySet={() => setAgent({ ...getCachedProspects() })} />
       )}
       {reportFor && (
         <div aria-hidden="true" style={{ position: "fixed", left: -12000, top: 0 }}>
@@ -485,37 +512,51 @@ function LeadDetail({ lead, touches, info, accountLabel, isFire, onToggleFire, o
 }
 
 // ---------- entry form: the data rule made physical ----------
-function NewLeadForm({ accounts, apiKey, onClose, onSaved, onAccountAdded, onToast }) {
+function NewLeadForm({ referrers, apiKey, onClose, onSaved, onSoiAdded, onToast }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [referredBy, setReferredBy] = useState("");
+  const [refQuery, setRefQuery] = useState("");
   const [sourceNote, setSourceNote] = useState("");
-  const [addingAcct, setAddingAcct] = useState(false);
-  const [newAcctName, setNewAcctName] = useState("");
-  const [newAcctType, setNewAcctType] = useState("team");
+  const [addingRef, setAddingRef] = useState(false);
+  const [refName, setRefName] = useState("");
+  const [refPhone, setRefPhone] = useState("");
+  const [refBrokerage, setRefBrokerage] = useState("");
+  const [refCategory, setRefCategory] = useState("");
   const [busy, setBusy] = useState(false);
 
   const inp = { width: "100%", boxSizing: "border-box", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: "11px 12px", fontFamily: FF.body, fontSize: 14 };
   const lbl = { fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.dim, marginBottom: 6, marginTop: 12 };
 
-  const addAccount = async () => {
-    if (!newAcctName.trim()) return;
+  const q = refQuery.trim().toLowerCase();
+  const matches = (q
+    ? referrers.filter((r) => r.name.toLowerCase().includes(q) || r.brokerage.toLowerCase().includes(q))
+    : referrers
+  ).slice(0, 8);
+  const chosen = referrers.find((r) => r.id === referredBy) || null;
+
+  // Inline SOI add: writes through the existing SOI path (manual contact plus
+  // membership with category); no parallel registry.
+  const addReferrer = async () => {
+    const rid = idFromPhone(refPhone);
+    if (!refName.trim() || rid.length < 7 || !refCategory) { onToast("Name, mobile and category required"); return; }
     try {
-      const a = await persistLeadAccount(apiKey, { name: newAcctName.trim(), type: newAcctType, reportDay: 5 });
-      onAccountAdded(a);
-      setAccountId(a.id);
-      setAddingAcct(false);
-      setNewAcctName("");
-    } catch { onToast("Account save failed"); }
+      await persistManualContact(apiKey, { name: refName.trim(), phone: refPhone.trim(), brokerage: refBrokerage.trim() });
+      await persistSoi(apiKey, rid, "add", refCategory);
+      onSoiAdded();
+      setReferredBy(rid);
+      setRefQuery(refName.trim());
+      setAddingRef(false);
+    } catch (e) { onToast(e.message || "Could not add to SOI"); }
   };
 
   const save = async () => {
     if (busy) return;
-    if (!accountId) { onToast("Pick an account"); return; }
+    if (!referredBy) { onToast("Pick a referral source"); return; }
     if (!name.trim() || idFromPhone(phone).length < 7) { onToast("Name and mobile required"); return; }
     setBusy(true);
-    const contact = { kind: "lead", name: name.trim(), phone: phone.trim(), email: email.trim(), accountId, sourceNote: sourceNote.trim(), note: "", timeline: "", createdAt: Date.now() };
+    const contact = { kind: "lead", name: name.trim(), phone: phone.trim(), email: email.trim(), referredBy, sourceNote: sourceNote.trim(), note: "", timeline: "", createdAt: Date.now() };
     try {
       await persistLead(apiKey, contact);
       onSaved(contact);
@@ -525,33 +566,52 @@ function NewLeadForm({ accounts, apiKey, onClose, onSaved, onAccountAdded, onToa
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 56, padding: "36px 14px", overflowY: "auto" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 420, padding: "18px 20px 22px", fontFamily: FF.body }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 440, padding: "18px 20px 22px", fontFamily: FF.body }}>
         <div style={{ fontWeight: 700, fontSize: 19, color: T.cream }}>New Lead</div>
-        <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 3 }}>Name, mobile, email, account, source. Nothing else, on purpose.</div>
+        <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 3 }}>Name, mobile, email, referral source, source note. Nothing else, on purpose.</div>
         <div style={lbl}>Name</div>
         <input style={inp} value={name} onChange={(e) => setName(e.target.value.slice(0, 120))} autoFocus />
         <div style={lbl}>Mobile</div>
         <input style={inp} type="tel" value={phone} onChange={(e) => setPhone(e.target.value.slice(0, 20))} />
         <div style={lbl}>Email</div>
         <input style={inp} type="email" value={email} onChange={(e) => setEmail(e.target.value.slice(0, 200))} />
-        <div style={lbl}>Account</div>
-        {addingAcct ? (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            <input style={{ ...inp, flex: 1, minWidth: 140 }} placeholder="Account name" value={newAcctName} onChange={(e) => setNewAcctName(e.target.value.slice(0, 120))} />
-            <select style={{ ...inp, width: "auto" }} value={newAcctType} onChange={(e) => setNewAcctType(e.target.value)}>
-              <option value="team">Team</option>
-              <option value="builder">Builder</option>
-              <option value="agent">Agent</option>
-            </select>
-            <button type="button" onClick={addAccount} style={{ border: "none", borderRadius: 10, padding: "0 14px", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Add</button>
+        <div style={lbl}>Referral source (SOI)</div>
+        <input style={inp} placeholder="Search your SOI…" value={chosen ? `${chosen.name}${chosen.brokerage ? ` · ${chosen.brokerage}` : ""}` : refQuery}
+          onChange={(e) => { setReferredBy(""); setRefQuery(e.target.value); }} />
+        {!chosen && refQuery.trim() !== "" && (
+          <div style={{ border: `1px solid ${T.line}`, borderRadius: 10, marginTop: 6, overflow: "hidden" }}>
+            {matches.map((r) => (
+              <button key={r.id} type="button" onClick={() => { setReferredBy(r.id); }}
+                style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 12px", background: "none", border: "none", borderBottom: `1px solid ${T.lineSoft}`, color: T.cream, fontFamily: FF.body, fontSize: 13.5, cursor: "pointer" }}>
+                {r.name}{r.brokerage ? <span style={{ color: T.dim }}> · {r.brokerage}</span> : null}
+              </button>
+            ))}
+            {matches.length === 0 && <div style={{ padding: "10px 12px", fontSize: 12.5, color: T.faint }}>No SOI match.</div>}
           </div>
+        )}
+        {!addingRef ? (
+          <button type="button" onClick={() => setAddingRef(true)}
+            style={{ marginTop: 8, background: "none", border: "none", color: T.greenBright, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer", padding: 0 }}>
+            Not in SOI yet? Add them.
+          </button>
         ) : (
-          <div style={{ display: "flex", gap: 6 }}>
-            <select style={{ ...inp, flex: 1 }} value={accountId} onChange={(e) => setAccountId(e.target.value)}>
-              <option value="">Pick an account…</option>
-              {Object.values(accounts).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
-            <button type="button" onClick={() => setAddingAcct(true)} style={{ border: `1px solid ${T.line}`, borderRadius: 10, padding: "0 12px", background: "none", color: T.dim, fontFamily: FF.body, fontSize: 12.5, cursor: "pointer" }}>New</button>
+          <div style={{ marginTop: 10, border: `1px solid ${T.line}`, borderRadius: 12, padding: "12px 12px 14px" }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.amber }}>New SOI member</div>
+            <input style={{ ...inp, marginTop: 8 }} placeholder="Name" value={refName} onChange={(e) => setRefName(e.target.value.slice(0, 120))} />
+            <input style={{ ...inp, marginTop: 6 }} type="tel" placeholder="Mobile" value={refPhone} onChange={(e) => setRefPhone(e.target.value.slice(0, 20))} />
+            <input style={{ ...inp, marginTop: 6 }} placeholder="Brokerage" value={refBrokerage} onChange={(e) => setRefBrokerage(e.target.value.slice(0, 120))} />
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+              {SOI_CATEGORIES.map((c) => (
+                <button key={c.id} type="button" onClick={() => setRefCategory(refCategory === c.id ? "" : c.id)}
+                  style={{ border: `1px solid ${refCategory === c.id ? T.greenWashLine : T.line}`, background: refCategory === c.id ? T.greenWash : "none", color: refCategory === c.id ? T.greenBright : T.dim, borderRadius: 999, padding: "5px 10px", fontFamily: FF.body, fontSize: 11.5, fontWeight: 600, cursor: "pointer" }}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={addReferrer}
+              style={{ marginTop: 10, width: "100%", border: "none", borderRadius: 10, padding: "10px 0", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+              Add to SOI and select
+            </button>
           </div>
         )}
         <div style={lbl}>Source note</div>
@@ -565,74 +625,40 @@ function NewLeadForm({ accounts, apiKey, onClose, onSaved, onAccountAdded, onToa
   );
 }
 
-// ---------- account management ----------
-function AccountManager({ accounts, apiKey, onClose, onSaved, onToast, onReport = null }) {
-  const [name, setName] = useState("");
-  const [type, setType] = useState("team");
-  const [reportDay, setReportDay] = useState(5);
-  const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const inp = { boxSizing: "border-box", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: "10px 12px", fontFamily: FF.body, fontSize: 13.5 };
-
-  const save = async (existing) => {
-    const account = existing
-      ? { ...existing }
-      : { name: name.trim(), type, reportDay: Number(reportDay) };
-    if (!account.name) return;
-    try {
-      const a = await persistLeadAccount(apiKey, account);
-      onSaved(a);
-      if (!existing) { setName(""); onToast("Account added"); }
-      else onToast("Account updated");
-    } catch { onToast("Account save failed"); }
-  };
-
+// ---------- per-referrer weekly reports ----------
+function ReferrerReports({ referrers, leads, apiKey, onClose, onReport, onToast, onDaySet }) {
+  const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const withLeads = referrers
+    .map((r) => ({ ...r, count: leads.filter((l) => l.referredBy === r.id).length }))
+    .filter((r) => r.count > 0);
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 56, padding: "36px 14px", overflowY: "auto" }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 460, padding: "18px 20px 22px", fontFamily: FF.body }}>
-        <div style={{ fontWeight: 700, fontSize: 19, color: T.cream, marginBottom: 12 }}>Accounts</div>
-        {Object.values(accounts).map((a) => (
-          <AccountRow key={a.id} account={a} days={DAYS} inp={inp} onSave={(next) => save(next)} onReport={onReport} />
+      <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 480, padding: "18px 20px 22px", fontFamily: FF.body }}>
+        <div style={{ fontWeight: 700, fontSize: 19, color: T.cream }}>Weekly reports</div>
+        <div style={{ fontSize: 11.5, color: T.dimmer, marginTop: 3 }}>Per referring SOI member. Status only, never notes.</div>
+        {withLeads.length === 0 && <div style={{ marginTop: 16, fontSize: 13, color: T.faint }}>No referring members with leads on file yet.</div>}
+        {withLeads.map((r) => (
+          <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <div style={{ flex: 1, minWidth: 140 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 600, color: T.cream }}>{r.name}</div>
+              <div style={{ fontSize: 11.5, color: T.dim }}>{r.brokerage || ""}{r.count ? ` · ${r.count} lead${r.count === 1 ? "" : "s"}` : ""}</div>
+            </div>
+            <select value={r.reportDay ?? ""} onChange={(e) => {
+                const day = e.target.value === "" ? null : Number(e.target.value);
+                if (day == null || !r.category) { onToast(r.category ? "Pick a day" : "Categorize them in the SOI cockpit first"); return; }
+                persistSoiCategory(apiKey, r.id, r.category, day).then(onDaySet).catch(() => onToast("Could not set day"));
+              }}
+              style={{ background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 8, padding: "7px 8px", fontFamily: FF.body, fontSize: 12 }}>
+              <option value="">Report day…</option>
+              {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
+            </select>
+            <button type="button" onClick={() => onReport({ id: r.id, name: r.name, brokerage: r.brokerage })}
+              style={{ border: `1px solid ${T.line}`, borderRadius: 10, padding: "8px 14px", background: "none", color: T.dim, fontFamily: FF.body, fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>
+              Report
+            </button>
+          </div>
         ))}
-        <div style={{ display: "flex", gap: 6, marginTop: 14, flexWrap: "wrap" }}>
-          <input style={{ ...inp, flex: 1, minWidth: 130 }} placeholder="New account name" value={name} onChange={(e) => setName(e.target.value.slice(0, 120))} />
-          <select style={inp} value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="team">Team</option>
-            <option value="builder">Builder</option>
-            <option value="agent">Agent</option>
-          </select>
-          <select style={inp} value={reportDay} onChange={(e) => setReportDay(Number(e.target.value))}>
-            {DAYS.map((d, i) => <option key={d} value={i}>{d}</option>)}
-          </select>
-          <button type="button" onClick={() => save(null)} style={{ border: "none", borderRadius: 10, padding: "0 14px", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Add</button>
-        </div>
       </div>
-    </div>
-  );
-}
-
-function AccountRow({ account, days, inp, onSave, onReport = null }) {
-  const [name, setName] = useState(account.name);
-  const [reportDay, setReportDay] = useState(account.reportDay);
-  const dirty = name !== account.name || reportDay !== account.reportDay;
-  return (
-    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-      <input style={{ ...inp, flex: 1, minWidth: 130 }} value={name} onChange={(e) => setName(e.target.value.slice(0, 120))} />
-      <span style={{ fontSize: 10.5, color: T.dimmer, textTransform: "uppercase", letterSpacing: "0.05em" }}>{account.type}</span>
-      <select style={inp} value={reportDay} onChange={(e) => setReportDay(Number(e.target.value))}>
-        {days.map((d, i) => <option key={d} value={i}>{d}</option>)}
-      </select>
-      {dirty && (
-        <button type="button" onClick={() => onSave({ ...account, name: name.trim(), reportDay })}
-          style={{ border: "none", borderRadius: 10, padding: "8px 12px", background: T.green, color: T.cream, fontFamily: FF.body, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          Save
-        </button>
-      )}
-      {onReport && (
-        <button type="button" onClick={() => onReport(account)}
-          style={{ border: `1px solid ${T.line}`, borderRadius: 10, padding: "8px 12px", background: "none", color: T.dim, fontFamily: FF.body, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-          Report
-        </button>
-      )}
     </div>
   );
 }

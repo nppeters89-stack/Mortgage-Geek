@@ -10,7 +10,8 @@ export function LeadReportCard({ report }) {
     <div style={{ width: 1080, minHeight: 1350, boxSizing: "border-box", background: T.bg1, padding: "64px 72px", fontFamily: FF.body, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 24 }}>
         <div>
-          <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.5px", color: T.cream }}>{report.accountName}</div>
+          <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: "-0.5px", color: T.cream }}>{report.memberName}</div>
+          {report.memberBrokerage && <div style={{ fontSize: 20, color: T.dim, marginTop: 6 }}>{report.memberBrokerage}</div>}
           <div style={{ fontSize: 19, color: T.dim, marginTop: 8 }}>Lead follow-up report · {report.dateLabel}</div>
         </div>
         <div style={{ fontSize: 17, color: T.dimmer, textAlign: "right" }}>

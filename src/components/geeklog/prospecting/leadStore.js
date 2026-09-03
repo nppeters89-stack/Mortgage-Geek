@@ -26,7 +26,6 @@ export async function loadLeads(apiKey) {
     contacts: data.contacts || {},
     fu: data.fu || {},
     status: data.status || {},
-    accounts: data.accounts || {},
     config: data.config || {},
   };
   saveLS(cache);
@@ -64,13 +63,6 @@ export function persistLeadStatus(apiKey, id, track, expiryTs) {
   return saveLeadKind(apiKey, { kind: "lead.status", id, track: track || "", ...(expiryTs ? { expiryTs } : {}) });
 }
 
-export function persistLeadAccount(apiKey, account) {
-  return saveLeadKind(apiKey, { kind: "lead.account", account }).then((r) => {
-    const c = getCachedLeads() || { accounts: {} };
-    mutate({ accounts: { ...c.accounts, [r.account.id]: r.account } });
-    return r.account;
-  });
-}
 
 export function deleteLead(apiKey, id) {
   const c = getCachedLeads() || { contacts: {}, fu: {}, status: {} };
@@ -81,9 +73,3 @@ export function deleteLead(apiKey, id) {
   return saveLeadKind(apiKey, { kind: "lead.delete", id });
 }
 
-export function deleteLeadAccount(apiKey, id) {
-  const c = getCachedLeads() || { accounts: {} };
-  const accounts = { ...c.accounts }; delete accounts[id];
-  mutate({ accounts });
-  return saveLeadKind(apiKey, { kind: "lead.account.delete", id });
-}

@@ -29,11 +29,11 @@ const firstAtOrAboveTs = (touches, stage) => {
   return t;
 };
 
-export function assembleAccountReport({ account, contacts, fu, status }, now = Date.now()) {
+export function assembleReferrerReport({ member, contacts, fu, status }, now = Date.now()) {
   const weekStart = mondayStart(now);
   const leads = Object.entries(contacts || {})
     .map(([id, c]) => ({ id, ...c }))
-    .filter((l) => l.accountId === account.id);
+    .filter((l) => l.referredBy === member.id);
 
   const step = (label, reachedTs) => {
     const times = leads.map(reachedTs).filter(Boolean);
@@ -71,8 +71,8 @@ export function assembleAccountReport({ account, contacts, fu, status }, now = D
     }));
 
   return {
-    accountName: account.name,
-    accountType: account.type,
+    memberName: member.name,
+    memberBrokerage: member.brokerage || "",
     dateLabel: new Date(now).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
     weekLabel: `week of ${new Date(weekStart).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
     funnel,
