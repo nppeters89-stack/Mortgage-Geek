@@ -1,5 +1,5 @@
 import { idFromPhone, buildSmsUrl, e164Phone } from "./prospectsModel";
-import { templateForStage, fill } from "./textTemplates";
+import { templateForStage, leadTemplateForStage, fill } from "./textTemplates";
 
 // Pending text intent: written when the Text button fires, read when the app
 // regains focus so the Sent it chip can offer a one-tap log. The app cannot
@@ -28,7 +28,7 @@ export function clearTextIntent() {
 // or hand back the body for a clipboard copy (desktop). Returns { ok: false }
 // when the number cannot normalize, so callers can disable the button.
 export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "", ns = "agent" }) {
-  const body = fill(templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
+  const body = fill(ns === "lead" ? leadTemplateForStage(stage) : templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
   const url = buildSmsUrl(prospect.phone, body);
   if (!url) return { ok: false };
   try {

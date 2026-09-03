@@ -36,3 +36,21 @@ export const NEED_IDS = NEEDS.map((c) => c.id);
 export const objectionLabel = (id) => (OBJECTIONS.find((c) => c.id === id) || {}).label || id;
 export const lenderLabel = (id) => (LENDER_SITUATION.find((c) => c.id === id) || {}).label || id;
 export const needLabel = (id) => (NEEDS.find((c) => c.id === id) || {}).label || id;
+
+// Lead pipeline vocabularies. Same rules: stable ids, renameable labels.
+export const LEAD_OBJECTIONS = [
+  { id: "working_with_lender", label: "Working with another lender" },
+  { id: "just_looking", label: "Just looking" },
+  { id: "credit", label: "Credit concerns" },
+  { id: "needs_to_sell", label: "Needs to sell first" },
+  { id: "went_quiet", label: "Went quiet" },
+];
+
+export const LEAD_TIMELINE = [
+  { id: "now", label: "0-3 months" },
+  { id: "soon", label: "3-6 months" },
+  { id: "later", label: "6-12 months" },
+];
+
+export const leadObjectionLabel = (id) => (LEAD_OBJECTIONS.find((c) => c.id === id) || {}).label || id;
+export const leadTimelineLabel = (id) => (LEAD_TIMELINE.find((c) => c.id === id) || {}).label || id;

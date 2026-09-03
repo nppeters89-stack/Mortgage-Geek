@@ -37,3 +37,18 @@ export function fill(template, contact = {}) {
     .replace(/^[ ]+|[ ]+$/gm, "");
   return out.trim();
 }
+
+// Lead pipeline templates. Placeholder copy: Nick rewrites before use and
+// clears consumer texting with compliance before the first send. No rates,
+// no program claims; each under 300 characters.
+export const leadFirstTouch = "Hi {first}, this is Nick Peters with Rate. You reached out about a home purchase and I wanted to introduce myself. When is a good time for a quick call?\nNMLS #1119524";
+export const leadFollowup = "Hi {first}, Nick with Rate following up. {hook} What questions can I answer for you this week?";
+export const leadNurture = "Hi {first}, Nick with Rate checking in. No rush on my end, just keeping in touch. Reach out whenever the timing feels right.";
+
+// Template selection for the lead pipeline: first touch through attempting,
+// follow up through the working stages, nurture for the slow tracks.
+export function leadTemplateForStage(stageIndex) {
+  if (stageIndex <= 1) return leadFirstTouch;
+  if (stageIndex <= 4) return leadFollowup;
+  return leadNurture;
+}

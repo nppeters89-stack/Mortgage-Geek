@@ -18,7 +18,7 @@ function Chip({ on, label, onClick }) {
   );
 }
 
-function ChipRow({ label, options, value, onChange, multi = false }) {
+export function ChipRow({ label, options, value, onChange, multi = false }) {
   const isOn = (id) => (multi ? (value || []).includes(id) : value === id);
   const toggle = (id) => {
     if (multi) {

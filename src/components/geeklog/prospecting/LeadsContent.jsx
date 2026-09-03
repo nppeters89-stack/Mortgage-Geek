@@ -10,6 +10,8 @@ import { ReplyDateDialog, LoggedDatePicker, todayLocalISO, tsForLoggedDate } fro
 import { startText } from "./textIntent";
 import { copyText } from "./clipboard";
 import { StatusBarCap, Toast } from "./ProspectingContent";
+import { ChipRow } from "./ChipFields";
+import { LEAD_OBJECTIONS, LEAD_TIMELINE } from "./chips";
 import { useIsMobile } from "../../../utils/hooks";
 
 // Leads tab: the consumer lead pipeline, running the same engine as the agent
@@ -268,6 +270,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           onSetTrack={(track, expiryTs) => setTrack(openId, track, expiryTs)}
           onText={() => handleText(openLead)}
           onSaveNote={(note) => { const next = { ...contacts[openId], note }; setContacts((p) => ({ ...p, [openId]: next })); persistLead(apiKey, next).catch(() => showToast("Save failed")); }}
+          onSaveTimeline={(timeline) => { const next = { ...contacts[openId], timeline }; setContacts((p) => ({ ...p, [openId]: next })); persistLead(apiKey, next).catch(() => showToast("Save failed")); }}
           onDelete={() => { deleteLead(apiKey, openId); setContacts((p) => { const n = { ...p }; delete n[openId]; return n; }); setOpenId(null); showToast("Lead deleted"); }}
           isNarrow={isNarrow} />
       )}
@@ -305,11 +308,13 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
 }
 
 // ---------- detail ----------
-function LeadDetail({ lead, touches, info, accountLabel, isFire, onToggleFire, onClose, onLogTouch, onLogAttempt, onSetTrack, onText, onSaveNote, onDelete, isNarrow }) {
+function LeadDetail({ lead, touches, info, accountLabel, isFire, onToggleFire, onClose, onLogTouch, onLogAttempt, onSetTrack, onText, onSaveNote, onSaveTimeline, onDelete, isNarrow }) {
   const [note, setNote] = useState("");
   const [stageSel, setStageSel] = useState(() => (info.place.type === "stage" ? Math.min(info.place.index + 1, 5) : 5));
   const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
   const [talked, setTalked] = useState(false);
+  const [objections, setObjections] = useState([]);
+  const [timeline, setTimeline] = useState(lead.timeline || "");
   const [nextStep, setNextStep] = useState(lead.note || "");
   const [expiry, setExpiry] = useState("");
   const history = [...touches].sort((a, b) => (b.ts || 0) - (a.ts || 0));
@@ -320,8 +325,9 @@ function LeadDetail({ lead, touches, info, accountLabel, isFire, onToggleFire, o
     if (!text) return;
     const touch = { ts: tsForLoggedDate(loggedOn), note: text, stage: stageSel };
     if (talked) touch.talked = true;
+    if (objections.length) touch.objections = objections;
     onLogTouch(touch);
-    setNote(""); setTalked(false); setLoggedOn(todayLocalISO());
+    setNote(""); setTalked(false); setObjections([]); setLoggedOn(todayLocalISO());
   };
 
   const trackBtn = (t) => (
@@ -403,6 +409,10 @@ function LeadDetail({ lead, touches, info, accountLabel, isFire, onToggleFire, o
             style={{ width: "100%", marginTop: 8, background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: "11px 12px", fontFamily: FF.body, fontSize: 14 }}>
             {LEAD_PIPELINE.stages.map((s, i) => <option key={s.id} value={i}>{s.label}</option>)}
           </select>
+          <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+            <ChipRow label="Timeline" options={LEAD_TIMELINE} value={timeline} onChange={(v) => { setTimeline(v); onSaveTimeline(v); }} />
+            <ChipRow label="Objections (this call)" options={LEAD_OBJECTIONS} value={objections} onChange={setObjections} multi />
+          </div>
           <textarea value={note} onChange={(e) => setNote(e.target.value)}
             placeholder="Status and next step only. No numbers."
             style={{ width: "100%", boxSizing: "border-box", marginTop: 8, minHeight: 70, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 14, lineHeight: 1.5 }} />
