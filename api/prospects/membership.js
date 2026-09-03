@@ -26,6 +26,7 @@
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
 import { LENDER_SITUATION_IDS, NEED_IDS } from "./_chips.js";
+import { issueSession, verifySession, safeEqual, readCookie, sessionCookie, clearSessionCookie } from "../geeklog/_auth.js";
 
 const SOI_KEY = "prospects:soi";
 const PINNED_SET = "prospects:pinned";
@@ -128,6 +129,42 @@ async function handleAdded(res, { id, ts }) {
   return jsonResponse(res, 200, { id, ts: existing != null ? Number(existing) : t });
 }
 
+// ---- Auth kinds: the only kinds reachable without a session. ----
+
+const FAIL_TTL_SEC = 15 * 60;
+const FAIL_LIMIT = 10;
+const failKey = (ip) => `auth:fail:${ip}`;
+const clientIp = (req) => String(req.headers?.["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+
+async function handleAuthLogin(req, res, { passphrase }) {
+  const ip = clientIp(req);
+  // Rate limit before comparing anything: 10 failures per ip per 15 minutes.
+  const fails = Number(await redis.get(failKey(ip))) || 0;
+  if (fails >= FAIL_LIMIT) { res.status(429).end(); return; }
+  const expected = process.env.GEEKLOG_KEY;
+  if (!expected || !safeEqual(passphrase, expected)) {
+    const n = await redis.incr(failKey(ip));
+    if (n === 1) await redis.expire(failKey(ip), FAIL_TTL_SEC);
+    res.status(401).end();
+    return;
+  }
+  const token = issueSession();
+  if (!token) { res.status(401).end(); return; }
+  await redis.del(failKey(ip));
+  res.setHeader("Set-Cookie", sessionCookie(token));
+  res.status(204).end();
+}
+
+function handleAuthLogout(res) {
+  res.setHeader("Set-Cookie", clearSessionCookie());
+  res.status(204).end();
+}
+
+function handleAuthCheck(req, res) {
+  const sess = verifySession(readCookie(req));
+  res.status(sess ? 204 : 401).end();
+}
+
 // Contact profile: Nick's current understanding, overwritten as it improves.
 // { lenderSituation?, needs?, hook? }; unknown chip ids are rejected. A save
 // that empties every field deletes the hash entry.
@@ -219,7 +256,6 @@ async function handleMotivation(res, { id, action, text }) {
 }
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
     res.setHeader("Allow", "PUT");
     return jsonResponse(res, 405, { error: "Method Not Allowed" });
@@ -228,6 +264,14 @@ export default async function handler(req, res) {
   try {
     const body = req.body;
     if (!body || typeof body !== "object") return jsonResponse(res, 400, { error: "body must be a JSON object" });
+
+    // The three auth kinds are reachable without a session; everything else
+    // sits behind the gate.
+    if (body.kind === "auth.login") return await handleAuthLogin(req, res, body);
+    if (body.kind === "auth.logout") return handleAuthLogout(res);
+    if (body.kind === "auth.check") return handleAuthCheck(req, res);
+
+    if (!requireKey(req, res)) return jsonResponse(res, 401, { error: "Unauthorized" });
 
     switch (body.kind) {
       case "soi": return await handleSoi(res, body);
