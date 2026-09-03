@@ -25,7 +25,7 @@
 // replaced wholesale on every re-seed from Excel and would destroy them.
 
 import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
-import { LENDER_SITUATION_IDS, NEED_IDS } from "./_chips.js";
+import { LENDER_SITUATION_IDS, NEED_IDS, LEAD_OBJECTION_IDS, LEAD_TIMELINE_IDS, LEAD_TRACK_IDS, LEAD_ACCOUNT_TYPES } from "./_chips.js";
 import { issueSession, verifySession, safeEqual, readCookie, sessionCookie, clearSessionCookie } from "../geeklog/_auth.js";
 
 const SOI_KEY = "prospects:soi";
@@ -36,6 +36,16 @@ const WHALE_SET = "prospects:whale";
 const FIRE_SET = "prospects:fire";
 const ADDED_KEY = "prospects:addedat";
 const PROFILE_KEY = "prospects:profile";
+// Leads namespace: a second pipeline for consumer leads referred by partner
+// accounts. Data minimization is a hard rule enforced here: a lead is name,
+// mobile, email, account, source note, timeline chip and a short next-step
+// note. Nothing else is stored, whatever the client sends.
+const LEADS_IDS = "leads:ids";
+const leadKey = (id) => `leads:contact:${id}`;
+const leadFuKey = (id) => `leads:fu:${id}`;
+const LEADS_FU_IDS = "leads:fu:ids";
+const LEADS_STATUS = "leads:status";
+const LEADS_ACCOUNTS = "leads:accounts";
 const COLD_KEY = "prospects:cold";
 const STAGEMAP_KEY = "prospects:fu:stagemap";
 const MOTIVATION_KEY = "prospects:motivation";
@@ -191,6 +201,113 @@ async function handleProfile(res, { id, profile }) {
   return jsonResponse(res, 200, { id, profile: clean });
 }
 
+// ---- Lead kinds ----
+
+async function accountExists(accountId) {
+  if (typeof accountId !== "string" || !accountId) return false;
+  const v = await redis.hget(LEADS_ACCOUNTS, accountId);
+  return v != null;
+}
+
+// Create or update a lead contact. Field whitelist IS the data rule: no
+// income, no credit, no loan numbers, no documents, ever.
+async function handleLeadSave(res, { contact }) {
+  if (!contact || typeof contact !== "object") return jsonResponse(res, 400, { error: "contact must be an object" });
+  const id = String(contact.phone || "").replace(/\D/g, "");
+  if (!/^\d{7,}$/.test(id)) return jsonResponse(res, 400, { error: "phone must have at least 7 digits" });
+  if (typeof contact.name !== "string" || !contact.name.trim()) return jsonResponse(res, 400, { error: "name required" });
+  if (!(await accountExists(contact.accountId))) return jsonResponse(res, 400, { error: "unknown accountId" });
+  for (const [k, max] of [["name", 120], ["email", 200], ["sourceNote", 300], ["note", 500]]) {
+    if (contact[k] != null && (typeof contact[k] !== "string" || contact[k].length > max)) return jsonResponse(res, 400, { error: `${k} must be a short string` });
+  }
+  if (contact.timeline != null && contact.timeline !== "" && !LEAD_TIMELINE_IDS.has(contact.timeline)) return jsonResponse(res, 400, { error: "unknown timeline id" });
+  const clean = {
+    kind: "lead",
+    name: contact.name.trim(),
+    phone: String(contact.phone),
+    email: typeof contact.email === "string" ? contact.email.trim() : "",
+    accountId: contact.accountId,
+    sourceNote: typeof contact.sourceNote === "string" ? contact.sourceNote.trim() : "",
+    note: typeof contact.note === "string" ? contact.note.trim() : "",
+    timeline: LEAD_TIMELINE_IDS.has(contact.timeline) ? contact.timeline : "",
+    createdAt: Number.isFinite(contact.createdAt) ? contact.createdAt : Date.now(),
+  };
+  await redis.set(leadKey(id), JSON.stringify(clean));
+  await redis.sadd(LEADS_IDS, id);
+  return jsonResponse(res, 200, { id, contact: clean });
+}
+
+// Append one touch to a lead's history. Same record shape as the agent
+// pipeline: ts, note, stage (0..5 or -4 reply), type, talked, objections
+// validated against the lead objection set.
+async function handleLeadTouch(res, { id, touch }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (!touch || typeof touch !== "object" || !Number.isFinite(touch.ts)) return jsonResponse(res, 400, { error: "touch.ts must be a number" });
+  if (touch.note != null && (typeof touch.note !== "string" || touch.note.length > 2000)) return jsonResponse(res, 400, { error: "touch.note must be a string" });
+  if (touch.stage != null && !(Number.isInteger(touch.stage) && touch.stage >= -4 && touch.stage <= 5)) return jsonResponse(res, 400, { error: "touch.stage out of range" });
+  if (touch.type != null && (typeof touch.type !== "string" || touch.type.length > 20)) return jsonResponse(res, 400, { error: "touch.type must be a short string" });
+  if (touch.talked != null && typeof touch.talked !== "boolean") return jsonResponse(res, 400, { error: "touch.talked must be a boolean" });
+  if (touch.objections != null && (!Array.isArray(touch.objections) || touch.objections.length > 10 || touch.objections.some((x) => !LEAD_OBJECTION_IDS.has(x)))) {
+    return jsonResponse(res, 400, { error: "touch.objections must be known lead objection ids" });
+  }
+  const clean = { ts: touch.ts, note: typeof touch.note === "string" ? touch.note : "" };
+  if (Number.isInteger(touch.stage)) clean.stage = touch.stage;
+  if (typeof touch.type === "string" && touch.type) clean.type = touch.type;
+  if (touch.talked === true) clean.talked = true;
+  if (Array.isArray(touch.objections) && touch.objections.length) clean.objections = touch.objections;
+  const existing = parseStored(await redis.get(leadFuKey(id))) || [];
+  const next = [...existing, clean].slice(-500);
+  await redis.set(leadFuKey(id), JSON.stringify(next));
+  await redis.sadd(LEADS_FU_IDS, id);
+  return jsonResponse(res, 200, { id, touches: next });
+}
+
+// Post-application status track: the single source of truth after
+// app_complete. An empty track clears the entry (back to the board).
+async function handleLeadStatus(res, { id, track, expiryTs }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  if (track === "" || track == null) {
+    await redis.hdel(LEADS_STATUS, id);
+    return jsonResponse(res, 200, { id, track: "" });
+  }
+  if (!LEAD_TRACK_IDS.has(track)) return jsonResponse(res, 400, { error: "unknown status track" });
+  const entry = { track, ts: Date.now() };
+  if (expiryTs != null) {
+    if (!Number.isFinite(expiryTs)) return jsonResponse(res, 400, { error: "expiryTs must be a number" });
+    entry.expiryTs = expiryTs;
+  }
+  await redis.hset(LEADS_STATUS, { [id]: JSON.stringify(entry) });
+  return jsonResponse(res, 200, { id, ...entry });
+}
+
+// Partner account registry: id, name, type, reportDay (0 Sunday .. 6).
+async function handleLeadAccount(res, { account }) {
+  if (!account || typeof account !== "object") return jsonResponse(res, 400, { error: "account must be an object" });
+  if (typeof account.name !== "string" || !account.name.trim() || account.name.length > 120) return jsonResponse(res, 400, { error: "account name required" });
+  if (!LEAD_ACCOUNT_TYPES.has(account.type)) return jsonResponse(res, 400, { error: "type must be team, builder or agent" });
+  const reportDay = Number.isInteger(account.reportDay) && account.reportDay >= 0 && account.reportDay <= 6 ? account.reportDay : 5;
+  const id = typeof account.id === "string" && /^acc_[a-z0-9]+$/.test(account.id) ? account.id : `acc_${Date.now().toString(36)}`;
+  const clean = { id, name: account.name.trim(), type: account.type, reportDay };
+  await redis.hset(LEADS_ACCOUNTS, { [id]: JSON.stringify(clean) });
+  return jsonResponse(res, 200, { account: clean });
+}
+
+async function handleLeadDelete(res, { id }) {
+  if (!validId(id)) return jsonResponse(res, 400, { error: "id must be phone digits" });
+  await redis.del(leadKey(id));
+  await redis.del(leadFuKey(id));
+  await redis.hdel(LEADS_STATUS, id);
+  await redis.srem(LEADS_IDS, id);
+  await redis.srem(LEADS_FU_IDS, id);
+  return jsonResponse(res, 200, { id, deleted: true });
+}
+
+async function handleLeadAccountDelete(res, { id }) {
+  if (typeof id !== "string" || !id) return jsonResponse(res, 400, { error: "id required" });
+  await redis.hdel(LEADS_ACCOUNTS, id);
+  return jsonResponse(res, 200, { id, deleted: true });
+}
+
 async function handleManual(res, contact) {
   const err = validateContact(contact);
   if (err) return jsonResponse(res, 400, { error: err });
@@ -285,6 +402,12 @@ export default async function handler(req, res) {
       case "dead": return await handleDead(res, body);
       case "added": return await handleAdded(res, body);
       case "profile": return await handleProfile(res, body);
+      case "lead.save": return await handleLeadSave(res, body);
+      case "lead.touch": return await handleLeadTouch(res, body);
+      case "lead.status": return await handleLeadStatus(res, body);
+      case "lead.account": return await handleLeadAccount(res, body);
+      case "lead.delete": return await handleLeadDelete(res, body);
+      case "lead.account.delete": return await handleLeadAccountDelete(res, body);
       case "manual": return await handleManual(res, body.contact);
       default: return jsonResponse(res, 400, { error: "kind must be soi, pin, rac, cold, dead or manual" });
     }

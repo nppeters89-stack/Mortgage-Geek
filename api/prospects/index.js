@@ -60,6 +60,31 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Leads namespace read: a separate payload on the same function so the
+    // function count stays at eleven. The nightly export writes this to
+    // leads.json alongside the agent file.
+    if ((req.query || {}).ns === "leads") {
+      const [ids, fuIds, statusRaw, accountsRaw, configRaw] = await Promise.all([
+        redis.smembers("leads:ids"),
+        redis.smembers("leads:fu:ids"),
+        redis.hgetall("leads:status"),
+        redis.hgetall("leads:accounts"),
+        redis.get("leads:config"),
+      ]);
+      const cids = (ids || []).map(String);
+      const fids = (fuIds || []).map(String);
+      const [contactVals, fuVals] = await Promise.all([
+        cids.length ? redis.mget(...cids.map((i) => `leads:contact:${i}`)) : [],
+        fids.length ? redis.mget(...fids.map((i) => `leads:fu:${i}`)) : [],
+      ]);
+      const contacts = {}, fu = {}, status = {}, accounts = {};
+      cids.forEach((i, k) => { const v = parseStored(contactVals[k]); if (v) contacts[i] = v; });
+      fids.forEach((i, k) => { const v = parseStored(fuVals[k]); if (Array.isArray(v)) fu[i] = v; });
+      for (const [i, v] of Object.entries(statusRaw || {})) { const x = parseStored(v); if (x && typeof x === "object") status[i] = x; }
+      for (const [i, v] of Object.entries(accountsRaw || {})) { const x = parseStored(v); if (x && typeof x === "object") accounts[i] = x; }
+      return jsonResponse(res, 200, { contacts, fu, status, accounts, config: parseStored(configRaw) || {} });
+    }
+
     // Every Upstash REST call is a full HTTP round trip, so serializing these
     // reads was most of this endpoint's latency. Wave 1 fires every independent
     // read at once; wave 2 holds the two MGETs that need their SMEMBERS first.
