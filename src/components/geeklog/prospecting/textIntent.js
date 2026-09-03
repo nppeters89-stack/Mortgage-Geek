@@ -1,4 +1,5 @@
 import { idFromPhone, buildSmsUrl, e164Phone } from "./prospectsModel";
+import { AGENT_PIPELINE } from "./pipelines";
 import { templateForStage, leadTemplateForStage, fill } from "./textTemplates";
 
 // Pending text intent: written when the Text button fires, read when the app
@@ -27,8 +28,10 @@ export function clearTextIntent() {
 // tap overwrites any older one), then either navigate to sms: (touch devices)
 // or hand back the body for a clipboard copy (desktop). Returns { ok: false }
 // when the number cannot normalize, so callers can disable the button.
-export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "", ns = "agent" }) {
-  const body = fill(ns === "lead" ? leadTemplateForStage(stage) : templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
+export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "", pipeline = AGENT_PIPELINE }) {
+  // Template set and storage namespace both come from the pipeline config.
+  const ns = pipeline.id === "lead" ? "lead" : "agent";
+  const body = fill(pipeline.templates === "lead" ? leadTemplateForStage(stage) : templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
   const url = buildSmsUrl(prospect.phone, body);
   if (!url) return { ok: false };
   try {

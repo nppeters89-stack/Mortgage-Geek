@@ -57,6 +57,16 @@ export const LEAD_PIPELINE = {
   fallbackDueDays: 7,
   chips: "lead",
   templates: "lead",
+  // Mode declaration read by the components: what the lead surface shows.
+  // Behavior lives here, not in component conditionals.
+  mode: {
+    rails: ["due", "attempting", "owed", "referrers"],
+    statStrip: ["Received", "Contacted", "Conversation", "Application", "Pre-Approved", "Under Contract", "Closed"],
+    chips: { objections: "lead", timeline: true },
+    templates: "lead",
+    quickActions: ["attempt", "text", "reply"],
+    entryForm: ["name", "phone", "email", "referredBy", "sourceNote"],
+  },
 };
 
 export const TRACK_IDS = LEAD_PIPELINE.tracks.map((t) => t.id);

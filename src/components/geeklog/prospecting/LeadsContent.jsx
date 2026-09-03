@@ -14,7 +14,7 @@ import { copyText } from "./clipboard";
 import { StatusBarCap, Toast } from "./ProspectingContent";
 import { ChipRow } from "./ChipFields";
 import { LEAD_OBJECTIONS, LEAD_TIMELINE } from "./chips";
-import { assembleReferrerReport } from "./leadReport";
+import { assembleReferrerReport, leadFunnel } from "./leadReport";
 import { LeadReportCard } from "./LeadReportCard";
 import { useIsMobile } from "../../../utils/hooks";
 
@@ -140,7 +140,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const handleText = useCallback((lead) => {
     const info = infoOf(lead.id);
     const stageIdx = info.place.type === "stage" ? info.place.index : 5;
-    const r = startText({ prospect: lead, stage: stageIdx, ns: "lead", pipeline: "lead" });
+    const r = startText({ prospect: lead, stage: stageIdx, pipeline: LEAD_PIPELINE });
     if (!r.ok) { showToast("No valid mobile number"); return; }
     if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
   }, [infoOf, showToast]);
@@ -183,12 +183,32 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   }, [agent]);
   const referrerName = useCallback((id) => referrers.find((r) => r.id === id)?.name || "", [referrers]);
 
-  const railChips = [
-    { key: "due", label: `Due today ${counts.due}` },
-    { key: "attempting", label: `Attempting ${counts.attempting}` },
-    { key: "owed", label: `Owed a response ${counts.owed}` },
-    ...[...new Set(leads.map((l) => l.referredBy).filter(Boolean))].map((id) => ({ key: id, label: referrerName(id) || "Unknown" })),
-  ];
+  // Rails come from the mode declaration, not hardcoded component logic.
+  const railChips = LEAD_PIPELINE.mode.rails.flatMap((key) => {
+    if (key === "due") return [{ key: "due", label: `Due today ${counts.due}` }];
+    if (key === "attempting") return [{ key: "attempting", label: `Attempting ${counts.attempting}` }];
+    if (key === "owed") return [{ key: "owed", label: `Owed a response ${counts.owed}` }];
+    if (key === "referrers") return [...new Set(leads.map((l) => l.referredBy).filter(Boolean))].map((id) => ({ key: id, label: referrerName(id) || "Unknown" }));
+    return [];
+  });
+
+  // Funnel stat strip, ordered by the mode declaration.
+  const funnel = useMemo(() => {
+    const rows = leadFunnel(leads, fu, status);
+    return LEAD_PIPELINE.mode.statStrip.map((label) => rows.find((r) => r.label === label)).filter(Boolean);
+  }, [leads, fu, status]);
+  const funnelStrip = leads.length > 0 && (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 8 }}>
+      {funnel.map((f) => (
+        <div key={f.label} style={{ flex: "1 0 100px", minWidth: 100, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 10, padding: "9px 10px", textAlign: "center" }}>
+          <div style={{ fontSize: 19, fontWeight: 700, color: T.cream, fontVariantNumeric: "tabular-nums" }}>
+            {f.total}{f.week > 0 && <span style={{ fontSize: 11.5, fontWeight: 700, color: T.greenBright }}> +{f.week}</span>}
+          </div>
+          <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: T.dimmer, marginTop: 3 }}>{f.label}</div>
+        </div>
+      ))}
+    </div>
+  );
 
   const rail = (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", padding: "10px 0" }}>
@@ -289,6 +309,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
 
   const body = (
     <>
+      {funnelStrip}
       {rail}
       {!ready ? (
         <div style={{ textAlign: "center", color: T.faint, padding: "50px 30px", fontSize: 14 }}>Loading…</div>

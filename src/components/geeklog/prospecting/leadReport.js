@@ -29,12 +29,10 @@ const firstAtOrAboveTs = (touches, stage) => {
   return t;
 };
 
-export function assembleReferrerReport({ member, contacts, fu, status }, now = Date.now()) {
+// Funnel counts for a set of leads: shared by the per-referrer report and
+// the lead board's stat strip.
+export function leadFunnel(leads, fu, status, now = Date.now()) {
   const weekStart = mondayStart(now);
-  const leads = Object.entries(contacts || {})
-    .map(([id, c]) => ({ id, ...c }))
-    .filter((l) => l.referredBy === member.id);
-
   const step = (label, reachedTs) => {
     const times = leads.map(reachedTs).filter(Boolean);
     return { label, total: times.length, week: times.filter((t) => t >= weekStart).length };
@@ -45,8 +43,7 @@ export function assembleReferrerReport({ member, contacts, fu, status }, now = D
       .filter((s) => s && tracks.includes(s.track));
     return { label, total: entries.length, week: entries.filter((s) => (s.ts || 0) >= weekStart).length };
   };
-
-  const funnel = [
+  return [
     step("Received", (l) => l.createdAt || 0),
     step("Contacted", (l) => firstOutboundTs(fu?.[l.id])),
     step("Conversation", (l) => (hasConversation(fu?.[l.id]) ? firstAtOrAboveTs(fu?.[l.id], 2) || firstOutboundTs(fu?.[l.id]) : 0)),
@@ -55,6 +52,15 @@ export function assembleReferrerReport({ member, contacts, fu, status }, now = D
     trackStep("Under Contract", ["under_contract"]),
     trackStep("Closed", ["closed"]),
   ];
+}
+
+export function assembleReferrerReport({ member, contacts, fu, status }, now = Date.now()) {
+  const weekStart = mondayStart(now);
+  const leads = Object.entries(contacts || {})
+    .map(([id, c]) => ({ id, ...c }))
+    .filter((l) => l.referredBy === member.id);
+
+  const funnel = leadFunnel(leads, fu, status, now);
 
   const rows = leads
     .map((l) => {
