@@ -6,7 +6,7 @@
 // One Redis STRING key per day: geeklog:activity:YYYY-MM-DD. Reuses the shared
 // auth + client from _redis.js. Does not read or write any closings key.
 
-import { redis, requireKey, jsonResponse, isValidISODate, isValidYear, parseStored } from "./_redis.js";
+import { authorize, redis, requireKey, jsonResponse, isValidISODate, isValidYear, parseStored } from "./_redis.js";
 import {
   COUNTERS,
   DEFAULT_WEEKLY_TARGET,
@@ -30,7 +30,8 @@ import {
 const ACTIVITY_PREFIX = "geeklog:activity:";
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  const auth = authorize(req, res, { deviceRead: true });
+  if (!auth.ok) return jsonResponse(res, auth.status, { error: auth.status === 403 ? "Forbidden" : "Unauthorized" });
 
   try {
     if (req.method === "GET") {

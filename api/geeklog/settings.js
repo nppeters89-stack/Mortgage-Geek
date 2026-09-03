@@ -3,11 +3,12 @@
 //   POST { weeklyTarget } -> validate (positive integer, <= 500), store, return.
 // One Redis STRING key: geeklog:settings. Reuses the shared auth + client.
 
-import { redis, requireKey, jsonResponse, parseStored } from "./_redis.js";
+import { authorize, redis, requireKey, jsonResponse, parseStored } from "./_redis.js";
 import { SETTINGS_KEY, DEFAULT_WEEKLY_TARGET, validateWeeklyTarget } from "./_activity.js";
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  const auth = authorize(req, res, { exportRead: true });
+  if (!auth.ok) return jsonResponse(res, auth.status, { error: auth.status === 403 ? "Forbidden" : "Unauthorized" });
 
   try {
     if (req.method === "GET") {

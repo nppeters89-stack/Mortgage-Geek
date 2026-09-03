@@ -1,7 +1,7 @@
 // /api/prospects — read the prospecting call queue plus every call log.
 //
 // Reuses the Geek Log auth + Upstash client (../geeklog/_redis.js): same
-// X-Geeklog-Key header, same GEEKLOG_KV_* connection. Contact data lives ONLY in
+// gl_session cookie header, same GEEKLOG_KV_* connection. Contact data lives ONLY in
 // Redis and is returned only to an authorized client; it is never bundled or
 // prerendered.
 //
@@ -17,7 +17,7 @@
 //               from Excel. Merged into the list client-side; kept out of
 //               prospects:list:v1 so a re-seed cannot destroy them.
 
-import { redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
+import { authorize, redis, requireKey, jsonResponse, parseStored } from "../geeklog/_redis.js";
 
 // Contact ids are phone digits, which the @upstash/redis SDK happily parses as
 // JSON numbers on the way out of a SET. Everything downstream compares them as
@@ -52,7 +52,8 @@ const DEFAULT_STAGES = ["New", "Intro Follow Up", "Value Add & Social", "Value A
 const DEFAULT_CONFIG = { weekTarget: 15, touchOverdueDays: 21, refQuietDays: 90 };
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  const auth = authorize(req, res, { exportRead: true });
+  if (!auth.ok) return jsonResponse(res, auth.status, { error: auth.status === 403 ? "Forbidden" : "Unauthorized" });
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return jsonResponse(res, 405, { error: "Method Not Allowed" });

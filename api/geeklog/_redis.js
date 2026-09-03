@@ -4,34 +4,43 @@
 // Responsibilities:
 //   - configured @upstash/redis client (REST over the GEEKLOG_KV_*
 //     env vars provisioned by the Upstash integration)
-//   - constant-time auth helper (X-Geeklog-Key header vs GEEKLOG_KEY)
+//   - constant-time auth helper (gl_session cookie header vs GEEKLOG_KEY)
 //   - small JSON response helper
 //   - input validators reused across endpoints
 
 import { Redis } from "@upstash/redis";
-import { timingSafeEqual } from "crypto";
 
 export const redis = new Redis({
   url: process.env.GEEKLOG_KV_REST_API_URL,
   token: process.env.GEEKLOG_KV_REST_API_TOKEN,
 });
 
-// Constant-time comparison of the X-Geeklog-Key header against the
-// GEEKLOG_KEY env var. Returns false if the env var is missing so the
-// endpoint fails closed if Vercel hasn't been configured yet.
-export function requireKey(req) {
-  const expected = process.env.GEEKLOG_KEY;
-  const provided = req.headers?.["x-geeklog-key"];
-  if (!expected || typeof provided !== "string") return false;
-  const a = Buffer.from(expected, "utf8");
-  const b = Buffer.from(provided, "utf8");
-  // timingSafeEqual throws on length mismatch; length is not secret here.
-  if (a.length !== b.length) return false;
-  try {
-    return timingSafeEqual(a, b);
-  } catch {
-    return false;
+import { verifySession, issueSession, readCookie, sessionCookie, bearerStatus, RENEW_UNDER_MS } from "./_auth.js";
+
+// Session gate, replacing the retired gl_session cookie check. The name is kept
+// so every handler's import keeps working. Sliding expiry: when a valid
+// session has under 15 days remaining, the response re-issues a fresh 30 day
+// cookie.
+export function requireKey(req, res) {
+  const sess = verifySession(readCookie(req));
+  if (!sess) return false;
+  if (res && sess.exp - Date.now() < RENEW_UNDER_MS) {
+    const fresh = issueSession();
+    if (fresh) res.setHeader("Set-Cookie", sessionCookie(fresh));
   }
+  return true;
+}
+
+// Session, or a machine bearer token where the endpoint allows it: the device
+// token for the widget read, the export token for the nightly backup reads.
+// A valid token on a disallowed endpoint or method is 403; anything else 401.
+export function authorize(req, res, { deviceRead = false, exportRead = false } = {}) {
+  if (requireKey(req, res)) return { ok: true };
+  const b = bearerStatus(req);
+  if (b === "device" && deviceRead && req.method === "GET") return { ok: true };
+  if (b === "export" && exportRead && req.method === "GET") return { ok: true };
+  if (b === "device" || b === "export") return { ok: false, status: 403 };
+  return { ok: false, status: 401 };
 }
 
 export function jsonResponse(res, status, body) {

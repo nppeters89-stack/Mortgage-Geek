@@ -1,7 +1,7 @@
 // /api/geeklog/entry — CRUD over EntryRecord objects keyed by ISO date
 // inside per-year Redis hashes: geeklog:entries:YYYY.
 
-import { redis, requireKey, jsonResponse, isValidISODate, isValidYear, parseStored } from "./_redis.js";
+import { authorize, redis, requireKey, jsonResponse, isValidISODate, isValidYear, parseStored } from "./_redis.js";
 
 const hashKey = (year) => `geeklog:entries:${year}`;
 
@@ -18,7 +18,8 @@ function validateEntryBody(body) {
 }
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  const auth = authorize(req, res, { exportRead: true });
+  if (!auth.ok) return jsonResponse(res, auth.status, { error: auth.status === 403 ? "Forbidden" : "Unauthorized" });
 
   try {
     if (req.method === "GET") {

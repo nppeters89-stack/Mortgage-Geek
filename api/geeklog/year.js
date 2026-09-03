@@ -2,7 +2,7 @@
 // read/write. Goal lives at geeklog:goal:YYYY (Redis string), separate
 // from the entries / closings hashes that the other endpoints manage.
 
-import { redis, requireKey, jsonResponse, isValidYear, parseStored } from "./_redis.js";
+import { authorize, redis, requireKey, jsonResponse, isValidYear, parseStored } from "./_redis.js";
 
 const goalKey = (year) => `geeklog:goal:${year}`;
 const entriesKey = (year) => `geeklog:entries:${year}`;
@@ -27,7 +27,8 @@ function chicagoDayOfYear() {
 }
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  const auth = authorize(req, res, { exportRead: true });
+  if (!auth.ok) return jsonResponse(res, auth.status, { error: auth.status === 403 ? "Forbidden" : "Unauthorized" });
 
   try {
     const { year } = req.query || {};

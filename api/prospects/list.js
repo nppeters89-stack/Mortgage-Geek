@@ -11,7 +11,7 @@ import { redis, requireKey, jsonResponse } from "../geeklog/_redis.js";
 const LIST_KEY = "prospects:list:v1";
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  if (!requireKey(req, res)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
     res.setHeader("Allow", "PUT");
     return jsonResponse(res, 405, { error: "Method Not Allowed" });

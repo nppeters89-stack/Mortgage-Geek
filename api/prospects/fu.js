@@ -36,7 +36,7 @@ function validate(body) {
 }
 
 export default async function handler(req, res) {
-  if (!requireKey(req)) return jsonResponse(res, 401, { error: "Unauthorized" });
+  if (!requireKey(req, res)) return jsonResponse(res, 401, { error: "Unauthorized" });
   if (req.method !== "PUT") {
     res.setHeader("Allow", "PUT");
     return jsonResponse(res, 405, { error: "Method Not Allowed" });
