@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { T, FF } from "../gl2Tokens";
 import { Stat } from "./StatCards";
-import { idFromPhone, soiQueue, touchesBy, referralsOf, lastTouchByTs, lastReferralTs, touchOverdue, producing, quadrantOf, DEFAULT_CONFIG } from "./prospectsModel";
+import { idFromPhone, soiQueue, touchesBy, referralsOf, lastTouchByTs, lastReferralTs, touchOverdue, producing, quadrantOf, DEFAULT_CONFIG, SOI_CATEGORIES, soiCategoryOf, soiCategoryLabel } from "./prospectsModel";
 
 // The desktop SOI cockpit (>= 900px), matching soi_cockpit_preview: a stat
 // strip, then a 2x2 quadrant grid driven by two clocks per partner - last touch
@@ -83,8 +83,11 @@ export function SoiPartnerContent({ prospect: p, touches, config, inRac, nameSiz
   );
 }
 
-export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDetail, onOpenFollowUps }) {
-  const members = useMemo(() => soiQueue(prospects, soi, followUps), [prospects, soi, followUps]);
+export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDetail, onOpenFollowUps, onCategorize = null }) {
+  const [catFilter, setCatFilter] = useState(null);
+  const allMembers = useMemo(() => soiQueue(prospects, soi, followUps), [prospects, soi, followUps]);
+  const uncategorized = useMemo(() => allMembers.filter((p) => !soiCategoryOf(soi[idFromPhone(p.phone)])).length, [allMembers, soi]);
+  const members = useMemo(() => (catFilter ? allMembers.filter((p) => soiCategoryOf(soi[idFromPhone(p.phone)]) === catFilter) : allMembers), [allMembers, soi, catFilter]);
 
   const byQuad = useMemo(() => {
     const cols = [[], [], [], []];
@@ -108,6 +111,21 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
       <div key={id} onClick={() => onOpenDetail(id)}
         style={{ boxSizing: "border-box", flex: "0 0 236px", minWidth: 0, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 12, padding: "12px 13px", cursor: "pointer" }}>
         <SoiPartnerContent prospect={p} touches={followUps[id] || []} config={config} inRac={racSet.has(id)} />
+        {onCategorize && !soiCategoryOf(soi[id]) && (
+          <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 9, paddingTop: 8, borderTop: `1px solid ${T.lineSoft}` }}>
+            {SOI_CATEGORIES.map((c) => (
+              <button key={c.id} type="button" onClick={() => onCategorize(id, c.id)}
+                style={{ border: `1px solid ${T.orangeWashLine}`, background: T.orangeWash, color: T.orange, borderRadius: 999, padding: "3px 8px", fontFamily: FF.body, fontSize: 10, fontWeight: 700, cursor: "pointer" }}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+        )}
+        {onCategorize && soiCategoryOf(soi[id]) && (
+          <div onClick={(e) => e.stopPropagation()} style={{ marginTop: 8, fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: T.dimmer }}>
+            {soiCategoryLabel(soiCategoryOf(soi[id]))}
+          </div>
+        )}
       </div>
     );
   };
@@ -124,6 +142,20 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
         </button>
       </div>
 
+      {/* Category filter: one chip per category, counts included. */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+        {SOI_CATEGORIES.map((c) => {
+          const n = allMembers.filter((p) => soiCategoryOf(soi[idFromPhone(p.phone)]) === c.id).length;
+          const on = catFilter === c.id;
+          return (
+            <button key={c.id} type="button" onClick={() => setCatFilter(on ? null : c.id)}
+              style={{ flex: "none", fontSize: 12, fontWeight: on ? 700 : 500, color: on ? T.bg1 : T.dim, border: `1px solid ${on ? T.cream : T.line}`, borderRadius: 999, padding: "6px 12px", background: on ? T.cream : "none", fontFamily: FF.body, cursor: "pointer", fontVariantNumeric: "tabular-nums" }}>
+              {c.label} {n}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Stat strip */}
       <div style={{ display: "flex", gap: 12, marginBottom: 14, flexWrap: "wrap" }}>
         {/* Owe a thank you leads and shouts, the SOI counterpart of Due now. */}
@@ -131,6 +163,7 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
         <Stat label="Partners" accent={T.line} color={T.cream}>{stats.total}</Stat>
         <Stat label={`Referrals ${config.refQuietDays ?? DEFAULT_CONFIG.refQuietDays}d`} accent={T.amber} color={T.amber}>{stats.refs90}</Stat>
         <Stat label="Avg since touch" accent={T.line} color={T.cream}>{stats.avg}d</Stat>
+        {uncategorized > 0 && <Stat label="Uncategorized" accent={T.orange} color={T.orange} wash={T.orangeWash}>{uncategorized}</Stat>}
       </div>
 
       <div style={{ fontSize: 12.5, color: T.faint, marginBottom: 12 }}>Cards place themselves by the two clocks: last touch and last referral. Nobody gets dragged; log activity and they move on their own. Top right is always today's call list.</div>

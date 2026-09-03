@@ -4,6 +4,7 @@ import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCac
 import { idFromPhone, soiQueue, formatSoiSince, manualContactTsvRow, referralsOf, quadrantOf, lastTouchByTs, STAGE_REFERRAL, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
+import { persistSoiCategory } from "./prospectStore";
 import { SoiCockpit, SoiPartnerContent, SOI_GROUPS, soiGroupColor } from "./SoiCockpit";
 import { fireConfetti } from "./confetti";
 import { StatusBarCap, Toast } from "./ProspectingContent";
@@ -196,6 +197,14 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
       <div style={{ minHeight: "100%" }}>
         <StatusBarCap />
         <SoiCockpit
+          onCategorize={(id, category) => {
+            setSoi((prev) => {
+              const v = prev[id];
+              const ts = v && typeof v === "object" ? v.ts : Number(v) || Date.now();
+              return { ...prev, [id]: { ...(typeof v === "object" ? v : {}), ts, category } };
+            });
+            persistSoiCategory(apiKey, id, category).catch(() => {});
+          }}
           prospects={prospects} soi={soi} followUps={followUps} config={config} racSet={racSet}
           onOpenDetail={(id) => { setOpenId(id); setView("detail"); }}
           onOpenFollowUps={onOpenFollowUps}

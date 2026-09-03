@@ -11,6 +11,7 @@ import { MotivationBox } from "./MotivationBox";
 import { LoggedDatePicker, todayLocalISO, tsForLoggedDate } from "./LoggedDatePicker";
 import { ChipFields } from "./ChipFields";
 import { lenderLabel, needLabel } from "./chips";
+import { SOI_CATEGORIES } from "./prospectsModel";
 
 // Contact detail, shared by Follow Ups and SOI. It renders the ContactHeader, a
 // read-only "First contact" block from the original call log, a composer, and the
@@ -80,6 +81,7 @@ export function FollowUpDetail({
   const [needs, setNeeds] = useState(profile?.needs || []);
   const [hook, setHook] = useState(profile?.hook || "");
   const [objections, setObjections] = useState([]);
+  const [soiCategory, setSoiCategory] = useState("");
   const saveProfileIfChanged = () => {
     if (!onSaveProfile) return;
     const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [], h: profile?.hook || "" });
@@ -107,8 +109,10 @@ export function FollowUpDetail({
   const submitStage = () => {
     const text = note.trim();
     if (!text) return;
+    const promoting = !whaleMode && stageSel === goal;
+    if (promoting && !soiCategory) return;
     saveProfileIfChanged();
-    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn), talked, objections);
+    onLogFollowUp(text, stageSel, tsForLoggedDate(loggedOn), talked, objections, promoting ? soiCategory : undefined);
     submitDone();
   };
   const submitSoi = () => {
@@ -257,6 +261,19 @@ export function FollowUpDetail({
           )}
           <ChipFields lender={lender} setLender={setLender} needs={needs} setNeeds={setNeeds}
             hook={hook} setHook={setHook} objections={objections} setObjections={setObjections} />
+          {composerMode === "stage" && !whaleMode && stageSel === goal && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.amber, fontFamily: FF.body }}>SOI category (required to promote)</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>
+                {SOI_CATEGORIES.map((c) => (
+                  <button key={c.id} type="button" onClick={() => setSoiCategory(soiCategory === c.id ? "" : c.id)}
+                    style={{ border: `1px solid ${soiCategory === c.id ? T.redWashLine : T.line}`, background: soiCategory === c.id ? T.redWash : "none", color: soiCategory === c.id ? T.redLift : T.dim, borderRadius: 999, padding: "6px 11px", fontFamily: FF.body, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div style={{ marginTop: 12 }} />
           <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="What happened on this touch..."
             style={{ width: "100%", minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
@@ -267,7 +284,7 @@ export function FollowUpDetail({
               We talked
             </label>
           </div>
-          <button type="button" onClick={composerMode === "stage" ? submitStage : submitPlain} disabled={!note.trim()}
+          <button type="button" onClick={composerMode === "stage" ? submitStage : submitPlain} disabled={!note.trim() || (composerMode === "stage" && !whaleMode && stageSel === goal && !soiCategory)}
             style={{ width: "100%", marginTop: 12, padding: 16, borderRadius: 12, border: "none", background: note.trim() ? (composerMode === "stage" && !whaleMode && stageSel === goal ? T.redLift : T.green) : T.surface, color: note.trim() ? T.cream : T.faint, fontFamily: FF.body, fontSize: 16, fontWeight: 700, cursor: note.trim() ? "pointer" : "default" }}>
             {composerMode === "stage" && !whaleMode && stageSel === goal ? "Promote to SOI" : "Log follow up"}
           </button>

@@ -7,6 +7,7 @@ import { FollowUpCockpit } from "./FollowUpCockpit";
 import { ContactQueueRow } from "./ContactQueueRow";
 import { MobileQueueRow } from "./MobileQueueRow";
 import { ReplyDateDialog } from "./LoggedDatePicker";
+import { SOI_CATEGORIES } from "./prospectsModel";
 import { startText } from "./textIntent";
 import { objectionLabel } from "./chips";
 import { AddToFollowUpsSheet } from "./AddToFollowUpsSheet";
@@ -127,6 +128,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   // different set from the desktop rail (data hygiene is desk work).
   const [mobileFilter, setMobileFilter] = useState(null); // null | "due" | "fire" | "whale"
   const [replyFor, setReplyFor] = useState(null); // { id, name } for the reply date dialog
+  const [soiCatFor, setSoiCatFor] = useState(null); // contact id awaiting an SOI category
   // Sent it chip Edit: open this contact's detail once, then hand back.
   useEffect(() => {
     if (openContactId) { setOpenId(openContactId); onOpenConsumed?.(); }
@@ -174,7 +176,11 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   // Log a touch at a chosen stage. The goal stage promotes to SOI in the same
   // gesture (writes the stage touch AND adds SOI membership). Non-goal touches
   // leave the detail open so the stage advances in place.
-  const handleLogFollowUp = useCallback((id, note, stage, ts, talked, objections) => {
+  const handleLogFollowUp = useCallback((id, note, stage, ts, talked, objections, soiCategory) => {
+    if (Number.isInteger(stage) && stage === goalIndex && !whaleRef.current.includes(id) && !soiCategory) {
+      showToast("Pick an SOI category to promote");
+      return;
+    }
     const touch = { ts: Number.isFinite(ts) ? ts : Date.now(), note };
     if (Number.isInteger(stage)) touch.stage = stage;
     if (talked === true) touch.talked = true;
@@ -185,10 +191,10 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
 
     if (Number.isInteger(stage) && stage === goalIndex && !whaleRef.current.includes(id)) {
       const prev = soiRef.current;
-      setSoi({ ...prev, [id]: String(Date.now()) });
+      setSoi({ ...prev, [id]: { ts: Date.now(), category: soiCategory } });
       closeDetail();
       showToast("Promoted to SOI");
-      persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
+      persistSoi(apiKey, id, "add", soiCategory).catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
     } else {
       // The dropdown is authoritative: when the ratchet alone would not land
       // the card on the chosen stage (a lower stage than the ratchet, or a
@@ -366,12 +372,13 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
     persistDead(apiKey, id, "remove").catch(() => { setCold(prevCold); setDead(prevDead); setCachedColdDead(prevCold, prevDead); showToast("Could not restore"); });
   }, [apiKey, showToast]);
 
-  const handleAddToSoi = useCallback((id) => {
+  const handleAddToSoi = useCallback((id, category) => {
+    if (!category) { setSoiCatFor(id); return; }
     const prev = soiRef.current;
-    setSoi({ ...prev, [id]: String(Date.now()) });
+    setSoi({ ...prev, [id]: { ts: Date.now(), category } });
     closeDetail();
     showToast("Added to SOI");
-    persistSoi(apiKey, id, "add").catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
+    persistSoi(apiKey, id, "add", category).catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
   }, [apiKey, showToast, closeDetail]);
 
   const setPin = useCallback((id, action, message) => {
@@ -438,7 +445,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
         />
       );
     }
-    const logTouch = (note, stage, ts, talked, objections) => { handleLogFollowUp(id, note, stage, ts, talked, objections); if (modal && stage === goalIndex) fireConfetti(); };
+    const logTouch = (note, stage, ts, talked, objections, soiCategory) => { handleLogFollowUp(id, note, stage, ts, talked, objections, soiCategory); if (modal && stage === goalIndex) fireConfetti(); };
     return (
       <FollowUpDetail
         prospect={p} log={logs[id]} touches={followUps[id] || []}
@@ -647,6 +654,22 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
       {replyFor && (
         <ReplyDateDialog name={replyFor.name} onClose={() => setReplyFor(null)}
           onSave={(ts) => handleLogReply(replyFor.id, "", ts)} />
+      )}
+      {soiCatFor && (
+        <div onClick={() => setSoiCatFor(null)} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 380, background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 14, padding: "16px 18px", fontFamily: FF.body }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.amber }}>SOI category</div>
+            <div style={{ marginTop: 4, fontSize: 12.5, color: T.dim }}>Every SOI member carries a category.</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12 }}>
+              {SOI_CATEGORIES.map((c) => (
+                <button key={c.id} type="button" onClick={() => { const cid = soiCatFor; setSoiCatFor(null); handleAddToSoi(cid, c.id); }}
+                  style={{ border: `1px solid ${T.line}`, background: "none", color: T.cream, borderRadius: 999, padding: "8px 13px", fontFamily: FF.body, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {sheetOpen && (
