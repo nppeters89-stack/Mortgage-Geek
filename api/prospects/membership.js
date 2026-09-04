@@ -239,6 +239,12 @@ async function handleLeadSave(res, { contact }) {
     if (contact[k] != null && (typeof contact[k] !== "string" || contact[k].length > max)) return jsonResponse(res, 400, { error: `${k} must be a short string` });
   }
   if (contact.timeline != null && contact.timeline !== "" && !LEAD_TIMELINE_IDS.has(contact.timeline)) return jsonResponse(res, 400, { error: "unknown timeline id" });
+  if (contact.stageOverride != null) {
+    const so = contact.stageOverride;
+    if (!so || typeof so !== "object" || !Number.isInteger(so.s) || so.s < 0 || so.s > 5 || !Number.isFinite(so.ts)) {
+      return jsonResponse(res, 400, { error: "stageOverride must be { s: 0-5, ts }" });
+    }
+  }
   const clean = {
     kind: "lead",
     name: contact.name.trim(),
@@ -250,6 +256,9 @@ async function handleLeadSave(res, { contact }) {
     timeline: LEAD_TIMELINE_IDS.has(contact.timeline) ? contact.timeline : "",
     createdAt: Number.isFinite(contact.createdAt) ? contact.createdAt : Date.now(),
   };
+  // Hand placement from the board drag: the same ratchet-base semantics as
+  // the agent stagemap, carried on the lead record.
+  if (contact.stageOverride != null) clean.stageOverride = { s: contact.stageOverride.s, ts: contact.stageOverride.ts };
   await redis.set(leadKey(id), JSON.stringify(clean));
   await redis.sadd(LEADS_IDS, id);
   return jsonResponse(res, 200, { id, contact: clean });

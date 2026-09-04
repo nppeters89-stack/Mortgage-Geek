@@ -47,7 +47,7 @@ export function TextIntentChip({ apiKey, onEdit, onLogged }) {
       // A texted lead logs an attempt (or a touch at its current stage past
       // attempting) into leads:fu and nowhere else.
       const touches = leadCache?.fu?.[id] || [];
-      const stage = Math.max(ATTEMPTING, leadStageOf(touches));
+      const stage = Math.max(ATTEMPTING, leadStageOf(touches, leadCache?.contacts?.[id]?.stageOverride || null));
       persistLeadTouch(apiKey, id, [...touches, { ts: Date.now(), note: "", stage, type: "text" }]);
       dismiss();
       onLogged?.();

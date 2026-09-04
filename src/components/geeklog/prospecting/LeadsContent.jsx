@@ -53,6 +53,8 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const [replyFor, setReplyFor] = useState(null);
   const [reportFor, setReportFor] = useState(null); // assembled report being exported
   const reportRef = useRef(null);
+  const dragRef = useRef(null); // lead id mid-drag
+  const [over, setOver] = useState(null); // highlighted drop key
   const [toast, setToast] = useState("");
   const isNarrow = useIsMobile(899);
 
@@ -76,7 +78,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     if (openLeadId) { setOpenId(openLeadId); onOpenConsumed?.(); }
   }, [openLeadId, onOpenConsumed]);
 
-  const infoOf = useCallback((id) => leadInfo(fu[id], status[id]), [fu, status]);
+  const infoOf = useCallback((id) => leadInfo(fu[id], status[id], Date.now(), contacts[id]?.stageOverride || null), [fu, status, contacts]);
   const fireSet = useMemo(() => new Set(fire), [fire]);
 
   const leads = useMemo(() => Object.entries(contacts).map(([id, c]) => ({ id, ...c })), [contacts]);
@@ -136,6 +138,35 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     setCachedFire(next);
     persistFire(apiKey, id, cur.includes(id) ? "remove" : "add").catch(() => { setFire(cur); setCachedFire(cur); });
   }, [apiKey]);
+
+  // ----- board drag: placements and track drops, agent-board semantics -----
+  const moveToStage = useCallback((si) => {
+    const id = dragRef.current;
+    if (!id) return;
+    const cur = leadInfo(fu[id], status[id], Date.now(), contacts[id]?.stageOverride || null);
+    if (cur.place.type === "stage" && cur.place.index === si) return;
+    if (cur.place.type === "track") {
+      setStatus((prev) => { const next = { ...prev }; delete next[id]; return next; });
+      persistLeadStatus(apiKey, id, "", undefined).catch(() => {});
+    }
+    const next = { ...contacts[id], stageOverride: { s: si, ts: Date.now() } };
+    setContacts((p) => ({ ...p, [id]: next }));
+    persistLead(apiKey, next).catch(() => showToast("Move failed"));
+    showToast(`Moved to ${LEAD_PIPELINE.stages[si].label}`);
+  }, [apiKey, contacts, fu, status, showToast]);
+
+  const moveToTrack = useCallback((tid) => {
+    const id = dragRef.current;
+    if (!id) return;
+    if (status[id]?.track === tid) return;
+    setTrack(id, tid, undefined);
+  }, [status, setTrack]);
+
+  const dropProps = (key, onDrop) => ({
+    onDragOver: (e) => { e.preventDefault(); if (over !== key) setOver(key); },
+    onDragLeave: () => setOver(null),
+    onDrop: (e) => { e.preventDefault(); setOver(null); onDrop(); dragRef.current = null; },
+  });
 
   const handleText = useCallback((lead) => {
     const info = infoOf(lead.id);
@@ -244,6 +275,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     const canText = !!e164Phone(lead.phone);
     return (
       <div key={id} role="button" tabIndex={0} onClick={() => setOpenId(id)}
+        draggable={!isNarrow} onDragStart={() => { dragRef.current = id; }} onDragEnd={() => { dragRef.current = null; setOver(null); }}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenId(id); } }}
         style={{ boxSizing: "border-box", width: "100%", maxWidth: isNarrow ? "none" : 210, backgroundColor: T.surface, backgroundImage: wash ? `linear-gradient(0deg, ${wash}, ${wash})` : "none", border: `1px solid ${fireSet.has(id) ? T.orangeWashLine : T.line}`, borderRadius: 11, padding: "11px 13px", cursor: "pointer", userSelect: "none" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
@@ -295,8 +327,9 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const colBody = { display: "flex", flexDirection: "column", gap: 8, padding: 10, minHeight: 56, maxHeight: "52vh", overflowY: "auto" };
 
   // Agent-board style column: ramp dash plus label in the ramp color.
-  const column = (label, ramp, items, border) => (
-    <div key={label} style={colShell(border)}>
+  const column = (label, ramp, items, border, drop) => (
+    <div key={label} style={{ ...colShell(border), outline: drop && over === drop.key ? `2px solid ${T.line}` : "none" }}
+      {...(drop ? dropProps(drop.key, drop.onDrop) : {})}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${border || T.line}` }}>
         <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
           <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
@@ -371,7 +404,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
         <>
           {/* Main lead pipeline: same red-to-yellow ramp as the agent board. */}
           <div style={{ display: "flex", gap: 12, alignItems: "flex-start", overflowX: "auto", paddingBottom: 16 }}>
-            {LEAD_PIPELINE.stages.map((st, i) => column(st.label, stageRampColor(i, LEAD_PIPELINE.stages.length), board.stageCols[i]))}
+            {LEAD_PIPELINE.stages.map((st, i) => column(st.label, stageRampColor(i, LEAD_PIPELINE.stages.length), board.stageCols[i], undefined, { key: `s${i}`, onDrop: () => moveToStage(i) }))}
           </div>
 
           {/* Post-app tracks: the whale palette, Pre-Approved through Under
@@ -385,9 +418,9 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
             <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
               {["preapproved", "not_yet", "nurture"].map((tid, i) => {
                 const t = trackOf(tid);
-                return column(t.label, whaleRampColor(i, 4), board.trackCols[tid], T.whaleWashLine);
+                return column(t.label, whaleRampColor(i, 4), board.trackCols[tid], T.whaleWashLine, { key: `t${tid}`, onDrop: () => moveToTrack(tid) });
               })}
-              <div key="uc" style={colShell(T.whaleWashLine)}>
+              <div key="uc" style={{ ...colShell(T.whaleWashLine), outline: over === "tuc" ? `2px solid ${T.line}` : "none" }} {...dropProps("tuc", () => moveToTrack("under_contract"))}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 12px", borderBottom: `1px solid ${T.whaleWashLine}` }}>
                   <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: whaleRampColor(3, 4) }} />
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: whaleRampColor(3, 4) }}>Under Contract</span>
@@ -402,7 +435,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           </details>
 
           {/* Dead box. */}
-          <details style={{ margin: "0 0 14px", border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden" }}>
+          <details style={{ margin: "0 0 14px", border: `1px solid ${over === "tdead" ? T.redWashLine : T.line}`, borderRadius: 14, overflow: "hidden", background: over === "tdead" ? T.redWash : "transparent" }} {...dropProps("tdead", () => moveToTrack("dead"))}>
             <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
               <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.faint }}>{"💀"} Dead · {board.trackCols.dead.length}</span>
               <span style={{ fontSize: 11.5, color: T.faint }}>Open one to revive it.</span>

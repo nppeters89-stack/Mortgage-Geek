@@ -18,9 +18,14 @@ export const attemptsOf = (touches) => (touches || []).filter((t) => t && t.stag
 export const hasConversation = (touches) => (touches || []).some((t) => t && ((Number.isInteger(t.stage) && t.stage >= CONVERSATION) || (t.talked === true && t.stage !== REPLY_STAGE)));
 
 // The linear-board stage: highest positive touch stage, New when untouched.
-export function leadStageOf(touches) {
-  let s = 0;
-  for (const t of touches || []) if (t && Number.isInteger(t.stage) && t.stage > s && t.stage <= APP_COMPLETE) s = t.stage;
+// A hand placement from the board drag ({ s, ts }) is the new ratchet base,
+// in either direction; only touches logged after it can push the stage up,
+// the same rule as the agent stagemap.
+export function leadStageOf(touches, override = null) {
+  const o = override && Number.isInteger(override.s) && Number.isFinite(override.ts) ? override : null;
+  const eligible = o ? (touches || []).filter((t) => (t?.ts || 0) > o.ts) : (touches || []);
+  let s = o ? o.s : 0;
+  for (const t of eligible) if (t && Number.isInteger(t.stage) && t.stage > s && t.stage <= APP_COMPLETE) s = t.stage;
   return s;
 }
 
@@ -32,7 +37,7 @@ export function leadStageOf(touches) {
 // to nurture without writing anything; otherwise the board stage applies.
 // A reply newer than the last outbound touch shortens any active clock to
 // REPLY_DUE_DAYS, same as the agent pipeline.
-export function leadInfo(touches, statusEntry, now = Date.now()) {
+export function leadInfo(touches, statusEntry, now = Date.now(), override = null) {
   const touchTs = lastTouchTs(touches) || 0;
   const replyTs = lastReplyTs(touches) || 0;
 
@@ -58,7 +63,7 @@ export function leadInfo(touches, statusEntry, now = Date.now()) {
     return withClock({ type: "track", track }, cfg ? cfg.dueDays : null, { derived, expiryTs: statusEntry.expiryTs || null });
   }
 
-  const stage = leadStageOf(touches);
+  const stage = leadStageOf(touches, override);
   const attempts = attemptsOf(touches);
 
   // Five attempts with no conversation: the lead derives to nurture.

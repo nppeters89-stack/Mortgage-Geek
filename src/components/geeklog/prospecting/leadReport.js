@@ -64,7 +64,7 @@ export function assembleReferrerReport({ member, contacts, fu, status }, now = D
 
   const rows = leads
     .map((l) => {
-      const info = leadInfo(fu?.[l.id], status?.[l.id], now);
+      const info = leadInfo(fu?.[l.id], status?.[l.id], now, l.stageOverride || null);
       return { l, info };
     })
     .filter(({ info }) => !(info.place.type === "track" && (info.place.track === "closed" || info.place.track === "dead")))
