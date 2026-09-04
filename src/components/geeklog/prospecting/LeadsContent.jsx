@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { toPng, getFontEmbedCSS } from "html-to-image";
-import { T, FF, staleColor, staleWash } from "../gl2Tokens";
+import { T, FF, staleColor, staleWash, stageRampColor, whaleRampColor } from "../gl2Tokens";
 import { LEAD_PIPELINE, trackOf } from "./pipelines";
 import { leadInfo, leadPlaceLabel, expiryDaysLeft, attemptsOf, ATTEMPTING } from "./leadsModel";
 import { idFromPhone, repliesOf, lastReplyTs, lastTouchTs, e164Phone, REPLY_STAGE } from "./prospectsModel";
@@ -197,7 +197,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     const rows = leadFunnel(leads, fu, status);
     return LEAD_PIPELINE.mode.statStrip.map((label) => rows.find((r) => r.label === label)).filter(Boolean);
   }, [leads, fu, status]);
-  const funnelStrip = leads.length > 0 && (
+  const funnelStrip = isNarrow && leads.length > 0 && (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", paddingTop: 8 }}>
       {funnel.map((f) => (
         <div key={f.label} style={{ flex: "1 0 100px", minWidth: 100, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 10, padding: "9px 10px", textAlign: "center" }}>
@@ -291,14 +291,17 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     return { stageCols, trackCols };
   }, [visible, infoOf]);
 
-  const colShell = { boxSizing: "border-box", flex: "1 0 200px", minWidth: 200, maxWidth: 240, border: `1px solid ${T.line}`, borderRadius: 12, display: "flex", flexDirection: "column" };
-  const colHead = { display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${T.line}` };
+  const colShell = (border) => ({ boxSizing: "border-box", flex: "1 0 200px", minWidth: 200, maxWidth: 240, border: `1px solid ${border || T.line}`, borderRadius: 12, display: "flex", flexDirection: "column" });
   const colBody = { display: "flex", flexDirection: "column", gap: 8, padding: 10, minHeight: 56, maxHeight: "52vh", overflowY: "auto" };
 
-  const column = (label, color, items) => (
-    <div key={label} style={colShell}>
-      <div style={colHead}>
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+  // Agent-board style column: ramp dash plus label in the ramp color.
+  const column = (label, ramp, items, border) => (
+    <div key={label} style={colShell(border)}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "10px 12px", borderBottom: `1px solid ${border || T.line}` }}>
+        <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+          <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: ramp, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+        </span>
         <span style={{ fontSize: 12, color: T.faint, fontVariantNumeric: "tabular-nums" }}>{items.length}</span>
       </div>
       <div style={colBody}>{items.map(leadCard)}</div>
@@ -307,8 +310,53 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
 
   const openLead = openId ? { id: openId, ...(contacts[openId] || {}) } : null;
 
+  // Lead cockpit diagnostics: the Triage HUD shape with lead data points.
+  const oldestDue = useMemo(() => {
+    const dues = leads.map((l) => infoOf(l.id)).filter((i) => i.due && i.sinceTs);
+    if (!dues.length) return null;
+    return Math.max(...dues.map((i) => Math.floor((Date.now() - i.sinceTs) / 86400000)));
+  }, [leads, infoOf]);
+  const leadsHud = !isNarrow && leads.length > 0 && (
+    <div style={{ fontFamily: FF.body, margin: "10px 0 2px" }}>
+      <div style={{ width: "fit-content", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", display: "grid", gridTemplateColumns: "280px auto 250px" }}>
+        <div style={{ padding: "14px 18px 15px", borderRight: `1px solid ${T.line}`, background: T.redWash, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.redLift }}>Needs you now</div>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+            <div style={{ fontSize: 46, fontWeight: 700, lineHeight: 0.85, fontVariantNumeric: "tabular-nums", color: counts.due > 0 ? T.redLift : T.dim }}>{counts.due}</div>
+            <div style={{ paddingBottom: 3, fontSize: 12, lineHeight: 1.35, color: T.dim }}>leads past<br />their clock</div>
+          </div>
+          <div style={{ fontSize: 11.5, color: T.dim }}>
+            {counts.attempting} attempting · {counts.owed} owed a response{oldestDue != null ? ` · oldest ${oldestDue}d` : ""}
+          </div>
+        </div>
+        <div style={{ padding: "14px 18px 15px", borderRight: `1px solid ${T.line}`, display: "flex", flexDirection: "column", gap: 9 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.greenBright }}>Funnel</div>
+          <div style={{ display: "flex", gap: 16 }}>
+            {funnel.map((f) => (
+              <div key={f.label} style={{ minWidth: 62, textAlign: "center" }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: T.cream, fontVariantNumeric: "tabular-nums" }}>
+                  {f.total}{f.week > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: T.greenBright }}> +{f.week}</span>}
+                </div>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: T.dimmer, marginTop: 3, lineHeight: 1.3 }}>{f.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: "14px 18px 15px", display: "flex", flexDirection: "column", gap: 7 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dim }}>Post-app</div>
+          <div style={{ fontSize: 11.5, color: T.dim, lineHeight: 1.8 }}>
+            <span style={{ color: T.whale }}>{board.trackCols.preapproved.length} pre-approved</span><br />
+            <span style={{ color: whaleRampColor(3, 4) }}>{board.trackCols.under_contract.length} under contract</span><br />
+            <span style={{ color: T.faint }}>{"💀"} {board.trackCols.dead.length}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const body = (
     <>
+      {leadsHud}
       {funnelStrip}
       {rail}
       {!ready ? (
@@ -320,10 +368,58 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
       ) : isNarrow ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>{visible.map(leadCard)}</div>
       ) : (
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", overflowX: "auto", paddingBottom: 16 }}>
-          {LEAD_PIPELINE.stages.map((st, i) => column(st.label, T.greenBright, board.stageCols[i]))}
-          {LEAD_PIPELINE.tracks.map((t) => column(t.label, t.id === "dead" ? T.faint : t.id === "closed" ? T.green : T.whale, board.trackCols[t.id]))}
-        </div>
+        <>
+          {/* Main lead pipeline: same red-to-yellow ramp as the agent board. */}
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start", overflowX: "auto", paddingBottom: 16 }}>
+            {LEAD_PIPELINE.stages.map((st, i) => column(st.label, stageRampColor(i, LEAD_PIPELINE.stages.length), board.stageCols[i]))}
+          </div>
+
+          {/* Post-app tracks: the whale palette, Pre-Approved through Under
+              Contract. Under Contract is a number, not cards; Closed has no
+              column at all (it lives in the funnel). */}
+          <details open style={{ margin: "2px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
+            <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.whaleWash }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.whale }}>Post-App Pipeline · {["preapproved", "not_yet", "nurture", "under_contract"].reduce((n, t) => n + board.trackCols[t].length, 0)}</span>
+              <span style={{ fontSize: 11.5, color: T.faint }}>Pre-approval through contract. Under contract counts itself; closings live in the funnel.</span>
+            </summary>
+            <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
+              {["preapproved", "not_yet", "nurture"].map((tid, i) => {
+                const t = trackOf(tid);
+                return column(t.label, whaleRampColor(i, 4), board.trackCols[tid], T.whaleWashLine);
+              })}
+              <div key="uc" style={colShell(T.whaleWashLine)}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 12px", borderBottom: `1px solid ${T.whaleWashLine}` }}>
+                  <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: whaleRampColor(3, 4) }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: whaleRampColor(3, 4) }}>Under Contract</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "26px 14px 28px" }}>
+                  <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{"🏡"}</span>
+                  <span style={{ fontSize: 34, fontWeight: 700, lineHeight: 1, color: whaleRampColor(3, 4), fontVariantNumeric: "tabular-nums" }}>{board.trackCols.under_contract.length}</span>
+                  <span style={{ fontSize: 11, color: T.dim }}>under contract</span>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          {/* Dead box. */}
+          <details style={{ margin: "0 0 14px", border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden" }}>
+            <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", cursor: "pointer" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.faint }}>{"💀"} Dead · {board.trackCols.dead.length}</span>
+              <span style={{ fontSize: 11.5, color: T.faint }}>Open one to revive it.</span>
+            </summary>
+            <div style={{ padding: "4px 14px 12px" }}>
+              {board.trackCols.dead.length === 0 ? (
+                <div style={{ fontSize: 12, color: T.faint, padding: "6px 2px" }}>Nobody here.</div>
+              ) : board.trackCols.dead.map((lead) => (
+                <button key={lead.id} type="button" onClick={() => setOpenId(lead.id)}
+                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left", background: "none", border: "none", borderBottom: `1px solid ${T.lineSoft}`, padding: "9px 4px", cursor: "pointer", fontFamily: FF.body }}>
+                  <span style={{ fontSize: 13.5, fontWeight: 600, color: T.dim }}>{lead.name}</span>
+                  <span style={{ fontSize: 11.5, color: T.faint }}>{referrerName(lead.referredBy)}</span>
+                </button>
+              ))}
+            </div>
+          </details>
+        </>
       )}
 
       {openLead && openLead.name && (
