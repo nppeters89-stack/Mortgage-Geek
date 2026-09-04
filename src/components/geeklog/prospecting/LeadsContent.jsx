@@ -58,6 +58,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const reportRef = useRef(null);
   const dragRef = useRef(null); // lead id mid-drag
   const [over, setOver] = useState(null); // highlighted drop key
+  const [sourceOpen, setSourceOpen] = useState(false); // source dropdown
   const [toast, setToast] = useState("");
   const isNarrow = useIsMobile(899);
 
@@ -329,6 +330,8 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   const colShell = (border) => ({ boxSizing: "border-box", flex: "1 0 200px", minWidth: 200, maxWidth: 240, border: `1px solid ${border || T.line}`, borderRadius: 12, display: "flex", flexDirection: "column" });
   const colBody = { display: "flex", flexDirection: "column", gap: 8, padding: 10, minHeight: 56, maxHeight: "52vh", overflowY: "auto" };
 
+  const repliedIn = (items) => items.filter((l) => repliesOf(fu[l.id]).length > 0).length;
+
   // Agent-board style column: ramp dash plus label in the ramp color.
   const column = (label, ramp, items, border, drop) => (
     <div key={label} style={{ ...colShell(border), outline: drop && over === drop.key ? `2px solid ${T.line}` : "none" }}
@@ -338,7 +341,10 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: ramp }} />
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: ramp, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
         </span>
-        <span style={{ fontSize: 12, color: T.faint, fontVariantNumeric: "tabular-nums" }}>{items.length}</span>
+        <span style={{ flex: "none", fontSize: 12, color: T.faint, fontVariantNumeric: "tabular-nums" }}>
+          {repliedIn(items) > 0 && <span style={{ marginRight: 7, fontSize: 10.5, fontWeight: 700, color: T.greenBright }}>{repliedIn(items)} replied</span>}
+          {items.length}
+        </span>
       </div>
       <div style={colBody}>{items.map(leadCard)}</div>
     </div>
@@ -356,14 +362,17 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     { key: "due", glyph: "◗", label: "Due today", accent: T.redLift, count: counts.due },
     { key: "attempting", glyph: "☎", label: "Attempting", accent: T.amber, count: counts.attempting },
     { key: "owed", glyph: "💬", label: "Owed a response", accent: T.greenBright, count: counts.owed },
-    ...[...new Set(leads.map((l) => l.referredBy).filter(Boolean))].map((id) => ({
-      key: id, glyph: "🤝", label: referrerName(id) || "Unknown", accent: T.whale,
-      count: leads.filter((l) => l.referredBy === id).length,
-    })),
   ];
+  // Sources scale as a dropdown, not one segment per member: dynamic over
+  // every referring member with leads on file.
+  const sources = [...new Set(leads.map((l) => l.referredBy).filter(Boolean))]
+    .map((id) => ({ id, name: referrerName(id) || "Unknown", count: leads.filter((l) => l.referredBy === id).length }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+  const activeSource = sources.find((x) => x.id === filter) || null;
   const leadsHud = !isNarrow && (
     <div style={{ fontFamily: FF.body, margin: "10px 0 2px" }}>
-      <div style={{ width: "fit-content", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", display: "grid", gridTemplateColumns: "280px auto 250px" }}>
+      <div style={{ width: "fit-content", maxWidth: "min(1240px, 100%)", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "280px auto 250px" }}>
         <div style={{ padding: "14px 18px 15px", borderRight: `1px solid ${T.line}`, background: T.redWash, display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.redLift }}>Needs you now</div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
@@ -415,7 +424,37 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
             </button>
           );
         })}
-        <button type="button" onClick={() => setFilter(null)}
+        <div style={{ position: "relative", flex: 1, minWidth: 0, display: "flex" }}>
+          <button type="button" disabled={!sources.length} aria-pressed={!!activeSource} aria-expanded={sourceOpen}
+            onClick={() => setSourceOpen((v) => !v)}
+            style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 10px", border: "none", borderRight: `1px solid ${T.line}`, borderTop: `2px solid ${activeSource ? T.whale : "transparent"}`, background: activeSource ? wash14(T.whale) : "rgba(255,254,251,0.02)", cursor: sources.length ? "pointer" : "default", fontFamily: FF.body, opacity: sources.length ? 1 : 0.45 }}>
+            <span aria-hidden="true" style={{ flex: "none", fontSize: 11, color: activeSource ? T.whale : T.dimmer }}>{"🤝"}</span>
+            <span style={{ fontSize: 12.5, color: activeSource ? T.whale : T.dim, fontWeight: activeSource ? 700 : 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeSource ? activeSource.name : "Source"}</span>
+            <span style={{ flex: "none", fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: activeSource ? T.whale : T.dimmer }}>{activeSource ? activeSource.count : sources.length}</span>
+            <span aria-hidden="true" style={{ flex: "none", fontSize: 9, color: T.dimmer }}>{"▾"}</span>
+          </button>
+          {sourceOpen && (
+            <>
+              <div onClick={() => setSourceOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 40 }} />
+              <div role="listbox" style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, minWidth: 200, zIndex: 41, background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 12px 30px rgba(0,0,0,0.45)" }}>
+                {activeSource && (
+                  <button type="button" onClick={() => { setFilter(null); setSourceOpen(false); }}
+                    style={{ display: "flex", width: "100%", padding: "10px 13px", background: "none", border: "none", borderBottom: `1px solid ${T.lineSoft}`, color: T.dimmer, fontFamily: FF.body, fontSize: 12.5, cursor: "pointer" }}>
+                    All sources
+                  </button>
+                )}
+                {sources.map((src) => (
+                  <button key={src.id} type="button" onClick={() => { setFilter(src.id); setSourceOpen(false); }}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, width: "100%", padding: "10px 13px", background: filter === src.id ? wash14(T.whale) : "none", border: "none", borderBottom: `1px solid ${T.lineSoft}`, color: filter === src.id ? T.whale : T.cream, fontFamily: FF.body, fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left" }}>
+                    <span style={{ minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{src.name}</span>
+                    <span style={{ flex: "none", fontVariantNumeric: "tabular-nums", color: T.dim }}>{src.count}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        <button type="button" onClick={() => { setFilter(null); setSourceOpen(false); }}
           style={{ flex: "none", padding: "0 14px", border: "none", background: "none", fontSize: 12, color: T.dimmer, cursor: "pointer", fontFamily: FF.body, whiteSpace: "nowrap" }}>
           All {leads.length} ✕
         </button>
@@ -427,6 +466,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           style={{ flex: "none", margin: 7, border: "none", borderRadius: 999, padding: "0 15px", background: T.green, color: T.cream, fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: FF.body, whiteSpace: "nowrap" }}>
           New Lead
         </button>
+      </div>
       </div>
     </div>
   );
