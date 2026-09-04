@@ -14,7 +14,7 @@
 // appended, never reordered or removed, so older stored docs that predate a
 // counter simply lack it and normalizeDoc backfills it to 0 (currentSoi,
 // networking, and sponsored were all added this way).
-export const COUNTERS = ["pastClient", "inProcess", "prospecting", "currentSoi", "preApproval", "realtor", "reel", "static", "networking", "sponsored"];
+export const COUNTERS = ["pastClient", "lead", "inProcess", "prospecting", "currentSoi", "preApproval", "realtor", "reel", "static", "networking", "sponsored"];
 
 export const DEFAULT_WEEKLY_TARGET = 50;
 export const MAX_WEEKLY_TARGET = 500;
@@ -142,7 +142,7 @@ export function validateWeeklyTarget(v) {
 }
 
 // Pillar sums over a (normalized) counter document.
-export const sumConversations = (doc) => doc.pastClient + doc.inProcess + doc.prospecting + doc.currentSoi;
+export const sumConversations = (doc) => doc.pastClient + (doc.lead || 0) + doc.inProcess + doc.prospecting + doc.currentSoi;
 export const sumAppointments = (doc) => doc.preApproval + doc.realtor;
 export const sumContent = (doc) => doc.reel + doc.static;
 export const sumEvents = (doc) => doc.networking + doc.sponsored;

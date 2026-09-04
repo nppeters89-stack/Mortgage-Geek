@@ -5,6 +5,7 @@
 
 export const CONV_SUBS = [
   { key: "pastClient", label: "Past Client", ceiling: 8 },
+  { key: "lead", label: "Lead", ceiling: 8 },
   { key: "inProcess", label: "In Process", ceiling: 8 },
   { key: "prospecting", label: "Prospecting", ceiling: 10 },
   { key: "currentSoi", label: "Current SOI", ceiling: 6 },

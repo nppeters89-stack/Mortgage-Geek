@@ -17,10 +17,9 @@
 const API_URL = "https://mortgagegeek.ai/api/geeklog/activity";
 const TOKEN_KEY = "geeklog-device-token";
 
-// Conversations has four sub-categories. This MUST match the server's
-// sumConversations: pastClient + inProcess + prospecting + currentSoi.
-// Omitting currentSoi (Current SOI / Sphere of Influence) undercounted the week.
-const CONV_KEYS = ["pastClient", "inProcess", "prospecting", "currentSoi"];
+// Conversations sub-categories. This MUST match the server's
+// sumConversations: pastClient + lead + inProcess + prospecting + currentSoi.
+const CONV_KEYS = ["pastClient", "lead", "inProcess", "prospecting", "currentSoi"];
 const CACHE_KEY = "geeklog-widget-cache";
 
 // Brand colors
