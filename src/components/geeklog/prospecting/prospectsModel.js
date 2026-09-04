@@ -13,6 +13,19 @@ export const idFromPhone = (phone) => String(phone || "").replace(/\D/g, "");
 // tel: href keeps a leading + for international, digits otherwise.
 export const dialHref = (phone) => `tel:${String(phone || "").replace(/[^0-9+]/g, "")}`;
 
+// Live phone-input formatter: digits become xxx-xxx-xxxx as they are typed,
+// with the dash appearing right after the third and sixth digits. Deleting
+// backs through the dashes cleanly (no trailing dash re-add while erasing).
+export function formatPhoneInput(next, prev = "") {
+  const d = String(next || "").replace(/\D/g, "").slice(0, 10);
+  const deleting = String(next || "").length < String(prev || "").length;
+  if (d.length > 6) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+  if (d.length === 6 && !deleting) return `${d.slice(0, 3)}-${d.slice(3)}-`;
+  if (d.length > 3) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  if (d.length === 3 && !deleting) return `${d}-`;
+  return d;
+}
+
 // E.164 for US numbers, from the same raw phone strings tap-to-dial uses:
 // 10 digits, or 11 with a leading 1. Anything else returns null so callers
 // can disable rather than send a text into the void.

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { T, FF, APP_MAX } from "../gl2Tokens";
-import { idFromPhone, searchContacts } from "./prospectsModel";
+import { idFromPhone, searchContacts, formatPhoneInput } from "./prospectsModel";
 import { ghostAction } from "./detailActionStyles";
 
 // Add to Follow Ups, a two step sheet.
@@ -157,7 +157,7 @@ export function AddToFollowUpsSheet({ prospects, onClose, onPin, onCreate, descr
       ) : (
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 20px calc(24px + env(safe-area-inset-bottom, 0px))" }}>
           <Field label="Name" value={form.name} onChange={setField("name")} placeholder="Full name" autoFocus error={errors.name} />
-          <Field label="Phone" value={form.phone} onChange={setField("phone")} placeholder="(615) 555-0142" type="tel" inputMode="tel" error={errors.phone} />
+          <Field label="Phone" value={form.phone} onChange={(v) => setField("phone")(formatPhoneInput(v, form.phone))} placeholder="615-555-0142" type="tel" inputMode="tel" error={errors.phone} />
           <Field label="Email" value={form.email} onChange={setField("email")} placeholder="Optional" type="email" inputMode="email" />
           <Field label="Brokerage" value={form.brokerage} onChange={setField("brokerage")} placeholder="Optional" />
 

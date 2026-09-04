@@ -30,9 +30,9 @@ export const LEAD_PIPELINE = {
   ns: "leads",
   stages: [
     { id: "new", label: "New" },
-    { id: "attempting", label: "Attempting" },
-    { id: "conversation", label: "Conversation" },
-    { id: "prequal", label: "Prequal" },
+    { id: "attempting", label: "Touch #1" },
+    { id: "conversation", label: "Touch #2" },
+    { id: "prequal", label: "Touch #3" },
     { id: "app_started", label: "App Started" },
     { id: "app_complete", label: "App Complete" },
   ],

@@ -3,7 +3,7 @@ import { toPng, getFontEmbedCSS } from "html-to-image";
 import { T, FF, staleColor, staleWash, stageRampColor, whaleRampColor } from "../gl2Tokens";
 import { LEAD_PIPELINE, trackOf } from "./pipelines";
 import { leadInfo, leadPlaceLabel, expiryDaysLeft, attemptsOf, ATTEMPTING } from "./leadsModel";
-import { idFromPhone, repliesOf, lastReplyTs, lastTouchTs, e164Phone, REPLY_STAGE } from "./prospectsModel";
+import { idFromPhone, repliesOf, lastReplyTs, lastTouchTs, e164Phone, REPLY_STAGE, formatPhoneInput } from "./prospectsModel";
 import { getCachedLeads, loadLeads, persistLeadTouch, persistLead, persistLeadStatus, deleteLead } from "./leadStore";
 import { getCachedProspects, loadProspects, persistFire, setCachedFire, persistFollowUps, persistManualContact, persistSoi, persistSoiCategory } from "./prospectStore";
 import { SOI_CATEGORIES, soiCategoryOf, soiReportDayOf } from "./prospectsModel";
@@ -360,7 +360,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
   }, [leads, infoOf]);
   const railSegs = [
     { key: "due", glyph: "◗", label: "Due today", accent: T.redLift, count: counts.due },
-    { key: "attempting", glyph: "☎", label: "Attempting", accent: T.amber, count: counts.attempting },
+    { key: "attempting", glyph: "☎", label: "Touch #1", accent: T.amber, count: counts.attempting },
     { key: "owed", glyph: "💬", label: "Owed a response", accent: T.greenBright, count: counts.owed },
   ];
   // Sources scale as a dropdown, not one segment per member: dynamic over
@@ -380,7 +380,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
             <div style={{ paddingBottom: 3, fontSize: 12, lineHeight: 1.35, color: T.dim }}>leads past<br />their clock</div>
           </div>
           <div style={{ fontSize: 11.5, color: T.dim }}>
-            {counts.attempting} attempting · {counts.owed} owed a response{oldestDue != null ? ` · oldest ${oldestDue}d` : ""}
+            {counts.attempting} in Touch #1 · {counts.owed} owed a response{oldestDue != null ? ` · oldest ${oldestDue}d` : ""}
           </div>
         </div>
         <div style={{ padding: "14px 18px 15px", borderRight: `1px solid ${T.line}`, display: "flex", flexDirection: "column", gap: 9 }}>
@@ -400,7 +400,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dim }}>Post-app</div>
           <div style={{ fontSize: 11.5, color: T.dim, lineHeight: 1.8 }}>
             <span style={{ color: T.whale }}>{board.trackCols.preapproved.length} pre-approved</span><br />
-            <span style={{ color: whaleRampColor(3, 4) }}>{board.trackCols.under_contract.length} under contract</span><br />
+            <span style={{ color: whaleRampColor(2, 3) }}>{board.trackCols.under_contract.length} under contract</span><br />
             <span style={{ color: T.faint }}>{"💀"} {board.trackCols.dead.length}</span>
           </div>
         </div>
@@ -496,25 +496,40 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
               column at all (it lives in the funnel). */}
           <details open style={{ margin: "2px 0 14px", border: `1px solid ${T.whaleWashLine}`, borderRadius: 14, overflow: "hidden" }}>
             <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.whaleWash }}>
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.whale }}>Post-App Pipeline · {["preapproved", "not_yet", "nurture", "under_contract"].reduce((n, t) => n + board.trackCols[t].length, 0)}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.whale }}>Post-App Pipeline · {["preapproved", "nurture", "under_contract"].reduce((n, t) => n + board.trackCols[t].length, 0)}</span>
               <span style={{ fontSize: 11.5, color: T.faint }}>Pre-approval through contract. Under contract counts itself; closings live in the funnel.</span>
             </summary>
             <div style={{ display: "flex", gap: 12, padding: 12, overflowX: "auto", alignItems: "flex-start" }}>
-              {["preapproved", "not_yet", "nurture"].map((tid, i) => {
+              {["preapproved", "nurture"].map((tid, i) => {
                 const t = trackOf(tid);
-                return column(t.label, whaleRampColor(i, 4), board.trackCols[tid], T.whaleWashLine, { key: `t${tid}`, onDrop: () => moveToTrack(tid) });
+                return column(t.label, whaleRampColor(i, 3), board.trackCols[tid], T.whaleWashLine, { key: `t${tid}`, onDrop: () => moveToTrack(tid) });
               })}
               <div key="uc" style={{ ...colShell(T.whaleWashLine), outline: over === "tuc" ? `2px solid ${T.line}` : "none" }} {...dropProps("tuc", () => moveToTrack("under_contract"))}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "10px 12px", borderBottom: `1px solid ${T.whaleWashLine}` }}>
-                  <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: whaleRampColor(3, 4) }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: whaleRampColor(3, 4) }}>Under Contract</span>
+                  <span style={{ flex: "none", width: 14, height: 5, borderRadius: 3, background: whaleRampColor(2, 3) }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase", color: whaleRampColor(2, 3) }}>Under Contract</span>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "26px 14px 28px" }}>
                   <span aria-hidden="true" style={{ fontSize: 24, lineHeight: 1 }}>{"🏡"}</span>
-                  <span style={{ fontSize: 34, fontWeight: 700, lineHeight: 1, color: whaleRampColor(3, 4), fontVariantNumeric: "tabular-nums" }}>{board.trackCols.under_contract.length}</span>
+                  <span style={{ fontSize: 34, fontWeight: 700, lineHeight: 1, color: whaleRampColor(2, 3), fontVariantNumeric: "tabular-nums" }}>{board.trackCols.under_contract.length}</span>
                   <span style={{ fontSize: 11, color: T.dim }}>under contract</span>
                 </div>
               </div>
+            </div>
+          </details>
+
+          {/* Not Yet pipeline: the cold-tray treatment for leads parked on
+              the 30 day not-yet clock. Drop a card here to park it. */}
+          <details open style={{ margin: "0 0 14px", border: `1px solid ${T.coldWashLine}`, borderRadius: 14, overflow: "hidden", background: over === "tnotyet" ? T.coldWash : "transparent" }}
+            {...dropProps("tnotyet", () => moveToTrack("not_yet"))}>
+            <summary style={{ listStyle: "none", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", cursor: "pointer", background: T.coldWash }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.cold }}>Not Yet · {board.trackCols.not_yet.length}</span>
+              <span style={{ fontSize: 11.5, color: T.faint }}>Parked on the 30 day clock. Drag back up when the timing turns.</span>
+            </summary>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, padding: 12 }}>
+              {board.trackCols.not_yet.length === 0
+                ? <div style={{ fontSize: 12, color: T.faint, padding: "2px 4px" }}>Nobody parked.</div>
+                : board.trackCols.not_yet.map((lead) => <div key={lead.id} style={{ flex: "0 1 210px", minWidth: 190 }}>{leadCard(lead)}</div>)}
             </div>
           </details>
 
@@ -806,7 +821,7 @@ function NewLeadForm({ referrers, apiKey, onClose, onSaved, onSoiAdded, onToast 
         <div style={lbl}>Name</div>
         <input style={inp} value={name} onChange={(e) => setName(e.target.value.slice(0, 120))} autoFocus />
         <div style={lbl}>Mobile</div>
-        <input style={inp} type="tel" value={phone} onChange={(e) => setPhone(e.target.value.slice(0, 20))} />
+        <input style={inp} type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(formatPhoneInput(e.target.value, phone))} placeholder="615-555-0142" />
         <div style={lbl}>Email</div>
         <input style={inp} type="email" value={email} onChange={(e) => setEmail(e.target.value.slice(0, 200))} />
         <div style={lbl}>Referral source (SOI)</div>
@@ -832,7 +847,7 @@ function NewLeadForm({ referrers, apiKey, onClose, onSaved, onSoiAdded, onToast 
           <div style={{ marginTop: 10, border: `1px solid ${T.line}`, borderRadius: 12, padding: "12px 12px 14px" }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.amber }}>New SOI member</div>
             <input style={{ ...inp, marginTop: 8 }} placeholder="Name" value={refName} onChange={(e) => setRefName(e.target.value.slice(0, 120))} />
-            <input style={{ ...inp, marginTop: 6 }} type="tel" placeholder="Mobile" value={refPhone} onChange={(e) => setRefPhone(e.target.value.slice(0, 20))} />
+            <input style={{ ...inp, marginTop: 6 }} type="tel" inputMode="tel" placeholder="Mobile" value={refPhone} onChange={(e) => setRefPhone(formatPhoneInput(e.target.value, refPhone))} />
             <input style={{ ...inp, marginTop: 6 }} placeholder="Brokerage" value={refBrokerage} onChange={(e) => setRefBrokerage(e.target.value.slice(0, 120))} />
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
               {SOI_CATEGORIES.map((c) => (
