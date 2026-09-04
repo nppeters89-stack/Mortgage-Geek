@@ -26,6 +26,9 @@ import { useIsMobile } from "../../../utils/hooks";
 // account, source note, stage and short next-step notes. Nothing else.
 
 const dSince = (ts) => (ts ? Math.floor((Date.now() - ts) / 86400000) : null);
+// Accent hex at 14% alpha for the rail's lit-tab background (same treatment
+// as the agent cockpit rail).
+const wash14 = (hex) => `rgba(${parseInt(hex.slice(1, 3), 16)},${parseInt(hex.slice(3, 5), 16)},${parseInt(hex.slice(5, 7), 16)},0.14)`;
 const SEND = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" />
@@ -349,7 +352,16 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     if (!dues.length) return null;
     return Math.max(...dues.map((i) => Math.floor((Date.now() - i.sinceTs) / 86400000)));
   }, [leads, infoOf]);
-  const leadsHud = !isNarrow && leads.length > 0 && (
+  const railSegs = [
+    { key: "due", glyph: "◗", label: "Due today", accent: T.redLift, count: counts.due },
+    { key: "attempting", glyph: "☎", label: "Attempting", accent: T.amber, count: counts.attempting },
+    { key: "owed", glyph: "💬", label: "Owed a response", accent: T.greenBright, count: counts.owed },
+    ...[...new Set(leads.map((l) => l.referredBy).filter(Boolean))].map((id) => ({
+      key: id, glyph: "🤝", label: referrerName(id) || "Unknown", accent: T.whale,
+      count: leads.filter((l) => l.referredBy === id).length,
+    })),
+  ];
+  const leadsHud = !isNarrow && (
     <div style={{ fontFamily: FF.body, margin: "10px 0 2px" }}>
       <div style={{ width: "fit-content", maxWidth: "100%", background: T.surface, border: `1px solid ${T.line}`, borderRadius: 14, overflow: "hidden", display: "grid", gridTemplateColumns: "280px auto 250px" }}>
         <div style={{ padding: "14px 18px 15px", borderRight: `1px solid ${T.line}`, background: T.redWash, display: "flex", flexDirection: "column", gap: 8 }}>
@@ -384,6 +396,38 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
           </div>
         </div>
       </div>
+      {/* Docked filter rail, welded under the grid like the agent cockpit. */}
+      <div role="group" aria-label="Filter the lead board"
+        style={{ borderTop: `1px solid ${T.line}`, background: "rgba(255,254,251,0.02)", display: "flex", alignItems: "stretch" }}>
+        <div style={{ padding: "0 16px", display: "flex", alignItems: "center", borderRight: `1px solid ${T.line}`, fontSize: 10, fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: T.dimmer, whiteSpace: "nowrap" }}>
+          Filter the board
+        </div>
+        {railSegs.map((seg) => {
+          const active = filter === seg.key;
+          const off = !seg.count;
+          return (
+            <button key={seg.key} type="button" disabled={off} aria-pressed={active}
+              onClick={() => setFilter(active ? null : seg.key)}
+              style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 10px", border: "none", borderRight: `1px solid ${T.line}`, borderTop: `2px solid ${active ? seg.accent : "transparent"}`, background: active ? wash14(seg.accent) : "rgba(255,254,251,0.02)", cursor: off ? "default" : "pointer", fontFamily: FF.body, opacity: off ? 0.45 : 1 }}>
+              <span aria-hidden="true" style={{ flex: "none", fontSize: 11, color: active ? seg.accent : T.dimmer }}>{seg.glyph}</span>
+              <span style={{ fontSize: 12.5, color: active ? seg.accent : T.dim, fontWeight: active ? 700 : 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{seg.label}</span>
+              <span style={{ flex: "none", fontSize: 14, fontWeight: 700, fontVariantNumeric: "tabular-nums", color: active ? seg.accent : T.dimmer }}>{seg.count}</span>
+            </button>
+          );
+        })}
+        <button type="button" onClick={() => setFilter(null)}
+          style={{ flex: "none", padding: "0 14px", border: "none", background: "none", fontSize: 12, color: T.dimmer, cursor: "pointer", fontFamily: FF.body, whiteSpace: "nowrap" }}>
+          All {leads.length} ✕
+        </button>
+        <button type="button" onClick={() => setAcctOpen(true)}
+          style={{ flex: "none", padding: "0 14px", border: "none", borderLeft: `1px solid ${T.line}`, background: "none", fontSize: 12, fontWeight: 700, color: T.dim, cursor: "pointer", fontFamily: FF.body, whiteSpace: "nowrap" }}>
+          Reports
+        </button>
+        <button type="button" onClick={() => setFormOpen(true)}
+          style={{ flex: "none", margin: 7, border: "none", borderRadius: 999, padding: "0 15px", background: T.green, color: T.cream, fontSize: 12.5, fontWeight: 700, cursor: "pointer", fontFamily: FF.body, whiteSpace: "nowrap" }}>
+          New Lead
+        </button>
+      </div>
     </div>
   );
 
@@ -391,7 +435,7 @@ export function LeadsContent({ apiKey, openLeadId = null, onOpenConsumed = null 
     <>
       {leadsHud}
       {funnelStrip}
-      {rail}
+      {isNarrow && rail}
       {!ready ? (
         <div style={{ textAlign: "center", color: T.faint, padding: "50px 30px", fontSize: 14 }}>Loading…</div>
       ) : leads.length === 0 ? (
