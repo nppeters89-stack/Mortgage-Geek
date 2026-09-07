@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef, useId } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceDot, ReferenceLine, Customized } from "recharts";
 import { P, F, CHART_COLORS, PROGRAM_COLORS } from "../theme";
 import { fmt, withAlpha } from "../utils/format";
@@ -7,7 +7,7 @@ import { CockpitShell } from "./cockpit/CockpitShell";
 import { CalcInput } from "./CalcInput";
 import { SHARED_STATE_TAX_RATES } from "../data/taxRates";
 import { LOAN_PROGRAMS, VA_USAGE_LABELS } from "../data/loanPrograms.js";
-import { simulateRentVsOwn, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE } from "./rentVsOwnSim";
+import { simulateRentVsOwn, breakevenBand, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE } from "./rentVsOwnSim";
 
 // The interactive Rent vs. Own tool. All series come from the 360-month
 // simulation in rentVsOwnSim.js, which is pure and SSR-safe, so the prerendered
@@ -66,6 +66,16 @@ const css = `
   .rvo-adv[open] summary::after { content: " \\2212"; }
   .rvo-adv-inner { padding: 4px 16px 14px; }
   .rvo-adv-note { font-size: 11.5px; line-height: 1.55; color: ${DIM}; margin: 10px 0 0; }
+
+  /* Investment-return preset chips. Same active treatment as the program tabs
+     (accent wash + accent border, cream text); 44px minimum touch target. */
+  .rvo-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 2px; }
+  .rvo-preset { font-family: ${F.body}; font-size: 12.5px; font-weight: 700; min-height: 44px; padding: 10px 14px; border-radius: 999px; cursor: pointer; background: transparent; border: 1px solid ${BORDER}; color: ${MUT}; transition: color .15s, background .15s, border-color .15s; }
+  .rvo-preset:hover { color: ${CREAM}; }
+  .rvo-preset:focus-visible { outline: 2px solid ${withAlpha(OWN, 0.7)}; outline-offset: 1px; }
+  .rvo-preset.is-active { background: ${withAlpha(OWN, 0.18)}; border-color: ${withAlpha(OWN, 0.75)}; color: ${CREAM}; }
+
+  .rvo-ro-s { font-size: 11px; line-height: 1.45; color: ${DIM}; margin-top: 3px; }
 
   .rvo-verdict { margin-top: 22px; background: ${P.navy}; border: 1px solid ${HAIR}; border-radius: 14px; padding: 22px 24px; }
   .rvo-verdict-k { font-size: 10.5px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; color: ${MUT}; margin-bottom: 8px; }
@@ -214,6 +224,7 @@ export function RentVsOwnChart() {
   const [inputs, setInputs] = useState(DEFAULTS);
   const [hoveredYear, setHoveredYear] = useState(null);
   const isCockpit = useIsCockpit();
+  const uid = useId();
 
   // Each program keeps its own rate, the same way the payment calculator does,
   // so switching tabs shows that program's live default (or whatever the user
@@ -315,6 +326,8 @@ export function RentVsOwnChart() {
   }, []);
 
   const sim = useMemo(() => simulateRentVsOwn(inputs), [inputs]);
+  // Breakeven under nearby assumptions, for the band subline on the readout.
+  const band = useMemo(() => breakevenBand(inputs), [inputs]);
   const terms = sim.terms;
   const data = sim.years;
   const hz = inputs.hz;
@@ -397,6 +410,17 @@ export function RentVsOwnChart() {
     ? "Owning never catches renting within 30 years in this scenario. Slide your horizon or adjust the inputs to see how the answer moves."
     : `Owning pulls ahead of renting in year ${be}${sim.leadChangesLater ? ", though the lead changes hands again later in this scenario. The chart shows where" : " and stays ahead through year 30 in this scenario"}. Slide your horizon to see how the answer changes with how long you stay.`;
 
+  // The band subline under the breakeven readout. With a finite base breakeven
+  // it reads "{min} to {max}" (or "to beyond 30 years" when a perturbation
+  // never crosses); with no base crossing it only notes nearby crossings.
+  const bandSub = be === null
+    ? (band.min !== null ? "Owning crosses in some nearby cases" : null)
+    : band.min === null
+      ? null
+      : band.anyNever
+        ? `${band.min} to beyond 30 years under nearby assumptions`
+        : `${band.min} to ${band.max} under nearby assumptions`;
+
   // Breakdown strip follows the hover and falls back to the horizon.
   const by = Math.max(0, Math.min(30, hoveredYear ?? hz));
   const b = data[by];
@@ -408,10 +432,14 @@ export function RentVsOwnChart() {
   // stacks above the results, matching the calculator.
   const rail = (
     <>
-      {/* Rent diagnostics — the two questions that frame the whole comparison. */}
+      {/* Rent diagnostics: the two questions that frame the whole comparison. */}
       <div className="rvo-panel">
         <div className="rvo-section-label">Your rent</div>
         <CalcInput label="Monthly rent today" value={inputs.rent0} onChange={(v) => set("rent0", v)} prefix="$" step={50} comma min={LIMITS.rent0[0]} max={LIMITS.rent0[1]} {...FIELD_DARK} />
+        <div style={{ marginTop: 12 }}>
+          <CalcInput label="Renter's insurance" value={inputs.renterIns} onChange={(v) => set("renterIns", v)} prefix="$" suffix="/mo" step={5} min={LIMITS.renterIns[0]} max={LIMITS.renterIns[1]} {...FIELD_DARK} />
+          <p className="rvo-note">Charged to the renter so both sides pay for everything.</p>
+        </div>
         <div style={{ marginTop: 12 }}>
           <Slider
             id="rvo-hz" label="How long you'll stay" field="hz" value={inputs.hz} step={1}
@@ -422,7 +450,7 @@ export function RentVsOwnChart() {
         </div>
       </div>
 
-      {/* Mortgage inputs — same controls and layout as the payment calculator. */}
+      {/* Mortgage inputs: same controls and layout as the payment calculator. */}
       <div className="rvo-panel" style={{ marginTop: 12 }}>
         <div className="rvo-section-label">If you own</div>
 
@@ -477,7 +505,7 @@ export function RentVsOwnChart() {
 
           <CalcInput label="Homeowners Ins. (est.)" value={insMonthly} onChange={setInsMonthly} prefix="$" suffix="/mo" step={5} min={0} max={9999} {...FIELD_DARK} />
 
-          {/* Property tax — state, county, and an editable monthly amount, the
+          {/* Property tax: state, county, and an editable monthly amount, the
               same layout the calculator uses. */}
           <div className="rvo-tax-group">
             <div className="rvo-tax-label">Property Tax</div>
@@ -530,6 +558,24 @@ export function RentVsOwnChart() {
               hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."
               onCommit={(v) => set("inv", v)}
             />
+            {/* Presets set the input; the slider stays editable, and a custom
+                value deactivates both chips. */}
+            <div className="rvo-presets" role="group" aria-label="Investment return presets">
+              <button type="button" className={`rvo-preset${inputs.inv === 10 ? " is-active" : ""}`} aria-pressed={inputs.inv === 10} onClick={() => set("inv", 10)}>10% (S&P long-run)</button>
+              <button type="button" className={`rvo-preset${inputs.inv === 7 ? " is-active" : ""}`} aria-pressed={inputs.inv === 7} onClick={() => set("inv", 7)}>7% (after tax and friction)</button>
+            </div>
+            <Slider
+              id={`${uid}-maint`} label="Maintenance / yr" field="maintRate" value={inputs.maintRate} step={0.25}
+              display={`${inputs.maintRate.toFixed(2)}%`}
+              hint="1% of the home's value per year is the standard planning figure. It covers repairs and upkeep, not HOA dues. Charged on the current value, so it grows as the home appreciates."
+              onCommit={(v) => set("maintRate", v)}
+            />
+            <Slider
+              id={`${uid}-costg`} label="Tax & insurance growth / yr" field="costGrowth" value={inputs.costGrowth} step={0.5}
+              display={`${inputs.costGrowth.toFixed(1)}%`}
+              hint="Property tax, homeowners insurance, and renter's insurance all step up by this much each year. Roughly inflation."
+              onCommit={(v) => set("costGrowth", v)}
+            />
 
             <div className="rvo-row" style={{ marginTop: 14 }}>
               <NumField id="rvo-cc" label="Closing costs %" field="ccPct" value={inputs.ccPct} step={0.25} onCommit={(v) => set("ccPct", v)} />
@@ -558,7 +604,13 @@ export function RentVsOwnChart() {
 
       {/* Readouts */}
       <div className="rvo-readouts">
-        <Readout label="Breakeven year" value={be === null ? "30+" : be === 0 ? "Day one" : String(be)} color={GOLD} />
+        <Readout
+          label="Breakeven year"
+          value={be === null ? "30+" : be === 0 ? "Day one" : String(be)}
+          color={GOLD}
+          sub={bandSub}
+          title="Small changes in assumptions move this number by years. The dollar gap at your horizon is the one to trust."
+        />
         <Readout label="Owning, month one" value={`${fmt(sim.owningMonthOne)}/mo`} color={CREAM} />
         <Readout label="Renting, month one" value={`${fmt(inputs.rent0)}/mo`} color={CREAM} />
         <Readout label="Rent in your final year" value={`${fmt(rentInYear(inputs.rent0, inputs.rentG, hz))}/mo`} color={CREAM} />
@@ -678,11 +730,12 @@ export function RentVsOwnChart() {
   );
 }
 
-function Readout({ label, value, color }) {
+function Readout({ label, value, color, sub, title }) {
   return (
-    <div className="rvo-ro">
+    <div className="rvo-ro" title={title}>
       <div className="rvo-ro-t">{label}</div>
       <div className="rvo-ro-n" style={{ color }}>{value}</div>
+      {sub && <div className="rvo-ro-s">{sub}</div>}
     </div>
   );
 }

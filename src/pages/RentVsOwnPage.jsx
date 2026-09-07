@@ -4,6 +4,7 @@ import { ContactCard } from "../components/homepage/ContactCard";
 import { RentVsOwnIcon } from "../components/icons";
 import { ToolLockup } from "../components/ToolLockup";
 import { RentVsOwnChart } from "../components/RentVsOwnChart";
+import { BASE_CASE } from "../components/rentVsOwnSim";
 import { withAlpha } from "../utils/format";
 
 // Dark-mode top-level tool page. Metadata + WebApplication schema live in the
@@ -28,10 +29,16 @@ const STATS = [
   { label: "What 4.1% compounds to", value: "3.2x", sub: "your rent, 30 years from now, at the average", color: CHART_COLORS.sp500 },
 ];
 
+// The two year references in "The flow flips" are read off the default-case
+// simulation, not written by hand, so they move with the model. Both are the
+// first year containing the flip month.
+const FLIP_YEAR = BASE_CASE.flipMonth ? Math.ceil(BASE_CASE.flipMonth / 12) : null;
+const MI_DROP_YEAR = BASE_CASE.miDropMonth ? Math.ceil(BASE_CASE.miDropMonth / 12) : null;
+
 const MEANS = [
   {
     title: "The flow flips, and only one way",
-    body: "Owning costs more than renting on day one, and the gap is real money. But the mortgage payment is fixed while rent compounds, and national rent has never had a down year in 56 years. At the defaults, rent catches the full cost of owning in year 10, mortgage insurance drops off in year 12, and eventually the loan retires entirely. Renting starts cheaper. Owning ends cheaper. The whole question is what happens in between, and that is what the chart shows.",
+    body: `Owning costs more than renting on day one, and the gap is real money. But the mortgage payment is fixed while rent compounds, and national rent has never had a down year in 56 years. At the defaults, rent catches the full cost of owning ${FLIP_YEAR ? `in year ${FLIP_YEAR}` : "beyond this 30-year window"}${MI_DROP_YEAR ? `, mortgage insurance drops off in year ${MI_DROP_YEAR},` : ","} and eventually the loan retires entirely. Renting starts cheaper. Owning ends cheaper. The whole question is what happens in between, and that is what the chart shows.`,
   },
   {
     title: "Your horizon is the answer",

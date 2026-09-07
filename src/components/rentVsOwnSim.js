@@ -68,15 +68,16 @@ export const DEFAULTS = {
   insPct: 0.35,
   ccPct: 3,
   sellPct: 7,
-  // The reconciliation inputs. Zero here keeps every existing caller and the
-  // published table byte-identical; the UI wires live defaults separately.
-  // maintRate: maintenance as a percent of the home's CURRENT value per year,
-  // charged monthly. costGrowth: annual growth applied to property tax,
-  // homeowners insurance, and renter's insurance, stepped once per year like
-  // rent. renterIns: renter's insurance in dollars per month in year 0.
-  maintRate: 0,
-  costGrowth: 0,
-  renterIns: 0,
+  // The reconciliation inputs, at their live defaults. maintRate: maintenance
+  // as a percent of the home's CURRENT value per year, charged monthly.
+  // costGrowth: annual growth applied to property tax, homeowners insurance,
+  // and renter's insurance, stepped once per year like rent. renterIns:
+  // renter's insurance in dollars per month in year 0. The published-table
+  // regression fixture zeroes all three and runs at 5.4% appreciation (parity
+  // fixture A, scripts/rentVsOwnParity.mjs).
+  maintRate: 1,
+  costGrowth: 3,
+  renterIns: 20,
 };
 
 // Input bounds. Shared by the sim clamp and the control min/max so a slider and
