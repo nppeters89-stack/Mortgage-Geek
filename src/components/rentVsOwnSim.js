@@ -7,9 +7,10 @@
 // that year, with selling costs off the top, the strictest honest test:
 //   - The renter's portfolio starts with the owner's down payment plus closing
 //     costs invested on day one.
-//   - Each month the full cost of owning (P&I, taxes, insurance, MI) is compared
-//     against that month's rent, and whichever side pays less invests the
-//     difference at the selected return.
+//   - Each month the full cost of owning (P&I, taxes, insurance, MI, and
+//     maintenance when enabled) is compared against that month's rent plus
+//     renter's insurance, and whichever side pays less invests the difference
+//     at the selected return.
 //   - Owner wealth in any year = home value net of selling costs, minus the loan
 //     balance, plus the owner's side fund. Renter wealth = the portfolio.
 //
@@ -58,6 +59,15 @@ export const DEFAULTS = {
   insPct: 0.35,
   ccPct: 3,
   sellPct: 7,
+  // The reconciliation inputs. Zero here keeps every existing caller and the
+  // published table byte-identical; the UI wires live defaults separately.
+  // maintRate: maintenance as a percent of the home's CURRENT value per year,
+  // charged monthly. costGrowth: annual growth applied to property tax,
+  // homeowners insurance, and renter's insurance, stepped once per year like
+  // rent. renterIns: renter's insurance in dollars per month in year 0.
+  maintRate: 0,
+  costGrowth: 0,
+  renterIns: 0,
 };
 
 // Input bounds. Shared by the sim clamp and the control min/max so a slider and
@@ -75,6 +85,9 @@ export const LIMITS = {
   insPct: [0, 2],
   ccPct: [0, 8],
   sellPct: [0, 12],
+  maintRate: [0, 3],
+  costGrowth: [0, 6],
+  renterIns: [0, 100],
 };
 
 // Numeric fields are clamped to their bounds. Non-numeric fields (program,
@@ -123,8 +136,8 @@ export function simulateRentVsOwn(input = {}) {
   const g = s.rentG / 100;
   const sell = s.sellPct / 100;
 
-  const taxM = (price * s.taxPct) / 100 / 12;
-  const insM = (price * s.insPct) / 100 / 12;
+  const taxM0 = (price * s.taxPct) / 100 / 12;
+  const insM0 = (price * s.insPct) / 100 / 12;
   // Mortgage insurance accrues on the base loan (before any financed upfront
   // fee), matching the calculator.
   const miM = (baseLoan * (terms.miRate / 100)) / 12;
@@ -154,7 +167,18 @@ export function simulateRentVsOwn(input = {}) {
   ];
 
   for (let m = 1; m <= TERM_MONTHS; m++) {
-    const rent = s.rent0 * Math.pow(1 + g, Math.floor((m - 1) / 12));
+    // Year index for this month's charges: months 1 through 12 run on year 0's
+    // prices, matching the annual step rent has always taken.
+    const yIdx = Math.floor((m - 1) / 12);
+    const rent = s.rent0 * Math.pow(1 + g, yIdx);
+    // Property tax, homeowners insurance, and renter's insurance step up once
+    // per year at the cost growth rate. Maintenance is charged on the home's
+    // value at the start of the year, so it grows as the home appreciates.
+    const esc = Math.pow(1 + s.costGrowth / 100, yIdx);
+    const taxM = taxM0 * esc;
+    const insM = insM0 * esc;
+    const rentersInsM = s.renterIns * esc;
+    const maintM = (homeVal[yIdx] * s.maintRate) / 100 / 12;
 
     // MI is assessed on the start-of-month balance. When it stops depends on the
     // program: PMI at 78% of the original price, FHA for the life of the loan
@@ -178,8 +202,8 @@ export function simulateRentVsOwn(input = {}) {
       }
     }
 
-    const owningCost = pi + taxM + insM + mi;
-    const diff = owningCost - rent;
+    const owningCost = pi + taxM + insM + mi + maintM;
+    const diff = owningCost - (rent + rentersInsM);
     if (flipMonth === 0 && diff < 0) flipMonth = m;
 
     // Whichever side pays less this month invests the difference.
@@ -222,13 +246,39 @@ export function simulateRentVsOwn(input = {}) {
     // does, so this readout equals the calculator's total to the dollar. The
     // month-by-month simulation above keeps the precise values, so the chart and
     // verdict are unaffected.
-    owningMonthOne: payment + Math.round(taxM) + Math.round(insM) + (chargesMI ? miM : 0),
+    owningMonthOne: payment + Math.round(taxM0) + Math.round(insM0) + (chargesMI ? miM : 0),
     sellCostRate: sell,
     miDropMonth: miDropMonth || null,
     flipMonth: flipMonth || null,
     chargesMI,
     terms,
   };
+}
+
+// Breakeven under nearby assumptions: the sim rerun four times, appreciation
+// half a point either way and maintenance half a point either way (floored at
+// zero), because near the crossing the two wealth lines run almost parallel and
+// small input changes move the year by more than they move the dollars. The
+// base breakeven is not part of the band. anyNever is true when at least one
+// perturbation never crosses inside 30 years.
+export function breakevenBand(input = {}) {
+  const s = { ...DEFAULTS, ...input };
+  const runs = [
+    { ...s, homeG: s.homeG - 0.5 },
+    { ...s, homeG: s.homeG + 0.5 },
+    { ...s, maintRate: s.maintRate + 0.5 },
+    { ...s, maintRate: Math.max(0, s.maintRate - 0.5) },
+  ];
+  let min = null;
+  let max = null;
+  let anyNever = false;
+  for (const run of runs) {
+    const be = simulateRentVsOwn(run).breakevenYear;
+    if (be === null) { anyNever = true; continue; }
+    if (min === null || be < min) min = be;
+    if (max === null || be > max) max = be;
+  }
+  return { min, max, anyNever };
 }
 
 // Computed once at module load. Deterministic and SSR-safe, so it backs the
