@@ -7,7 +7,7 @@ import { CockpitShell } from "./cockpit/CockpitShell";
 import { CalcInput } from "./CalcInput";
 import { SHARED_STATE_TAX_RATES } from "../data/taxRates";
 import { LOAN_PROGRAMS, VA_USAGE_LABELS } from "../data/loanPrograms.js";
-import { simulateRentVsOwn, breakevenBand, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE } from "./rentVsOwnSim";
+import { simulateRentVsOwn, breakevenBand, roundDefaultRate, rentInYear, clampInput, DEFAULTS, LIMITS, BASE_CASE, APPRECIATION } from "./rentVsOwnSim";
 
 // The interactive Rent vs. Own tool. All series come from the 360-month
 // simulation in rentVsOwnSim.js, which is pure and SSR-safe, so the prerendered
@@ -549,7 +549,7 @@ export function RentVsOwnChart() {
             <Slider
               id="rvo-homeg" label="Real estate return / yr" field="homeG" value={inputs.homeG} step={0.1}
               display={`${inputs.homeG.toFixed(1)}%`}
-              hint="5.4% is the 56-year national average (1970 to 2026): the compound annual growth of the average U.S. home sale price (FRED: ASPUS). This is the home's appreciation before costs."
+              hint={`${APPRECIATION.pct.toFixed(1)}% is the ${APPRECIATION.windowYears}-year national average (${APPRECIATION.start} to ${APPRECIATION.end}): the compound annual growth of the FHFA House Price Index, a repeat-sales index that tracks the same homes over time (FRED: USSTHPI). This is the home's appreciation before costs.`}
               onCommit={(v) => set("homeG", v)}
             />
             <Slider
@@ -582,7 +582,7 @@ export function RentVsOwnChart() {
               <NumField id="rvo-sell" label="Selling costs %" field="sellPct" value={inputs.sellPct} step={0.25} onCommit={(v) => set("sellPct", v)} />
             </div>
             <p className="rvo-adv-note">Closing costs are what you pay going in, when you buy the home ({fmt(Math.round((inputs.price * inputs.ccPct) / 100))} here), and the renter invests that same cash on day one instead. Selling costs are what comes off the top coming out, when you sell, and the owner is charged them in every year of the chart.</p>
-            <p className="rvo-adv-note">Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Property taxes and insurance are set with the mortgage inputs above and held flat, a simplification the footnotes disclose.</p>
+            <p className="rvo-adv-note">Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Property taxes and insurance are set with the mortgage inputs above and grow each year at the rate you set here.</p>
           </div>
         </details>
       </div>
