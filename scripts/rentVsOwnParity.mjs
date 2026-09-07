@@ -37,8 +37,8 @@ const FIXTURES = {
   B: { maintRate: 1, costGrowth: 3, renterIns: 20, homeG: 4.5 },
   C: { downPct: 20, maintRate: 1, costGrowth: 3, renterIns: 20, homeG: 4.5 },
   D: { maintRate: 1, costGrowth: 3, renterIns: 20, homeG: 4.5, inv: 7 },
-  E: { maintRate: 1 },
-  F: { costGrowth: 3, renterIns: 20 },
+  E: { maintRate: 1, homeG: 5.4 },
+  F: { costGrowth: 3, renterIns: 20, homeG: 5.4 },
 };
 const EXACT = new Set(["A"]);
 const YEARS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30];

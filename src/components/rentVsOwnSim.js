@@ -19,12 +19,15 @@
 // year 10, breakeven year 4, owning $2,868/mo). That scenario is a fixture for
 // the math, not the shipped default.
 //
-// The shipped default matches the payment calculator's opening scenario
-// ($350,000, 3.5% down, Conventional at 6.75%, Nashville/Davidson's 0.95%
-// property tax, 0.35% insurance, 7% selling cost): owning is ahead $122,934 at
-// year 10, breakeven year 4, owning $2,716/mo, which equals the calculator's
-// Conventional payment for the same inputs. Any change should be checked against
-// both.
+// The published-table regression fixture is the payment calculator's opening
+// scenario ($350,000, 3.5% down, Conventional at 6.75%, Nashville/Davidson's
+// 0.95% property tax, 0.35% insurance, 7% selling cost) at 5.4% appreciation
+// with maintenance, cost growth, and renter's insurance zeroed: owning ahead
+// $122,934 at year 10, breakeven year 4, owning $2,716/mo, which equals the
+// calculator's Conventional payment for the same inputs. That is parity
+// fixture A (scripts/rentVsOwnParity.mjs). The shipped appreciation default is
+// now the FHFA figure below, so the live default case differs from the fixture
+// by design.
 //
 // The per-program loan, mortgage insurance, and payment come from the shared
 // mortgageMath module (via loanPrograms), so this tool and the calculator cannot
@@ -32,10 +35,16 @@
 import { programTerms, miChargedThisMonth } from "../data/loanPrograms.js";
 import { monthlyPI } from "../utils/mortgageMath.js";
 
-// Default home value compound annual growth: 5.4%, the 1970-2026 CAGR of the
-// Census/HUD average sales price of houses sold (FRED: ASPUS). Adjustable via
-// the homeG input; DEFAULTS.homeG holds this as a percent.
-export const HOME_GROWTH = 1.054;
+// Default home value compound annual growth: the repeat-sales CAGR of the FHFA
+// All-Transactions House Price Index (FRED: USSTHPI), computed from the series'
+// first and latest observations rather than typed by hand: 60.04 on 1975-01-01
+// to 719.87 on 2026-04-01 is 4.9666% over 51.25 years, rounded to one decimal.
+// A repeat-sales index tracks the same homes over time, so it measures
+// appreciation, not the growing size and quality of whatever sold (which is why
+// the old ASPUS average-sale-price default ran higher at 5.4%). The window
+// rides along so copy can cite it without hardcoding. Recompute against a fresh
+// FRED download whenever the data window moves.
+export const APPRECIATION = { pct: 5.0, series: "USSTHPI", start: 1975, end: 2026, windowYears: 51 };
 
 const TERM_MONTHS = 360;
 const YEARS = 30;
@@ -52,7 +61,7 @@ export const DEFAULTS = {
   rent0: 2000,
   rate: 6.75,
   rentG: 4.1,
-  homeG: 5.4,
+  homeG: APPRECIATION.pct,
   inv: 10,
   hz: 10,
   taxPct: 0.95,
