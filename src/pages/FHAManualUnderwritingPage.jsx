@@ -8,7 +8,7 @@ import { InteractiveChecklist } from "../components/InteractiveChecklist";
 import { FHA_MANUAL_CHECKLIST } from "../data/fhaManualUnderwritingChecklist";
 
 const TITLE = "FHA Manual Underwriting: HUD 4000.1 Rules, Compensating Factors, and How to Get Approved | Mortgage Geek";
-const DESCRIPTION = "FHA manual underwriting: HUD 4000.1 rules, DTI compensating factors, full documentation checklist. Plain English, from a real LO with 12+ years.";
+const DESCRIPTION = "FHA manual underwriting: HUD 4000.1 rules, DTI compensating factors, full documentation checklist. Plain English, from a real LO with 13+ years.";
 const PATH = "/deep-dives/fha-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-24";
@@ -158,7 +158,7 @@ export function FHAManualUnderwritingPage() {
             If your lender told you your FHA loan needs to go through "manual underwriting," you probably have questions. What does that mean? Is your loan in trouble? Can it still close?
           </p>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
-            Short answer: manual underwriting isn't a death sentence. In 12+ years as a loan originator, I've gotten hundreds of manually underwritten FHA files to the closing table. But it does mean your loan is held to a different, stricter set of standards than a typical "approve/eligible" from the automated system. Most of what gets written about manual underwriting online is either wrong, outdated, or buried behind paywalls.
+            Short answer: manual underwriting isn't a death sentence. In 13+ years as a loan originator, I've gotten hundreds of manually underwritten FHA files to the closing table. But it does mean your loan is held to a different, stricter set of standards than a typical "approve/eligible" from the automated system. Most of what gets written about manual underwriting online is either wrong, outdated, or buried behind paywalls.
           </p>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7 }}>
             This page walks through what actually happens on a manual, using the current HUD 4000.1 Single Family Housing Policy Handbook as the source. If you're a borrower, realtor, or another LO trying to make sense of a refer/eligible, this is for you.
@@ -170,7 +170,7 @@ export function FHAManualUnderwritingPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator, not an underwriter. I don't make approval decisions. But I've spent 12+ years working these files and know how to get them to close. This page explains HUD's rules as written in handbook 4000.1. Your specific loan is evaluated by your lender's underwriter against those rules plus their own overlays. More on overlays below.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator, not an underwriter. I don't make approval decisions. But I've spent 13+ years working these files and know how to get them to close. This page explains HUD's rules as written in handbook 4000.1. Your specific loan is evaluated by your lender's underwriter against those rules plus their own overlays. More on overlays below.
             </p>
           </div>
         </div>
@@ -246,7 +246,7 @@ export function FHAManualUnderwritingPage() {
         <GeekTip title="When a downgrade is really a dead deal">
           <TipBody text="Some of these downgrade triggers essentially mean your file is finished, not just headed to a human reviewer. Here's why: HUD's manual underwriting credit standard requires **zero 30-day lates on housing in the last 12 months**. So if your file gets downgraded specifically because of recent mortgage lates (3x30, 1x60+1x30, or 1x90), the manual standards can't approve it either, unless you have documented **extenuating circumstances**." />
           <TipBody text="HUD defines extenuating circumstances narrowly: serious illness, involuntary job loss, or death of a wage earner. **Divorce, job relocation, and the inability to sell a current home don't qualify.** Even when they do apply, the approval path requires substantial documentation, second-level underwriter review, and a lender whose overlays don't prohibit approving mortgage lates at all (many do)." />
-          <TipBody text="In 12+ years, I have never personally seen a file approved this way. The theoretical path exists; the practical path almost never does. If your file is getting downgraded for mortgage lates within the last 12 months, assume you're not closing on FHA and plan accordingly. Either wait out the 12 months or look at alternative loan programs." />
+          <TipBody text="In 13+ years, I have never personally seen a file approved this way. The theoretical path exists; the practical path almost never does. If your file is getting downgraded for mortgage lates within the last 12 months, assume you're not closing on FHA and plan accordingly. Either wait out the 12 months or look at alternative loan programs." />
         </GeekTip>
 
         <H2>The six things an underwriter evaluates on a manual</H2>
@@ -513,7 +513,7 @@ export function FHAManualUnderwritingPage() {
           That's my whole philosophy on manual underwrites in one story. The rules are the rules. Borrowers don't need to be perfect. They need to be honest about their situation early enough that their LO can build a real plan around it. It's all about communication.
         </Para>
 
-        <H2>Why manual underwrites fail: patterns I've seen over 12+ years</H2>
+        <H2>Why manual underwrites fail: patterns I've seen over 13+ years</H2>
         <Para>
           In my experience, the answer is almost always the same: lack of due diligence up front.
         </Para>
@@ -616,7 +616,7 @@ export function FHAManualUnderwritingPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: HUD 4000.1 Single Family Housing Policy Handbook, Section II.A.5 (Manual Underwriting of the Borrower), updated 04/10/2025; HUD 4000.1 Section II.A.5.a (Credit Requirements, Manual); author's 12+ years of field experience as an FHA loan originator.
+          Sources: HUD 4000.1 Single Family Housing Policy Handbook, Section II.A.5 (Manual Underwriting of the Borrower), updated 04/10/2025; HUD 4000.1 Section II.A.5.a (Credit Requirements, Manual); author's 13+ years of field experience as an FHA loan originator.
         </p>
 
 

@@ -90,7 +90,7 @@ export function HeroEditorial({ showStats = true, enableMotion = true }) {
           </picture>
           {showStats && (
             <div className={`he-badge${enableMotion ? " he-float" : ""}`}>
-              <div className="he-stat-num">12<span>+</span></div>
+              <div className="he-stat-num">13<span>+</span></div>
               <div className="he-stat-label">years lending</div>
               <div className="he-badge-rule" />
               <div className="he-stat-num">1,000<span>+</span></div>

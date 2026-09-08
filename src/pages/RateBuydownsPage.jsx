@@ -116,7 +116,7 @@ export function RateBuydownsPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a loan originator with 12+ years of experience. Every number on this page is computed exactly on one consistent example loan, and every number is illustrative: rates move daily, and buydown pricing is a live market. Use this page to understand the structures and compare the shapes. Use your lender, after your rate is locked, for your real numbers.
+              I'm Nick Peters (NMLS #1119524), a loan originator with 13+ years of experience. Every number on this page is computed exactly on one consistent example loan, and every number is illustrative: rates move daily, and buydown pricing is a live market. Use this page to understand the structures and compare the shapes. Use your lender, after your rate is locked, for your real numbers.
             </p>
           </div>
         </div>
@@ -273,7 +273,7 @@ export function RateBuydownsPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B2-1.4-04 (Temporary Interest Rate Buydowns) referencing B3-6-04 (Qualifying Payment Requirements); Fannie Mae Selling Guide B3-4.1-02 (Interested Party Contributions), May 2025 update SEL-2025-03; Freddie Mac Single-Family Seller/Servicer Guide Sections 4204.4 (Temporary Subsidy Buydown Plans) and 5501.5 (Financing and Sales Concessions); HUD Handbook 4000.1, Section II.A.4.d.iii and II.A.5.b (Interested Party Contributions and Inducements to Purchase); VA Lender's Handbook (Pamphlet 26-7), Chapter 8 (Borrower Fees and Charges) and Chapter 4 (Credit Underwriting); author's 12+ years of field experience pricing, structuring, and underwriting buydowns and seller credits. All dollar figures on this page are computed exactly on one frozen example loan and labeled illustrative; buydown pricing is a live market and your actual numbers require a locked rate and a current lender quote.
+          Sources: Fannie Mae Selling Guide B2-1.4-04 (Temporary Interest Rate Buydowns) referencing B3-6-04 (Qualifying Payment Requirements); Fannie Mae Selling Guide B3-4.1-02 (Interested Party Contributions), May 2025 update SEL-2025-03; Freddie Mac Single-Family Seller/Servicer Guide Sections 4204.4 (Temporary Subsidy Buydown Plans) and 5501.5 (Financing and Sales Concessions); HUD Handbook 4000.1, Section II.A.4.d.iii and II.A.5.b (Interested Party Contributions and Inducements to Purchase); VA Lender's Handbook (Pamphlet 26-7), Chapter 8 (Borrower Fees and Charges) and Chapter 4 (Credit Underwriting); author's 13+ years of field experience pricing, structuring, and underwriting buydowns and seller credits. All dollar figures on this page are computed exactly on one frozen example loan and labeled illustrative; buydown pricing is a live market and your actual numbers require a locked rate and a current lender quote.
         </p>
 
       </article>

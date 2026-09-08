@@ -7,7 +7,7 @@ import { ARMRateAnatomyGraphic } from "../components/ARMRateAnatomyGraphic";
 import { ARMTermsGlossary } from "../components/ARMTermsGlossary";
 
 const TITLE = "ARMs Demystified: How Adjustable-Rate Mortgages Work, When They Make Sense, and What the Caps Actually Mean | Mortgage Geek";
-const DESCRIPTION = "Adjustable-rate mortgages explained in plain English. How caps work, when ARMs make sense, qualifying rate quirks. From a real LO with 12+ years.";
+const DESCRIPTION = "Adjustable-rate mortgages explained in plain English. How caps work, when ARMs make sense, qualifying rate quirks. From a real LO with 13+ years.";
 const PATH = "/deep-dives/arms-demystified";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-26";
@@ -331,7 +331,7 @@ export function ARMsDemystifiedPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 12+ years of experience writing mortgages. I'm not a financial advisor, and your specific decision depends on your specific situation. This page explains how ARMs work and when they tend to make sense, but the right call for your file is a conversation with someone who can look at the whole picture.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 13+ years of experience writing mortgages. I'm not a financial advisor, and your specific decision depends on your specific situation. This page explains how ARMs work and when they tend to make sense, but the right call for your file is a conversation with someone who can look at the whole picture.
             </p>
           </div>
         </div>
@@ -592,7 +592,7 @@ export function ARMsDemystifiedPage() {
 
         <H2>Nick's take: how I counsel borrowers on ARMs</H2>
         <Para>
-          In 12+ years originating mortgages, I've written my share of ARMs. I've also talked plenty of borrowers out of them when the file didn't fit. Here's what I've learned.
+          In 13+ years originating mortgages, I've written my share of ARMs. I've also talked plenty of borrowers out of them when the file didn't fit. Here's what I've learned.
         </Para>
         <Para>
           The single biggest mistake I see is <strong style={{ color: P.navy, fontWeight: 600 }}>borrowers anchoring on the note rate without thinking about anything else.</strong> Someone sees a 5.75% ARM rate quoted next to a 6.875% fixed rate and immediately wants the ARM. They don't ask about the margin, don't look at the caps, and definitely don't model what happens at adjustment. By the time they understand what they signed up for, they're a few years into the loan and stuck with the answer.
@@ -679,7 +679,7 @@ export function ARMsDemystifiedPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Federal Reserve Bank of New York data on Secured Overnight Financing Rate (SOFR), 2026; Mortgage Bankers Association weekly mortgage applications survey, 2026 data on ARM share of originations; 12 CFR Part 1026 (Regulation Z) Adjustable-Rate Mortgage disclosure requirements; author's 12+ years of field experience originating ARM and fixed-rate mortgages.
+          Sources: Federal Reserve Bank of New York data on Secured Overnight Financing Rate (SOFR), 2026; Mortgage Bankers Association weekly mortgage applications survey, 2026 data on ARM share of originations; 12 CFR Part 1026 (Regulation Z) Adjustable-Rate Mortgage disclosure requirements; author's 13+ years of field experience originating ARM and fixed-rate mortgages.
         </p>
 
 

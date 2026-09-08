@@ -164,7 +164,7 @@ export function ExpectedIncomePage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from agency guidelines (Fannie Mae Selling Guide, Freddie Mac Single-Family Seller/Servicer Guide, HUD 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and 12+ years of writing expected-income files for moving professionals, new graduates, military relocations, and folks taking new positions in new cities. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays. As always, lenders vary.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from agency guidelines (Fannie Mae Selling Guide, Freddie Mac Single-Family Seller/Servicer Guide, HUD 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and 13+ years of writing expected-income files for moving professionals, new graduates, military relocations, and folks taking new positions in new cities. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays. As always, lenders vary.
             </p>
           </div>
         </div>
@@ -502,7 +502,7 @@ export function ExpectedIncomePage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-3.3-03 (Employment Offers or Contracts), updated March 4, 2026; Fannie Mae Selling Guide B3-3.1-04 (Verbal Verification of Employment); Freddie Mac Single-Family Seller/Servicer Guide Section 5303.2; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating expected income loans for relocating professionals.
+          Sources: Fannie Mae Selling Guide B3-3.3-03 (Employment Offers or Contracts), updated March 4, 2026; Fannie Mae Selling Guide B3-3.1-04 (Verbal Verification of Employment); Freddie Mac Single-Family Seller/Servicer Guide Section 5303.2; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 13+ years of field experience originating expected income loans for relocating professionals.
         </p>
 
 

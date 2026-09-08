@@ -167,7 +167,7 @@ export function BusinessAssetsPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 12+ years of experience writing mortgages for self-employed borrowers. The rules below come from agency guidelines (Fannie Mae Selling Guide B3-3.5-01 and B3-4.2-02, Freddie Mac Single-Family Seller/Servicer Guide, HUD 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and field experience. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays. Lenders vary on this topic more than most.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 13+ years of experience writing mortgages for self-employed borrowers. The rules below come from agency guidelines (Fannie Mae Selling Guide B3-3.5-01 and B3-4.2-02, Freddie Mac Single-Family Seller/Servicer Guide, HUD 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and field experience. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays. Lenders vary on this topic more than most.
             </p>
           </div>
         </div>
@@ -409,7 +409,7 @@ export function BusinessAssetsPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-3.5-01 (Underwriting Factors and Documentation for a Self-Employed Borrower); Fannie Mae Selling Guide B3-4.2-02 (Depository Accounts); Freddie Mac Single-Family Seller/Servicer Guide, Asset documentation sections; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Asset Verification); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating self-employed mortgage files using business assets.
+          Sources: Fannie Mae Selling Guide B3-3.5-01 (Underwriting Factors and Documentation for a Self-Employed Borrower); Fannie Mae Selling Guide B3-4.2-02 (Depository Accounts); Freddie Mac Single-Family Seller/Servicer Guide, Asset documentation sections; FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4 and II.A.5 (Asset Verification); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 13+ years of field experience originating self-employed mortgage files using business assets.
         </p>
 
 

@@ -208,7 +208,7 @@ export function HourlyPartTimeIncomePage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from current agency guidelines (Fannie Mae Selling Guide updated March 2026, Freddie Mac Single-Family Seller/Servicer Guide, HUD Handbook 4000.1, VA Lender's Handbook Pamphlet 26-7, USDA HB-1-3555) and 12+ years of writing files for hourly and part-time borrowers. Lenders vary on this topic, especially around the consistency analysis. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from current agency guidelines (Fannie Mae Selling Guide updated March 2026, Freddie Mac Single-Family Seller/Servicer Guide, HUD Handbook 4000.1, VA Lender's Handbook Pamphlet 26-7, USDA HB-1-3555) and 13+ years of writing files for hourly and part-time borrowers. Lenders vary on this topic, especially around the consistency analysis. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays.
             </p>
           </div>
         </div>
@@ -447,7 +447,7 @@ export function HourlyPartTimeIncomePage() {
 
         <H2>Why these files fail (the patterns I see)</H2>
         <Para>
-          After 12 years of writing files for hourly, part-time, and seasonal borrowers, the failure modes are predictable:
+          After 13 years of writing files for hourly, part-time, and seasonal borrowers, the failure modes are predictable:
         </Para>
         <Bullets items={[
           "**1. Trending-down hours not caught at pre-approval.** Borrower thinks they earn $X per month based on a recent good month. Underwriter looks at the YTD trend, sees hours dropping, and uses a lower number. The pre-approval was issued at a higher income figure than the actual qualifying income. Solution: pull two years of W-2s and recent paystubs at intake, run the consistency test before issuing pre-approval.",
@@ -488,7 +488,7 @@ export function HourlyPartTimeIncomePage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-3.3-01 (Base Income, including variable base for hourly), B3-3.3-08 (Seasonal Income), B3-3.4-01 (General Requirements for Other Sources of Income), restructured March 4, 2026; Freddie Mac Single-Family Seller/Servicer Guide Sections 5303.2-5303.5, 5901.1-5901.3; HUD Handbook 4000.1, Section II.A.4.c.iii (hourly), II.A.4.c.iv & vi (part-time, secondary, seasonal), II.A.5.b.iv & vi; VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Section 2-h; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Attachment 9-A; author's 12+ years of field experience originating mortgages with hourly, part-time, and seasonal borrowers.
+          Sources: Fannie Mae Selling Guide B3-3.3-01 (Base Income, including variable base for hourly), B3-3.3-08 (Seasonal Income), B3-3.4-01 (General Requirements for Other Sources of Income), restructured March 4, 2026; Freddie Mac Single-Family Seller/Servicer Guide Sections 5303.2-5303.5, 5901.1-5901.3; HUD Handbook 4000.1, Section II.A.4.c.iii (hourly), II.A.4.c.iv & vi (part-time, secondary, seasonal), II.A.5.b.iv & vi; VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Section 2-h; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Attachment 9-A; author's 13+ years of field experience originating mortgages with hourly, part-time, and seasonal borrowers.
         </p>
 
 

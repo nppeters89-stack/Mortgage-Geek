@@ -20,7 +20,7 @@ export function personSchema() {
     "@id": PERSON_ID,
     name: "Nick Peters",
     jobTitle: "Mortgage Loan Officer",
-    description: "Mortgage loan officer with 12+ years of experience helping first-time buyers navigate the mortgage process. Plain-English guidance, real answers, no jargon.",
+    description: "Mortgage loan officer with 13+ years of experience helping first-time buyers navigate the mortgage process. Plain-English guidance, real answers, no jargon.",
     url: `${BASE_URL}/about`,
     image: `${BASE_URL}/headshot.jpg`,
     identifier: {

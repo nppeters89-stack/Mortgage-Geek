@@ -7,7 +7,7 @@ import { SelfEmploymentDocumentationGrid } from "../components/SelfEmploymentDoc
 import { PLRequirementsGrid } from "../components/PLRequirementsGrid";
 
 const TITLE = "Self-Employed Mortgage Documentation: What Lenders Actually Want to See | Mortgage Geek";
-const DESCRIPTION = "Self-employed mortgage requirements explained: 2-year rule, tax returns, P&L statements, qualifying income calculations. From a real LO with 12+ years.";
+const DESCRIPTION = "Self-employed mortgage requirements explained: 2-year rule, tax returns, P&L statements, qualifying income calculations. From a real LO with 13+ years.";
 const PATH = "/deep-dives/self-employed-documentation";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-26";
@@ -213,7 +213,7 @@ export function SelfEmploymentDocumentationPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 12+ years of experience writing mortgages for self-employed borrowers. The rules below come from agency guidelines (Fannie Mae, Freddie Mac, FHA, VA, USDA) and my field experience. Your specific tax situation requires a CPA. Your specific loan situation requires a conversation with an LO who actually does self-employed files. This page is the framework. The math on your file is the conversation.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator with 13+ years of experience writing mortgages for self-employed borrowers. The rules below come from agency guidelines (Fannie Mae, Freddie Mac, FHA, VA, USDA) and my field experience. Your specific tax situation requires a CPA. Your specific loan situation requires a conversation with an LO who actually does self-employed files. This page is the framework. The math on your file is the conversation.
             </p>
           </div>
         </div>
@@ -541,7 +541,7 @@ export function SelfEmploymentDocumentationPage() {
 
         <H2>Why self-employed files fail. The patterns I see.</H2>
         <Para>
-          In 12+ years writing self-employed mortgages, the failure modes are remarkably consistent. Here's what kills SE files most often.
+          In 13+ years writing self-employed mortgages, the failure modes are remarkably consistent. Here's what kills SE files most often.
         </Para>
         <Para>
           <strong style={{ color: P.navy, fontWeight: 600 }}>1. The qualifying income surprise.</strong> A borrower thinks they make $200k. Their qualifying income is $80k. They've already gone under contract on a $700k house. Now they can't qualify. This is preventable with up-front math, but only if the LO actually runs the calculation before pre-approval. Many don't.
@@ -644,7 +644,7 @@ export function SelfEmploymentDocumentationPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-3.2 (Self-Employment Income); Fannie Mae Selling Guide B3-3.4 (Profit and Loss Analysis); Freddie Mac Single-Family Seller/Servicer Guide 5304.1 (Self-Employed Income); FHA Single Family Housing Policy Handbook 4000.1, Section II.A.4 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook 3555-1, Chapter 9; IRS Schedule C, Form 1120-S, Form 1065, Form 1120, K-1 instructions; author's 12+ years of field experience originating loans for self-employed borrowers.
+          Sources: Fannie Mae Selling Guide B3-3.2 (Self-Employment Income); Fannie Mae Selling Guide B3-3.4 (Profit and Loss Analysis); Freddie Mac Single-Family Seller/Servicer Guide 5304.1 (Self-Employed Income); FHA Single Family Housing Policy Handbook 4000.1, Section II.A.4 (Effective Income); VA Lender's Handbook (Pamphlet 26-7), Chapter 4 (Credit Underwriting); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook 3555-1, Chapter 9; IRS Schedule C, Form 1120-S, Form 1065, Form 1120, K-1 instructions; author's 13+ years of field experience originating loans for self-employed borrowers.
         </p>
 
 

@@ -161,7 +161,7 @@ export function GiftFundsPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from agency guidelines (Fannie Mae Selling Guide B3-4.3-04, Freddie Mac Single-Family Seller/Servicer Guide Section 5501.4, HUD Handbook 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and 12+ years of writing files where gift funds were involved. Lenders vary on this topic, especially around documentation specifics. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator. The rules below come from agency guidelines (Fannie Mae Selling Guide B3-4.3-04, Freddie Mac Single-Family Seller/Servicer Guide Section 5501.4, HUD Handbook 4000.1, VA Pamphlet 26-7, USDA HB-1-3555) and 13+ years of writing files where gift funds were involved. Lenders vary on this topic, especially around documentation specifics. Your specific file is evaluated by your lender's underwriter against agency guidelines plus their own overlays.
             </p>
           </div>
         </div>
@@ -433,7 +433,7 @@ export function GiftFundsPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-4.3-04 (Personal Gifts); Freddie Mac Single-Family Seller/Servicer Guide Section 5501.4 (Other sources of funds); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.d.iii(F) and II.A.5.c.iii(F) (Gifts); FHA policy update effective for case numbers assigned on or after 8/19/2024 (gift fund documentation methods); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 12+ years of field experience originating mortgages with gift fund components.
+          Sources: Fannie Mae Selling Guide B3-4.3-04 (Personal Gifts); Freddie Mac Single-Family Seller/Servicer Guide Section 5501.4 (Other sources of funds); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.d.iii(F) and II.A.5.c.iii(F) (Gifts); FHA policy update effective for case numbers assigned on or after 8/19/2024 (gift fund documentation methods); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 9; author's 13+ years of field experience originating mortgages with gift fund components.
         </p>
 
 

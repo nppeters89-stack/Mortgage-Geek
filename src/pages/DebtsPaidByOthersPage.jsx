@@ -319,7 +319,7 @@ export function DebtsPaidByOthersPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-6-05 (Monthly Debt Obligations); Freddie Mac Single-Family Seller/Servicer Guide Section 5401.2 (Monthly debt payment-to-income ratio); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.b.iv.(L) and II.A.5.a.iv.(N) (Contingent Liabilities); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 11 (Ratio Analysis); VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Topic 5 (Debts and Obligations); author's 12+ years of field experience originating mortgages with co-signed and third-party-paid debts.
+          Sources: Fannie Mae Selling Guide B3-6-05 (Monthly Debt Obligations); Freddie Mac Single-Family Seller/Servicer Guide Section 5401.2 (Monthly debt payment-to-income ratio); FHA Single Family Housing Policy Handbook 4000.1, Sections II.A.4.b.iv.(L) and II.A.5.a.iv.(N) (Contingent Liabilities); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 11 (Ratio Analysis); VA Lender's Handbook (Pamphlet 26-7), Chapter 4, Topic 5 (Debts and Obligations); author's 13+ years of field experience originating mortgages with co-signed and third-party-paid debts.
         </p>
 
 

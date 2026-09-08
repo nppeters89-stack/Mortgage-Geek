@@ -8,7 +8,7 @@ import { VADTIThresholdGrid } from "../components/VADTIThresholdGrid";
 import { VACompFactorsGrid } from "../components/VACompFactorsGrid";
 
 const TITLE = "VA Manual Underwriting: Residual Income, Compensating Factors, and How to Get Approved | Mortgage Geek";
-const DESCRIPTION = "VA manual underwriting explained: residual income tables, compensating factors, DTI thresholds, and how to actually get approved. From a real LO with 12+ years.";
+const DESCRIPTION = "VA manual underwriting explained: residual income tables, compensating factors, DTI thresholds, and how to actually get approved. From a real LO with 13+ years.";
 const PATH = "/deep-dives/va-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-25";
@@ -286,7 +286,7 @@ export function VAManualUnderwritingPage() {
             If your VA loan got a "Refer/Eligible" from automated underwriting, your file is headed for manual underwriting. That sounds scary. It isn't.
           </p>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7, marginBottom: 14 }}>
-            In 12+ years as a loan originator, I've closed plenty of manually underwritten VA loans. The VA program is genuinely the most forgiving of any major loan program for veterans with credit setbacks, high DTI, or unusual income situations. The handbook is written to encourage lenders to make these loans. But you have to know what the underwriter is actually looking at, and that's where most online content falls short.
+            In 13+ years as a loan originator, I've closed plenty of manually underwritten VA loans. The VA program is genuinely the most forgiving of any major loan program for veterans with credit setbacks, high DTI, or unusual income situations. The handbook is written to encourage lenders to make these loans. But you have to know what the underwriter is actually looking at, and that's where most online content falls short.
           </p>
           <p style={{ fontSize: 16, color: P.warmGray, lineHeight: 1.7 }}>
             This page walks through what actually happens on a VA manual underwrite, using the current VA Lender's Handbook (Pamphlet 26-7, Chapter 4) as the source. If you're a veteran trying to make sense of a refer/eligible, a realtor working with a VA buyer, or another LO trying to keep up with the rules, this is for you.
@@ -298,7 +298,7 @@ export function VAManualUnderwritingPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a licensed loan originator, not an underwriter. I don't make approval decisions. But I've spent 12+ years working VA files and know how to get them to close. This page explains VA's rules as written in the Lender's Handbook. Your specific loan is evaluated by your lender's underwriter against those rules plus their own overlays. More on overlays below.
+              I'm Nick Peters (NMLS #1119524), a licensed loan originator, not an underwriter. I don't make approval decisions. But I've spent 13+ years working VA files and know how to get them to close. This page explains VA's rules as written in the Lender's Handbook. Your specific loan is evaluated by your lender's underwriter against those rules plus their own overlays. More on overlays below.
             </p>
           </div>
         </div>
@@ -541,7 +541,7 @@ export function VAManualUnderwritingPage() {
           <TipBody text="This is in the handbook in plain language: comp factors &quot;cannot be used to compensate for unsatisfactory credit.&quot; If a borrower has recent late payments, a 2-month-old collection, or an unresolved judgment, no amount of reserves or residual income will fix the file. The credit has to clear the bar first. Then comp factors let you stretch DTI or borderline residual income." />
         </GeekTip>
 
-        <H2>Why VA manual underwrites fail: patterns I've seen over 12+ years</H2>
+        <H2>Why VA manual underwrites fail: patterns I've seen over 13+ years</H2>
         <Para>
           In my experience, VA manual files fail for the same reason FHA manuals fail: lack of due diligence up front.
         </Para>
@@ -642,7 +642,7 @@ export function VAManualUnderwritingPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: VA Pamphlet 26-7, Lender's Handbook, Chapter 4 (Credit Underwriting), current as of 2026; VA Pamphlet 26-7, Chapter 4, Topic 10d (Compensating Factors); VA Circular 26-25-7 (Energy Efficient Mortgages); 38 CFR 36.4340 (Underwriting Standards, Residual Income Tables); author's 12+ years of field experience as a VA loan originator.
+          Sources: VA Pamphlet 26-7, Lender's Handbook, Chapter 4 (Credit Underwriting), current as of 2026; VA Pamphlet 26-7, Chapter 4, Topic 10d (Compensating Factors); VA Circular 26-25-7 (Energy Efficient Mortgages); 38 CFR 36.4340 (Underwriting Standards, Residual Income Tables); author's 13+ years of field experience as a VA loan originator.
         </p>
 
 

@@ -422,7 +422,7 @@ export function ResidencyRulesPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: FHA Single Family Housing Policy Handbook 4000.1, Section II.A.1.b.iii (Residency Requirements), with May 25, 2025 update; FHA Mortgagee Letter announcing the May 2025 non-permanent resident rule change; Fannie Mae Selling Guide B2-2-02 (Non-US Citizen Borrower Eligibility); Freddie Mac Single-Family Seller/Servicer Guide 5103.2 (Non-US Citizen Borrowers); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook; author's 12+ years of field experience originating loans for foreign-national borrowers.
+          Sources: FHA Single Family Housing Policy Handbook 4000.1, Section II.A.1.b.iii (Residency Requirements), with May 25, 2025 update; FHA Mortgagee Letter announcing the May 2025 non-permanent resident rule change; Fannie Mae Selling Guide B2-2-02 (Non-US Citizen Borrower Eligibility); Freddie Mac Single-Family Seller/Servicer Guide 5103.2 (Non-US Citizen Borrowers); VA Lender's Handbook (Pamphlet 26-7), Chapter 4; USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook; author's 13+ years of field experience originating loans for foreign-national borrowers.
         </p>
 
 

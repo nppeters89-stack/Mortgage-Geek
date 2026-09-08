@@ -133,7 +133,7 @@ export function SellerConcessionsPage() {
           <div>
             <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: P.goldMuted, marginBottom: 6 }}>A note on who wrote this</p>
             <p style={{ fontSize: 13.5, color: P.warmGray, lineHeight: 1.7, margin: 0 }}>
-              I'm Nick Peters (NMLS #1119524), a loan originator with 12+ years of experience. Concession limits are one of the few mortgage topics where the rules are precise, public, and still constantly misquoted in real negotiations. Everything below is sourced from the current agency guidelines, with citations, so you and your agent can verify every number.
+              I'm Nick Peters (NMLS #1119524), a loan originator with 13+ years of experience. Concession limits are one of the few mortgage topics where the rules are precise, public, and still constantly misquoted in real negotiations. Everything below is sourced from the current agency guidelines, with citations, so you and your agent can verify every number.
             </p>
           </div>
         </div>
@@ -308,7 +308,7 @@ export function SellerConcessionsPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: Fannie Mae Selling Guide B3-4.1-02 (Interested Party Contributions), updated May 7, 2025 via announcement SEL-2025-03, effective for loans with note dates on or after September 3, 2025; Freddie Mac Single-Family Seller/Servicer Guide Section 5501.5 (Financing and Sales Concessions); HUD Handbook 4000.1, Section II.A.4.d.iii (Inducements to Purchase) and II.A.5.b (FHA-Insured Mortgages with Seller Contributions); VA Lender's Handbook (Pamphlet 26-7), Chapter 8 (Borrower Fees and Charges and the VA Funding Fee); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 6 (Loan Purposes) and Chapter 8 (Applicant Characteristics); GSE NAR-settlement guidance issued April 2024; FHA confirmation of buyer-broker compensation treatment; USDA 2025 clarification on seller-paid buyer agent compensation; VA Circular 26-24-09 (2024) on veteran-paid buyer-broker charges; author's 12+ years of field experience originating mortgages across all four channels.
+          Sources: Fannie Mae Selling Guide B3-4.1-02 (Interested Party Contributions), updated May 7, 2025 via announcement SEL-2025-03, effective for loans with note dates on or after September 3, 2025; Freddie Mac Single-Family Seller/Servicer Guide Section 5501.5 (Financing and Sales Concessions); HUD Handbook 4000.1, Section II.A.4.d.iii (Inducements to Purchase) and II.A.5.b (FHA-Insured Mortgages with Seller Contributions); VA Lender's Handbook (Pamphlet 26-7), Chapter 8 (Borrower Fees and Charges and the VA Funding Fee); USDA Rural Development Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 6 (Loan Purposes) and Chapter 8 (Applicant Characteristics); GSE NAR-settlement guidance issued April 2024; FHA confirmation of buyer-broker compensation treatment; USDA 2025 clarification on seller-paid buyer agent compensation; VA Circular 26-24-09 (2024) on veteran-paid buyer-broker charges; author's 13+ years of field experience originating mortgages across all four channels.
         </p>
 
       </article>

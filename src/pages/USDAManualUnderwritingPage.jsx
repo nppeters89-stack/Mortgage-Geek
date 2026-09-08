@@ -7,7 +7,7 @@ import { USDARatioThresholdGrid } from "../components/USDARatioThresholdGrid";
 import { USDACompFactorsGrid } from "../components/USDACompFactorsGrid";
 
 const TITLE = "USDA Manual Underwriting: Refer with Caution, Ratio Waivers, and How to Get Approved | Mortgage Geek";
-const DESCRIPTION = "USDA manual underwriting explained: GUS Refer, ratio waivers, compensating factors, credit rules. Plain English from a real LO with 12+ years of USDA experience.";
+const DESCRIPTION = "USDA manual underwriting explained: GUS Refer, ratio waivers, compensating factors, credit rules. Plain English from a real LO with 13+ years of USDA experience.";
 const PATH = "/deep-dives/usda-manual-underwriting";
 const URL = `https://mortgagegeek.ai${PATH}`;
 const PUBLISHED = "2026-04-28";
@@ -757,7 +757,7 @@ export function USDAManualUnderwritingPage() {
         </div>
 
         <p style={{ fontSize: 11, color: P.warmGrayLight, lineHeight: 1.6, marginTop: 40, fontStyle: "italic" }}>
-          Sources: USDA Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 10 (Credit Analysis) and Chapter 11 (Ratio Analysis), current as of 2026; USDA HB-1-3555, Attachment 10-A (Credit Matrix); USDA Procedure Notice 621 (August 5, 2024) revising PITI ratio waiver ceiling to 34%; 7 CFR Part 3555 (Single Family Housing Guaranteed Loan Program regulations); author's 12+ years of field experience originating USDA Guaranteed loans.
+          Sources: USDA Single Family Housing Guaranteed Loan Program Handbook (HB-1-3555), Chapter 10 (Credit Analysis) and Chapter 11 (Ratio Analysis), current as of 2026; USDA HB-1-3555, Attachment 10-A (Credit Matrix); USDA Procedure Notice 621 (August 5, 2024) revising PITI ratio waiver ceiling to 34%; 7 CFR Part 3555 (Single Family Housing Guaranteed Loan Program regulations); author's 13+ years of field experience originating USDA Guaranteed loans.
         </p>
 
 
