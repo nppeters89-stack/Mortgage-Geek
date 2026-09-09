@@ -16,6 +16,18 @@ export function ComparePage() {
   }, []);
 
   const [selectedId, setSelectedId] = useState(null);
+  // Geek Tips start collapsed on every card; the map holds only the ids the user opened.
+  const [openTips, setOpenTips] = useState({});
+
+  const toggleTips = (id) => setOpenTips(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const updateNotes = (id, value) => {
+    setScenarios(prev => {
+      const next = prev.map(s => (s.id === id ? { ...s, notes: value } : s));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
 
   const removeScenario = (id) => {
     const next = scenarios.filter(s => s.id !== id);
@@ -41,6 +53,10 @@ export function ComparePage() {
         @media (max-width: 720px) { .compare-card { width: 100%; max-width: 360px; } }
 
         .print-only { display: none; }
+        .notes-print { display: none; }
+
+        .geek-tips-toggle:hover .geek-tips-label { color: ${P.gold}; }
+        .compare-notes:focus { border-color: ${P.navy}; box-shadow: 0 0 0 2px ${P.navy}20; }
 
         @media print {
           @page { size: portrait; margin: 0.25in; }
@@ -85,6 +101,15 @@ export function ComparePage() {
           /* Darken labels and values in card body for high contrast on white */
           .compare-card .pdf-label { color: #4a4a4a !important; font-size: 6.5px !important; }
           .compare-card .pdf-value { color: #000 !important; font-size: 6.5px !important; }
+
+          /* Collapsed tips still belong in the PDF, so force them open and hide the control chrome */
+          .geek-tips-body { display: block !important; }
+          .geek-tips-toggle { padding: 8px 12px 0 !important; }
+          .geek-tips-toggle, .geek-tips-toggle strong, .geek-tips-toggle span { font-size: 7px !important; }
+          .geek-tips-chevron { display: none !important; }
+          .notes-print { display: block !important; }
+          .notes-print .notes-print-label { color: #4a4a4a !important; }
+          .notes-print .notes-print-body { color: #000 !important; }
         }
       `}</style>
 
@@ -144,6 +169,7 @@ export function ComparePage() {
               {scenarios.map((s) => {
                 const isBest = s.total === lowestTotal && scenarios.length > 1;
                 const isSelected = selectedId === s.id;
+                const tipsOpen = !!openTips[s.id];
                 const cardColor = PROGRAM_COLORS[s.program] || s.color || P.navy;
                 return (
                   <div key={s.id} className="content-card compare-card" onClick={() => setSelectedId(isSelected ? null : s.id)} style={{ overflow: "visible", position: "relative", border: isSelected ? `2px solid ${cardColor}` : isBest ? `2px solid ${P.gold}` : "2px solid transparent", cursor: "pointer", transition: "border-color 0.2s, box-shadow 0.2s", boxShadow: isSelected ? `0 0 0 3px ${cardColor}30` : undefined }}>
@@ -181,33 +207,66 @@ export function ComparePage() {
                           <p style={{ fontSize: 8, color: P.warmGrayLight, marginTop: 4, lineHeight: 1.4, fontStyle: "italic" }}>Estimated APR is for educational purposes only — your actual APR will be disclosed on your Loan Estimate.</p>
                         </div>
                       )}
-                      {/* Geek Tips */}
-                      <div style={{ marginTop: 14, padding: "10px 12px", background: P.cream, borderRadius: 8, fontSize: 11, lineHeight: 1.6, color: P.warmGray }}>
-                        <span style={{ fontSize: 13 }}>🤓</span> <strong style={{ color: P.text }}>Geek Tips:</strong>
-                        {s.program === "Conventional" && (
-                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
-                            <li>PMI drops off automatically at 80% LTV — no refinance needed.</li>
-                            <li>Conventional loans can sometimes be <strong>recast</strong>: make a large lump-sum payment toward principal, and the lender recalculates your monthly payment at the same rate and term — lowering it without refinancing.</li>
-                            <li>Best rates go to 740+ credit scores; pricing adjustments increase below 700.</li>
-                          </ul>
-                        )}
-                        {s.program === "FHA" && (
-                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
-                            {s.downPct >= 10 ? (
-                              <li>With 10%+ down, your monthly mortgage insurance (MIP) <strong>drops off after 11 years</strong> — unlike FHA loans with less than 10% down, which carry MIP for the life of the loan.</li>
-                            ) : (
-                              <li>With less than 10% down, MIP stays for the <strong>life of the loan</strong>. Refinancing to conventional once you hit 80% LTV is the typical exit strategy.</li>
-                            )}
-                            <li>FHA loans are <strong>assumable</strong> — a future buyer can take over your loan at your locked-in rate, which can be a major selling advantage if rates rise.</li>
-                            <li>More lenient credit and DTI requirements than conventional.</li>
-                          </ul>
-                        )}
-                        {s.program === "VA" && (
-                          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
-                            <li>No monthly mortgage insurance — ever. The VA funding fee is a one-time cost.</li>
-                            <li>VA loans are <strong>assumable</strong> — a future buyer (even a non-veteran) can assume your rate and terms, which is a powerful advantage in a rising-rate market.</li>
-                            <li>No down payment required and typically the lowest rates available.</li>
-                          </ul>
+                      {/* Geek Tips (collapsed by default; click to expand) */}
+                      <div style={{ marginTop: 14, background: P.cream, borderRadius: 8 }}>
+                        <button
+                          type="button"
+                          className="geek-tips-toggle"
+                          aria-expanded={tipsOpen}
+                          aria-controls={`geek-tips-${s.id}`}
+                          onClick={(e) => { e.stopPropagation(); toggleTips(s.id); }}
+                          style={{ width: "100%", display: "flex", alignItems: "center", gap: 6, padding: "10px 12px", border: "none", background: "transparent", borderRadius: 8, cursor: "pointer", fontFamily: F.body, fontSize: 11, lineHeight: 1.6, color: P.warmGray, textAlign: "left" }}
+                        >
+                          <span style={{ fontSize: 13 }}>🤓</span>
+                          <strong className="geek-tips-label" style={{ color: P.text, transition: "color 0.2s" }}>Geek Tips</strong>
+                          <span className="geek-tips-chevron" aria-hidden="true" style={{ marginLeft: "auto", fontSize: 10, color: P.warmGrayLight, transform: tipsOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
+                        </button>
+                        <div id={`geek-tips-${s.id}`} className="geek-tips-body" style={{ display: tipsOpen ? "block" : "none", padding: "0 12px 10px", fontSize: 11, lineHeight: 1.6, color: P.warmGray }}>
+                          {s.program === "Conventional" && (
+                            <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                              <li>PMI drops off automatically at 80% LTV — no refinance needed.</li>
+                              <li>Conventional loans can sometimes be <strong>recast</strong>: make a large lump-sum payment toward principal, and the lender recalculates your monthly payment at the same rate and term — lowering it without refinancing.</li>
+                              <li>Best rates go to 740+ credit scores; pricing adjustments increase below 700.</li>
+                            </ul>
+                          )}
+                          {s.program === "FHA" && (
+                            <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                              {s.downPct >= 10 ? (
+                                <li>With 10%+ down, your monthly mortgage insurance (MIP) <strong>drops off after 11 years</strong> — unlike FHA loans with less than 10% down, which carry MIP for the life of the loan.</li>
+                              ) : (
+                                <li>With less than 10% down, MIP stays for the <strong>life of the loan</strong>. Refinancing to conventional once you hit 80% LTV is the typical exit strategy.</li>
+                              )}
+                              <li>FHA loans are <strong>assumable</strong> — a future buyer can take over your loan at your locked-in rate, which can be a major selling advantage if rates rise.</li>
+                              <li>More lenient credit and DTI requirements than conventional.</li>
+                            </ul>
+                          )}
+                          {s.program === "VA" && (
+                            <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                              <li>No monthly mortgage insurance — ever. The VA funding fee is a one-time cost.</li>
+                              <li>VA loans are <strong>assumable</strong> — a future buyer (even a non-veteran) can assume your rate and terms, which is a powerful advantage in a rising-rate market.</li>
+                              <li>No down payment required and typically the lowest rates available.</li>
+                            </ul>
+                          )}
+                          </div>
+                      </div>
+
+                      {/* Scenario notes */}
+                      <div style={{ marginTop: 12 }} onClick={(e) => e.stopPropagation()}>
+                        <label className="no-print" htmlFor={`notes-${s.id}`} style={{ display: "block", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 5 }}>Notes</label>
+                        <textarea
+                          id={`notes-${s.id}`}
+                          className="no-print compare-notes"
+                          rows={3}
+                          value={s.notes || ""}
+                          onChange={(e) => updateNotes(s.id, e.target.value)}
+                          placeholder="Your notes on this scenario."
+                          style={{ width: "100%", boxSizing: "border-box", resize: "vertical", padding: "8px 10px", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "#FFFFFF", fontFamily: F.body, fontSize: 11, lineHeight: 1.5, color: P.text, outline: "none", transition: "border-color 0.2s, box-shadow 0.2s" }}
+                        />
+                        {(s.notes || "").trim() && (
+                          <div className="notes-print" style={{ padding: "6px 8px", background: P.cream, borderRadius: 6 }}>
+                            <span className="notes-print-label" style={{ display: "block", fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", color: P.warmGrayLight, marginBottom: 3 }}>Notes</span>
+                            <span className="notes-print-body" style={{ display: "block", whiteSpace: "pre-wrap", color: P.text }}>{s.notes}</span>
+                          </div>
                         )}
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); removeScenario(s.id); }} className="no-print" style={{ width: "100%", marginTop: 14, padding: "8px 0", borderRadius: 6, border: `1px solid ${P.creamDark}`, background: "transparent", fontSize: 11, fontWeight: 600, color: P.warmGrayLight, cursor: "pointer", fontFamily: F.body }}>Remove</button>
