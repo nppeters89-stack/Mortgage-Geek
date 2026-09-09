@@ -83,7 +83,7 @@ export function SoiPartnerContent({ prospect: p, touches, config, inRac, nameSiz
   );
 }
 
-export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDetail, onOpenFollowUps, onCategorize = null }) {
+export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDetail, onOpenFollowUps, onCategorize = null, onAdd = null }) {
   const [catFilter, setCatFilter] = useState(null);
   const allMembers = useMemo(() => soiQueue(prospects, soi, followUps), [prospects, soi, followUps]);
   const uncategorized = useMemo(() => allMembers.filter((p) => !soiCategoryOf(soi[idFromPhone(p.phone)])).length, [allMembers, soi]);
@@ -136,10 +136,18 @@ export function SoiCockpit({ prospects, soi, followUps, config, racSet, onOpenDe
     <div style={{ maxWidth: 1440, margin: "0 auto", padding: "18px 26px 40px" }}>
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
         <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>Sphere of Influence</h1>
-        <button type="button" onClick={onOpenFollowUps}
-          style={{ fontSize: 13, color: T.dim, background: "none", border: `1px solid ${T.line}`, borderRadius: 999, padding: "7px 14px", cursor: "pointer", fontFamily: FF.body }}>
-          ← Pipeline Cockpit
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button type="button" onClick={onOpenFollowUps}
+            style={{ fontSize: 13, color: T.dim, background: "none", border: `1px solid ${T.line}`, borderRadius: 999, padding: "7px 14px", cursor: "pointer", fontFamily: FF.body }}>
+            ← Pipeline Cockpit
+          </button>
+          {onAdd && (
+            <button type="button" onClick={onAdd}
+              style={{ fontSize: 13, fontWeight: 700, color: T.bg1, background: T.green, border: `1px solid ${T.green}`, borderRadius: 999, padding: "7px 15px", cursor: "pointer", fontFamily: FF.body }}>
+              + Add to SOI
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Category filter: one chip per category, counts included. */}
