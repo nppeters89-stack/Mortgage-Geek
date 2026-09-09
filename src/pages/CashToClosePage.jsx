@@ -127,6 +127,13 @@ export function CashToClosePage() {
   const [fhaRate, setFhaRate] = useState(paramProgram === "FHA" && paramRate > 0 ? paramRate : 6.25);
   const [vaRate, setVaRate] = useState(paramProgram === "VA" && paramRate > 0 ? paramRate : 6.25);
   const [usdaRate, setUsdaRate] = useState(paramProgram === "USDA" && paramRate > 0 ? paramRate : 6.25);
+  // Per-program market baselines, same contract as the calculator: fixed to the
+  // auto-populated MND rate so the slider keeps a stable window that does not
+  // drift as the user drags. Updated only when fresh API data lands.
+  const [convRateApi, setConvRateApi] = useState(6.75);
+  const [fhaRateApi, setFhaRateApi] = useState(6.25);
+  const [vaRateApi, setVaRateApi] = useState(6.25);
+  const [usdaRateApi, setUsdaRateApi] = useState(6.25);
   const [ratesLoaded, setRatesLoaded] = useState(false);
   const [rateSource, setRateSource] = useState(null);
   const [rateLoading, setRateLoading] = useState(true);
@@ -168,6 +175,11 @@ export function CashToClosePage() {
     program === "FHA"          ? fhaRate  :
     program === "USDA"         ? usdaRate :
                                  vaRate;
+  const marketRate =
+    program === "Conventional" ? convRateApi :
+    program === "FHA"          ? fhaRateApi  :
+    program === "USDA"         ? usdaRateApi :
+                                 vaRateApi;
   const setRate = (v) => {
     if      (program === "Conventional") setConvRate(v);
     else if (program === "FHA")          setFhaRate(v);
@@ -193,14 +205,24 @@ export function CashToClosePage() {
           const conv30 = find("30-year fixed");
           const fha = find("fha");
           const va = find("va");
-          if (conv30 && !(paramProgram === "Conventional" && paramRate > 0)) setConvRate(roundRate(parseFloat(conv30.rate)));
+          if (conv30) {
+            const conv30Parsed = roundRate(parseFloat(conv30.rate));
+            setConvRateApi(conv30Parsed);
+            if (!(paramProgram === "Conventional" && paramRate > 0)) setConvRate(conv30Parsed);
+          }
           if (fha) {
             const fhaParsed = roundRate(parseFloat(fha.rate));
+            setFhaRateApi(fhaParsed);
+            setUsdaRateApi(fhaParsed);
             if (!(paramProgram === "FHA" && paramRate > 0)) setFhaRate(fhaParsed);
             // USDA tracks FHA from MND (MND doesn't publish a separate USDA rate)
             if (!(paramProgram === "USDA" && paramRate > 0)) setUsdaRate(fhaParsed);
           }
-          if (va && !(paramProgram === "VA" && paramRate > 0)) setVaRate(roundRate(parseFloat(va.rate)));
+          if (va) {
+            const vaParsed = roundRate(parseFloat(va.rate));
+            setVaRateApi(vaParsed);
+            if (!(paramProgram === "VA" && paramRate > 0)) setVaRate(vaParsed);
+          }
           setRateSource(data.date || "today");
           setRatesLoaded(true);
         }
@@ -639,7 +661,7 @@ export function CashToClosePage() {
                   LIVE
                 </span>
               )}
-              <RateInput label={`${program} Rate`} rate={rate} setRate={setRate} color={PROG_COLOR} />
+              <RateInput label={`${program} Rate`} rate={rate} setRate={setRate} color={PROG_COLOR} marketRate={marketRate} />
               {rateLoading && (
                 <p style={{ fontSize: 10, color: P.warmGrayLight, marginTop: 2, fontWeight: 500, fontStyle: "italic" }}>
                   <span style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: P.warmGrayLight, marginRight: 6, verticalAlign: "middle", animation: "rate-pulse 1.2s ease-in-out infinite" }} />
