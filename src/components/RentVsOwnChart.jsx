@@ -694,6 +694,14 @@ export function RentVsOwnChart() {
           <Op>=</Op><BdCell label="Advantage" value={fmt(b.advantage)} color={b.advantage < 0 ? RENT : GOLD} />
         </div>
         <p className="rvo-bd-foot">The renter's portfolio starts with the owner's down payment plus closing costs invested on day one. Each month, whichever side pays less for housing invests the difference at the selected return. The owner is always scored as if selling that year, with selling costs deducted, the strictest honest test.</p>
+        {/* The owner side fund is empty until rent grows past the cost of
+            owning, so the line explaining it only appears once there is money
+            in it and the number above stops reading as unexplained. */}
+        {b.ownerFund > 0 && (
+          <p className="rvo-bd-foot">
+            Where that owner side fund comes from: the mortgage payment is fixed while rent keeps climbing{flipYear ? `, and around year ${flipYear} rent passed the full cost of owning` : ""}. From there the owner is the one paying less each month, and that monthly surplus is invested at the same {inputs.inv.toFixed(1)}% return the renter's portfolio earns. Same rule for both sides, running the other way. It compounds to {fmt(Math.round(b.ownerFund))} by year {by}.
+          </p>
+        )}
       </div>
 
       <p className="rvo-caption">{caption}</p>
