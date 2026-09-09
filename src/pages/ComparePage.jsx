@@ -226,7 +226,7 @@ export function ComparePage() {
                             <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
                               <li>PMI drops off automatically at 80% LTV — no refinance needed.</li>
                               <li>Conventional loans can sometimes be <strong>recast</strong>: make a large lump-sum payment toward principal, and the lender recalculates your monthly payment at the same rate and term — lowering it without refinancing.</li>
-                              <li>Best rates go to 740+ credit scores; pricing adjustments increase below 700.</li>
+                              <li>Credit pricing runs in tiers from 640 up to 780+. The best rates go to 780+ scores, and every tier you climb improves your pricing.</li>
                             </ul>
                           )}
                           {s.program === "FHA" && (
