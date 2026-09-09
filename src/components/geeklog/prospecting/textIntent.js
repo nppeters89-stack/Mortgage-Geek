@@ -28,10 +28,10 @@ export function clearTextIntent() {
 // tap overwrites any older one), then either navigate to sms: (touch devices)
 // or hand back the body for a clipboard copy (desktop). Returns { ok: false }
 // when the number cannot normalize, so callers can disable the button.
-export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, hook = "", pipeline = AGENT_PIPELINE }) {
+export function startText({ prospect, stage = 0, cold = false, prospectingTab = false, pipeline = AGENT_PIPELINE }) {
   // Template set and storage namespace both come from the pipeline config.
   const ns = pipeline.id === "lead" ? "lead" : "agent";
-  const body = fill(pipeline.templates === "lead" ? leadTemplateForStage(stage) : templateForStage(stage, { prospectingTab, cold }), { ...prospect, hook });
+  const body = fill(pipeline.templates === "lead" ? leadTemplateForStage(stage) : templateForStage(stage, { prospectingTab, cold }), { ...prospect });
   const url = buildSmsUrl(prospect.phone, body);
   if (!url) return { ok: false };
   try {

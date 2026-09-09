@@ -298,7 +298,7 @@ export function FollowUpsContent({ apiKey, onOpenSoi, openContactId = null, onOp
   // Text button: template by stage, intent written, sms: on touch devices,
   // clipboard on desktop. Never logs anything by itself.
   const handleText = useCallback((p, { stage = 0, cold = false } = {}) => {
-    const r = startText({ prospect: p, stage, cold, hook: profile[idFromPhone(p.phone)]?.hook || "" });
+    const r = startText({ prospect: p, stage, cold });
     if (!r.ok) { showToast("No valid mobile number"); return; }
     if (r.mode === "copy") copyText(r.body).then(() => showToast(`Message copied. Text ${r.number}`), () => showToast("Copy failed"));
   }, [showToast, profile]);

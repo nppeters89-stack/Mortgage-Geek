@@ -68,10 +68,14 @@ export function FollowUpDetail({
 }) {
   const goal = goalIndex != null ? goalIndex : goalIndexOf(stages || undefined);
   const [note, setNote] = useState("");
-  // Stage defaults to the next stage up, capped at the goal. Re-sync as the
-  // contact's derived stage advances (the parent re-renders this view after each
-  // logged touch), so the selector keeps pointing one stage ahead.
-  const [stageSel, setStageSel] = useState(() => (whaleMode ? Math.min(stageIndex + 1, goal) : Math.min(stageIndex + 1, goal)));
+  // Stage defaults to the next stage up. On the agent axis it stops one short
+  // of the goal: promoting to SOI is a deliberate pick, never the default, so a
+  // card already sitting in the last pipeline column can log a plain touch
+  // without being pushed through the promotion gate. Re-sync as the contact's
+  // derived stage advances (the parent re-renders this view after each logged
+  // touch), so the selector keeps pointing one stage ahead.
+  const stageCeiling = whaleMode ? goal : Math.max(0, goal - 1);
+  const [stageSel, setStageSel] = useState(() => Math.min(stageIndex + 1, stageCeiling));
   const [refMode, setRefMode] = useState(false); // "soi" composer: touch vs referral tab
   // The day this touch actually happened: today unless backdated.
   const [loggedOn, setLoggedOn] = useState(() => todayLocalISO());
@@ -79,21 +83,19 @@ export function FollowUpDetail({
   const [talked, setTalked] = useState(false);
   const [lender, setLender] = useState(profile?.lenderSituation || "");
   const [needs, setNeeds] = useState(profile?.needs || []);
-  const [hook, setHook] = useState(profile?.hook || "");
   const [objections, setObjections] = useState([]);
   const [soiCategory, setSoiCategory] = useState("");
   const saveProfileIfChanged = () => {
     if (!onSaveProfile) return;
-    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [], h: profile?.hook || "" });
-    const after = JSON.stringify({ l: lender, n: needs, h: hook.trim() });
+    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [] });
+    const after = JSON.stringify({ l: lender, n: needs });
     if (before === after) return;
     const next = {};
     if (lender) next.lenderSituation = lender;
     if (needs.length) next.needs = needs;
-    if (hook.trim()) next.hook = hook.trim();
     onSaveProfile(next);
   };
-  useEffect(() => { setStageSel(Math.min(stageIndex + 1, goal)); }, [stageIndex, goal]);
+  useEffect(() => { setStageSel(Math.min(stageIndex + 1, stageCeiling)); }, [stageIndex, stageCeiling]);
 
   const history = [...(touches || [])].sort((a, b) => (b.ts || 0) - (a.ts || 0));
   const atCap = coldCount >= COLD_CHECKIN_CAP;
@@ -166,11 +168,10 @@ export function FollowUpDetail({
 
       {/* Read-only understanding for composers without the editable chips
           (SOI and cold); the plain and stage composers edit these inline. */}
-      {(composerMode === "soi" || composerMode === "cold") && profile && (profile.lenderSituation || profile.needs?.length || profile.hook) && (
+      {(composerMode === "soi" || composerMode === "cold") && profile && (profile.lenderSituation || profile.needs?.length) && (
         <div style={{ marginTop: 14, border: `1px solid ${T.line}`, borderRadius: 12, background: T.surface, padding: "11px 14px", fontSize: 12.5, lineHeight: 1.7, color: T.dim }}>
           {profile.lenderSituation && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Lender</span>{lenderLabel(profile.lenderSituation)}</div>}
           {profile.needs?.length > 0 && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Needs</span>{profile.needs.map(needLabel).join(", ")}</div>}
-          {profile.hook && <div><span style={{ color: T.dimmer, fontWeight: 700, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", marginRight: 7 }}>Hook</span>{profile.hook}</div>}
         </div>
       )}
 
@@ -260,7 +261,7 @@ export function FollowUpDetail({
             </select>
           )}
           <ChipFields lender={lender} setLender={setLender} needs={needs} setNeeds={setNeeds}
-            hook={hook} setHook={setHook} objections={objections} setObjections={setObjections} />
+            objections={objections} setObjections={setObjections} />
           {composerMode === "stage" && !whaleMode && stageSel === goal && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: T.amber, fontFamily: FF.body }}>SOI category (required to promote)</div>
