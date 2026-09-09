@@ -35,15 +35,22 @@ const COCKPIT_GAP = 32;
  *  - paddingBottom: number — optional override for the shell's bottom padding.
  *    Defaults to 64. Tools that draw their own boundary immediately below the
  *    canvas pass a smaller value so the rule sits against the content.
+ *  - rightRail: ReactNode — optional second sticky rail on the far side of the
+ *    canvas, for a tool with a body of settings that would make the left rail
+ *    too tall. Omitted by default, so the two-column tools are unaffected.
+ *  - rightRailWidth: number — width of that rail. Wider than the left by
+ *    default: what goes here tends to be prose-heavy.
+ *  - maxWidth: number — optional override for the shell cap. A three-column
+ *    layout needs more room than a two-column one.
  */
-export function CockpitShell({ rail, canvas, dividerColor = P.creamDark, paddingBottom = 64 }) {
+export function CockpitShell({ rail, canvas, dividerColor = P.creamDark, paddingBottom = 64, rightRail = null, rightRailWidth = 380, maxWidth = 1320 }) {
   return (
     <div
       className="cockpit-shell"
       style={{
         display: 'flex',
         gap: COCKPIT_GAP,
-        maxWidth: 1320,
+        maxWidth,
         margin: '0 auto',
         padding: `24px 24px ${paddingBottom}px`,
         alignItems: 'flex-start',
@@ -89,6 +96,31 @@ export function CockpitShell({ rail, canvas, dividerColor = P.creamDark, padding
       >
         {canvas}
       </section>
+
+      {rightRail && (
+        <aside
+          className="cockpit-rail-right"
+          aria-label="Advanced assumptions"
+          style={{
+            width: rightRailWidth,
+            flexShrink: 0,
+            // Same sticky recipe as the left rail.
+            alignSelf: 'flex-start',
+            position: 'sticky',
+            top: 0,
+            maxHeight: '100vh',
+            overflowY: 'auto',
+            overscrollBehavior: 'contain',
+            paddingTop: 16,
+            paddingBottom: 24,
+            // Mirror of the left rail's rule: the line faces the canvas.
+            borderLeft: `1px solid ${dividerColor}`,
+            paddingLeft: COCKPIT_GAP / 2,
+          }}
+        >
+          {rightRail}
+        </aside>
+      )}
     </div>
   );
 }

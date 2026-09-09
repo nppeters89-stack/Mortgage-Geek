@@ -40,15 +40,19 @@ export function useIsStandalone() {
 // rail+canvas layout (desktop). Below 1100px the rail+canvas split squeezes
 // the canvas to ~760px and the compact-cards row breaks, so the cockpit is
 // strictly desktop-only.
-export function useIsCockpit() {
+// The optional breakpoint argument serves tools that need a second, higher
+// gate on top of the cockpit floor (Rent vs Own puts its advanced assumptions
+// in a third column only where three columns fit). Callers that pass nothing
+// get the 1100px cockpit gate exactly as before.
+export function useIsCockpit(breakpoint = 1100) {
   const [is, setIs] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia('(min-width: 1100px)');
+    const mq = window.matchMedia(`(min-width: ${breakpoint}px)`);
     const update = () => setIs(mq.matches);
     update();
     mq.addEventListener('change', update);
     return () => mq.removeEventListener('change', update);
-  }, []);
+  }, [breakpoint]);
   return is;
 }
 

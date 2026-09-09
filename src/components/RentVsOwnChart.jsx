@@ -65,6 +65,12 @@ const css = `
   .rvo-adv summary::after { content: " +"; color: ${OWN}; }
   .rvo-adv[open] summary::after { content: " \\2212"; }
   .rvo-adv-inner { padding: 4px 16px 14px; }
+  /* In its own rail the panel is the column, not a footnote inside one: no
+     top margin to fight the rail's padding, and a little more air for the
+     prose it carries. */
+  .rvo-adv--rail { margin-top: 0; }
+  .rvo-adv--rail .rvo-adv-inner { padding: 6px 18px 18px; }
+  .rvo-adv--rail .rvo-adv-note { font-size: 12px; }
   .rvo-adv-note { font-size: 11.5px; line-height: 1.55; color: ${DIM}; margin: 10px 0 0; }
 
   /* Investment-return preset chips. Same active treatment as the program tabs
@@ -224,6 +230,12 @@ export function RentVsOwnChart() {
   const [inputs, setInputs] = useState(DEFAULTS);
   const [hoveredYear, setHoveredYear] = useState(null);
   const isCockpit = useIsCockpit();
+  // Advanced assumptions ride their own rail to the right of the chart, but
+  // only where three columns actually fit. Between the cockpit floor (1100px)
+  // and this gate the chart would be squeezed under 500px, so there the panel
+  // stays in the left rail exactly as it was.
+  const isWideCockpit = useIsCockpit(1400);
+  const advancedOnRight = isCockpit && isWideCockpit;
   const uid = useId();
 
   // Each program keeps its own rate, the same way the payment calculator does,
@@ -428,6 +440,61 @@ export function RentVsOwnChart() {
 
   const caption = `At these inputs, owning starts at about ${fmt(sim.owningMonthOne)} a month against ${fmt(inputs.rent0)} rent, so the renter banks the difference early and starts ahead: on day one the renter holds the invested down payment and closing costs while an immediate sale would cost the owner both sets of transaction costs. Rent compounds at ${inputs.rentG.toFixed(1)}% a year while the mortgage payment stays fixed. Rent passes the full cost of owning ${flipYear ? `around year ${flipYear}` : "never, within this window"}, and from there the flow reverses and the owner banks the surplus. The owner ${be === null ? "never catches the renter inside 30 years" : `first catches the renter in year ${be}`}. Read at your year-${hz} horizon, ${owningAhead ? "owning" : "renting"} walks away ahead by ${fmt(Math.abs(adv))}. Hover any year to watch the calculation strip rebuild the number in front of you.`;
 
+  // Advanced assumptions. Collapsed inside the left rail on narrow layouts,
+  // and open in its own right-hand rail when there is room for three columns:
+  // the block is long and prose-heavy, and stacking it under the mortgage
+  // inputs made the left rail scroll forever.
+  const advanced = (
+    <details className={`rvo-adv${advancedOnRight ? " rvo-adv--rail" : ""}`} open={advancedOnRight}>
+      <summary>Advanced assumptions</summary>
+      <div className="rvo-adv-inner">
+        <Slider
+          id="rvo-rentg" label="Rent growth / yr" field="rentG" value={inputs.rentG} step={0.1}
+          display={`${inputs.rentG.toFixed(1)}%`}
+          hint="4.1% is the 56-year national average (1970 to 2026). Rent has never had a down year."
+          onCommit={(v) => set("rentG", v)}
+        />
+        <Slider
+          id="rvo-homeg" label="Real estate return / yr" field="homeG" value={inputs.homeG} step={0.1}
+          display={`${inputs.homeG.toFixed(1)}%`}
+          hint={`${APPRECIATION.pct.toFixed(1)}% is the ${APPRECIATION.windowYears}-year national average (${APPRECIATION.start} to ${APPRECIATION.end}): the compound annual growth of the FHFA House Price Index, a repeat-sales index that tracks the same homes over time (FRED: USSTHPI). This is the home's appreciation before costs.`}
+          onCommit={(v) => set("homeG", v)}
+        />
+        <Slider
+          id="rvo-inv" label="Investment return / yr" field="inv" value={inputs.inv} step={0.5}
+          display={`${inputs.inv.toFixed(1)}%`}
+          hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."
+          onCommit={(v) => set("inv", v)}
+        />
+        {/* Presets set the input; the slider stays editable, and a custom
+            value deactivates both chips. */}
+        <div className="rvo-presets" role="group" aria-label="Investment return presets">
+          <button type="button" className={`rvo-preset${inputs.inv === 10 ? " is-active" : ""}`} aria-pressed={inputs.inv === 10} onClick={() => set("inv", 10)}>10% (S&P long-run)</button>
+          <button type="button" className={`rvo-preset${inputs.inv === 7 ? " is-active" : ""}`} aria-pressed={inputs.inv === 7} onClick={() => set("inv", 7)}>7% (after tax and friction)</button>
+        </div>
+        <Slider
+          id={`${uid}-maint`} label="Maintenance / yr" field="maintRate" value={inputs.maintRate} step={0.25}
+          display={`${inputs.maintRate.toFixed(2)}%`}
+          hint="1% of the home's value per year is the standard planning figure. It covers repairs and upkeep, not HOA dues. Charged on the current value, so it grows as the home appreciates."
+          onCommit={(v) => set("maintRate", v)}
+        />
+        <Slider
+          id={`${uid}-costg`} label="Tax & insurance growth / yr" field="costGrowth" value={inputs.costGrowth} step={0.5}
+          display={`${inputs.costGrowth.toFixed(1)}%`}
+          hint="Property tax, homeowners insurance, and renter's insurance all step up by this much each year. Roughly inflation."
+          onCommit={(v) => set("costGrowth", v)}
+        />
+
+        <div className="rvo-row" style={{ marginTop: 14 }}>
+          <NumField id="rvo-cc" label="Closing costs %" field="ccPct" value={inputs.ccPct} step={0.25} onCommit={(v) => set("ccPct", v)} />
+          <NumField id="rvo-sell" label="Selling costs %" field="sellPct" value={inputs.sellPct} step={0.25} onCommit={(v) => set("sellPct", v)} />
+        </div>
+        <p className="rvo-adv-note">Closing costs are what you pay going in, when you buy the home ({fmt(Math.round((inputs.price * inputs.ccPct) / 100))} here), and the renter invests that same cash on day one instead. Selling costs are what comes off the top coming out, when you sell, and the owner is charged them in every year of the chart.</p>
+        <p className="rvo-adv-note">Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Property taxes and insurance are set with the mortgage inputs above and grow each year at the rate you set here.</p>
+      </div>
+    </details>
+  );
+
   // The inputs rail. On desktop this is the sticky left column; on mobile it
   // stacks above the results, matching the calculator.
   const rail = (
@@ -537,54 +604,7 @@ export function RentVsOwnChart() {
           }}
         />
 
-        <details className="rvo-adv">
-          <summary>Advanced assumptions</summary>
-          <div className="rvo-adv-inner">
-            <Slider
-              id="rvo-rentg" label="Rent growth / yr" field="rentG" value={inputs.rentG} step={0.1}
-              display={`${inputs.rentG.toFixed(1)}%`}
-              hint="4.1% is the 56-year national average (1970 to 2026). Rent has never had a down year."
-              onCommit={(v) => set("rentG", v)}
-            />
-            <Slider
-              id="rvo-homeg" label="Real estate return / yr" field="homeG" value={inputs.homeG} step={0.1}
-              display={`${inputs.homeG.toFixed(1)}%`}
-              hint={`${APPRECIATION.pct.toFixed(1)}% is the ${APPRECIATION.windowYears}-year national average (${APPRECIATION.start} to ${APPRECIATION.end}): the compound annual growth of the FHFA House Price Index, a repeat-sales index that tracks the same homes over time (FRED: USSTHPI). This is the home's appreciation before costs.`}
-              onCommit={(v) => set("homeG", v)}
-            />
-            <Slider
-              id="rvo-inv" label="Investment return / yr" field="inv" value={inputs.inv} step={0.5}
-              display={`${inputs.inv.toFixed(1)}%`}
-              hint="10% is the long-run S&P 500 total-return average. Both side funds compound at this rate."
-              onCommit={(v) => set("inv", v)}
-            />
-            {/* Presets set the input; the slider stays editable, and a custom
-                value deactivates both chips. */}
-            <div className="rvo-presets" role="group" aria-label="Investment return presets">
-              <button type="button" className={`rvo-preset${inputs.inv === 10 ? " is-active" : ""}`} aria-pressed={inputs.inv === 10} onClick={() => set("inv", 10)}>10% (S&P long-run)</button>
-              <button type="button" className={`rvo-preset${inputs.inv === 7 ? " is-active" : ""}`} aria-pressed={inputs.inv === 7} onClick={() => set("inv", 7)}>7% (after tax and friction)</button>
-            </div>
-            <Slider
-              id={`${uid}-maint`} label="Maintenance / yr" field="maintRate" value={inputs.maintRate} step={0.25}
-              display={`${inputs.maintRate.toFixed(2)}%`}
-              hint="1% of the home's value per year is the standard planning figure. It covers repairs and upkeep, not HOA dues. Charged on the current value, so it grows as the home appreciates."
-              onCommit={(v) => set("maintRate", v)}
-            />
-            <Slider
-              id={`${uid}-costg`} label="Tax & insurance growth / yr" field="costGrowth" value={inputs.costGrowth} step={0.5}
-              display={`${inputs.costGrowth.toFixed(1)}%`}
-              hint="Property tax, homeowners insurance, and renter's insurance all step up by this much each year. Roughly inflation."
-              onCommit={(v) => set("costGrowth", v)}
-            />
-
-            <div className="rvo-row" style={{ marginTop: 14 }}>
-              <NumField id="rvo-cc" label="Closing costs %" field="ccPct" value={inputs.ccPct} step={0.25} onCommit={(v) => set("ccPct", v)} />
-              <NumField id="rvo-sell" label="Selling costs %" field="sellPct" value={inputs.sellPct} step={0.25} onCommit={(v) => set("sellPct", v)} />
-            </div>
-            <p className="rvo-adv-note">Closing costs are what you pay going in, when you buy the home ({fmt(Math.round((inputs.price * inputs.ccPct) / 100))} here), and the renter invests that same cash on day one instead. Selling costs are what comes off the top coming out, when you sell, and the owner is charged them in every year of the chart.</p>
-            <p className="rvo-adv-note">Mortgage insurance is automatic and follows the loan program: {terms.miLabel ? `${terms.miLabel}. ${terms.miNote}` : terms.miNote}. Property taxes and insurance are set with the mortgage inputs above and grow each year at the rate you set here.</p>
-          </div>
-        </details>
+        {!advancedOnRight && advanced}
       </div>
     </>
   );
@@ -714,7 +734,15 @@ export function RentVsOwnChart() {
         {/* Small bottom padding: the page draws its closing rule immediately
             below this, and the default 64 left it floating well under the
             caption. */}
-        <CockpitShell rail={rail} canvas={canvas} dividerColor={HAIR} paddingBottom={16} />
+        <CockpitShell
+          rail={rail}
+          canvas={canvas}
+          rightRail={advancedOnRight ? advanced : null}
+          rightRailWidth={390}
+          maxWidth={advancedOnRight ? 1560 : 1320}
+          dividerColor={HAIR}
+          paddingBottom={16}
+        />
       </div>
     );
   }
