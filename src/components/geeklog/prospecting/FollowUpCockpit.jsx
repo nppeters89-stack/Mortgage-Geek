@@ -86,6 +86,10 @@ export function FollowUpCockpit({
   const touchesOf = (id) => followUps[id] || [];
   const repliedIn = (col) => col.filter((p) => repliesOf(followUps[idFromPhone(p.phone)]).length > 0).length;
   const stageFor = (id) => stageOf(touchesOf(id), { isSoi: !!soi[id], goalIndex, override: stagemap[id] });
+  // The last pipeline column before the goal (Motivation Identified /
+  // Maintenance). Cards park here for a long time, so they get a log button on
+  // the card itself: a touch in place, no trip through the SOI promotion.
+  const maintIndex = Math.max(0, goalIndex - 1);
 
   // Board columns: active pipeline members plus SOI members (SOI sits in the goal
   // column via the stageOf exception), minus cold and dead. Each column oldest
@@ -379,6 +383,13 @@ export function FollowUpCockpit({
                 onClick={(e) => { e.stopPropagation(); onText(p, { stage: stageFor(id), cold: false }); }}
                 style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: e164Phone(p.phone) ? "pointer" : "default", color: T.dim, display: "inline-flex", opacity: e164Phone(p.phone) ? 1 : 0.35 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 2 11 13" /><path d="M22 2 15 22l-4-9-9-4Z" /></svg>
+              </button>
+            )}
+            {onLogTouch && stageFor(id) === maintIndex && !soi[id] && (
+              <button type="button" title="Log a touch" aria-label={`Log a touch for ${p.name}`}
+                onClick={(e) => { e.stopPropagation(); setPop({ type: "stage", id, targetStage: maintIndex }); }}
+                style={{ flex: "none", background: "none", border: "none", padding: 2, cursor: "pointer", color: T.dim, display: "inline-flex" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9" /><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
               </button>
             )}
             {onLogReply && (

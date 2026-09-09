@@ -1,7 +1,6 @@
 // Prefilled text-message templates for the Text button. Placeholder copy:
 // Nick owns the words and will rewrite these. Placeholders: {first} is the
-// contact's first name, {link} is SITE_URL, {hook} stays empty until the hook
-// field exists and collapses cleanly when blank. No rate figures, no program
+// contact's first name and {link} is SITE_URL. No rate figures, no program
 // names, no claims; each template stays under 300 characters.
 
 export const SITE_URL = "https://mortgagegeek.ai";
@@ -22,14 +21,13 @@ export function templateForStage(stageIndex, { prospectingTab = false, cold = fa
   return pipeline;
 }
 
-// Fill placeholders and tidy whatever an empty {hook} leaves behind: doubled
+// Fill placeholders and tidy what a blank one can leave behind: doubled
 // spaces, a space before punctuation, or repeated punctuation.
 export function fill(template, contact = {}) {
   const first = String(contact.name || "").trim().split(/\s+/)[0] || "there";
   let out = String(template || "")
     .replaceAll("{first}", first)
-    .replaceAll("{link}", SITE_URL)
-    .replaceAll("{hook}", String(contact.hook || "").trim());
+    .replaceAll("{link}", SITE_URL);
   out = out
     .replace(/ {2,}/g, " ")
     .replace(/ ([,.!?])/g, "$1")
@@ -42,7 +40,7 @@ export function fill(template, contact = {}) {
 // clears consumer texting with compliance before the first send. No rates,
 // no program claims; each under 300 characters.
 export const leadFirstTouch = "Hi {first}, this is Nick Peters with Rate. You reached out about a home purchase and I wanted to introduce myself. When is a good time for a quick call?\nNMLS #1119524";
-export const leadFollowup = "Hi {first}, Nick with Rate following up. {hook} What questions can I answer for you this week?";
+export const leadFollowup = "Hi {first}, Nick with Rate following up. What questions can I answer for you this week?";
 export const leadNurture = "Hi {first}, Nick with Rate checking in. No rush on my end, just keeping in touch. Reach out whenever the timing feels right.";
 
 // Template selection for the lead pipeline: first touch through attempting,

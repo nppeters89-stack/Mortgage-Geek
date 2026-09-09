@@ -26,7 +26,6 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
   // Contact understanding, prefilled; objections belong to this call only.
   const [lender, setLender] = useState(profile?.lenderSituation || "");
   const [needs, setNeeds] = useState(profile?.needs || []);
-  const [hook, setHook] = useState(profile?.hook || "");
   const [objections, setObjections] = useState([]);
 
   const pickOutcome = (value) => {
@@ -49,13 +48,12 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
   // Contact fields write only when they changed from the prefill.
   const saveProfileIfChanged = () => {
     if (!onSaveProfile) return;
-    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [], h: profile?.hook || "" });
-    const after = JSON.stringify({ l: lender, n: needs, h: hook.trim() });
+    const before = JSON.stringify({ l: profile?.lenderSituation || "", n: profile?.needs || [] });
+    const after = JSON.stringify({ l: lender, n: needs });
     if (before !== after) {
       const next = {};
       if (lender) next.lenderSituation = lender;
       if (needs.length) next.needs = needs;
-      if (hook.trim()) next.hook = hook.trim();
       onSaveProfile(next);
     }
   };
@@ -102,7 +100,7 @@ export function ContactCard({ prospect: p, log, onSave, onBack, onCopyOne, onToa
         </div>
 
         <ChipFields lender={lender} setLender={setLender} needs={needs} setNeeds={setNeeds}
-          hook={hook} setHook={setHook} objections={objections} setObjections={setObjections} />
+          objections={objections} setObjections={setObjections} />
         <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Notes from the call..."
           style={{ width: "100%", marginTop: 20, minHeight: 88, resize: "vertical", background: T.surface, color: T.cream, border: `1px solid ${T.line}`, borderRadius: 10, padding: 12, fontFamily: FF.body, fontSize: 15, lineHeight: 1.5 }} />
 
