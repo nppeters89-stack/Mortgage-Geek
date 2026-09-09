@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { T, FF } from "../gl2Tokens";
-import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation } from "./prospectStore";
+import { getCachedProspects, loadProspects, persistFollowUps, persistSoi, setCachedSoi, persistRac, setCachedRac, persistMotivation, setCachedMotivation, persistManualContact } from "./prospectStore";
 import { idFromPhone, soiQueue, formatSoiSince, manualContactTsvRow, referralsOf, quadrantOf, lastTouchByTs, STAGE_REFERRAL, DEFAULT_STAGES, DEFAULT_CONFIG } from "./prospectsModel";
 import { copyText } from "./clipboard";
 import { FollowUpDetail } from "./FollowUpDetail";
@@ -8,6 +8,7 @@ import { persistSoiCategory } from "./prospectStore";
 import { SoiCockpit, SoiPartnerContent, SOI_GROUPS, soiGroupColor } from "./SoiCockpit";
 import { fireConfetti } from "./confetti";
 import { StatusBarCap, Toast } from "./ProspectingContent";
+import { AddToSoiSheet } from "./AddToSoiSheet";
 import { quietAction } from "./detailActionStyles";
 
 // SOI (sphere of influence): contacts promoted out of Follow Ups after they send
@@ -34,6 +35,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
   const [ready, setReady] = useState(!!seed);
   const [view, setView] = useState("queue");
   const [openId, setOpenId] = useState(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
   const fuRef = useRef(followUps);
@@ -136,6 +138,36 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
     });
   }, [apiKey, showToast]);
 
+  // Add straight from this tab. Promotion is the same write the Follow Ups
+  // detail makes (membership hash plus category), so a contact added here is
+  // indistinguishable from one promoted after a referral.
+  const handleAddExisting = useCallback((p, category) => {
+    const id = idFromPhone(p.phone);
+    if (soiRef.current[id]) { showToast(`${p.name} is already in your SOI`); return; }
+    const prev = soiRef.current;
+    setSoi({ ...prev, [id]: { ts: Date.now(), category } });
+    setSheetOpen(false);
+    showToast(`${p.name} added to SOI`);
+    persistSoi(apiKey, id, "add", category).catch(() => { setSoi(prev); setCachedSoi(prev); showToast("Could not update SOI"); });
+  }, [apiKey, showToast]);
+
+  // New contact: write the contact record first, then membership. If the
+  // membership write fails the contact still exists, so the sheet closes on the
+  // contact write and the toast reports the SOI half separately.
+  const handleCreateAndAdd = useCallback(async (input, category) => {
+    const { id, contact, cache } = await persistManualContact(apiKey, input);
+    setProspects(cache.prospects);
+    const prev = soiRef.current;
+    setSoi({ ...prev, [id]: { ts: Date.now(), category } });
+    setSheetOpen(false);
+    showToast(`${contact.name} added to SOI`);
+    persistSoi(apiKey, id, "add", category).catch(() => {
+      setSoi(prev);
+      setCachedSoi(prev);
+      showToast(`${contact.name} saved, but not added to SOI`);
+    });
+  }, [apiKey, showToast]);
+
   // Demote: optimistic, back to the queue, revert both this view and the shared
   // cache if the write fails. Nothing is deleted, so the contact reappears in
   // Follow Ups on the strength of its original call score.
@@ -208,7 +240,14 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
           prospects={prospects} soi={soi} followUps={followUps} config={config} racSet={racSet}
           onOpenDetail={(id) => { setOpenId(id); setView("detail"); }}
           onOpenFollowUps={onOpenFollowUps}
+          onAdd={() => setSheetOpen(true)}
         />
+        {sheetOpen && (
+          <AddToSoiSheet prospects={prospects} soi={soi}
+            onClose={() => setSheetOpen(false)}
+            onAddExisting={handleAddExisting}
+            onCreate={handleCreateAndAdd} />
+        )}
         {view === "detail" && openProspect && (
           <div onClick={() => { setView("queue"); setOpenId(null); }} style={{ position: "fixed", inset: 0, background: "rgba(22,23,26,0.72)", display: "flex", alignItems: "flex-start", justifyContent: "center", zIndex: 55, padding: "40px 20px", overflowY: "auto" }}>
             <div onClick={(e) => e.stopPropagation()} style={{ background: T.bg1, border: `1px solid ${T.line}`, borderRadius: 16, width: "100%", maxWidth: 560, marginTop: 8 }}>
@@ -240,8 +279,14 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
       <header style={{ position: "sticky", top: "calc(8px + env(safe-area-inset-top, 0px))", zIndex: 20, padding: "2px 20px 14px", background: T.bg1 }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
           <h1 style={{ fontFamily: FF.body, fontWeight: 700, fontSize: 30, letterSpacing: "0.2px", color: T.cream }}>SOI</h1>
-          <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
-            <strong style={{ color: T.green, fontWeight: 600 }}>{queue.length}</strong> in sphere
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ fontSize: 13, color: T.dim, fontVariantNumeric: "tabular-nums" }}>
+              <strong style={{ color: T.green, fontWeight: 600 }}>{queue.length}</strong> in sphere
+            </div>
+            <button type="button" onClick={() => setSheetOpen(true)}
+              style={{ flex: "none", background: "none", border: `1px solid ${T.greenWashLine}`, color: T.green, borderRadius: 999, padding: "7px 14px", fontFamily: FF.body, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+              + Add
+            </button>
           </div>
         </div>
       </header>
@@ -250,7 +295,7 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
         {queue.length === 0 ? (
           <div style={{ textAlign: "center", color: T.faint, padding: "60px 30px", fontSize: 14, lineHeight: 1.6 }}>
             {ready ? (
-              <>No one in your sphere yet.<br />Add a contact from their Follow Ups detail once they refer you.</>
+              <>No one in your sphere yet.<br />Use Add above, or promote a contact from their Follow Ups detail once they refer you.</>
             ) : "Loading…"}
           </div>
         ) : (
@@ -281,6 +326,13 @@ export function SoiContent({ apiKey, onOpenFollowUps }) {
           </>
         )}
       </div>
+
+      {sheetOpen && (
+        <AddToSoiSheet prospects={prospects} soi={soi}
+          onClose={() => setSheetOpen(false)}
+          onAddExisting={handleAddExisting}
+          onCreate={handleCreateAndAdd} />
+      )}
 
       <Toast msg={toast} />
     </div>
